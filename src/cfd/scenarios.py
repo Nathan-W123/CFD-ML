@@ -402,7 +402,8 @@ def build_spec(params: Dict[str, Any], cfg: Dict[str, Any], dt: Optional[float] 
     components: List[Component] = []
     first = float(params["timing"]["spinup_s"])
     if fog is not None:
-        components.append(fog_component(fog, grid, (theta_ref, qv_ref, ql_ref), p, pi, rho_air, wind, first))
+        window = (int(params["timing"]["n_frames"]) - 1) * float(params["timing"]["frame_interval_s"])
+        components.append(fog_component(fog, grid, (theta_ref, qv_ref, ql_ref), p, pi, rho_air, wind, first, window))
     if params.get("smoke") is not None:
         components.append(smoke_component(params["smoke"], grid, first, theta0,
                                           float(phys.get("heat_cap_k", 30.0)), wind))

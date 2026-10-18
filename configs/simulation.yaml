@@ -55,7 +55,7 @@ validation:
   label_line_of_sight_m: 100.0
   label_tau_min: 0.1
   label_min_cells: 4
-  label_min_frames: 4
+  label_min_frames: 6                # at least half of the 12 observations
   absent_tau_max: 0.05
 
 # Scenario sampling (see src/cfd/scenarios.py). Context first: wind, terrain,

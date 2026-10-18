@@ -52,7 +52,7 @@ def _hot_plume(cfg, flux=30.0):
 
 # ------------------------------------------------------------------ ambient state
 def test_ambient_state_is_steady_with_inversion_terrain_and_fog_layer():
-    cfg = _short(CFG, n_frames=5)
+    cfg = _short(CFG, n_frames=7)
     p = _calm(_find("fog_only", "fog_regime", "radiation_fog", cfg), spinup=60.0)
     p["terrain"] = {"kind": "hill", "height_m": 40.0, "center_frac": 0.5, "width_m": 50.0}
     p["fog"].update(inversion_dtheta_dz=0.06, surface_cooling_k_s=0.0, heterogeneity=0.0, top_undulation=0.0)

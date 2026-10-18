@@ -201,7 +201,7 @@ def fog_reference(fog: Optional[Dict[str, Any]], grid: Grid, atm: Dict[str, Any]
 
 
 def fog_component(fog: Dict[str, Any], grid: Grid, refs, p: np.ndarray, pi: np.ndarray,
-                  rho_air: float, wind_fn, first_frame_s: float = 0.0) -> Component:
+                  rho_air: float, wind_fn, first_frame_s: float = 0.0, window_s: float = 55.0) -> Component:
     regime = fog["regime"]
     theta_ref, qv_ref, ql_ref = refs
     comp = Component()
@@ -301,7 +301,9 @@ def fog_component(fog: Dict[str, Any], grid: Grid, refs, p: np.ndarray, pi: np.n
         b = a * fog["aspect"]
         k_c = int(np.clip(zc / grid.dx, 0, grid.nz - 1))
         u_drift = DRIFT_FACTOR * float(wind_fn(0.0)[k_c])
-        x0 = drift_start(target, u_drift, first_frame_s)
+        # A patch is placed at the middle of the observation window, so in wind it
+        # crosses the view during the window instead of leaving it early.
+        x0 = drift_start(target, u_drift, first_frame_s + 0.5 * window_s)
         r2 = ((grid.xx - x0) / a) ** 2 + ((grid.zz - zc) / b) ** 2
         blob = np.where(grid.fluid, np.exp(-1.5 * r2) * tex, 0.0)
 

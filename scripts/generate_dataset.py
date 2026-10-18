@@ -53,6 +53,8 @@ def parse_args(argv=None):
     ap.add_argument("--workers", type=int, default=1, help="worker processes (throughput only; default 1)")
     ap.add_argument("--limit", type=int, default=None, help="process only the first N slots (smoke test)")
     ap.add_argument("--sims-only", action="store_true", help="only run (and cache) the CFD simulations")
+    ap.add_argument("--suites", action="store_true",
+                    help="also re-render test_iid simulations with every robustness suite -> features_robustness.npz")
     ap.add_argument("--examples", default=None, help="write example figures (one per category and per regime) here")
     return ap.parse_args(argv)
 
@@ -94,6 +96,66 @@ def build_tasks(cfg, out_dir, splits):
             for index in range(counts.get(split, 0)):
                 tasks.append({"cfg": cfg, "out_dir": str(out_dir), "split": split, "category": category, "index": index})
     return tasks, counts
+
+
+def _suite_task(task):
+    from src.cfd.results import SimulationResult
+    from src.data.pipeline import render_and_extract
+
+    sim = SimulationResult.load(task["sim_path"])
+    out = []
+    for k in range(task["variants"]):
+        feats, info, _, rej = render_and_extract(sim, task["cfg"], k, suite=task["suite"],
+                                                 suite_index=task["suite_index"], overrides=task["overrides"])
+        if feats is not None:
+            out.append((feats, info))
+    return task, out
+
+
+def robustness(out, cfg, rows, workers):
+    """Re-render every test_iid simulation under each robustness suite (separate FeatureSet)."""
+    from src.data.dataset import FeatureSet
+
+    suites = cfg.get("robustness", {"nominal": {}})
+    sims = {}
+    for r in rows:
+        if r["split"] == "test_iid":
+            sims.setdefault(r["sim_id"], r)
+    tasks = [{"cfg": cfg, "sim_path": str(out / r["sim_path"]), "suite": name, "suite_index": i + 1,
+              "overrides": ov or None, "variants": 1, "row": r}
+             for i, (name, ov) in enumerate(suites.items()) for r in sims.values()]
+    print(f"robustness: {len(sims)} test_iid simulations x {len(suites)} suites", flush=True)
+    if workers > 1:
+        with mp.get_context("fork").Pool(workers) as pool:
+            results = list(pool.imap(_suite_task, tasks, chunksize=2))
+    else:
+        results = [_suite_task(t) for t in tasks]
+    X, y, rec = [], [], []
+    for task, items in results:
+        r = task["row"]
+        for feats, info in items:
+            X.append(feats)
+            y.append(r["labels"])
+            rec.append((r, task["suite"], info))
+    fs = FeatureSet(
+        X=np.stack(X).astype(np.float32), y=np.array(y, dtype=np.float32),
+        seq_ids=np.array([f"{r['sim_id']}-{suite}-v{info['variant']}" for r, suite, info in rec]),
+        sim_ids=np.array([r["sim_id"] for r, _, _ in rec]),
+        groups=np.array([r["sim_id"] for r, _, _ in rec]),
+        splits=np.array([f"robust:{suite}" for _, suite, _ in rec]),
+        categories=np.array([r["category"] for r, _, _ in rec]),
+        regimes=np.array([r["regime"] for r, _, _ in rec]),
+        tags=np.array([""] * len(rec)),
+        mask_sources=np.array([info["mask_source"] for _, _, info in rec]),
+        meta=[{"suite": suite, "render_seed": info["render_seed"], "smoke_regime": r["smoke_regime"],
+               "fog_regime": r["fog_regime"], "distractor_regime": r["distractor_regime"],
+               "context": r["context"], "render": {k: v for k, v in info["render_params"].items()
+                                                   if isinstance(v, (int, float, str, bool))}}
+              for r, suite, info in rec],
+        source="synthetic",
+    )
+    fs.save(out / "features_robustness.npz")
+    print(f"robustness: {len(rec)} sequences -> {out / 'features_robustness.npz'}", flush=True)
 
 
 def write_csv(path, rows):
@@ -243,6 +305,8 @@ def main(argv=None):
         "threads": _bootstrap.THREADS,
     }
     write_json(out / "summary.json", summary)
+    if args.suites:
+        robustness(out, cfg, rows, args.workers)
     if args.examples:
         write_examples(out, rows, args.examples)
     print(json.dumps({k: summary[k] for k in ("simulations_accepted", "simulation_attempts_rejected", "render_retries", "sequences", "slots_without_valid_simulation")}), flush=True)

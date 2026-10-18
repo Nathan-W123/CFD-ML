@@ -40,7 +40,7 @@ _DEFAULTS = {
     "label_line_of_sight_m": 100.0,
     "label_tau_min": 0.1,
     "label_min_cells": 4,
-    "label_min_frames": 4,
+    "label_min_frames": 6,
     "absent_tau_max": 0.05,
 }
 CONCENTRATIONS = ("qv", "ql", "smoke", "tracer")
