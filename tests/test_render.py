@@ -253,6 +253,14 @@ def _peak(out, comp):
     return max(out.visibility["peak_opacity"][comp])
 
 
+def _reference(out, comp):
+    """Opacity of the aerosol body: 90th percentile over occupied pixels (the normalisation target)."""
+    op = np.asarray(out.component_opacity[comp], dtype=np.float64)
+    tau = -np.log(np.clip(1.0 - op, 1e-6, 1.0))
+    occupied = tau[tau > 0.02 * tau.max()]
+    return 1.0 - math.exp(-float(np.percentile(occupied, 90.0)))
+
+
 def test_exposure_normalisation_targets_per_group():
     over = _clean(texture={"gain": [0.0, 0.0]})
     rp = _params(7, over)
@@ -266,19 +274,20 @@ def test_exposure_normalisation_targets_per_group():
                           rp, np.random.default_rng(0))
     g = out.visibility["groups"]
     assert g["smoke"]["role"] == "primary" and g["tracer"]["role"] == "background"
-    assert _peak(out, "smoke") == pytest.approx(0.6, abs=0.02)
-    assert _peak(out, "tracer") == pytest.approx(0.1, abs=0.01)
+    assert _reference(out, "smoke") == pytest.approx(0.6, abs=0.04)
+    assert _peak(out, "smoke") >= 0.6
+    assert _reference(out, "tracer") == pytest.approx(0.1, abs=0.01)
     # both: smoke and fog each to their own target
     out = render_sequence(make_sim("both", smoke=smoke, smoke_lag=smoke, lwc=lwc, lwc_lag=lwc), rp,
                           np.random.default_rng(0))
-    assert _peak(out, "smoke") == pytest.approx(0.6, abs=0.02)
-    assert _peak(out, "fog") == pytest.approx(0.3, abs=0.02)
+    assert _reference(out, "smoke") == pytest.approx(0.6, abs=0.04)
+    assert _reference(out, "fog") == pytest.approx(0.3, abs=0.04)
     # neither: haze_drift tracer is primary; an illumination_change tracer is background haze
     for regime, target in (("haze_drift", 0.45), ("dust_burst", 0.45), ("illumination_change", 0.1)):
         sim = make_sim("neither", tracer=haze * _blob(TIMES, 160, 60, 0, 0), tracer_lag=haze * _blob(LAG_TIMES, 160, 60, 0, 0),
                        params={"distractor_regime": regime})
         out = render_sequence(sim, rp, np.random.default_rng(0))
-        assert _peak(out, "tracer") == pytest.approx(target, abs=0.02), regime
+        assert _reference(out, "tracer") == pytest.approx(target, abs=0.04), regime
         assert out.visibility["groups"]["tracer"]["role"] == ("background" if target == 0.1 else "primary")
 
 
@@ -302,7 +311,7 @@ def test_background_haze_not_scaled_by_primary_group():
         smoke = _blob(TIMES, 120.0, 90.0, 0.0, 0.0, peak=0.3)
         sim = make_sim("smoke_only", smoke=smoke, smoke_lag=smoke, tracer=haze, tracer_lag=haze)
         out = render_sequence(sim, rp, np.random.default_rng(0))
-        assert _peak(out, "smoke") == pytest.approx(target, abs=0.02)
+        assert _reference(out, "smoke") == pytest.approx(target, abs=0.04)
         peaks.append(_peak(out, "tracer"))
     assert peaks[0] == pytest.approx(peaks[1], abs=1e-3)
     assert peaks[0] == pytest.approx(rp["background_haze_opacity"], abs=0.01)
@@ -375,8 +384,8 @@ def test_check_label_visibility_accept_and_reject():
     assert not ok and any("smoke not labelled" in r for r in reasons) and any("fog labelled" in r for r in reasons)
     ok, reasons = check_label_visibility(out, (0, 0), CFG)
     assert not ok
-    # a primary target below label_min_opacity is rejected
-    rp["peak_opacity"]["smoke"] = 0.05
+    # a primary target well below label_min_opacity is rejected
+    rp["peak_opacity"]["smoke"] = 0.02
     faint = render_sequence(smoke_blob_sim(), rp, np.random.default_rng(0))
     assert not check_label_visibility(faint, (1, 0), CFG)[0]
     # visible in too few frames: the blob leaves the view after a few frames

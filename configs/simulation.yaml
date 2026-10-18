@@ -136,7 +136,8 @@ render:
   smoke_mass_extinction_m2_mg: 0.0076    # 7.6 m^2/g
   tracer_mass_extinction_m2_mg: 0.004
   aerosol_brightness: [0.35, 0.95]       # ONE distribution for smoke, fog and haze
-  peak_opacity: [0.05, 0.95]             # per primary group (smoke / fog / neither-aerosol)
+  peak_opacity: [0.08, 0.9]              # per primary group (smoke / fog / neither-aerosol): opacity of the
+                                         # aerosol body (90th percentile of occupied pixels), see render.py
   background_haze_opacity: [0.02, 0.2]   # background haze, any category
   texture:
     gain: [0.15, 0.6]                    # relative optical-depth modulation, class-independent
@@ -168,6 +169,7 @@ render:
   occlusion_prob: 0.3
   occlusion_area_frac: [0.03, 0.2]
   label_min_opacity: 0.08                # labelled component visible ...
+  label_min_contrast: 0.025              # ... and visibly different from what is behind it (|A - B| alpha)
   label_min_frames: 4                    # ... in at least this many observation frames
   absent_max_opacity: 0.03               # unlabelled smoke / fog never above this in view
   masks:

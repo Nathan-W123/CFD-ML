@@ -793,8 +793,13 @@ def _group_roles(sim: SimulationResult) -> Dict[str, str]:
 def _exposure_scales(sim: SimulationResult, rp: Mapping[str, Any], layers: Dict[str, List[Any]], n_obs: int):
     """Per-component tau scale factors (3,) and a JSON-able record of the group normalisation.
 
-    The raw peak is the maximum untextured tau inside the view (above the
-    floor, outside terrain) over the observation frames.
+    The reference optical depth is the 90th percentile of the untextured tau
+    over the aerosol-occupied pixels in view (tau above 2 % of its maximum,
+    above the floor, outside terrain) over the observation frames: the body
+    of the plume or layer, not its near-source spike. Normalising the maximum
+    instead let a dense source region (tau > 100 for a hot plume) push the
+    rest of the plume below visibility; now the source may saturate, as dense
+    smoke does, while the target opacity describes what most of it looks like.
     """
     roles = _group_roles(sim)
     groups: Dict[str, Any] = {}
@@ -802,7 +807,11 @@ def _exposure_scales(sim: SimulationResult, rp: Mapping[str, Any], layers: Dict[
     for j, c in enumerate(COMPONENTS):
         raw_peak = 0.0
         if layers["tau"] and j in layers["tau"][0]:
-            raw_peak = max(float((layers["tau"][f][j] * layers["air"][f]).max()) for f in range(n_obs))
+            frames_tau = [layers["tau"][f][j] * layers["air"][f] for f in range(n_obs)]
+            tau_max = max(float(t.max()) for t in frames_tau)
+            if tau_max > 0.0:
+                occupied = np.concatenate([t[t > 0.02 * tau_max] for t in frames_tau])
+                raw_peak = float(np.percentile(occupied, 90.0)) if occupied.size else 0.0
         role = roles[c]
         target = None
         if role == "primary":
