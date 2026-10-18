@@ -1,0 +1,24 @@
+# Generated datasets (large; regenerate with scripts/generate_dataset.py).
+/data/*
+!/data/README.md
+
+# Scratch runs. Curated outputs live in artifacts/ and reports/.
+/runs/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Editors and tooling
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,12 @@
+[project]
+name = "cfd-physics-expert"
+version = "0.1.0"
+description = "CFD-pretrained physics expert: a small GRU that separates wildfire smoke from fog by its motion"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = [
+    "slow: long-running numerical checks (grid convergence, full scenarios); deselect with -m 'not slow'",
+]

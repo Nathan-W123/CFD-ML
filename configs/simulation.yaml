@@ -1,0 +1,204 @@
+# Simulation, rendering and dataset configuration for the physics expert.
+#
+# Units are SI unless a key says otherwise. Ranges written [lo, hi] are
+# sampled uniformly per simulation (log-uniform where the key ends in _log).
+# The grid is deliberately coarse for one CPU core: this is a simplified
+# cross-section, not a high-fidelity wildfire simulation.
+
+seed: 20261018
+
+grid:
+  nx: 64
+  nz: 64
+  domain_width_m: 320.0     # dx = 5 m
+  domain_height_m: 320.0
+
+time:
+  dt_s: 0.1                 # starting timestep; halved automatically if the Mach limit needs it
+  max_dt_halvings: 3        # 0.1 -> 0.05 -> 0.025 -> 0.0125 s, then the simulation is rejected
+  n_frames: 12
+  frame_interval_s: 5.0     # 12 observations span 55 s (~60 s window)
+  flow_lag_s: 1.0           # each observation also gets a frame this much earlier, for optical flow
+  precursor_s: 30.0         # source-free spin-up of the ambient flow before anything is switched on
+  spinup_s: [10.0, 60.0]    # extra random pre-roll before the first frame
+
+lbm:
+  sponge_width_cells: 6     # absorbing layer at the left, right and top boundaries
+  sponge_rate_s: 0.8        # max relaxation rate towards the ambient state, 1/s
+  top_sponge_theta_rate_s: 0.5  # buoyancy (theta_l') relaxation in the top sponge, 1/s
+  max_lattice_speed: 0.14   # |u| dt/dx; Mach = speed / c_s (c_s = 1/sqrt(3)) -> Ma ~ 0.24
+  target_lattice_speed: 0.10  # dt is pre-reduced so the (conservative) expected peak speed stays below this
+  max_view_density_deviation: 0.05  # |rho - 1| inside the camera view (weak compressibility)
+
+scalars:
+  scheme: muscl             # muscl (minmod-limited, 2nd order) or upwind (1st order)
+
+physics:
+  g: 9.81
+  theta0_k: 288.0           # Boussinesq reference potential temperature
+  p0_pa: 101325.0
+  rho_air: 1.2              # kg/m^3, converts q_l to liquid water content
+  heat_cap_k: 30.0          # source heating fades out as the local theta anomaly approaches this
+  texture_period_s: 30.0    # reset cycle of each advected texture-coordinate pair
+
+validation:
+  max_mass_residual: 1.0e-6     # |budget residual| / budget scale, per scalar
+  max_clipped_fraction: 1.0e-6  # mass added by non-negativity clipping / budget scale
+  max_compressibility_fraction: 0.05  # C div(u) correction / budget scale (smoke, fog, tracer)
+  max_density_deviation: 0.05   # |rho - 1| inside the camera view (weak compressibility)
+  max_theta_anomaly_frac: 0.1   # |theta'| / theta0 (Boussinesq validity)
+  max_mach: 0.25
+  # Label support: a labelled aerosol must be visible inside the camera view
+  # (optical depth >= label_tau_min over >= label_min_cells cells at a nominal
+  # line of sight) in >= label_min_frames frames; an unlabelled one must stay
+  # below absent_tau_max everywhere in view.
+  label_line_of_sight_m: 100.0
+  label_tau_min: 0.1
+  label_min_cells: 4
+  label_min_frames: 4
+  absent_tau_max: 0.05
+
+# Scenario sampling (see src/cfd/scenarios.py). Context first: wind, terrain,
+# atmosphere, spin-up, background haze and camera nuisances are drawn from the
+# SAME distributions for every category; then a regime compatible with that
+# context is chosen with these weights (renormalised over compatible regimes).
+# "both" combines an independent fog regime and smoke regime, each chosen as
+# for fog_only / smoke_only under the shared context.
+scenarios:
+  regime_weights:
+    smoke_only: {hot_plume: 0.24, smoldering: 0.22, crosswind: 0.2, pulsing: 0.17, advected_smoke: 0.17}
+    fog_only: {radiation_fog: 0.18, advected_fog_bank: 0.2, terrain_fog: 0.17, fog_patch: 0.17, fog_dissipating: 0.16, steam_fog: 0.12}
+    neither: {haze_drift: 0.35, dust_burst: 0.3, illumination_change: 0.15, camera_artifact: 0.1, distant_cloud: 0.1}
+  # Camera / detector nuisances, class-independent; regimes illumination_change,
+  # camera_artifact and distant_cloud are only possible when the nuisance was drawn.
+  nuisance:
+    shadow_prob: 0.25
+    strong_artifact_prob: 0.15
+    fp_boost_prob: 0.2
+    distant_cloud_prob: 0.15
+  common:
+    wind_speed_ms: [0.0, 7.0]          # at 50 m, all categories; 7-9 m/s is held out (holdout.fast_wind)
+    wind_shear_exponent: [0.1, 0.3]
+    wind_gust_fraction: [0.0, 0.35]    # relative amplitude of smooth gusts
+    wind_gust_period_s: [10.0, 60.0]
+    wind_direction_flip_prob: 0.05     # slow reversal over the sequence in near-calm conditions
+    eddy_viscosity_m2s: [1.5, 3.0]     # base LBM viscosity (low: plumes become unsteady)
+    smagorinsky_cs: [0.1, 0.2]         # subgrid model: the main mixing knob
+    scalar_diffusivity_m2s: [0.3, 4.0] # scalar K, log-uniform, independent of nu
+    terrain_prob: 0.35                 # chance of uneven terrain in non-terrain regimes
+    terrain_height_m: [5.0, 40.0]      # taller terrain is held out (holdout.elevated_source)
+    background_haze_prob: 0.3          # faint drifting haze in ANY category (anti-shortcut)
+    theta_ground_k: [272.0, 300.0]
+    lapse_dtheta_dz: [-0.002, 0.03]    # K/m; > 0 stable
+    relative_humidity_dry: [0.3, 0.7]  # non-fog categories (no unlabelled condensate)
+    spinup_s: [10.0, 60.0]
+  smoke:
+    source_x_frac: [0.1, 0.9]          # across the camera view
+    source_width_m: [10.0, 25.0]       # at least two cells
+    source_height_m: [0.0, 10.0]       # above local ground (the source starts one cell above it)
+    emission_mg_m3_s: [5.0, 100.0]
+    duration_frac: [0.6, 1.0]          # fraction of the run the source is active
+    # wind_speed_ms here is the regime's COMPATIBILITY range with the shared wind draw.
+    # buoyancy_flux_m3s3: integrated buoyancy flux per metre of source (log-uniform).
+    hot_plume: {buoyancy_flux_m3s3: [5.0, 70.0], wind_speed_ms: [0.0, 5.0]}
+    smoldering: {buoyancy_flux_m3s3: [0.02, 0.5], wind_speed_ms: [0.0, 7.0]}
+    crosswind: {buoyancy_flux_m3s3: [2.0, 40.0], wind_speed_ms: [3.5, 9.0]}
+    pulsing: {buoyancy_flux_m3s3: [1.0, 40.0], pulse_period_s: [8.0, 40.0], duty_cycle: [0.2, 0.7], wind_speed_ms: [0.0, 7.0]}
+    advected_smoke: {layer_base_m: [0.0, 120.0], layer_depth_m: [20.0, 150.0], inflow_mg_m3: [0.5, 15.0], intermittency: [0.3, 0.8], residual_warmth_k: [0.1, 0.5], wind_speed_ms: [1.0, 9.0]}
+  fog:
+    lwc_g_m3: [0.05, 0.4]
+    fog_top_m: [40.0, 160.0]
+    rh_outside: [0.92, 0.99]           # air around / above established fog (dry air only in fog_dissipating)
+    radiation_fog: {wind_speed_ms: [0.0, 3.5], inversion_dtheta_dz: [0.01, 0.06], surface_cooling_k_s: [0.0002, 0.002]}
+    advected_fog_bank: {wind_speed_ms: [1.0, 9.0], front_x_frac: [0.1, 0.6]}
+    terrain_fog: {wind_speed_ms: [0.0, 4.0], cold_layer_k: [0.5, 3.0]}   # needs valley terrain
+    fog_patch: {wind_speed_ms: [0.0, 7.0], patch_radius_m: [25.0, 70.0], ambient_rh: [0.92, 0.99]}
+    fog_dissipating: {wind_speed_ms: [0.0, 9.0], dry_inflow_rh: [0.4, 0.85], surface_warming_k_s: [0.002, 0.02]}
+    steam_fog: {wind_speed_ms: [0.0, 5.0], surface_excess_k: [8.0, 15.0], ambient_rh: [0.85, 0.98], strip_width_m: [20.0, 120.0]}   # needs flat ground
+  neither:
+    haze_drift: {inflow_mg_m3: [0.2, 4.0], layer_depth_m: [40.0, 250.0]}
+    dust_burst: {emission_mg_m3_s: [10.0, 120.0], duration_s: [2.0, 12.0], settling_ms: [0.1, 0.6], wind_speed_ms: [1.5, 9.0]}
+
+# Held-out (test_ood) recipes. train / val_select / val_calib / test_iid never
+# sample them; test_ood alternates between them, in EVERY category (so each
+# shifted positive has matched shifted negatives). Nothing from test_ood is
+# used for fitting, selection or threshold tuning.
+holdout:
+  fast_wind: {wind_speed_ms: [7.0, 9.0]}          # e.g. fast-moving fog, strong-wind smouldering
+  elevated_source: {terrain_height_m: [45.0, 80.0]}  # tall hill; smoke sources on its top
+
+render:
+  native_size: [192, 192]                # H, W rendered; noise and JPEG applied at this size
+  view_margin_cells: 6                   # crop the sponge layers out of the camera view
+  zoom: [0.6, 1.0]                       # fraction of the interior domain shown
+  foreground_band: [0.0, 0.2]            # textured ground below the simulated floor (fraction of H)
+  line_of_sight_m: [30.0, 200.0]         # depth of each aerosol component along the view ray
+  smoke_mass_extinction_m2_mg: 0.0076    # 7.6 m^2/g
+  tracer_mass_extinction_m2_mg: 0.004
+  aerosol_brightness: [0.35, 0.95]       # ONE distribution for smoke, fog and haze
+  peak_opacity: [0.05, 0.95]             # per primary group (smoke / fog / neither-aerosol)
+  background_haze_opacity: [0.02, 0.2]   # background haze, any category
+  texture:
+    gain: [0.15, 0.6]                    # relative optical-depth modulation, class-independent
+    wavelengths_m: [3.0, 40.0]           # octaves of the advected noise pattern
+  background:
+    procedural_prob: 0.85                # else a real image from data/backgrounds/ (with a camera manifest)
+    sky_brightness: [0.45, 0.95]
+    ground_brightness: [0.1, 0.5]
+  global_haze: [0.0, 0.35]
+  contrast: [0.6, 1.3]
+  brightness_offset: [-0.12, 0.12]
+  noise_sigma: [0.004, 0.035]
+  jpeg_quality: [35, 95]
+  jpeg_prob: 0.6
+  exposure_flicker: [0.0, 0.04]
+  camera_shake_px: [0.0, 2.5]            # per-frame translation jitter (std, native pixels)
+  camera_rotation_deg: [0.0, 0.6]
+  strong_artifact:                       # only when params.render_hints.strong_artifact
+    camera_shake_px: [2.5, 6.0]
+    zoom_jitter: [0.01, 0.04]
+    exposure_flicker: [0.04, 0.12]
+  shadow:                                # only when params.render_hints.shadow
+    strength: [0.15, 0.45]
+    speed_frac_s: [0.002, 0.02]
+  distant_cloud:                         # only when params.render_hints.distant_cloud
+    brightness: [0.75, 1.0]
+    size_frac: [0.1, 0.35]
+    speed_frac_s: [0.0005, 0.005]
+  occlusion_prob: 0.3
+  occlusion_area_frac: [0.03, 0.2]
+  label_min_opacity: 0.08                # labelled component visible ...
+  label_min_frames: 4                    # ... in at least this many observation frames
+  absent_max_opacity: 0.03               # unlabelled smoke / fog never above this in view
+  masks:
+    source_probs: {degraded: 0.5, bbox: 0.2, detector: 0.3}
+    threshold_contrast: [0.02, 0.08]     # on the visible-contrast map alpha * |A - B|
+    morph_px: [-2, 2]                    # erosion (<0) / dilation (>0), native pixels
+    boundary_noise: [0.0, 0.15]
+    drop_component_prob: 0.1
+    false_positive_prob: 0.15
+    false_positive_prob_boost: 0.5       # with render_hints.fp_boost
+    frame_dropout_prob: 0.05             # whole frame mask missing (detector miss)
+    min_area_frac: 0.001
+
+# Robustness suites: test_iid simulations re-rendered with settings BEYOND the
+# training ranges, next to a matched nominal re-render. Keys override render.*.
+robustness:
+  nominal: {}
+  occlusion_heavy: {occlusion_prob: 1.0, occlusion_area_frac: [0.3, 0.45]}
+  shake_heavy: {camera_shake_px: [4.0, 7.0], camera_rotation_deg: [0.8, 1.5]}
+  render_shift: {noise_sigma: [0.05, 0.08], jpeg_quality: [12, 25], jpeg_prob: 1.0, contrast: [0.35, 0.55], global_haze: [0.35, 0.5]}
+  zoom_out: {zoom: [0.35, 0.55]}
+  detector_masks: {masks: {source_probs: {detector: 1.0}}}
+  bbox_masks: {masks: {source_probs: {bbox: 1.0}}}
+
+dataset:
+  n_per_category: 50                     # pipeline-debug size; 250 for the full run
+  # Integer counts per category come from largest-remainder rounding.
+  split_fractions: {train: 0.6, val_select: 0.1, val_calib: 0.15, test_iid: 0.15}
+  ood_per_category: 25                   # extra test_ood simulations per category
+  variants: {train: 3, val_select: 3, val_calib: 3, test_iid: 2, test_ood: 2}
+  max_attempts: 6                        # re-draws (attempt key) per slot before giving up
+  max_variant_retries: 4                 # re-drawn render params per variant failing label visibility
+  store_render_diagnostics: subset       # opacity maps only for val/test and a visualisation subset
+  store_diagnostics: true

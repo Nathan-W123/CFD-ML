@@ -1,0 +1,10 @@
+# CPU-only stack. Install PyTorch from the CPU wheel index first:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+numpy>=1.26
+numba>=0.59
+opencv-python-headless>=4.8
+torch>=2.2
+pyyaml>=6.0
+matplotlib>=3.7
+pytest>=7.4
+threadpoolctl>=3.1

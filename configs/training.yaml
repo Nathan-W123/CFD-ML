@@ -1,0 +1,60 @@
+# Training configuration for the physics GRU (CPU, one thread).
+
+model:
+  input_dim: 14
+  seq_len: 12
+  hidden_size: 32
+  num_layers: 1
+  embedding_dim: 16
+  dropout: 0.1
+  output_names: [smoke, fog]
+
+normalization:
+  clip: 5.0
+
+training:
+  loss: bce_with_logits
+  optimizer: adamw
+  lr: 0.001
+  weight_decay: 0.0001
+  batch_size: 64
+  max_epochs: 50
+  early_stopping_patience: 7
+  grad_clip_norm: 1.0
+  seeds: [0, 1, 2]
+  balance: auto            # auto | pos_weight | sampler | none (auto: pos_weight when a label ratio exceeds 1.5)
+  selection_metric: val_loss
+
+# Every fitted decision rule below uses val_calib only (val_select drives early
+# stopping and seed choice); counts are made per simulation, not per variant.
+calibration:
+  temperature_scaling: true  # per-label temperature
+  temperature_bounds: [0.5, 5.0]  # a fit at a bound means val_calib is separable: T = 1 and a flag
+
+thresholds:
+  operating_points:
+    balanced: f1             # per-label threshold maximising F1
+    low_false_alarm: {max_false_smoke_on_fog_only: 0.05}
+  min_calibration_sims_per_category: 20   # below this: store insufficient_calibration_data
+
+abstain:
+  logit_margin_floor: 0.25   # |logit - threshold logit| below the margin -> abstain (-1)
+  target_error: 0.05         # widen the margin until confident-prediction error <= this ...
+  max_rate: 0.3              # ... but never abstain on more than this fraction of val_calib
+  min_mask_frames: 3         # input-validity abstention
+  min_flow_frames: 2
+  max_clip_fraction: 0.2
+
+audit:
+  flags_only_auc_max: 0.6    # shortcut audit: flag the dataset when a flags-only probe beats this
+  parameter_auc_max: 0.6     # ... or when a nuisance / context parameter predicts a label this well
+
+finetune:
+  lr: 0.0001
+  max_epochs: 50
+  early_stopping_patience: 7
+  freeze_encoder_epochs: 0
+
+evaluation:
+  calibration_bins: 10
+  bootstrap_resamples: 1000
