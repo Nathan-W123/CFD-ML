@@ -34,7 +34,7 @@ from src.cfd.scenarios import run_scenario, sample_scenario
 from src.cfd.simulation import SimulationUnstable
 from src.utils.runtime import STREAM_RENDER_PARAMS, child_rng, derive_seed
 
-ROI_SCALE_RANGE = (2.0, 4.0)   # synthetic ROI scale; inference uses the fixed FeatureConfig default
+ROI_SCALE_RANGE = (1.5, 2.5)   # synthetic ROI scale; inference uses the fixed FeatureConfig default
 _CFD_DIR = Path(__file__).resolve().parents[1] / "cfd"
 
 

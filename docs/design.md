@@ -362,12 +362,12 @@ class IncompatibleFrameTiming(ValueError): ...
 class FeatureConfig:
     work_size: int = 128            # longer side of the analysis frame (ROI) after resizing
     roi: str = "union_bbox"         # "union_bbox" | "full"
-    roi_scale: float = 3.0          # ROI side = roi_scale * max(bbox w, h) (synthetic: drawn from [2, 4])
-    roi_min_px: int = 48            # minimum ROI side in native pixels
+    roi_scale: float = 2.0          # ROI side = roi_scale * max(extent w, h) (synthetic: drawn from [1.5, 2.5])
+    roi_min_px: int = 32            # minimum ROI side in native pixels
     stabilize: bool = True
     min_mask_frac: float = 0.002    # of the analysis frame
     flow_method: str = "dis"        # "dis" (default) | "farneback"
-    flow_erode_px: int = 4          # flow statistics on the mask eroded by this (working px)
+    flow_erode_px: int = 2          # flow statistics on the mask eroded by this (working px)
     fb_max_px: float = 1.0          # forward-backward consistency (median, working px)
     anchor_band_px: int = 6
     min_roughness_px: int = 100
