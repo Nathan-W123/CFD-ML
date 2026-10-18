@@ -40,7 +40,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
 from src.cfd import thermo
-from src.cfd.fog import FOG_WIND, fog_component, fog_reference, fog_wind_range, sample_fog
+from src.cfd.fog import fog_component, fog_reference, fog_wind_range, sample_fog
 from src.cfd.results import SimulationResult
 from src.cfd.scenario_util import (
     Component, Grid, layer_profile, log_uniform, sample_noise_spec, smooth_noise, smooth_noise01,
@@ -48,12 +48,9 @@ from src.cfd.scenario_util import (
 )
 from src.cfd.simulation import SimulationSpec, SimulationUnstable, run_simulation
 from src.cfd.smoke import (
-    SMOKE_DEFAULTS, dust_component, required_spinup, sample_dust, sample_smoke, smoke_component,
-    smoke_wind_range,
+    dust_component, required_spinup, sample_dust, sample_smoke, smoke_component, smoke_wind_range,
 )
-from src.constants import (
-    CATEGORIES, CATEGORY_INDEX, CATEGORY_LABELS, FOG_REGIMES, NEITHER_REGIMES, SMOKE_REGIMES,
-)
+from src.constants import CATEGORIES, CATEGORY_INDEX, CATEGORY_LABELS, FOG_REGIMES, SMOKE_REGIMES
 from src.utils.runtime import child_rng, derive_seed
 
 SPLITS: Tuple[str, ...] = ("train", "val_select", "val_calib", "test_iid", "test_ood")

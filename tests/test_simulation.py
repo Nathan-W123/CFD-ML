@@ -5,7 +5,6 @@ import copy
 import numpy as np
 import pytest
 
-from src.cfd import thermo
 from src.cfd.lbm import LatticeUnits, LBMConfig, LBMSolver, ambient_maintaining_acceleration
 from src.cfd.scenarios import (
     HOLDOUT_TAGS, SPLITS, build_spec, run_scenario, sample_scenario, scenario_seed,

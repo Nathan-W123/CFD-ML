@@ -27,7 +27,6 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
-import numpy as np
 
 from src.cfd.results import SimulationResult
 from src.cfd.scenarios import run_scenario, sample_scenario

@@ -15,7 +15,6 @@ import _bootstrap  # noqa: F401
 
 import argparse
 import sys
-from collections import defaultdict
 from pathlib import Path
 
 import numpy as np

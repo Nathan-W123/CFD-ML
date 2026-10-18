@@ -6,7 +6,6 @@ Calls into: torch, cv2 and numba when they are importable; numpy always.
 
 from __future__ import annotations
 
-import os
 import random
 from typing import Dict, Optional
 
