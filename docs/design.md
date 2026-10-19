@@ -425,6 +425,26 @@ deterministic from `texture.sgs_seed`; `sgs_gain` 0 (robustness suite
 before its observation is displaced by about `sgs_gain * u_sgs * 1 s`
 relative to it; frames a minute apart see decorrelated sub-grid texture.
 
+Stretch fade (far field): over a 480 s texture period, km-scale shear
+stretches the advected texture coordinates into streaks a real plume or
+cloud does not show (P90 stretch about 2, up to about 5). With
+`render.texture.max_stretch` set (1.5 in the far profile, unset in the near
+profile), each texture pair's modulation is faded towards 1 by
+`min(1, max_stretch / s)`, where s is the largest singular value of the
+Jacobian of that pair's texture coordinates on the grid (coordinates and
+grid both in metres, so unstretched air has s = 1). The weight is warped to the image with the
+texture, so texture fades only where it is sheared, the opacity field
+itself is unchanged, and it applies to every class alike.
+
+Far-profile imaging ranges (`ground_brightness`, `global_haze`, `contrast`,
+`brightness_offset`, `exposure_flicker`, `camera_shake_px`,
+`camera_rotation_deg`) were set from `scripts/image_stats.py` on the FIgLib
+train split only (114 sequences); the held-out FIgLib cameras are compared
+afterwards in `reports/far/image_stats_figlib.md`. The near profile was not
+tuned to FIRESENSE, its only real footage, because that footage is also its
+zero-shot check (`reports/image_stats_firesense.md` flags its contrast and
+JPEG blocking as slightly beyond the synthetic range).
+
 Native resolution: frames are rendered at `render.native_size` (default
 192 x 192), noise and JPEG are applied at that size (not at the 128 px
 working size), exactly like real footage that is compressed natively and
@@ -795,10 +815,10 @@ class PhysicsExpert:
     consecutive_native: bool                      # trained only on consecutive flow (far field)
 ```
 
-`predict` defaults to `low_false_alarm`: in the engine v1 evaluation the
-balanced point called smoke on ~76 % of the fog_only clips it decided on,
-so `balanced` is for uses where a missed fire costs more than a fog false
-alarm. A model trained only on consecutive flow takes consecutive input as
+`predict` defaults to `low_false_alarm`: in the engine v1 and v2
+evaluations the balanced point called smoke on 70-92 % of the fog_only
+clips it decided on (near and far field), so `balanced` is for uses where a
+missed fire costs more than a fog false alarm. A model trained only on consecutive flow takes consecutive input as
 native (lag frames passed to `features_from_frames` are ignored).
 
 ## 12. Data splits and leakage rules

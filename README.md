@@ -6,8 +6,10 @@ and look-alikes, and producing a 16-dimensional motion embedding for a
 multimodal wildfire detector. Two camera profiles: near field (a 320 m
 scene, frames 5 s apart with 1 s lag pairs, for surveillance video) and far
 field (a 3.2 km scene, one frame per minute, for wildfire camera networks
-such as HPWREN and AlertWildfire). Synthetic pretraining only: its
-real-world performance is untested.**
+such as HPWREN and AlertWildfire). Pretrained on synthetic data only; on
+real one-frame-per-minute wildfire camera footage (HPWREN FIgLib, smoke
+labels only) it separates smoke from smoke-free windows only weakly
+(AUROC 0.61).**
 
 The physics expert is one of four parts of a larger system (vision, physics,
 weather, fusion). It sees only motion features measured from camera frames:
@@ -16,164 +18,263 @@ how stable the region's base is. It never sees the simulated velocity,
 pressure or concentration fields; the simulator only renders camera-like
 frames, and real footage goes through the same feature extractor.
 
-> **Status: synthetic pretraining only. No real camera footage has been
-> used for training or evaluation, so nothing here measures real-world
-> accuracy.** Synthetic test scores show that the motion signal in the
-> simulated data is learnable and how robust the model is to simulated
-> nuisances; they are not evidence that the model reduces fog-related false
-> alarms on real cameras. The real-data fine-tuning (Stage B) and the
-> pretrained-vs-scratch comparison are implemented (see [Stage B](#stage-b-real-footage))
-> and are pending labelled real footage.
+> **Status: synthetic pretraining, one partial real-data test.** The
+> far-field model was tested on real wildfire camera footage (HPWREN FIgLib,
+> 880 windows from 137 cameras) for smoke only, because FIgLib does not
+> annotate fog. Zero-shot on cameras it has never seen it reaches smoke
+> AUROC 0.61 ± 0.02 (three seeds), about what it reaches on its own
+> synthetic test set. Training the same network on the real footage, from
+> scratch or by fine-tuning the pretrained model, does no better, and the
+> synthetic thresholds do not transfer. The near-field model has only a
+> five-window sanity check on real video. No labelled real footage with fog
+> was available, so nothing here shows that the model reduces fog false
+> alarms on real cameras.
 
-## Results (synthetic only)
+## Results (engine v2)
 
-> Results below are from engine v1 (near field only); the v2 retest is in progress.
+Full reports: near field [`reports/results.md`](reports/results.md) (from
+[`reports/evaluation.json`](reports/evaluation.json)); far field
+[`reports/far/results.md`](reports/far/results.md) (from
+[`reports/far/evaluation.json`](reports/far/evaluation.json), including the
+FIgLib Stage B section). Data QA, CFD-oracle diagnostics, image statistics,
+zero-shot reports and benchmarks sit next to them; figures in
+`reports/figures/` and `reports/figures_far/`; the engine v1 reports are
+archived in [`reports/v1/`](reports/v1). Single numbers are for the exported
+model (the seed with the best validation loss) with 95 % bootstrap
+intervals over simulations or cameras; "±" is mean ± sd over three
+training seeds.
 
-Full tables: [`reports/results.md`](reports/results.md) (generated from
-[`reports/evaluation.json`](reports/evaluation.json)); data quality:
-[`reports/qa_full.json`](reports/qa_full.json); CFD-oracle diagnostic:
-[`reports/oracle_diagnostic.md`](reports/oracle_diagnostic.md); figures in
-`reports/` and `reports/figures/` (example sequences per category and regime).
+### Real footage
 
-**Data.** 1200 simulation slots: 29 CFD attempts were rejected by the
-numerical and label-support checks and re-drawn (5 % of both-class and
-3.5 % of fog-only attempts, under 1 % of the rest); 2 valid simulations
-(val_calib-smoke_only-0020, test_ood-both-0042) were dropped because none
-of their render variants passed the label-visibility check. The remaining
-1198 simulations give 3246 sequences: train 1800 (600 simulations),
-val_select 300, val_calib 453 (151), test_iid 295 (148), test_ood 398 (199
-simulations: wind 7-9 m/s, sources on 45-80 m hills), plus 1024 robustness
-re-renders of the test_iid simulations.
+**HPWREN FIgLib, far field, smoke only**
+([`reports/far/results.md`](reports/far/results.md#real-footage-stage-b-test_iid-split-camera-disjoint),
+[`reports/far/real_zero_shot_figlib.md`](reports/far/real_zero_shot_figlib.md)).
+Imagery courtesy of HPWREN (https://www.hpwren.ucsd.edu/). 229 fire
+sequences from 137 cameras, one frame per minute. Each sequence gives up
+to two 12-frame windows entirely before the first visible plume (smoke 0)
+and two starting at least a minute after it (smoke 1): 880 windows, fog
+unknown. Splits are camera-disjoint by camera mount; the test cameras give
+171 windows (46 sequences, 35 cameras). Candidate masks come from the
+built-in fallback detector, as there is no vision model yet.
 
-**Experiment C, the CFD-pretrained GRU** (exported seed 0; 95 % intervals
-from a bootstrap over simulations; mean ± sd over the three seeds in
-`reports/results.md`):
+| test cameras, 171 windows | smoke AUROC | 3 seeds |
+|---|---|---|
+| C: CFD-pretrained, zero-shot | 0.60 [0.52, 0.67] | 0.609 ± 0.022 |
+| B: same network trained from scratch on the 439 FIgLib training windows | 0.57 [0.49, 0.66] | 0.579 ± 0.020 |
+| D: C fine-tuned on those windows (lr 1e-4) | 0.58 [0.50, 0.66] | 0.582 ± 0.001 |
 
-| | smoke AUROC | fog AUROC | false smoke on fog_only (threshold only), balanced / low-false-alarm | ECE smoke / fog |
-|---|---|---|---|---|
-| test_iid | 0.64 [0.57, 0.71] | 0.69 [0.62, 0.76] | 46 % / 4 % [0, 9] | 0.07 / 0.07 |
-| test_ood (held-out recipes) | 0.64 [0.58, 0.70] | 0.65 [0.57, 0.70] | 52 % / 12 % [5, 20] | 0.05 / 0.07 |
-| A: motion-cue heuristic, test_iid | 0.56 | 0.49 | 45 % / 1 % | |
-| pooled logistic (14 features x mean/std), test_iid | 0.62 | 0.73 | 68 % / 4 % | |
+* **The signal is weak and uniform.** Zero-shot smoke AUROC is 0.57-0.60
+  on every split (0.58 over all 880 windows). Pretraining on the simulator
+  is no worse than learning from 439 real windows, and fine-tuning adds
+  nothing; the intervals overlap, so B, C and D cannot be told apart.
+* **The synthetic thresholds do not transfer.** Real windows score in a
+  narrow band around P(smoke) 0.6. At the balanced point the zero-shot
+  model finds 106 of the 136 smoke windows it decides on (78 %), but calls
+  smoke on 74 of the 107 smoke-free windows it decides on (69 %). At the
+  low-false-alarm point it raises no false alarm (0 of 117) and finds 3 of
+  129. Over all windows it abstains on 78 %: 43 % have fewer than two
+  valid flow frames and 23 % fewer than three valid masks.
+* **No real low-false-alarm point.** B and D recalibrate on the real
+  `val_calib` split, but without fog labels there are no fog_only clips to
+  fit the low-false-alarm threshold on, so it equals the balanced one. This
+  is recorded in their `model_config.yaml` and in the report.
+* **Why so little.** Single motion features carry little on FIgLib: the
+  best univariate smoke AUROC is 0.57 (vorticity, flow spread, mask
+  validity). Smoke at ignition is small and distant, and the smoke-free
+  windows are mostly static landscapes, whereas every synthetic scene
+  contains a moving aerosol or look-alike.
+* **The stretch fix holds up on real data.** The model trained before
+  the far-field stretch fix (below) does no better on FIgLib: 0.593 against
+  0.609 on the test cameras (three-seed means).
 
-Seeds agree closely (smoke 0.638 ± 0.007, fog 0.699 ± 0.013 on test_iid).
-The false-smoke column applies the threshold to every fog_only clip,
-ignoring abstention; the low-false-alarm threshold (fitted that way on
-val_calib) holds its 5 % target in distribution (4.1 %) but not on the
-held-out recipes (12 %). Counting only the fog_only clips the model does
-decide on, the balanced point calls smoke on 76 % of them (22/29 test_iid,
-34/44 test_ood) and the low-false-alarm point on none (0/24, 0/31): use the
-low-false-alarm point wherever a fog false alarm is costly. The model
-abstains on 72 % of test_iid clips: 32 % because fewer than two frames
-have measurable flow (mostly fog, haze and both-class scenes whose
-background cannot be stabilised), 1 % because fewer than three frames have
-a valid mask, and 39 % because a calibrated logit is within the margin of
-its threshold. Accuracy on the clips it does decide is 0.61 (smoke) and
-0.69 (fog).
-
-**What this says.** The camera-level motion features carry a weak but real
-signal. The GRU beats the motion-cue baseline A on AUROC (clearly on fog
-and on test_ood, marginally on test_iid smoke) but not on false smoke on
-fog_only, where A is equal or lower; it is on par with a time-pooled
-logistic regression (better on smoke, worse on fog in distribution);
-it largely keeps its ranking on the held-out wind and terrain recipes; its
-calibration error is moderate (ECE about 0.07, no better than A's). It is
-not a stand-alone smoke detector; it is a calibrated, abstaining input for
-the fusion model.
-
-**Where the signal is lost (CFD-oracle diagnostic, never a model input).**
-The same twelve features computed from the CFD fields reach smoke AUROC
-0.78 [0.71, 0.85] on test_iid against 0.60 for the camera features with the
-same classifier. On test_iid the loss is mostly in the optical-flow group
-(0.74 vs 0.55), above all in the spread of vertical velocity inside the
-region (univariate AUROC 0.70 from the CFD, 0.56 from optical flow); the
-region-mean vertical velocity itself is only a few cm/s. On the held-out
-recipes the larger smoke loss is in the region group (0.73 vs 0.53, against
-0.71 vs 0.60 for velocity). For fog the camera keeps almost all of it (0.73
-vs 0.75 on test_iid), mainly through region geometry. Optical flow tracks the CFD velocity of the
-candidate region with correlation 0.85 (horizontal) and 0.55 (vertical).
-
-**Robustness and generalisation** (re-renders of test_iid; leave-one-
-regime-out on test_iid):
-
-* Heavy occlusion, heavy shake and degraded imaging cost about 0.10 smoke
-  AUROC each; fog AUROC moves by less than 0.07. Under the strongest
-  imaging shift (noise, JPEG 12-25, low contrast) background stabilisation
-  fails its quality check and the model abstains on every clip rather than
-  reading camera motion as aerosol motion.
-* Detector-like masks do not hurt (smoke 0.71, fog 0.68); box masks cost
-  0.05 smoke AUROC.
-* Unseen regimes are the weak point: held out of training, drifting haze
-  is called fog 82 % of the time, steam fog is found 44 % of the time
-  (AUROC 0.48) and crosswind smoke 28 % of the time; hot plumes (recall
-  0.70), dissipating fog (AUROC 0.74) and radiation fog (recall 0.80, only
-  10 sequences) transfer best.
-
-**Shortcut audit.** No context or render parameter predicts a label (all
-folded AUROCs at most 0.53). The validity flags alone predict fog with
-pooled held-out AUROC 0.60 (test_iid 0.64, test_ood 0.61, against the
-GRU's 0.69 / 0.65; threshold 0.6, flagged): fog scenes more often have a
-valid mask and less often a stabilisable background. That is a property of
-the simulated and rendered fog scenes, carried by the flags rather than by
-motion, and a good part of the fog signal; it is reported, not hidden.
-
-**Synthetic transfer proxy (not real-world evidence).** On a separately
-seeded synthetic set rendered with detector / box masks and harsher
-imaging (240 simulations, re-split by simulation), the pretrained model
-zero-shot (fog 0.70, smoke 0.57) and fine-tuned at lr 1e-4 (fog 0.67 ±
-0.00, smoke 0.58 ± 0.00 over seeds) reach a higher fog AUROC than training
-from scratch (0.60 ± 0.01) and the same smoke AUROC (0.57 ± 0.06); the
-intervals on 48 test simulations overlap. B trains only on the proxy's
-120 training simulations (337 sequences); C was pretrained on 600
-simulations and D fine-tuned on the same 337 sequences. All three abstain
-on about 90 % or more of the proxy test clips (heavy noise and JPEG defeat
-stabilisation), so only the AUROCs are informative. This only shows the
-Stage B code path works on a domain shift the simulator itself produces.
-
-**Real-world status: pending.** Experiments B (real data from scratch) and
-D (CFD-pretrained, fine-tuned on real data) are `null` in
-`evaluation.json`: no labelled surveillance video with compatible frame
-timing was available. Nothing here measures real-world accuracy or shows
-a reduction of fog false alarms on real cameras.
-
-**Zero-shot sanity check on public real video (FIRESENSE).** The exported
-model, unchanged and with its synthetic thresholds, was run on the
-[FIRESENSE](https://zenodo.org/records/836749) smoke clips
+**FIRESENSE, near field**
 ([`reports/real_zero_shot_firesense.md`](reports/real_zero_shot_firesense.md)).
-Only 5 of its 22 clips are long enough for one 56 s window (the other 16
-were refused for timing, one crashes OpenCV's decoder): 4 close-range smoke
-videos and 1 smoke-free one, 9 windows, no fog, masks from the built-in
-fallback detector. All 7 smoke windows score a higher smoke probability than
-both smoke-free windows, but the smoke-free side is one video. At the
-balanced point the model decides on 3 windows (2 smoke detected, 1 correct
-"no smoke", no false smoke) and abstains on the rest (the handheld clip
-has no stabilisable background, so no flow; others are near the
-threshold); at the low-false-alarm point it raises no smoke alarm at all,
-missing the 3 smoke windows it decides on. It calls 2 smoke windows "fog"
-(P(fog) 0.70), the confusion this model is meant to resolve. This shows the real-footage path works end to end; it
-says nothing reliable about accuracy. Wildfire camera archives
-(HPWREN/FIgLib, AlertWildfire, PyroNear) record one frame per minute: the
-near-field model refuses them (it needs 1 s frame pairs), the far-field
-model (`configs/simulation_far.yaml`, see [the simulator](#the-simulator))
-is built for them. A real evaluation of either still needs labelled
-footage at its timing with smoke, fog and both.
+[FIRESENSE](https://zenodo.org/records/836749) (CC BY 4.0) is close-range
+smoke video, not wildfire views. Only 5 windows from 3 videos fit the
+12 x 5 s window with 1 s lag frames: 3 smoke windows and 2 smoke-free ones,
+with no fog. All 3 smoke windows score above both smoke-free ones. The
+balanced point detects the 3 smoke windows and decides on neither
+smoke-free one; the low-false-alarm point decides on one window of each
+and gets both right. One smoke window is called fog (P(fog) 0.67). This
+shows that the real-footage path works; it measures nothing.
 
-**Single-core CPU cost** ([`reports/benchmark_cpu.md`](reports/benchmark_cpu.md);
-every library pinned to one thread):
+**Image statistics, far render against FIgLib**
+([`reports/far/image_stats_figlib.md`](reports/far/image_stats_figlib.md)).
+The far profile's imaging ranges were set from the FIgLib train cameras
+only. On the held-out cameras, noise, contrast, brightness, sharpness and
+JPEG blocking fall inside the synthetic range. Flicker and
+frame-to-frame motion do not: 30 % and 45 % of the held-out clips are
+steadier than 99 % of the synthetic ones. The camera model can be that
+steady (synthetic clips with shake below 0.03 px move 0.08 px per minute,
+against a real median of 0.06-0.10 px), but its uniform draws rarely are,
+and part of the remaining motion is scene content. The near profile was
+not tuned to FIRESENSE, its only real footage, because that footage is
+also its check.
 
-| Stage | Time |
-|---|---|
-| CFD simulation, accepted, incl. 30 s precursor | 5.6 s mean (about 640 per hour) |
-| Render 12 + 12 lag frames (192 x 192) | 142 ms |
-| Feature extraction (12 x 14) | 58 ms |
-| GRU training epoch, 1800 sequences | 0.17 s (5202 parameters) |
-| Inference, one sequence (features to decisions) | 0.9 ms |
+### Near field, synthetic
 
-The time step starts at the specified 0.1 s and is halved when the
+**Data.** 1200 simulation slots. 28 CFD attempts failed the numerical and
+label-support checks and were re-drawn; 2 slots kept no sequence because
+no render variant passed the visibility check. That leaves 3247
+sequences:
+
+* train 1800 (600 simulations), val_select 300, val_calib 453;
+* test_iid 296 (148 simulations);
+* test_ood 398 (199 simulations; held-out recipes: wind 7-9 m/s, sources
+  on 45-80 m hills);
+* plus 1176 robustness re-renders of the test_iid simulations in 8 suites.
+
+| | smoke AUROC | fog AUROC | false smoke on fog_only, balanced / low-false-alarm | ECE smoke / fog |
+|---|---|---|---|---|
+| C: CFD-pretrained GRU, test_iid | 0.60 [0.53, 0.66] | 0.75 [0.68, 0.81] | 77 % / 4 % [0, 9] | 0.08 / 0.07 |
+| C, test_ood (held-out recipes) | 0.64 [0.58, 0.71] | 0.69 [0.63, 0.75] | 70 % / 18 % [10, 26] | 0.03 / 0.08 |
+| A: motion-cue heuristic, test_iid | 0.57 | 0.50 | 64 % / 1 % | |
+| pooled logistic (14 features x mean/std), test_iid | 0.60 | 0.73 | 70 % / 4 % | |
+
+* **Over seeds:** smoke 0.590 ± 0.020 and fog 0.724 ± 0.020 on test_iid;
+  smoke 0.624 ± 0.016 and fog 0.694 ± 0.005 on test_ood.
+* **The low-false-alarm point (the default) holds its 5 % target in
+  distribution.** It reaches 4.1 ± 2.7 % on test_iid but 14.3 ± 3.2 % on
+  the held-out recipes. Counting only the fog_only clips the model decides
+  on, the balanced point calls smoke on 76 % (16/21 test_iid) and 92 %
+  (46/50 test_ood), the low-false-alarm point on 0/37 and 5/41.
+* **Abstention.** The model abstains on 75 % of test_iid clips:
+  * 32 % have fewer than two frames with measurable flow;
+  * 6 % have fewer than three valid masks;
+  * the rest are within the calibrated margin of a threshold.
+
+  On the clips it decides, it is right on 57 % (smoke) and 74 % (fog).
+* **The GRU against the baselines.** It beats the motion-cue baseline A
+  on AUROC, by a lot on fog. It is on par with a time-pooled logistic
+  regression (0.60 / 0.73). It is not a stand-alone smoke detector; it is
+  a calibrated, abstaining input for the fusion model.
+
+**v1 against v2** (three-seed means; [`reports/ablation_sgs.md`](reports/ablation_sgs.md)):
+
+| | v1 | v2 | v2, subgrid texture motion off |
+|---|---|---|---|
+| smoke AUROC test_iid / test_ood | 0.638 / 0.637 | 0.590 / 0.624 | 0.595 / 0.630 |
+| fog AUROC test_iid / test_ood | 0.699 / 0.653 | 0.724 / 0.694 | 0.726 / 0.682 |
+| false smoke on fog_only, low-false-alarm point, test_iid / test_ood | 4.5 / 11.0 % | 4.1 / 14.3 % | 4.5 / 14.0 % |
+
+Engine v2 changed several things at once:
+
+* subgrid texture motion;
+* camera shake correlated in time;
+* more shadows, camera artefacts and distant clouds in every class;
+* more look-alike-heavy "neither" scenes.
+
+Fog AUROC rose and smoke AUROC fell. The ablation re-rendered the same
+simulations without subgrid texture motion, and it changes nothing beyond
+the seed spread. The v2 test sets are harder than the v1 ones, so v1 and
+v2 numbers are not directly comparable.
+
+**Where the signal is lost (CFD-oracle diagnostic, never a model input;
+[`reports/oracle_diagnostic.md`](reports/oracle_diagnostic.md)).** Computed
+from the CFD fields, the same twelve features reach smoke AUROC 0.81
+[0.74, 0.88] on test_iid (v1: 0.78); from the camera they reach 0.57 with
+the same classifier. The velocity group is where most of it goes: 0.79
+from the CFD, 0.50 from optical flow. Fog keeps its signal through the
+camera (0.73 against 0.75), mostly through region geometry. Optical flow
+follows the CFD velocity of the candidate region with correlation 0.83
+horizontally and 0.41 vertically.
+
+**Robustness** (re-renders of test_iid, exported model; deltas against
+the nominal re-render):
+
+* Heavy shake costs the most smoke AUROC (-0.14), heavy occlusion -0.05.
+* Under the strongest imaging shift (noise, JPEG 12-25, low contrast)
+  stabilisation fails its quality check. The model then abstains on every
+  clip rather than reading camera motion as aerosol motion.
+* Detector-like masks help slightly (+0.04 smoke), box masks change
+  nothing.
+
+**Leave-one-regime-out** (each regime held out of training in turn):
+
+* Unseen look-alikes and fogs remain the weak point:
+  * held out, drifting haze is called fog 92 % of the time;
+  * steam fog is found 38 % of the time (AUROC 0.49);
+  * drifting fog patches 34 %;
+  * advected smoke remnants 17 % (AUROC 0.52).
+* Advected fog banks (recall 0.91) and dissipating fog (recall 0.87)
+  transfer best.
+
+**Shortcut audit.** No context or render parameter predicts a label: all
+folded AUROCs are at most 0.53. The validity flags alone predict fog with
+pooled held-out AUROC 0.66, so they are flagged: fog scenes more often
+have a valid mask and less often a stabilisable background. That is part
+of the fog signal and is reported, not hidden.
+
+### Far field, synthetic
+
+**Data.** 1200 simulation slots. 62 CFD attempts were rejected and
+re-drawn, and 1 slot kept no sequence. That leaves 3248 sequences:
+
+* train 1799 (600 simulations), val_select 297, val_calib 456;
+* test_iid 296 (148 simulations);
+* test_ood 400 (200 simulations; wind 12-15 m/s, sources on 700-1000 m
+  hills);
+* plus 1176 robustness re-renders.
+
+| | smoke AUROC | fog AUROC | false smoke on fog_only, balanced / low-false-alarm | ECE smoke / fog |
+|---|---|---|---|---|
+| C: CFD-pretrained GRU, test_iid | 0.55 [0.47, 0.62] | 0.67 [0.60, 0.74] | 68 % / 14 % [7, 20] | 0.09 / 0.08 |
+| C, test_ood (held-out recipes) | 0.59 [0.53, 0.65] | 0.70 [0.64, 0.75] | 61 % / 9 % [4, 16] | 0.04 / 0.08 |
+| A: motion-cue heuristic, test_iid | 0.58 | 0.61 | 85 % / 5 % | |
+| pooled logistic, test_iid | 0.57 | 0.67 | 66 % / 10 % | |
+
+* **Over seeds:** smoke 0.559 ± 0.008 and fog 0.687 ± 0.018 on test_iid;
+  smoke 0.589 ± 0.012 and fog 0.692 ± 0.013 on test_ood. The
+  low-false-alarm point gives 8.1 ± 4.9 % and 6.7 ± 2.5 % false smoke on
+  fog_only, so it misses its 5 % target. On the fog_only clips the
+  exported model decides on, it calls no smoke (0/25, 0/34).
+* **On smoke the GRU is no better than the four-cue heuristic A.** On fog
+  it is better (0.67 against 0.61). It abstains on 79 % of test_iid clips,
+  33 % for too few flow frames.
+* **The one-minute camera is the bottleneck, not the simulation**
+  ([`reports/far/oracle_diagnostic.md`](reports/far/oracle_diagnostic.md)).
+  From the CFD fields the features reach smoke 0.75 [0.66, 0.82] and fog
+  0.81 [0.72, 0.87] on test_iid; from the camera, 0.57 and 0.64. Flow
+  between frames a minute apart tracks the simulated horizontal velocity
+  poorly (correlation 0.21; vertical 0.56) and is valid on only 30-39 % of
+  frames. The velocity features from the camera are at chance for fog
+  (0.50).
+* **Stretch fix.** Over a 480 s texture period, km-scale shear drew the
+  advected texture into streaks that real smoke and cloud do not show.
+  Fading over-stretched texture (`render.texture.max_stretch`) removed
+  them. It lowered synthetic smoke AUROC from 0.598 to 0.559 (seed means;
+  fog unchanged), but real FIgLib AUROC did not move, so the streaks were
+  a cue that exists only in the simulator.
+* **Shortcut audit.** The validity flags alone predict fog at 0.61
+  (flagged); no context or render parameter exceeds 0.54.
+* **Leave-one-regime-out.** The new regimes transfer moderately: ridge
+  cloud is found 70 % of the time (AUROC 0.78), and rain shafts are
+  called smoke 50 % of the time when held out.
+
+### CPU cost
+
+One core, every library pinned to one thread; measured while other jobs
+ran on the other cores
+([`reports/benchmark_cpu.md`](reports/benchmark_cpu.md),
+[`reports/far/benchmark_cpu.md`](reports/far/benchmark_cpu.md)):
+
+| Stage | near field | far field |
+|---|---|---|
+| CFD simulation, accepted, incl. precursor | 6.4 s (about 560 per hour) | 8.6 s (about 420 per hour) |
+| Render 12 observation frames (+ 12 lag frames near) | 167 ms | 119 ms |
+| Feature extraction (12 x 14) | 80 ms | 75 ms |
+| GRU training epoch, about 1800-2000 sequences | 0.21 s | 0.15 s |
+| Inference, one sequence (features to decisions) | 1.0 ms | 0.8 ms |
+
+The time step starts at 0.1 s near (0.5 s far) and is halved when the
 expected peak speed would push the lattice Mach number past its limit:
-25 % of the accepted simulations ran at 0.1 s, 44 % at 0.05 s and 31 % at
-0.025 s (strong wind and hot plumes on 5 m cells); the physical frame
-times are the same for all of them.
+
+* near field: 25 % of simulations ran at 0.1 s, 44 % at 0.05 s and 31 % at
+  0.025 s;
+* far field: 36 % at 0.5 s, 42 % at 0.25 s, 22 % at 0.125 s and under
+  1 % at 0.0625 s.
+
+The physical frame times are the same for all of them.
 
 ## How it fits together
 
@@ -357,9 +458,9 @@ python scripts/train_physics.py --features data/synthetic/features.npz --out art
 # 3. evaluation (writes artifacts/evaluation.json and reports/), diagnostics, report
 python scripts/evaluate_physics.py --features data/synthetic/features.npz --artifacts artifacts \
     --reports reports --robustness data/synthetic/features_robustness.npz \
-    --summary data/synthetic/summary.json --loro --proxy data/synthetic_proxy/features.npz
+    --summary data/synthetic/summary.json --loro
 python scripts/oracle_diagnostic.py --data data/synthetic --out reports/oracle_diagnostic.json
-python scripts/benchmark_cpu.py --out reports/benchmark_cpu.json --features data/synthetic/features.npz
+python scripts/benchmark_cpu.py --out reports/benchmark_cpu.json
 python scripts/summarize_results.py --evaluation reports/evaluation.json \
     --oracle reports/oracle_diagnostic.json --benchmark reports/benchmark_cpu.json \
     --qa reports/qa_full.json --out reports/results.md
@@ -377,15 +478,22 @@ python scripts/train_physics.py --features data/synthetic_far/features.npz --out
 python scripts/evaluate_physics.py --features data/synthetic_far/features.npz --artifacts artifacts_far \
     --reports reports/far --robustness data/synthetic_far/features_robustness.npz \
     --summary data/synthetic_far/summary.json --loro
-python scripts/benchmark_cpu.py --config configs/simulation_far.yaml --out reports/benchmark_cpu_far.json \
+python scripts/oracle_diagnostic.py --data data/synthetic_far --out reports/far/oracle_diagnostic.json
+python scripts/benchmark_cpu.py --config configs/simulation_far.yaml --out reports/far/benchmark_cpu.json \
     --features data/synthetic_far/features.npz --artifacts artifacts_far
+# after the FIgLib Stage B below, which adds its section to reports/far/evaluation.json:
 python scripts/summarize_results.py --evaluation reports/far/evaluation.json \
-    --benchmark reports/benchmark_cpu_far.json --qa reports/far/qa_full.json --out reports/far/results.md
+    --oracle reports/far/oracle_diagnostic.json --benchmark reports/far/benchmark_cpu.json \
+    --qa reports/far/qa_full.json --out reports/far/results.md
 ```
 
-The synthetic proxy set (`--proxy`) is a small, separately seeded dataset
-rendered with detector / box masks and harsher imaging; it is used only for
-the pretrained-vs-scratch transfer proxy and is not real-world evidence:
+Optional, not part of the v2 evaluation: a synthetic proxy set
+(`evaluate_physics.py --proxy data/synthetic_proxy/features.npz`), a small,
+separately seeded dataset rendered with detector / box masks and harsher
+imaging, gives a pretrained-vs-scratch transfer proxy on a domain shift the
+simulator itself produces (v1 result in [`reports/v1/results.md`](reports/v1/results.md);
+not real-world evidence). For the far field the real FIgLib Stage B below
+replaces it:
 
 ```bash
 python scripts/generate_dataset.py --out data/synthetic_proxy --n-per-category 60 --ood-per-category 0 \
@@ -421,9 +529,12 @@ fitted margin of the threshold; a label the model could not calibrate (no
 known calibration target, e.g. fog after a smoke-only Stage B from scratch)
 always abstains. The default operating point, `"low_false_alarm"`, uses the
 smoke threshold fitted for at most 5 % false smoke on fog-only validation
-clips; `operating_point="balanced"` called smoke on 76 % of the fog_only
-clips it decided on in the v1 evaluation, so use it only where a missed
-fire costs more than a fog false alarm.
+clips; `operating_point="balanced"` called smoke on 70-92 % of the fog_only
+clips it decided on in the v2 synthetic tests, so use it only where a missed
+fire costs more than a fog false alarm. A model recalibrated on real
+footage without fog labels (smoke-only Stage B) cannot fit the
+low-false-alarm threshold and uses the balanced one under that name; its
+`model_config.yaml` records this (`calibration.threshold_fit`).
 
 ### Real footage: zero-shot checks and image statistics
 
@@ -441,21 +552,36 @@ python scripts/prepare_firesense.py --out data/real/firesense
 python scripts/extract_features.py --real-manifest data/real/firesense/real.csv --artifacts artifacts \
     --out data/real/firesense/features.npz
 python scripts/evaluate_real_zero_shot.py --features data/real/firesense/features.npz --artifacts artifacts \
-    --name firesense --out reports/real_zero_shot_firesense.json
+    --name firesense --description "..." --out reports/real_zero_shot_firesense.json
 
-# HPWREN FIgLib (far field, one frame per minute; imagery courtesy of HPWREN, https://www.hpwren.ucsd.edu/)
-python scripts/prepare_figlib.py --out data/real/figlib --n 40
+# HPWREN FIgLib (far field, one frame per minute; imagery courtesy of HPWREN, https://www.hpwren.ucsd.edu/):
+# 250 fire sequences requested (229 usable), up to two windows before and two after the first plume
+python scripts/prepare_figlib.py --out data/real/figlib --n 250 --pre-windows 2 --post-windows 2
 python scripts/extract_features.py --real-manifest data/real/figlib/real.csv --artifacts artifacts_far \
     --out data/real/figlib/features.npz
 python scripts/evaluate_real_zero_shot.py --features data/real/figlib/features.npz --artifacts artifacts_far \
-    --name figlib --out reports/real_zero_shot_figlib.json
+    --name "figlib (all splits)" --description "..." --out reports/far/real_zero_shot_figlib.json
+python - <<'PY'   # the test cameras on their own (the split Stage B reports on)
+from src.data.dataset import FeatureSet
+FeatureSet.load("data/real/figlib/features.npz").split("test_iid").save("data/real/figlib/features_test_iid.npz")
+PY
+python scripts/evaluate_real_zero_shot.py --features data/real/figlib/features_test_iid.npz \
+    --artifacts artifacts_far --name "figlib (test_iid cameras)" --description "..." \
+    --out reports/far/real_zero_shot_figlib_test.json
 
-# real vs synthetic image statistics (noise, contrast, sharpness, JPEG blocking, flicker, shake; diagnostic)
+# real vs synthetic image statistics (noise, contrast, sharpness, JPEG blocking, flicker, shake; diagnostic).
+# Far field: tune render ranges on the FIgLib train cameras, then check them on the held-out ones.
 python scripts/image_stats.py --real-manifest data/real/firesense/real.csv --synthetic data/synthetic \
     --out reports/image_stats_firesense.json
-python scripts/image_stats.py --real-manifest data/real/figlib/real.csv --synthetic data/synthetic_far \
-    --out reports/image_stats_figlib.json
+python scripts/image_stats.py --real-manifest data/real/figlib/real.csv --real-splits train --one-per-video \
+    --synthetic data/synthetic_far --out reports/far/image_stats_figlib_train.json
+python scripts/image_stats.py --real-manifest data/real/figlib/real.csv \
+    --real-splits val_select,val_calib,test_iid --one-per-video \
+    --synthetic data/synthetic_far --out reports/far/image_stats_figlib.json
 ```
+
+(`--description` holds the dataset paragraph at the top of each zero-shot
+report; the committed reports keep theirs in their JSON.)
 
 `prepare_figlib.py` downloads FIgLib sequences (about 81 frames, one per
 minute, around the first visible plume), writes 12-frame windows 60 s apart
@@ -470,12 +596,14 @@ downloaded by a registered user (labels in
 
 ### Stage B, real footage
 
-Not run yet: `evaluation.json` reports `"real": {"status": "pending"}` and
-experiments B and D are `null`. For the near-field model no labelled real
-surveillance video with compatible frame timing was available. For the
-far-field model, FIgLib makes a smoke-only Stage B possible: its windows
-carry smoke labels and leave fog unknown, which training, calibration and
-metrics handle per label. With labelled footage:
+Run for the far-field model on FIgLib, smoke only (results above;
+`reports/far/evaluation.json` has `"real": {"status": "partial"}` with fog
+`"no_labels"`). Not run for the near-field model:
+`reports/evaluation.json` keeps `"real": {"status": "pending"}` and
+experiments B and D `null`, because no labelled real surveillance video
+with compatible frame timing was available. Labels are handled per label:
+FIgLib windows carry smoke labels and leave fog unknown. With labelled
+footage:
 
 ```bash
 # real.csv: video_path, camera_id, video_id, smoke, fog
@@ -487,6 +615,7 @@ python scripts/evaluate_physics.py --features data/synthetic/features.npz --arti
 
 # far field on FIgLib (smoke-only labels; features extracted as above with --artifacts artifacts_far);
 # without --features the synthetic sections of the existing evaluation.json are kept
+# (this produced the Stage B section of reports/far/evaluation.json; B and D go to runs/real_figlib)
 python scripts/evaluate_physics.py --artifacts artifacts_far --reports reports/far \
     --real data/real/figlib/features.npz --real-out runs/real_figlib
 ```
@@ -522,6 +651,8 @@ tests/        test_lbm, test_scalars, test_simulation, test_render, test_feature
 docs/         spec.md (requirements), design.md (interface contract and design decisions)
 artifacts/    exported near-field model (encoder, classifier, normaliser, config, evaluation);
               the far-field model goes to artifacts_far/
-reports/      evaluation.json, results.md, QA, oracle diagnostic, benchmarks, figures,
-              real-footage zero-shot reports
+reports/      near field: evaluation.json, results.md, QA, oracle diagnostic, benchmark, figures,
+              FIRESENSE zero-shot and image statistics, subgrid-texture ablation;
+              far/: the same for the far field plus the FIgLib zero-shot, Stage B and image
+              statistics; v1/: the engine v1 reports
 ```
