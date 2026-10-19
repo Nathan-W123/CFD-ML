@@ -1005,3 +1005,50 @@ def test_extract_real_consecutive_windows_and_synthetic_stored_config(tmp_path):
         FeatureConfig(**{**stored, "expected_interval_s": 30.0}, roi_scale=1.7))[1]["timing"]
     near, _ = extract_features_with_meta(frames, np.arange(T) * 60.0, masks, None, None, FeatureConfig())
     assert not np.array_equal(near, want)                                    # the defaults would differ
+
+
+def test_report_real_fog_zero_shot(tmp_path, fs):
+    """scripts/report_real_fog.py on a small labelled 'HPWREN' set: fog AUROC, false smoke on fog, per fog type."""
+    import csv as _csv
+
+    cfg = _cfg("training.seeds=[0,1]", "training.max_epochs=2")
+    run_pretraining(fs, cfg, tmp_path / "pre", log=None)
+    real = _real_set(seed=5, fog_unknown=False)
+    real.y[:, 0] = 0.0                                          # fog_only / neither windows only
+    hp = tmp_path / "hp"
+    rows = []
+    for i in range(len(real)):
+        wid = f"hpwren-cam-{i:03d}"
+        real.meta[i] = {**real.meta[i], "window_id": wid}
+        (hp / wid).mkdir(parents=True)
+        fog = int(real.y[i, 1])
+        (hp / wid / "window.json").write_text(json.dumps({"kind_candidate": "fog" if i % 3 else "clear"}))
+        rows.append({"window_id": wid, "fog": str(fog), "smoke": "0", "quality": "ok",
+                     "fog_type": ("below" if i % 2 else "enveloping") if fog else "", "fog_extent": "small" if fog else ""})
+    real.y[3, 1] = float("nan")                                  # an unknown fog label is left out
+    real.save(tmp_path / "hp.npz")
+    with open(tmp_path / "labels.csv", "w", newline="") as fh:
+        w = _csv.DictWriter(fh, fieldnames=list(rows[0]))
+        w.writeheader()
+        w.writerows(rows)
+    fig = _real_set(seed=6)                                      # FIgLib-like: smoke labels, fog unknown
+    fig.save(tmp_path / "fig.npz")
+    out = tmp_path / "rep.json"
+    assert _script("report_real_fog").main(["--features", str(tmp_path / "hp.npz"), "--hpwren-dir", str(hp),
+                                            "--labels", str(tmp_path / "labels.csv"), "--artifacts", str(tmp_path / "pre"),
+                                            "--figlib", str(tmp_path / "fig.npz"), "--n-boot", "20",
+                                            "--out", str(out)]) == 0
+    doc = json.loads(out.read_text())
+    allr = doc["subsets"]["all"]
+    assert allr["n"] == len(real) - 1 and allr["n_fog"] + allr["n_clear"] == allr["n"]
+    assert 0.0 <= allr["auroc_fog"] <= 1.0 and len(allr["auroc_fog_seeds"]["values"]) == 2
+    for op in ("balanced", "low_false_alarm"):
+        o = allr["ops"][op]
+        f = o["fog"]["smoke"]
+        assert f["yes"] + f["no"] + f["abstain"] == allr["n_fog"]
+        assert o["false_smoke_on_fog"] == f["yes"] / allr["n_fog"]
+    assert set(allr["by_fog_type"]) <= {"below", "enveloping"}
+    assert doc["smoke_vs_fog_cross_set"]["confounded"] is True
+    assert doc["labels"]["windows_labelled"] == len(real)
+    md = out.with_suffix(".md").read_text()
+    assert "Fog AUROC" in md and "false smoke on fog" in md and "confounded" in md
