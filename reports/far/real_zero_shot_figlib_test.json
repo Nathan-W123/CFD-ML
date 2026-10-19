@@ -1,0 +1,6226 @@
+{
+  "artifacts": "artifacts_far",
+  "calibration_source": "synthetic_val_calib",
+  "counts": {
+    "cameras": 35,
+    "mask_sources": {
+      "fallback_detector": 171
+    },
+    "videos": 46,
+    "windows": 171
+  },
+  "description": "HPWREN FIgLib wildfire camera sequences (imagery courtesy of HPWREN, https://www.hpwren.ucsd.edu/), one frame per minute: 12-frame windows entirely before the first visible plume (smoke 0) and starting at least 60 s after it (smoke 1); fog is not annotated (unknown). Splits are camera-disjoint by camera mount; the far-field render ranges were set from image statistics of the train split only (no labels). Masks from the built-in fallback detector; the plumes are early, small and often distant. Only the test_iid cameras (the split Stage B reports on).",
+  "name": "figlib (test_iid cameras)",
+  "not_a_real_world_accuracy_estimate": true,
+  "operating_points": {
+    "balanced": {
+      "abstain_reasons": {
+        "few_valid_flow_frames": 76,
+        "few_valid_mask_frames": 40,
+        "fog_near_threshold": 21,
+        "smoke_near_threshold": 46
+      },
+      "abstained_any": 129,
+      "fog": {
+        "correct_rejections": 0,
+        "detected": 0,
+        "false_alarms": 0,
+        "missed": 0,
+        "negative_windows": 0,
+        "negatives_decided": 0,
+        "positive_windows": 0,
+        "positives_decided": 0,
+        "unknown_windows": 171
+      },
+      "smoke": {
+        "correct_rejections": 6,
+        "detected": 24,
+        "false_alarms": 15,
+        "missed": 4,
+        "negative_windows": 83,
+        "negatives_decided": 21,
+        "positive_windows": 88,
+        "positives_decided": 28,
+        "unknown_windows": 0
+      }
+    },
+    "low_false_alarm": {
+      "abstain_reasons": {
+        "few_valid_flow_frames": 76,
+        "few_valid_mask_frames": 40,
+        "fog_near_threshold": 21,
+        "smoke_near_threshold": 52
+      },
+      "abstained_any": 146,
+      "fog": {
+        "correct_rejections": 0,
+        "detected": 0,
+        "false_alarms": 0,
+        "missed": 0,
+        "negative_windows": 0,
+        "negatives_decided": 0,
+        "positive_windows": 0,
+        "positives_decided": 0,
+        "unknown_windows": 171
+      },
+      "smoke": {
+        "correct_rejections": 19,
+        "detected": 0,
+        "false_alarms": 0,
+        "missed": 24,
+        "negative_windows": 83,
+        "negatives_decided": 19,
+        "positive_windows": 88,
+        "positives_decided": 24,
+        "unknown_windows": 0
+      }
+    }
+  },
+  "ranking_balanced_probs": {
+    "fog": {
+      "auroc_windows": null,
+      "cameras_neg": 0,
+      "cameras_pos": 0,
+      "n_neg": 0,
+      "n_pos": 0,
+      "n_unknown": 171
+    },
+    "smoke": {
+      "auroc_windows": 0.5958378970427163,
+      "cameras_neg": 33,
+      "cameras_pos": 35,
+      "n_neg": 83,
+      "n_pos": 88,
+      "n_unknown": 0
+    }
+  },
+  "stage_b": "not run (no training or recalibration on real data); evaluation.json real status unchanged",
+  "status": "zero_shot_sanity_check",
+  "timing_unchecked": {
+    "count": 0,
+    "handling": "abstain (no_timing_record)",
+    "note": "no feature_meta.timing in the FeatureSet: predict's frame-timing check could not run",
+    "windows": []
+  },
+  "windows": [
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "sp-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20180602_Alison_sp-w-mobo-c",
+      "window": "20180602_Alison_sp-w-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "sp-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20180602_Alison_sp-w-mobo-c",
+      "window": "20180602_Alison_sp-w-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "sp-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20180602_Alison_sp-w-mobo-c",
+      "window": "20180602_Alison_sp-w-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "sp-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20180602_Alison_sp-w-mobo-c",
+      "window": "20180602_Alison_sp-w-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "69bravo-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5151948841386352,
+        "smoke": 0.5896110328493
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 4,
+      "valid_mask_frames": 7,
+      "video": "20190813_FIRE_69bravo-e-mobo-c",
+      "window": "20190813_FIRE_69bravo-e-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "69bravo-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6042117359834198,
+        "smoke": 0.6206546494889305
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 4,
+      "valid_mask_frames": 8,
+      "video": "20190813_FIRE_69bravo-e-mobo-c",
+      "window": "20190813_FIRE_69bravo-e-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": []
+      },
+      "camera": "69bravo-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5362165312387361,
+        "smoke": 0.546794173513647
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 3,
+      "valid_mask_frames": 11,
+      "video": "20190813_FIRE_69bravo-e-mobo-c",
+      "window": "20190813_FIRE_69bravo-e-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "69bravo-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5017021878030538,
+        "smoke": 0.5778058239148142
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 11,
+      "video": "20190813_FIRE_69bravo-e-mobo-c",
+      "window": "20190813_FIRE_69bravo-e-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "lp-s-iqeye",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20170520_FIRE_lp-s-iqeye",
+      "window": "20170520_FIRE_lp-s-iqeye-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "lp-s-iqeye",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20170520_FIRE_lp-s-iqeye",
+      "window": "20170520_FIRE_lp-s-iqeye-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": []
+      },
+      "camera": "lp-s-iqeye",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5946452296353638,
+        "smoke": 0.5428727844936374
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 7,
+      "valid_mask_frames": 12,
+      "video": "20170520_FIRE_lp-s-iqeye",
+      "window": "20170520_FIRE_lp-s-iqeye-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "lp-s-iqeye",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6006703882391632,
+        "smoke": 0.6249018797824902
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 7,
+      "valid_mask_frames": 12,
+      "video": "20170520_FIRE_lp-s-iqeye",
+      "window": "20170520_FIRE_lp-s-iqeye-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "om-s-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20191030_CopperCanyon_om-s-mobo-m",
+      "window": "20191030_CopperCanyon_om-s-mobo-m-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "om-s-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20191030_CopperCanyon_om-s-mobo-m",
+      "window": "20191030_CopperCanyon_om-s-mobo-m-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": []
+      },
+      "camera": "om-s-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5418809972258134,
+        "smoke": 0.5232692809007085
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 10,
+      "valid_mask_frames": 12,
+      "video": "20191030_CopperCanyon_om-s-mobo-m",
+      "window": "20191030_CopperCanyon_om-s-mobo-m-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "fog_near_threshold"
+        ],
+        "low_false_alarm": [
+          "fog_near_threshold"
+        ]
+      },
+      "camera": "om-s-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": 0
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.39944026973964875,
+        "smoke": 0.4356838407430609
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 7,
+      "valid_mask_frames": 11,
+      "video": "20191030_CopperCanyon_om-s-mobo-m",
+      "window": "20191030_CopperCanyon_om-s-mobo-m-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": []
+      },
+      "camera": "pi-s-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5957395448345796,
+        "smoke": 0.539971033206461
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 11,
+      "valid_mask_frames": 12,
+      "video": "20220831-Border32fire-pi-s-mobo-m",
+      "window": "20220831-Border32fire-pi-s-mobo-m-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "pi-s-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5922132733314628,
+        "smoke": 0.5952764894704838
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 2,
+      "valid_mask_frames": 12,
+      "video": "20220831-Border32fire-pi-s-mobo-m",
+      "window": "20220831-Border32fire-pi-s-mobo-m-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "om-s-mobo",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.42267248014629843,
+        "smoke": 0.5008498385640776
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 1,
+      "valid_mask_frames": 8,
+      "video": "20190803_OtaySouth_om-s-mobo",
+      "window": "20190803_OtaySouth_om-s-mobo-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "om-s-mobo",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.32954451663874573,
+        "smoke": 0.4114794295883636
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 12,
+      "video": "20190803_OtaySouth_om-s-mobo",
+      "window": "20190803_OtaySouth_om-s-mobo-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "om-s-mobo",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5411416032841017,
+        "smoke": 0.6375951625039644
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 9,
+      "valid_mask_frames": 11,
+      "video": "20190803_OtaySouth_om-s-mobo",
+      "window": "20190803_OtaySouth_om-s-mobo-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "om-s-mobo",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.31968942814467793,
+        "smoke": 0.40335230249452414
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 1,
+      "valid_mask_frames": 2,
+      "video": "20190803_OtaySouth_om-s-mobo",
+      "window": "20190803_OtaySouth_om-s-mobo-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "lp-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5270839610407424,
+        "smoke": 0.5528410877606101
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 5,
+      "valid_mask_frames": 10,
+      "video": "20200806_SpringsFire_lp-w-mobo-c",
+      "window": "20200806_SpringsFire_lp-w-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold",
+          "fog_near_threshold"
+        ],
+        "low_false_alarm": [
+          "fog_near_threshold"
+        ]
+      },
+      "camera": "lp-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.4900817792980795,
+        "smoke": 0.5418055920240156
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 3,
+      "valid_mask_frames": 12,
+      "video": "20200806_SpringsFire_lp-w-mobo-c",
+      "window": "20200806_SpringsFire_lp-w-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold",
+          "fog_near_threshold"
+        ],
+        "low_false_alarm": [
+          "fog_near_threshold"
+        ]
+      },
+      "camera": "pi-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.44261956444762746,
+        "smoke": 0.45557894143270455
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 8,
+      "valid_mask_frames": 11,
+      "video": "20170520_FIRE_pi-w-mobo-c",
+      "window": "20170520_FIRE_pi-w-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold",
+          "fog_near_threshold"
+        ],
+        "low_false_alarm": [
+          "smoke_near_threshold",
+          "fog_near_threshold"
+        ]
+      },
+      "camera": "pi-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.4750243567856653,
+        "smoke": 0.5531938259942464
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 2,
+      "valid_mask_frames": 11,
+      "video": "20170520_FIRE_pi-w-mobo-c",
+      "window": "20170520_FIRE_pi-w-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "pi-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5351776359945547,
+        "smoke": 0.5801975931067589
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 7,
+      "valid_mask_frames": 9,
+      "video": "20170520_FIRE_pi-w-mobo-c",
+      "window": "20170520_FIRE_pi-w-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": []
+      },
+      "camera": "pi-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5372357645879888,
+        "smoke": 0.5279368115501315
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 8,
+      "valid_mask_frames": 10,
+      "video": "20170520_FIRE_pi-w-mobo-c",
+      "window": "20170520_FIRE_pi-w-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "wilson-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6559752550646958,
+        "smoke": 0.5945215032144717
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 11,
+      "valid_mask_frames": 12,
+      "video": "20260909_GettyFire_wilson-w-mobo-c",
+      "window": "20260909_GettyFire_wilson-w-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "wilson-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6611659515666551,
+        "smoke": 0.5865087200141597
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 11,
+      "valid_mask_frames": 12,
+      "video": "20260909_GettyFire_wilson-w-mobo-c",
+      "window": "20260909_GettyFire_wilson-w-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "wilson-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6466032760006342,
+        "smoke": 0.584100729206742
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 11,
+      "valid_mask_frames": 12,
+      "video": "20260909_GettyFire_wilson-w-mobo-c",
+      "window": "20260909_GettyFire_wilson-w-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "wilson-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6483061804754933,
+        "smoke": 0.5931781147229841
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 7,
+      "valid_mask_frames": 12,
+      "video": "20260909_GettyFire_wilson-w-mobo-c",
+      "window": "20260909_GettyFire_wilson-w-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold",
+          "fog_near_threshold"
+        ],
+        "low_false_alarm": [
+          "smoke_near_threshold",
+          "fog_near_threshold"
+        ]
+      },
+      "camera": "lp-s-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.4668883019966974,
+        "smoke": 0.5556597136892125
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 6,
+      "valid_mask_frames": 10,
+      "video": "20200727_Border11Fire_lp-s-mobo-m",
+      "window": "20200727_Border11Fire_lp-s-mobo-m-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "lp-s-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5684109508807065,
+        "smoke": 0.5714841433585647
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 1,
+      "valid_mask_frames": 11,
+      "video": "20200727_Border11Fire_lp-s-mobo-m",
+      "window": "20200727_Border11Fire_lp-s-mobo-m-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "lp-s-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.40616964216629814,
+        "smoke": 0.45640521072849166
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 1,
+      "valid_mask_frames": 8,
+      "video": "20200727_Border11Fire_lp-s-mobo-m",
+      "window": "20200727_Border11Fire_lp-s-mobo-m-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "lp-s-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.35835672060581014,
+        "smoke": 0.4178953231528222
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 5,
+      "video": "20200727_Border11Fire_lp-s-mobo-m",
+      "window": "20200727_Border11Fire_lp-s-mobo-m-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "so-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6066295279488839,
+        "smoke": 0.6433092362731143
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 7,
+      "valid_mask_frames": 9,
+      "video": "20170722_FIRE_so-s-mobo-c",
+      "window": "20170722_FIRE_so-s-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "so-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.35307414030598966,
+        "smoke": 0.4261504516336604
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 5,
+      "video": "20170722_FIRE_so-s-mobo-c",
+      "window": "20170722_FIRE_so-s-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "so-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6081762892032049,
+        "smoke": 0.5974429949353446
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 7,
+      "valid_mask_frames": 11,
+      "video": "20170722_FIRE_so-s-mobo-c",
+      "window": "20170722_FIRE_so-s-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "so-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6336812327385152,
+        "smoke": 0.622309558322943
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 11,
+      "valid_mask_frames": 12,
+      "video": "20170722_FIRE_so-s-mobo-c",
+      "window": "20170722_FIRE_so-s-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "sm-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.37456788389985984,
+        "smoke": 0.4448524358358057
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 11,
+      "video": "20191007_FIRE_sm-s-mobo-c",
+      "window": "20191007_FIRE_sm-s-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "fog_near_threshold"
+        ],
+        "low_false_alarm": [
+          "fog_near_threshold"
+        ]
+      },
+      "camera": "sm-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": 0
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3986195319614959,
+        "smoke": 0.4431489016567533
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 10,
+      "valid_mask_frames": 12,
+      "video": "20191007_FIRE_sm-s-mobo-c",
+      "window": "20191007_FIRE_sm-s-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "sm-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.34991821991704347,
+        "smoke": 0.4363107768591282
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 9,
+      "video": "20191007_FIRE_sm-s-mobo-c",
+      "window": "20191007_FIRE_sm-s-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "sm-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3587448829751081,
+        "smoke": 0.440775217563308
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 10,
+      "video": "20191007_FIRE_sm-s-mobo-c",
+      "window": "20191007_FIRE_sm-s-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "smer-tcs3-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20160604_FIRE_smer-tcs3-mobo-c",
+      "window": "20160604_FIRE_smer-tcs3-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "smer-tcs3-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20160604_FIRE_smer-tcs3-mobo-c",
+      "window": "20160604_FIRE_smer-tcs3-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "smer-tcs3-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6347515656202994,
+        "smoke": 0.6468636824876413
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 7,
+      "valid_mask_frames": 12,
+      "video": "20160604_FIRE_smer-tcs3-mobo-c",
+      "window": "20160604_FIRE_smer-tcs3-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": []
+      },
+      "camera": "smer-tcs3-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6160818593424743,
+        "smoke": 0.5451818987347123
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 11,
+      "valid_mask_frames": 12,
+      "video": "20160604_FIRE_smer-tcs3-mobo-c",
+      "window": "20160604_FIRE_smer-tcs3-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "bl-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.39950278803159006,
+        "smoke": 0.4562167369886736
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 9,
+      "video": "20170711_FIRE_bl-e-mobo-c",
+      "window": "20170711_FIRE_bl-e-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "bl-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3895705981206979,
+        "smoke": 0.4589842595309502
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 7,
+      "video": "20170711_FIRE_bl-e-mobo-c",
+      "window": "20170711_FIRE_bl-e-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "bl-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3701599670868827,
+        "smoke": 0.44929359815256253
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 10,
+      "video": "20170711_FIRE_bl-e-mobo-c",
+      "window": "20170711_FIRE_bl-e-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "bl-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5730943608729668,
+        "smoke": 0.6145431822527924
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 10,
+      "video": "20170711_FIRE_bl-e-mobo-c",
+      "window": "20170711_FIRE_bl-e-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": []
+      },
+      "camera": "sojr-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5265890242453477,
+        "smoke": 0.5232020680496273
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 11,
+      "valid_mask_frames": 12,
+      "video": "20240802_WarnersFire_sojr-s-mobo-c",
+      "window": "20240802_WarnersFire_sojr-s-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": []
+      },
+      "camera": "sojr-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5774465794733638,
+        "smoke": 0.502441404560247
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 10,
+      "valid_mask_frames": 12,
+      "video": "20240802_WarnersFire_sojr-s-mobo-c",
+      "window": "20240802_WarnersFire_sojr-s-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "sojr-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5695934153333607,
+        "smoke": 0.5733572525796224
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 8,
+      "valid_mask_frames": 12,
+      "video": "20240802_WarnersFire_sojr-s-mobo-c",
+      "window": "20240802_WarnersFire_sojr-s-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": []
+      },
+      "camera": "sojr-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5865530852190455,
+        "smoke": 0.5495190692764369
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 9,
+      "valid_mask_frames": 12,
+      "video": "20240802_WarnersFire_sojr-s-mobo-c",
+      "window": "20240802_WarnersFire_sojr-s-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "lo-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.346503532102705,
+        "smoke": 0.40955484353923577
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 2,
+      "video": "20170821_FIRE_lo-s-mobo-c",
+      "window": "20170821_FIRE_lo-s-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "lo-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20170821_FIRE_lo-s-mobo-c",
+      "window": "20170821_FIRE_lo-s-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "lo-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.4857012536309367,
+        "smoke": 0.5694520642072598
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 2,
+      "video": "20170821_FIRE_lo-s-mobo-c",
+      "window": "20170821_FIRE_lo-s-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": []
+      },
+      "camera": "lo-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 0,
+          "smoke": 0
+        },
+        "low_false_alarm": {
+          "fog": 0,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3257949906077518,
+        "smoke": 0.40569747097329234
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 2,
+      "valid_mask_frames": 3,
+      "video": "20170821_FIRE_lo-s-mobo-c",
+      "window": "20170821_FIRE_lo-s-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "sp-s-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20180806_Holy_sp-s-mobo-m",
+      "window": "20180806_Holy_sp-s-mobo-m-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "sp-s-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5858785876353738,
+        "smoke": 0.6330586357694927
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 11,
+      "valid_mask_frames": 12,
+      "video": "20180806_Holy_sp-s-mobo-m",
+      "window": "20180806_Holy_sp-s-mobo-m-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "om-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.43142946999181947,
+        "smoke": 0.5686533503455686
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 1,
+      "valid_mask_frames": 2,
+      "video": "20200521_FIRE_om-w-mobo-c",
+      "window": "20200521_FIRE_om-w-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "om-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20200521_FIRE_om-w-mobo-c",
+      "window": "20200521_FIRE_om-w-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "om-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5107242626012601,
+        "smoke": 0.5923995146544242
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 8,
+      "video": "20200521_FIRE_om-w-mobo-c",
+      "window": "20200521_FIRE_om-w-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "om-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20200521_FIRE_om-w-mobo-c",
+      "window": "20200521_FIRE_om-w-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "fog_near_threshold"
+        ],
+        "low_false_alarm": [
+          "fog_near_threshold"
+        ]
+      },
+      "camera": "smer-tcs3-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": 0
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3547103251001006,
+        "smoke": 0.42727208134934175
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 3,
+      "valid_mask_frames": 12,
+      "video": "20220905-FairviewFire-smer-tcs3-mobo-m",
+      "window": "20220905-FairviewFire-smer-tcs3-mobo-m-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": []
+      },
+      "camera": "smer-tcs3-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5597820651920876,
+        "smoke": 0.5192121306262739
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 7,
+      "valid_mask_frames": 12,
+      "video": "20220905-FairviewFire-smer-tcs3-mobo-m",
+      "window": "20220905-FairviewFire-smer-tcs3-mobo-m-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "smer-tcs3-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.573073620235773,
+        "smoke": 0.5839079022780891
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 3,
+      "valid_mask_frames": 12,
+      "video": "20220905-FairviewFire-smer-tcs3-mobo-m",
+      "window": "20220905-FairviewFire-smer-tcs3-mobo-m-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "smer-tcs3-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5678036610917854,
+        "smoke": 0.5697113543514395
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 5,
+      "valid_mask_frames": 12,
+      "video": "20220905-FairviewFire-smer-tcs3-mobo-m",
+      "window": "20220905-FairviewFire-smer-tcs3-mobo-m-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "bm-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20191005_FIRE_bm-e-mobo-c",
+      "window": "20191005_FIRE_bm-e-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "bm-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20191005_FIRE_bm-e-mobo-c",
+      "window": "20191005_FIRE_bm-e-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "bm-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20191005_FIRE_bm-e-mobo-c",
+      "window": "20191005_FIRE_bm-e-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "bm-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20191005_FIRE_bm-e-mobo-c",
+      "window": "20191005_FIRE_bm-e-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "sp-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20180602_Alison_sp-s-mobo-c",
+      "window": "20180602_Alison_sp-s-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "sp-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20180602_Alison_sp-s-mobo-c",
+      "window": "20180602_Alison_sp-s-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "sp-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20180602_Alison_sp-s-mobo-c",
+      "window": "20180602_Alison_sp-s-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "sp-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20180602_Alison_sp-s-mobo-c",
+      "window": "20180602_Alison_sp-s-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "om-w-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6415031826915999,
+        "smoke": 0.5790626503442946
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 7,
+      "valid_mask_frames": 12,
+      "video": "20231110.112257-Border36Fire-om-w-mobo-m",
+      "window": "20231110.112257-Border36Fire-om-w-mobo-m-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "om-w-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6160928772404162,
+        "smoke": 0.5647289291580079
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 7,
+      "valid_mask_frames": 12,
+      "video": "20231110.112257-Border36Fire-om-w-mobo-m",
+      "window": "20231110.112257-Border36Fire-om-w-mobo-m-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "om-w-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5987068717269253,
+        "smoke": 0.5967701896824991
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 9,
+      "valid_mask_frames": 12,
+      "video": "20231110.112257-Border36Fire-om-w-mobo-m",
+      "window": "20231110.112257-Border36Fire-om-w-mobo-m-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold",
+          "fog_near_threshold"
+        ],
+        "low_false_alarm": [
+          "fog_near_threshold"
+        ]
+      },
+      "camera": "om-w-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.4491508806772566,
+        "smoke": 0.4759551009124114
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 2,
+      "valid_mask_frames": 11,
+      "video": "20231110.112257-Border36Fire-om-w-mobo-m",
+      "window": "20231110.112257-Border36Fire-om-w-mobo-m-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "syp-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.39547574410512765,
+        "smoke": 0.4877220083045379
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 11,
+      "video": "20180718_FIRE_syp-w-mobo-c",
+      "window": "20180718_FIRE_syp-w-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "syp-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6010729670511761,
+        "smoke": 0.5789708141443972
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 1,
+      "valid_mask_frames": 12,
+      "video": "20180718_FIRE_syp-w-mobo-c",
+      "window": "20180718_FIRE_syp-w-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "syp-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.45866299821285567,
+        "smoke": 0.5439067985784878
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 10,
+      "video": "20180718_FIRE_syp-w-mobo-c",
+      "window": "20180718_FIRE_syp-w-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "syp-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6167820641400308,
+        "smoke": 0.5970146883457587
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 2,
+      "valid_mask_frames": 11,
+      "video": "20180718_FIRE_syp-w-mobo-c",
+      "window": "20180718_FIRE_syp-w-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "om-w-mobo",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20190801_Caliente_om-w-mobo",
+      "window": "20190801_Caliente_om-w-mobo-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "om-w-mobo",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20190801_Caliente_om-w-mobo",
+      "window": "20190801_Caliente_om-w-mobo-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "om-w-mobo",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20190801_Caliente_om-w-mobo",
+      "window": "20190801_Caliente_om-w-mobo-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "om-w-mobo",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20190801_Caliente_om-w-mobo",
+      "window": "20190801_Caliente_om-w-mobo-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "tdlln-n-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5268696889017915,
+        "smoke": 0.5674037011427826
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 2,
+      "valid_mask_frames": 11,
+      "video": "20240625_DelMarFire_tdlln-n-mobo-c",
+      "window": "20240625_DelMarFire_tdlln-n-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "tdlln-n-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.49106526586981464,
+        "smoke": 0.5722319136493796
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 9,
+      "video": "20240625_DelMarFire_tdlln-n-mobo-c",
+      "window": "20240625_DelMarFire_tdlln-n-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "fog_near_threshold"
+        ],
+        "low_false_alarm": [
+          "fog_near_threshold"
+        ]
+      },
+      "camera": "tdlln-n-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": 0
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3854502060700293,
+        "smoke": 0.40612681243373044
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 3,
+      "valid_mask_frames": 11,
+      "video": "20240625_DelMarFire_tdlln-n-mobo-c",
+      "window": "20240625_DelMarFire_tdlln-n-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "tdlln-n-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.4627150919583001,
+        "smoke": 0.5501928104480278
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 1,
+      "valid_mask_frames": 9,
+      "video": "20240625_DelMarFire_tdlln-n-mobo-c",
+      "window": "20240625_DelMarFire_tdlln-n-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "cp-n-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5725314743658957,
+        "smoke": 0.614930954728077
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 2,
+      "valid_mask_frames": 3,
+      "video": "20240903_NavajoFire_cp-n-mobo-c",
+      "window": "20240903_NavajoFire_cp-n-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "cp-n-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.48952330747991085,
+        "smoke": 0.5755612066977668
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 7,
+      "video": "20240903_NavajoFire_cp-n-mobo-c",
+      "window": "20240903_NavajoFire_cp-n-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "cp-n-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3842735546316924,
+        "smoke": 0.4631897683362447
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 4,
+      "video": "20240903_NavajoFire_cp-n-mobo-c",
+      "window": "20240903_NavajoFire_cp-n-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "cp-n-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.507037573641973,
+        "smoke": 0.5994556655441653
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 7,
+      "video": "20240903_NavajoFire_cp-n-mobo-c",
+      "window": "20240903_NavajoFire_cp-n-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": []
+      },
+      "camera": "sjh-n-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6436441387385237,
+        "smoke": 0.5493372181944488
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 11,
+      "valid_mask_frames": 12,
+      "video": "20200813_Ranch2Fire_sjh-n-mobo-c",
+      "window": "20200813_Ranch2Fire_sjh-n-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "sjh-n-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6521314929131583,
+        "smoke": 0.5709361504337452
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 11,
+      "valid_mask_frames": 12,
+      "video": "20200813_Ranch2Fire_sjh-n-mobo-c",
+      "window": "20200813_Ranch2Fire_sjh-n-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "sjh-n-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6355783224083702,
+        "smoke": 0.563329522435538
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 11,
+      "valid_mask_frames": 12,
+      "video": "20200813_Ranch2Fire_sjh-n-mobo-c",
+      "window": "20200813_Ranch2Fire_sjh-n-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": []
+      },
+      "camera": "sjh-n-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6059262621834415,
+        "smoke": 0.5321956886421599
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 9,
+      "valid_mask_frames": 12,
+      "video": "20200813_Ranch2Fire_sjh-n-mobo-c",
+      "window": "20200813_Ranch2Fire_sjh-n-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold",
+          "fog_near_threshold"
+        ],
+        "low_false_alarm": [
+          "fog_near_threshold"
+        ]
+      },
+      "camera": "pi-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.444487757250071,
+        "smoke": 0.4852982059469762
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 9,
+      "valid_mask_frames": 12,
+      "video": "20160619_FIRE_pi-s-mobo-c",
+      "window": "20160619_FIRE_pi-s-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": []
+      },
+      "camera": "pi-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 0,
+          "smoke": 0
+        },
+        "low_false_alarm": {
+          "fog": 0,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3363021135901274,
+        "smoke": 0.4136863529091318
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 4,
+      "valid_mask_frames": 6,
+      "video": "20160619_FIRE_pi-s-mobo-c",
+      "window": "20160619_FIRE_pi-s-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "pi-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.32136438523493893,
+        "smoke": 0.40370475288831115
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 8,
+      "video": "20160619_FIRE_pi-s-mobo-c",
+      "window": "20160619_FIRE_pi-s-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold",
+          "fog_near_threshold"
+        ],
+        "low_false_alarm": [
+          "fog_near_threshold"
+        ]
+      },
+      "camera": "pi-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.48809121409004924,
+        "smoke": 0.511424246904841
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 4,
+      "valid_mask_frames": 6,
+      "video": "20160619_FIRE_pi-s-mobo-c",
+      "window": "20160619_FIRE_pi-s-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "lp-w-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5787705197092374,
+        "smoke": 0.5850867942447691
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 3,
+      "valid_mask_frames": 11,
+      "video": "20200806_SpringsFire_lp-w-mobo-m",
+      "window": "20200806_SpringsFire_lp-w-mobo-m-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "wilson-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.34444776375052677,
+        "smoke": 0.41109919019953506
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 3,
+      "video": "20250107_EatonFire_wilson-s-mobo-c",
+      "window": "20250107_EatonFire_wilson-s-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold",
+          "fog_near_threshold"
+        ],
+        "low_false_alarm": [
+          "fog_near_threshold"
+        ]
+      },
+      "camera": "wilson-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.4661227587660729,
+        "smoke": 0.5456059772313394
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 2,
+      "valid_mask_frames": 7,
+      "video": "20250107_EatonFire_wilson-s-mobo-c",
+      "window": "20250107_EatonFire_wilson-s-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": []
+      },
+      "camera": "wilson-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.4955198682478906,
+        "smoke": 0.5464481623196393
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 7,
+      "valid_mask_frames": 12,
+      "video": "20250107_EatonFire_wilson-s-mobo-c",
+      "window": "20250107_EatonFire_wilson-s-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "wilson-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6308301400443763,
+        "smoke": 0.5804252579060363
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 11,
+      "valid_mask_frames": 12,
+      "video": "20250107_EatonFire_wilson-s-mobo-c",
+      "window": "20250107_EatonFire_wilson-s-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold",
+          "fog_near_threshold"
+        ],
+        "low_false_alarm": [
+          "fog_near_threshold"
+        ]
+      },
+      "camera": "sm-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3828632314031173,
+        "smoke": 0.4736705415647614
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 3,
+      "valid_mask_frames": 7,
+      "video": "20180603_FIRE_sm-w-mobo-c",
+      "window": "20180603_FIRE_sm-w-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "sm-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3168827410440997,
+        "smoke": 0.4030991687985271
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 1,
+      "valid_mask_frames": 2,
+      "video": "20180603_FIRE_sm-w-mobo-c",
+      "window": "20180603_FIRE_sm-w-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "sm-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3909171997347458,
+        "smoke": 0.45603330751490817
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 1,
+      "valid_mask_frames": 8,
+      "video": "20180603_FIRE_sm-w-mobo-c",
+      "window": "20180603_FIRE_sm-w-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "sm-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.4078017818939239,
+        "smoke": 0.5879228563915121
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 1,
+      "valid_mask_frames": 3,
+      "video": "20180603_FIRE_sm-w-mobo-c",
+      "window": "20180603_FIRE_sm-w-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "so-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3158148416015357,
+        "smoke": 0.4031687351425011
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 2,
+      "video": "20180726_FIRE_so-w-mobo-c",
+      "window": "20180726_FIRE_so-w-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "fog_near_threshold"
+        ],
+        "low_false_alarm": [
+          "fog_near_threshold"
+        ]
+      },
+      "camera": "so-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": 0
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.38254591211014116,
+        "smoke": 0.4366108063006194
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 2,
+      "valid_mask_frames": 4,
+      "video": "20180726_FIRE_so-w-mobo-c",
+      "window": "20180726_FIRE_so-w-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "so-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3185300517339328,
+        "smoke": 0.4034334801272271
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 1,
+      "valid_mask_frames": 2,
+      "video": "20180726_FIRE_so-w-mobo-c",
+      "window": "20180726_FIRE_so-w-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "so-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3158159785957484,
+        "smoke": 0.4031574440661856
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 2,
+      "video": "20180726_FIRE_so-w-mobo-c",
+      "window": "20180726_FIRE_so-w-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold",
+          "fog_near_threshold"
+        ],
+        "low_false_alarm": [
+          "fog_near_threshold"
+        ]
+      },
+      "camera": "lo-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.4105565512829541,
+        "smoke": 0.5012774456832904
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 4,
+      "valid_mask_frames": 6,
+      "video": "20190924_FIRE_lo-w-mobo-c",
+      "window": "20190924_FIRE_lo-w-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": []
+      },
+      "camera": "lo-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.497259468910817,
+        "smoke": 0.5201048613255004
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 4,
+      "valid_mask_frames": 6,
+      "video": "20190924_FIRE_lo-w-mobo-c",
+      "window": "20190924_FIRE_lo-w-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold",
+          "fog_near_threshold"
+        ],
+        "low_false_alarm": [
+          "fog_near_threshold"
+        ]
+      },
+      "camera": "lo-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.4688941484846167,
+        "smoke": 0.5267475883122305
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 3,
+      "valid_mask_frames": 7,
+      "video": "20190924_FIRE_lo-w-mobo-c",
+      "window": "20190924_FIRE_lo-w-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "lo-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5225219026760843,
+        "smoke": 0.5838206080057097
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 10,
+      "video": "20190924_FIRE_lo-w-mobo-c",
+      "window": "20190924_FIRE_lo-w-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": []
+      },
+      "camera": "sclm-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5491251571895194,
+        "smoke": 0.5312612998222652
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 8,
+      "valid_mask_frames": 12,
+      "video": "20201205_typical-range-fire_sclm-e-mobo-c",
+      "window": "20201205_typical-range-fire_sclm-e-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "sclm-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5670057410432272,
+        "smoke": 0.5664616636532673
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 3,
+      "valid_mask_frames": 11,
+      "video": "20201205_typical-range-fire_sclm-e-mobo-c",
+      "window": "20201205_typical-range-fire_sclm-e-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": []
+      },
+      "camera": "sclm-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5549122813321566,
+        "smoke": 0.5016995236095164
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 2,
+      "valid_mask_frames": 12,
+      "video": "20201205_typical-range-fire_sclm-e-mobo-c",
+      "window": "20201205_typical-range-fire_sclm-e-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": []
+      },
+      "camera": "sclm-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.608260351821354,
+        "smoke": 0.537506744860676
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 8,
+      "valid_mask_frames": 12,
+      "video": "20201205_typical-range-fire_sclm-e-mobo-c",
+      "window": "20201205_typical-range-fire_sclm-e-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "om-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5372443505437474,
+        "smoke": 0.602814054298398
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 2,
+      "valid_mask_frames": 3,
+      "video": "20170520_FIRE_om-s-mobo-c",
+      "window": "20170520_FIRE_om-s-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "om-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5622074262666957,
+        "smoke": 0.6188401524413076
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 4,
+      "valid_mask_frames": 6,
+      "video": "20170520_FIRE_om-s-mobo-c",
+      "window": "20170520_FIRE_om-s-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "om-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5657943782244358,
+        "smoke": 0.6151179334847044
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 5,
+      "valid_mask_frames": 7,
+      "video": "20170520_FIRE_om-s-mobo-c",
+      "window": "20170520_FIRE_om-s-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "sp-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3170558431065866,
+        "smoke": 0.40327534570731743
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 1,
+      "video": "20201202_BondFire-nightime_sp-w-mobo-c",
+      "window": "20201202_BondFire-nightime_sp-w-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "sp-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3205803382922659,
+        "smoke": 0.404667149743165
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 2,
+      "video": "20201202_BondFire-nightime_sp-w-mobo-c",
+      "window": "20201202_BondFire-nightime_sp-w-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold",
+          "fog_near_threshold"
+        ],
+        "low_false_alarm": [
+          "smoke_near_threshold",
+          "fog_near_threshold"
+        ]
+      },
+      "camera": "sp-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.45576030149289737,
+        "smoke": 0.5575229907660479
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 4,
+      "valid_mask_frames": 6,
+      "video": "20201202_BondFire-nightime_sp-w-mobo-c",
+      "window": "20201202_BondFire-nightime_sp-w-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "69bravo-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6470441186719432,
+        "smoke": 0.561375118493062
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 11,
+      "valid_mask_frames": 12,
+      "video": "20250101_Fire_69bravo-e-mobo-c",
+      "window": "20250101_Fire_69bravo-e-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": []
+      },
+      "camera": "69bravo-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6238352237642022,
+        "smoke": 0.5359311929912898
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 11,
+      "valid_mask_frames": 12,
+      "video": "20250101_Fire_69bravo-e-mobo-c",
+      "window": "20250101_Fire_69bravo-e-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": []
+      },
+      "camera": "69bravo-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6027050824058358,
+        "smoke": 0.5289130052527199
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 11,
+      "valid_mask_frames": 12,
+      "video": "20250101_Fire_69bravo-e-mobo-c",
+      "window": "20250101_Fire_69bravo-e-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": []
+      },
+      "camera": "69bravo-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5358738399084206,
+        "smoke": 0.4975660712634119
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 11,
+      "valid_mask_frames": 12,
+      "video": "20250101_Fire_69bravo-e-mobo-c",
+      "window": "20250101_Fire_69bravo-e-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "lp-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6685254029109879,
+        "smoke": 0.5982725649795322
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 11,
+      "valid_mask_frames": 12,
+      "video": "20200822_SloaneFire_lp-w-mobo-c",
+      "window": "20200822_SloaneFire_lp-w-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "lp-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.619764768873781,
+        "smoke": 0.5894803229707336
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 8,
+      "valid_mask_frames": 12,
+      "video": "20200822_SloaneFire_lp-w-mobo-c",
+      "window": "20200822_SloaneFire_lp-w-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "lp-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6491677471575521,
+        "smoke": 0.592585124477586
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 11,
+      "valid_mask_frames": 12,
+      "video": "20200822_SloaneFire_lp-w-mobo-c",
+      "window": "20200822_SloaneFire_lp-w-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "lp-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.59093811212956,
+        "smoke": 0.6485431454722704
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 5,
+      "valid_mask_frames": 12,
+      "video": "20200822_SloaneFire_lp-w-mobo-c",
+      "window": "20200822_SloaneFire_lp-w-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": []
+      },
+      "camera": "pi-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 0,
+          "smoke": 0
+        },
+        "low_false_alarm": {
+          "fog": 0,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.323666845953983,
+        "smoke": 0.40726198577305955
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 3,
+      "valid_mask_frames": 4,
+      "video": "20190717_FIRE_pi-w-mobo-c",
+      "window": "20190717_FIRE_pi-w-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold",
+          "fog_near_threshold"
+        ],
+        "low_false_alarm": [
+          "fog_near_threshold"
+        ]
+      },
+      "camera": "pi-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3841112548763524,
+        "smoke": 0.5189346733829948
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 2,
+      "valid_mask_frames": 4,
+      "video": "20190717_FIRE_pi-w-mobo-c",
+      "window": "20190717_FIRE_pi-w-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "pi-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.36589332547176423,
+        "smoke": 0.5048219964787332
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 1,
+      "valid_mask_frames": 2,
+      "video": "20190717_FIRE_pi-w-mobo-c",
+      "window": "20190717_FIRE_pi-w-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": []
+      },
+      "camera": "pi-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.49994869540511494,
+        "smoke": 0.4972273948496074
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 3,
+      "valid_mask_frames": 6,
+      "video": "20190717_FIRE_pi-w-mobo-c",
+      "window": "20190717_FIRE_pi-w-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "sm-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.552773165230421,
+        "smoke": 0.6187191710934541
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 9,
+      "valid_mask_frames": 12,
+      "video": "20200828_BorderFire_sm-s-mobo-c",
+      "window": "20200828_BorderFire_sm-s-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "sm-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6069514496536774,
+        "smoke": 0.5602628408212453
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 3,
+      "valid_mask_frames": 12,
+      "video": "20200828_BorderFire_sm-s-mobo-c",
+      "window": "20200828_BorderFire_sm-s-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "sm-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5885792617783314,
+        "smoke": 0.6477707194597409
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 11,
+      "valid_mask_frames": 12,
+      "video": "20200828_BorderFire_sm-s-mobo-c",
+      "window": "20200828_BorderFire_sm-s-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": []
+      },
+      "camera": "sm-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5453276890369791,
+        "smoke": 0.4862424159651094
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 8,
+      "valid_mask_frames": 12,
+      "video": "20200828_BorderFire_sm-s-mobo-c",
+      "window": "20200828_BorderFire_sm-s-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "bl-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5747453475625167,
+        "smoke": 0.6307614720631893
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 2,
+      "valid_mask_frames": 10,
+      "video": "20180727_FIRE_bl-e-mobo-c",
+      "window": "20180727_FIRE_bl-e-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "bl-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.4848333488809701,
+        "smoke": 0.5630393046700126
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 7,
+      "video": "20180727_FIRE_bl-e-mobo-c",
+      "window": "20180727_FIRE_bl-e-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "bl-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.4863487101907023,
+        "smoke": 0.5465930386416564
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 1,
+      "valid_mask_frames": 12,
+      "video": "20180727_FIRE_bl-e-mobo-c",
+      "window": "20180727_FIRE_bl-e-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold",
+          "fog_near_threshold"
+        ],
+        "low_false_alarm": [
+          "fog_near_threshold"
+        ]
+      },
+      "camera": "bl-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.46716123960866174,
+        "smoke": 0.47699483612866633
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 6,
+      "valid_mask_frames": 8,
+      "video": "20180727_FIRE_bl-e-mobo-c",
+      "window": "20180727_FIRE_bl-e-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "lo-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6376296648863988,
+        "smoke": 0.6431514734218937
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 12,
+      "video": "20180606_FIRE_lo-s-mobo-c",
+      "window": "20180606_FIRE_lo-s-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "lo-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5995895317874101,
+        "smoke": 0.6336499384613361
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 12,
+      "video": "20180606_FIRE_lo-s-mobo-c",
+      "window": "20180606_FIRE_lo-s-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "lo-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5573606724218776,
+        "smoke": 0.571825907697868
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 12,
+      "video": "20180606_FIRE_lo-s-mobo-c",
+      "window": "20180606_FIRE_lo-s-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "lo-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5607162313899322,
+        "smoke": 0.577384488062482
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 12,
+      "video": "20180606_FIRE_lo-s-mobo-c",
+      "window": "20180606_FIRE_lo-s-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "om-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20200618_FIRE_om-w-mobo-c",
+      "window": "20200618_FIRE_om-w-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "om-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20200618_FIRE_om-w-mobo-c",
+      "window": "20200618_FIRE_om-w-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "om-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.4990944298832311,
+        "smoke": 0.5849866832116473
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 8,
+      "video": "20200618_FIRE_om-w-mobo-c",
+      "window": "20200618_FIRE_om-w-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_mask_frames",
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "om-w-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3171042272039486,
+        "smoke": 0.4033030799645283
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 0,
+      "video": "20200618_FIRE_om-w-mobo-c",
+      "window": "20200618_FIRE_om-w-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "fog_near_threshold"
+        ],
+        "low_false_alarm": [
+          "fog_near_threshold"
+        ]
+      },
+      "camera": "bm-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": 0
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3566116693161295,
+        "smoke": 0.4196498209574193
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 10,
+      "valid_mask_frames": 12,
+      "video": "20260629_JunctionFire_bm-e-mobo-c",
+      "window": "20260629_JunctionFire_bm-e-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "bm-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5447255905178636,
+        "smoke": 0.5943000252447365
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 1,
+      "valid_mask_frames": 12,
+      "video": "20260629_JunctionFire_bm-e-mobo-c",
+      "window": "20260629_JunctionFire_bm-e-mobo-c-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "fog_near_threshold"
+        ],
+        "low_false_alarm": [
+          "fog_near_threshold"
+        ]
+      },
+      "camera": "bm-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": 0
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.39009212874398,
+        "smoke": 0.44163519181301236
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 6,
+      "valid_mask_frames": 12,
+      "video": "20260629_JunctionFire_bm-e-mobo-c",
+      "window": "20260629_JunctionFire_bm-e-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "bm-e-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5762422715899197,
+        "smoke": 0.6047474386423155
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 5,
+      "valid_mask_frames": 12,
+      "video": "20260629_JunctionFire_bm-e-mobo-c",
+      "window": "20260629_JunctionFire_bm-e-mobo-c-post1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "sp-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5546945681666349,
+        "smoke": 0.6154352507496199
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 2,
+      "valid_mask_frames": 3,
+      "video": "20180806_Holy_sp-s-mobo-c",
+      "window": "20180806_Holy_sp-s-mobo-c-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "sp-s-mobo-c",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6031345295192346,
+        "smoke": 0.6201697539072036
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 11,
+      "valid_mask_frames": 12,
+      "video": "20180806_Holy_sp-s-mobo-c",
+      "window": "20180806_Holy_sp-s-mobo-c-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "om-w-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6434623419864578,
+        "smoke": 0.5953378420576256
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 11,
+      "valid_mask_frames": 12,
+      "video": "20240806_Border68FireMayBeHardToFind_om-w-mobo-m",
+      "window": "20240806_Border68FireMayBeHardToFind_om-w-mobo-m-pre0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "om-w-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "0"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6355827228303366,
+        "smoke": 0.5998070745819124
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 11,
+      "valid_mask_frames": 12,
+      "video": "20240806_Border68FireMayBeHardToFind_om-w-mobo-m",
+      "window": "20240806_Border68FireMayBeHardToFind_om-w-mobo-m-pre1-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "om-w-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6470518223388899,
+        "smoke": 0.5885460467753141
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 11,
+      "valid_mask_frames": 12,
+      "video": "20240806_Border68FireMayBeHardToFind_om-w-mobo-m",
+      "window": "20240806_Border68FireMayBeHardToFind_om-w-mobo-m-post0-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "om-w-mobo-m",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": "unknown",
+        "smoke": "1"
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6411413849019896,
+        "smoke": 0.586802725681075
+      },
+      "stabilization": "applied",
+      "timing_checked": true,
+      "valid_flow_frames": 11,
+      "valid_mask_frames": 12,
+      "video": "20240806_Border68FireMayBeHardToFind_om-w-mobo-m",
+      "window": "20240806_Border68FireMayBeHardToFind_om-w-mobo-m-post1-w0"
+    }
+  ]
+}

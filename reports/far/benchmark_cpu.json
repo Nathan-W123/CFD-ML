@@ -1,0 +1,106 @@
+{
+  "config": "configs/simulation_far.yaml",
+  "grid": {
+    "domain_height_m": 3200.0,
+    "domain_width_m": 3200.0,
+    "nx": 64,
+    "nz": 64
+  },
+  "inference": {
+    "encode_single_ms": 0.6421514599969669,
+    "predict_batch256_ms": 3.9004464999379707,
+    "predict_single_ms": 0.804774610005552,
+    "torch_threads": 1
+  },
+  "machine": {
+    "platform": "Linux-6.18.44-fc-v139-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "python": "3.13.16"
+  },
+  "render_features": {
+    "features_s": 0.07483440099895233,
+    "frame_shape": [
+      12,
+      192,
+      192
+    ],
+    "lag_frames": false,
+    "render_plus_features_mean_s": 0.25241442150036164,
+    "render_s": 0.11892862799868453
+  },
+  "simulation": {
+    "both": {
+      "dt_used": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "max_s": 12.473004266001226,
+      "mean_s": 7.40635146966694,
+      "n": 3,
+      "steps_mean": 2813.864834773867
+    },
+    "fog_only": {
+      "dt_used": [
+        0.5,
+        0.5,
+        0.25
+      ],
+      "max_s": 20.0035168530012,
+      "mean_s": 10.373695848667316,
+      "n": 3,
+      "steps_mean": 4505.0751045573825
+    },
+    "neither": {
+      "dt_used": [
+        0.25,
+        0.25,
+        0.25
+      ],
+      "max_s": 13.26418671799911,
+      "mean_s": 10.75395223433346,
+      "n": 3,
+      "steps_mean": 5946.989676122513
+    },
+    "overall": {
+      "mean_s_per_accepted_sim": 8.625875978583585,
+      "sims_per_hour": 417.348917250621
+    },
+    "smoke_only": {
+      "dt_used": [
+        0.25,
+        0.5,
+        0.5
+      ],
+      "max_s": 9.223569756999495,
+      "mean_s": 5.969504361666623,
+      "n": 3,
+      "steps_mean": 3429.0077845554515
+    }
+  },
+  "threads": {
+    "blas": 1,
+    "cv2": 1,
+    "numba": 1,
+    "torch_interop": 1,
+    "torch_intra": 1
+  },
+  "time": {
+    "dt_s": 0.5,
+    "flow_lag_s": null,
+    "frame_interval_s": 60.0,
+    "max_dt_halvings": 3,
+    "max_offset_s": 10.0,
+    "n_frames": 12,
+    "precursor_s": 240.0,
+    "spinup_s": [
+      120.0,
+      900.0
+    ]
+  },
+  "training": {
+    "epoch_s_mean": 0.14972788966527636,
+    "n_train_sequences": 1799,
+    "parameters": 5202
+  }
+}

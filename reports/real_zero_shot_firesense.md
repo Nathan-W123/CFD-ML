@@ -1,6 +1,6 @@
 # Zero-shot check on real footage: firesense
 
-> Sanity check, not an accuracy estimate: the exported synthetic model and its synthetic thresholds, no fine-tuning or recalibration on real data (Stage B not run).
+> Sanity check, not an accuracy estimate: the exported synthetic model and its synthetic thresholds, no fine-tuning or recalibration on real data (Stage B is reported separately).
 
 FIRESENSE smoke videos (CERTH / Bilkent, Zenodo record 836749, CC BY 4.0). Clips of at least 56 s fit the 12 x 5 s window with 1 s lag frames; testpos04 (edited footage) and testpos05 (wrong container clock) are excluded, testpos03 crashes OpenCV. Used: a building fire (testpos02), a courtyard CCTV bucket fire (testpos07, two windows) and one smoke-free fixed view of bushes and a fence (testneg04, two windows). No fog in any clip; masks from the built-in fallback detector; close-range smoke, not long-range wildfire views.
 

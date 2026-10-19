@@ -250,3 +250,29 @@ Overall flag: **True**.
 * Highest context / render parameter AUROCs for fog (folded, threshold 0.6): wind_speed_ms 0.523, diffusivity_m2s 0.520, lapse_dtheta_dz 0.520, render_view_x_frac 0.520
 * Highest context / render parameter AUROCs for smoke (folded, threshold 0.6): wind_sign 0.529, hint_fp_boost 0.526, render_fp_boost 0.526, nu_m2s 0.524
 
+## CFD-oracle diagnostic (oracle features are never model inputs)
+
+CFD-oracle diagnostic. Oracle features are computed from the CFD fields (exact velocities, region from the optical depth at the nominal line of sight) and are never model inputs; they bound what a perfect measurement of the same motion representation could achieve. Synthetic data only.
+
+Pooled logistic regression on per-feature time mean and std, test AUROC [95 % CI]:
+
+| features | label | oracle test_iid | camera test_iid | oracle test_ood | camera test_ood |
+|---|---|---|---|---|---|
+| all | smoke | 0.809 [0.74, 0.88] | 0.565 [0.50, 0.63] | 0.770 [0.70, 0.83] | 0.617 [0.56, 0.68] |
+| all | fog | 0.753 [0.67, 0.83] | 0.725 [0.66, 0.79] | 0.690 [0.62, 0.76] | 0.686 [0.62, 0.75] |
+| region | smoke | 0.760 [0.68, 0.84] | 0.560 [0.49, 0.62] | 0.761 [0.69, 0.82] | 0.579 [0.52, 0.64] |
+| region | fog | 0.717 [0.63, 0.80] | 0.730 [0.66, 0.80] | 0.787 [0.72, 0.85] | 0.716 [0.66, 0.77] |
+| velocity | smoke | 0.785 [0.71, 0.85] | 0.499 [0.43, 0.57] | 0.744 [0.67, 0.81] | 0.613 [0.55, 0.67] |
+| velocity | fog | 0.610 [0.52, 0.69] | 0.624 [0.55, 0.69] | 0.516 [0.44, 0.60] | 0.569 [0.50, 0.64] |
+
+## CPU benchmark (one core)
+
+| Stage | Single-core time |
+|---|---|
+| CFD simulation (accepted, incl. precursor) | 6.4 s/sim (565 sims/h) |
+| Render 12 + 12 lag frames | 167 ms |
+| Feature extraction (12 x 14) | 80 ms |
+| GRU training epoch (2000 sequences) | 0.21 s |
+| Inference, one sequence (features -> probabilities) | 0.99 ms |
+| Inference, batch of 256 | 3.8 ms |
+
