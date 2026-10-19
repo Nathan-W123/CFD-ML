@@ -470,6 +470,8 @@ def threshold_max_f1(score, y, weights=None) -> Tuple[float, Dict[str, Any]]:
     fn = cpos[-1] - tp
     denom = 2 * tp + fp + fn
     f1 = np.where(denom > 0, 2 * tp / np.maximum(denom, 1e-300), 0.0)
+    if cpos[-1] <= 0:                    # no positives: F1 is 0 everywhere; predict nothing
+        return float(cands[-1]), {"f1": None, "precision": None, "recall": None, "reason": "no_positives"}
     k = int(np.argmax(f1))
     return float(cands[k]), {"f1": float(f1[k]), "precision": _ratio(tp[k], tp[k] + fp[k]),
                              "recall": _ratio(tp[k], tp[k] + fn[k])}

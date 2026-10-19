@@ -24,9 +24,9 @@ The thresholds come from SYNTHETIC validation data until real labelled
 footage is available (`calibration_source` says which); they are not
 validated real-world operating points.
 
-This module imports only numpy, torch, PyYAML, src.models and src.data
-(OpenCV only inside `features_from_frames`). It never imports src.training or
-matplotlib, so a deployment needs no training dependencies.
+This module imports only numpy, torch, PyYAML (via src.utils.io), src.models
+and src.data (OpenCV only inside `features_from_frames`). It never imports
+src.training or matplotlib, so a deployment needs no training code.
 
 CLI:
     python -m src.inference.predict --artifacts artifacts --features x.npy [--operating-point low_false_alarm]

@@ -11,8 +11,8 @@ bin (1.5 m/s) and mask source.
 `run_evaluation` is the whole synthetic report:
 
 * "synthetic": the exported (val_select-best) seed with CIs and slices on
-  test_iid / test_ood, point estimates on the validation splits (marked as
-  such), and mean +- sd over every trained seed;
+  test_iid / test_ood, its ROC / PR curves, point estimates on the
+  validation splits (marked as such), and mean +- sd over every trained seed;
 * "ablations": A (heuristic baseline) and C (this GRU); B and D need real
   labelled footage and are null with the reason; the pooled logistic
   regression is an extra reference;
@@ -21,7 +21,10 @@ bin (1.5 m/s) and mask source.
 * "robustness": every robustness suite against its matched nominal
   re-render; "loro": leave-one-regime-out results if supplied;
 * "real": {"status": "pending", ...} until real results are supplied
-  (`evaluate_real`); "data": counts and generation acceptance;
+  (`evaluate_real`, Stage B artifacts on camera-disjoint real test data);
+  "synthetic_proxy": optional `run_synthetic_proxy` (pretrained vs scratch
+  on a small shifted synthetic domain, flagged not_real_world_evidence);
+  "data": counts and generation acceptance;
 * figures in the reports directory: 4-class confusion matrices, reliability
   diagrams, ROC / PR curves.
 
@@ -519,6 +522,8 @@ def run_synthetic_proxy(fs_shifted: FeatureSet, cfg: Mapping[str, Any], init_art
     same data from scratch, C = pretrained zero-shot; all evaluated on the
     proxy's test split. Stored under "synthetic_proxy" with
     not_real_world_evidence = true: it is not a substitute for real footage.
+    Use data that no reported test number depends on (e.g. separately
+    generated shifted simulations): the proxy TRAINS on part of `fs_shifted`.
     """
     from src.training.train import run_finetune
 
