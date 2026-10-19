@@ -1,9 +1,10 @@
 # CFD-ML: a CFD-pretrained physics expert for wildfire smoke vs fog
 
-**A small temporal network (GRU) that tells wildfire smoke from fog by how it
-moves, pretrained on a 2D lattice-Boltzmann simulator of smoke, fog and
-look-alikes, and producing a 16-dimensional motion embedding for a
-multimodal wildfire detector.**
+**A small temporal network (GRU) trained to tell wildfire smoke from fog by
+how it moves, pretrained on a 2D lattice-Boltzmann simulator of smoke, fog
+and look-alikes, and producing a 16-dimensional motion embedding for a
+multimodal wildfire detector. Synthetic pretraining only: its real-world
+performance is untested.**
 
 The physics expert is one of four parts of a larger system (vision, physics,
 weather, fusion). It sees only motion features measured from camera frames:
@@ -29,10 +30,13 @@ Full tables: [`reports/results.md`](reports/results.md) (generated from
 [`reports/oracle_diagnostic.md`](reports/oracle_diagnostic.md); figures in
 `reports/` and `reports/figures/` (example sequences per category and regime).
 
-**Data.** 1198 accepted simulations (29 attempts rejected by the numerical
-and label-support checks and re-drawn: 5 % of both-class and 3.5 % of
-fog-only attempts, under 1 % of the rest) rendered into 3246 sequences: train 1800 (600 simulations), val_select
-300, val_calib 453, test_iid 295 (148 simulations), test_ood 398 (199
+**Data.** 1200 simulation slots: 29 CFD attempts were rejected by the
+numerical and label-support checks and re-drawn (5 % of both-class and
+3.5 % of fog-only attempts, under 1 % of the rest); 2 valid simulations
+(val_calib-smoke_only-0020, test_ood-both-0042) were dropped because none
+of their render variants passed the label-visibility check. The remaining
+1198 simulations give 3246 sequences: train 1800 (600 simulations),
+val_select 300, val_calib 453 (151), test_iid 295 (148), test_ood 398 (199
 simulations: wind 7-9 m/s, sources on 45-80 m hills), plus 1024 robustness
 re-renders of the test_iid simulations.
 
@@ -40,7 +44,7 @@ re-renders of the test_iid simulations.
 from a bootstrap over simulations; mean ± sd over the three seeds in
 `reports/results.md`):
 
-| | smoke AUROC | fog AUROC | false smoke on fog_only, balanced / low-false-alarm | ECE smoke / fog |
+| | smoke AUROC | fog AUROC | false smoke on fog_only (threshold only), balanced / low-false-alarm | ECE smoke / fog |
 |---|---|---|---|---|
 | test_iid | 0.64 [0.57, 0.71] | 0.69 [0.62, 0.76] | 46 % / 4 % [0, 9] | 0.07 / 0.07 |
 | test_ood (held-out recipes) | 0.64 [0.58, 0.70] | 0.65 [0.57, 0.70] | 52 % / 12 % [5, 20] | 0.05 / 0.07 |
@@ -48,28 +52,40 @@ from a bootstrap over simulations; mean ± sd over the three seeds in
 | pooled logistic (14 features x mean/std), test_iid | 0.62 | 0.73 | 68 % / 4 % | |
 
 Seeds agree closely (smoke 0.638 ± 0.007, fog 0.699 ± 0.013 on test_iid).
-The low-false-alarm point holds its 5 % target on in-distribution data but
-not on the held-out recipes (12 %). The model abstains on 72 % of test
-clips: 32 % because fewer than two frames have measurable flow (mostly
-fog, haze and both-class scenes whose background cannot be stabilised), the
-rest because the calibrated logit is within the margin of the threshold.
-Accuracy on the clips it does decide is 0.61 (smoke) and 0.69 (fog).
+The false-smoke column applies the threshold to every fog_only clip,
+ignoring abstention; the low-false-alarm threshold (fitted that way on
+val_calib) holds its 5 % target in distribution (4.1 %) but not on the
+held-out recipes (12 %). Counting only the fog_only clips the model does
+decide on, the balanced point calls smoke on 76 % of them (22/29 test_iid,
+34/44 test_ood) and the low-false-alarm point on none (0/24, 0/31): use the
+low-false-alarm point wherever a fog false alarm is costly. The model
+abstains on 72 % of test_iid clips: 32 % because fewer than two frames
+have measurable flow (mostly fog, haze and both-class scenes whose
+background cannot be stabilised), 1 % because fewer than three frames have
+a valid mask, and 39 % because a calibrated logit is within the margin of
+its threshold. Accuracy on the clips it does decide is 0.61 (smoke) and
+0.69 (fog).
 
 **What this says.** The camera-level motion features carry a weak but real
-signal: the GRU beats the fixed-form motion-cue heuristic (A) clearly, is
-on par with a time-pooled logistic regression (better on smoke, worse on
-fog in distribution), largely keeps its ranking on the held-out wind and
-terrain recipes, and is well calibrated. It is not a stand-alone smoke detector;
-it is a calibrated, abstaining input for the fusion model.
+signal. The GRU beats the motion-cue baseline A on AUROC (clearly on fog
+and on test_ood, marginally on test_iid smoke) but not on false smoke on
+fog_only, where A is equal or lower; it is on par with a time-pooled
+logistic regression (better on smoke, worse on fog in distribution);
+it largely keeps its ranking on the held-out wind and terrain recipes; its
+calibration error is moderate (ECE about 0.07, no better than A's). It is
+not a stand-alone smoke detector; it is a calibrated, abstaining input for
+the fusion model.
 
 **Where the signal is lost (CFD-oracle diagnostic, never a model input).**
 The same twelve features computed from the CFD fields reach smoke AUROC
 0.78 [0.71, 0.85] on test_iid against 0.60 for the camera features with the
-same classifier; the loss is mostly in the optical-flow group (0.74 vs
-0.55: the region-mean vertical motion that separates smoke from drifting
-aerosol is of order 0.1 m/s here, close to the optical-flow noise floor at
-this image resolution). For fog the camera keeps almost all of it (0.73 vs 0.75),
-mainly through region geometry. Optical flow tracks the CFD velocity of the
+same classifier. On test_iid the loss is mostly in the optical-flow group
+(0.74 vs 0.55), above all in the spread of vertical velocity inside the
+region (univariate AUROC 0.70 from the CFD, 0.56 from optical flow); the
+region-mean vertical velocity itself is only a few cm/s. On the held-out
+recipes the larger smoke loss is in the region group (0.73 vs 0.53, against
+0.71 vs 0.60 for velocity). For fog the camera keeps almost all of it (0.73
+vs 0.75 on test_iid), mainly through region geometry. Optical flow tracks the CFD velocity of the
 candidate region with correlation 0.85 (horizontal) and 0.55 (vertical).
 
 **Robustness and generalisation** (re-renders of test_iid; leave-one-
@@ -85,23 +101,29 @@ regime-out on test_iid):
 * Unseen regimes are the weak point: held out of training, drifting haze
   is called fog 82 % of the time, steam fog is found 44 % of the time
   (AUROC 0.48) and crosswind smoke 28 % of the time; hot plumes (recall
-  0.70) and dissipating fog (AUROC 0.74) transfer best.
+  0.70), dissipating fog (AUROC 0.74) and radiation fog (recall 0.80, only
+  10 sequences) transfer best.
 
 **Shortcut audit.** No context or render parameter predicts a label (all
 folded AUROCs at most 0.53). The validity flags alone predict fog with
-AUROC 0.60 (threshold 0.6, flagged): fog scenes more often have a valid
-mask and less often a stabilisable background. This is a real property of
-fog footage, but it is carried by the flags rather than by motion and is
-reported, not hidden.
+pooled held-out AUROC 0.60 (test_iid 0.64, test_ood 0.61, against the
+GRU's 0.69 / 0.65; threshold 0.6, flagged): fog scenes more often have a
+valid mask and less often a stabilisable background. That is a property of
+the simulated and rendered fog scenes, carried by the flags rather than by
+motion, and a good part of the fog signal; it is reported, not hidden.
 
 **Synthetic transfer proxy (not real-world evidence).** On a separately
 seeded synthetic set rendered with detector / box masks and harsher
 imaging (240 simulations, re-split by simulation), the pretrained model
 zero-shot (fog 0.70, smoke 0.57) and fine-tuned at lr 1e-4 (fog 0.67 ±
-0.00, smoke 0.58 ± 0.00 over seeds) beat training from scratch on fog
-(0.60 ± 0.01) and tie on smoke (0.57 ± 0.06), with overlapping intervals
-on 48 test simulations. This only shows the Stage B code path works on a
-domain shift the simulator itself produces.
+0.00, smoke 0.58 ± 0.00 over seeds) reach a higher fog AUROC than training
+from scratch (0.60 ± 0.01) and the same smoke AUROC (0.57 ± 0.06); the
+intervals on 48 test simulations overlap. B trains only on the proxy's
+120 training simulations (337 sequences); C was pretrained on 600
+simulations and D fine-tuned on the same 337 sequences. All three abstain
+on about 90 % or more of the proxy test clips (heavy noise and JPEG defeat
+stabilisation), so only the AUROCs are informative. This only shows the
+Stage B code path works on a domain shift the simulator itself produces.
 
 **Real-world status: pending.** Experiments B (real data from scratch) and
 D (CFD-pretrained, fine-tuned on real data) are `null` in
@@ -212,7 +234,11 @@ splits.
 
 Twelve observations 5 s apart span 55 s. Flow is measured over a 1 s lag pair
 at each observation (DIS optical flow), because flow over the 5 s observation
-spacing loses the texture correspondence. Camera shake is removed by a
+spacing loses the texture correspondence. At the first observation the
+between-observation derivatives (area growth, centroid velocity, anchor
+stability) are 0; they have no flag of their own (the 14-feature layout
+has only the two validity flags), which is unambiguous because they are
+always the GRU's first step, while the 1 s lag flow at t = 0 is valid. Camera shake is removed by a
 similarity transform estimated from background corners outside the candidate
 masks; when no estimate is possible (a frame-filling fog bank, an untextured
 sky) the flow features of that clip are gated off rather than left to

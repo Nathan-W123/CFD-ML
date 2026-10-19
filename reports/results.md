@@ -32,7 +32,7 @@ Validity flags / parameters with folded univariate AUROC above 0.6:
 
 ## Headline: experiment C (CFD-pretrained GRU) against baselines
 
-AUROC is threshold-free; F1, false smoke on fog_only and abstention use the operating point (thresholds fitted on val_calib only). Temperature scaling and abstention apply to C only (its temperatures and abstention margins are also fitted on val_calib), so only C's ECE is after temperature scaling; A and the pooled logistic baseline report raw sigmoid probabilities and never abstain. Exported model = the seed with the best val_select loss.
+AUROC is threshold-free; F1, false smoke on fog_only and abstention use the operating point (thresholds fitted on val_calib only). False smoke on fog_only applies the threshold to every fog_only clip, abstentions included (the rate on the clips C decides follows the table). Temperature scaling and abstention apply to C only (its temperatures and abstention margins are also fitted on val_calib), so only C's ECE is after temperature scaling; A and the pooled logistic baseline report raw sigmoid probabilities and never abstain. Exported model = the seed with the best val_select loss.
 
 | model | split | operating point | smoke AUROC | fog AUROC | smoke F1 | fog F1 | false smoke on fog_only | ECE smoke / fog | abstain (any) |
 |---|---|---|---|---|---|---|---|---|---|
@@ -49,23 +49,23 @@ AUROC is threshold-free; F1, false smoke on fog_only and abstention use the oper
 | pooled logistic (14 x mean/std) | test_ood | balanced | 0.614 | 0.637 | 0.621 | 0.608 | 65.0 % | 0.073 / 0.079 | 0.0 % |
 | pooled logistic (14 x mean/std) | test_ood | low_false_alarm | 0.614 | 0.637 | 0.349 | 0.608 | 18.0 % | 0.073 / 0.079 | 0.0 % |
 
-C temperatures: fog T = 1.516, smoke T = 1.520.
+C temperatures: fog T = 1.516, smoke T = 1.520. C false smoke on the fog_only clips it does not abstain on: test_iid balanced 75.9 % (22/29); test_iid low_false_alarm 0.0 % (0/24); test_ood balanced 77.3 % (34/44); test_ood low_false_alarm 0.0 % (0/31).
 
 Mean ± sd over the 3 training seeds (balanced point):
 
 | split | smoke AUROC | fog AUROC | false smoke on fog_only | smoke ECE | fog ECE |
 |---|---|---|---|---|---|
-| test_iid | 0.638 ± 0.007 | 0.699 ± 0.013 | 0.392 ± 0.059 | 0.063 ± 0.007 | 0.068 ± 0.005 |
-| test_ood | 0.637 ± 0.010 | 0.653 ± 0.010 | 0.507 ± 0.032 | 0.048 ± 0.012 | 0.068 ± 0.004 |
+| test_iid | 0.638 ± 0.007 | 0.699 ± 0.013 | 39.2 ± 5.9 % | 0.063 ± 0.007 | 0.068 ± 0.005 |
+| test_ood | 0.637 ± 0.010 | 0.653 ± 0.010 | 50.7 ± 3.2 % | 0.048 ± 0.012 | 0.068 ± 0.004 |
 
 95 % grouped-bootstrap intervals (resampling simulations), exported model:
 
 | split | operating point | smoke AUROC | fog AUROC | false smoke on fog_only |
 |---|---|---|---|---|
-| test_iid | balanced | 0.642 [0.57, 0.71] | 0.687 [0.62, 0.76] | 45.9 % [0.36, 0.57] |
-| test_iid | low_false_alarm | 0.642 [0.57, 0.71] | 0.687 [0.62, 0.76] | 4.1 % [0.00, 0.09] |
-| test_ood | balanced | 0.638 [0.58, 0.70] | 0.646 [0.57, 0.70] | 52.0 % [0.41, 0.64] |
-| test_ood | low_false_alarm | 0.638 [0.58, 0.70] | 0.646 [0.57, 0.70] | 12.0 % [0.05, 0.20] |
+| test_iid | balanced | 0.642 [0.57, 0.71] | 0.687 [0.62, 0.76] | 45.9 % [36, 57] |
+| test_iid | low_false_alarm | 0.642 [0.57, 0.71] | 0.687 [0.62, 0.76] | 4.1 % [0, 9] |
+| test_ood | balanced | 0.638 [0.58, 0.70] | 0.646 [0.57, 0.70] | 52.0 % [41, 64] |
+| test_ood | low_false_alarm | 0.638 [0.58, 0.70] | 0.646 [0.57, 0.70] | 12.0 % [5, 20] |
 
 ### C on test_iid by category (balanced point)
 

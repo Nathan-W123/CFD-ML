@@ -456,8 +456,13 @@ Pipeline (identical for synthetic and real input):
    bottom-boundary row; `exp(-median |dz_bottom| / (0.02 L))` times the IoU
    of the two column sets; 0 when more than half of the bottom boundary lies
    on the ROI border).
-   First observation: `mask_pair` features 0 (no previous observation); its
-   flow is available when a lag frame exists.
+   First observation: `mask_pair` features 0 (no previous observation). No
+   extra flag marks this: the 12 x 14 layout has only `mask_valid` and
+   `flow_valid`, both of which describe t itself. The missingness is
+   implicit, because timestep 0 is always the GRU's first step and, for
+   t >= 1, the `mask_pair` gate is mask_valid[t] AND mask_valid[t-1], both
+   visible to the network. Flow at t = 0 comes from its own 1 s lag frame,
+   so flow_valid[0] can legitimately be 1.
 
 ## 8. `src/data/normalization.py`  (owner: training)
 

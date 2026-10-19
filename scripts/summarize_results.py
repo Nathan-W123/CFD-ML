@@ -28,10 +28,12 @@ def pct(v):
     return "n/a" if v is None else f"{100 * v:.1f} %"
 
 
-def ci(doc, path):
+def ci(doc, path, percent=False):
     c = (doc or {}).get(path) or {}
     if c.get("lo") is None:
         return ""
+    if percent:
+        return f" [{100 * c['lo']:.0f}, {100 * c['hi']:.0f}]"
     return f" [{c['lo']:.2f}, {c['hi']:.2f}]"
 
 
@@ -39,7 +41,9 @@ def ms(mean_sd, path, fmt=f3):
     r = (mean_sd or {}).get(path)
     if not r:
         return "n/a"
-    return f"{fmt(r['mean'])} ± {fmt(r['sd'])}" if fmt is f3 else f"{fmt(r['mean'])} ± {100 * r['sd']:.1f}"
+    if fmt is pct:
+        return f"{100 * r['mean']:.1f} ± {100 * r['sd']:.1f} %"
+    return f"{fmt(r['mean'])} ± {fmt(r['sd'])}"
 
 
 def headline_rows(name, test):
@@ -103,7 +107,9 @@ def main(argv=None):
 
     L += ["## Headline: experiment C (CFD-pretrained GRU) against baselines", "",
           "AUROC is threshold-free; F1, false smoke on fog_only and abstention use the operating point "
-          "(thresholds fitted on val_calib only). Temperature scaling and abstention apply to C only (its "
+          "(thresholds fitted on val_calib only). False smoke on fog_only applies the threshold to every "
+          "fog_only clip, abstentions included (the rate on the clips C decides follows the table). "
+          "Temperature scaling and abstention apply to C only (its "
           "temperatures and abstention margins are also fitted on val_calib), so only C's ECE is after "
           "temperature scaling; A and the pooled logistic baseline report raw sigmoid probabilities and never "
           "abstain. Exported model = the seed with the best val_select loss.", "",
@@ -117,6 +123,16 @@ def main(argv=None):
     L.append("")
     temps, cal = syn.get("temperatures") or {}, syn.get("calibration") or {}
     notes = ["C temperatures: " + ", ".join(f"{k} T = {f3(v)}" for k, v in temps.items()) + "."] if temps else []
+    sel = []
+    for split in SPLITS:
+        for op in OPS:
+            r = ((syn.get("test", {}).get(split, {}).get(op) or {}).get("overall") or {}).get(
+                "false_smoke_on_fog_only_selective")
+            if r and r.get("n_fog_only") is not None:
+                decided = int(r["n_fog_only"]) - int(r.get("n_abstained", 0))
+                sel.append(f"{split} {op} {pct(r['rate'])} ({r['n_false_smoke']}/{decided})")
+    if sel:
+        notes.append("C false smoke on the fog_only clips it does not abstain on: " + "; ".join(sel) + ".")
     for key, what in (("temperature_fallback", "fell back to T = 1"), ("temperature_clipped", "clipped to a bound")):
         hit = {k: v for k, v in (cal.get(key) or {}).items() if v is not None}  # key absent in older runs
         if hit:
@@ -132,7 +148,7 @@ def main(argv=None):
         for split in SPLITS:
             p = f"{split}.balanced"
             L.append(f"| {split} | {ms(msd, p + '.smoke.auroc')} | {ms(msd, p + '.fog.auroc')} | "
-                     f"{ms(msd, p + '.false_smoke_on_fog_only')} | {ms(msd, p + '.smoke.ece')} | "
+                     f"{ms(msd, p + '.false_smoke_on_fog_only', pct)} | {ms(msd, p + '.smoke.ece')} | "
                      f"{ms(msd, p + '.fog.ece')} |")
         L.append("")
 
@@ -146,7 +162,7 @@ def main(argv=None):
             c = o.get("ci95") or {}
             L.append(f"| {split} | {op} | {f3(o['per_label']['smoke']['auroc'])}{ci(c, 'smoke.auroc')} | "
                      f"{f3(o['per_label']['fog']['auroc'])}{ci(c, 'fog.auroc')} | "
-                     f"{pct(o['false_smoke_on_fog_only']['rate'])}{ci(c, 'false_smoke_on_fog_only.rate')} |")
+                     f"{pct(o['false_smoke_on_fog_only']['rate'])}{ci(c, 'false_smoke_on_fog_only.rate', True)} |")
     L.append("")
 
     for split in SPLITS:
