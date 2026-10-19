@@ -132,7 +132,7 @@
         "weight_decay": 0.0001
       },
       "stopped_early": true,
-      "train_seconds": 6.486342221000086
+      "train_seconds": 4.02855932500006
     },
     "1": {
       "balance": "none",
@@ -153,7 +153,7 @@
         "weight_decay": 0.0001
       },
       "stopped_early": true,
-      "train_seconds": 3.1939581750000343
+      "train_seconds": 3.3351221589991837
     },
     "2": {
       "balance": "none",
@@ -174,7 +174,7 @@
         "weight_decay": 0.0001
       },
       "stopped_early": true,
-      "train_seconds": 3.8704686809999203
+      "train_seconds": 3.7629300049993617
     }
   },
   "stage": "A_cfd_pretraining",

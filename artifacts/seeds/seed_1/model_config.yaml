@@ -65,8 +65,21 @@ preprocessing:
   normalizer_clip: 5.0
   closed_gate_value: 0.0
   feature_config:
+    work_size: 128
+    roi: union_bbox
+    roi_min_px: 32
+    stabilize: true
+    require_stabilization: true
+    min_mask_frac: 0.002
+    flow_method: dis
+    flow_erode_px: 2
+    fb_max_px: 1.0
+    anchor_band_px: 6
+    min_roughness_px: 100
     expected_interval_s: 5.0
     flow_lag_s: 1.0
+    max_offset_s: 0.5
+  feature_config_source: train_feature_meta
   feature_timing_source:
     expected_interval_s: train_feature_meta
     flow_lag_s: train_feature_meta
