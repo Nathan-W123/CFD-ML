@@ -1,0 +1,422 @@
+{
+  "data": "data/synthetic",
+  "description": "CFD-oracle diagnostic. Oracle features are computed from the CFD fields (exact velocities, region from the optical depth at the nominal line of sight) and are never model inputs; they bound what a perfect measurement of the same motion representation could achieve. Synthetic data only.",
+  "n_sequences": {
+    "test_iid": 295,
+    "test_ood": 398,
+    "train": 1800,
+    "val_calib": 453,
+    "val_select": 300
+  },
+  "n_simulations": {
+    "test_iid": 148,
+    "test_ood": 199,
+    "train": 600,
+    "val_calib": 151,
+    "val_select": 100
+  },
+  "oracle_region_valid_fraction": {
+    "both": 1.0,
+    "fog_only": 0.9791666666666666,
+    "neither": 0.845,
+    "smoke_only": 0.9754738015607581
+  },
+  "pooled_logistic": {
+    "all": {
+      "camera": {
+        "fog": {
+          "test_iid": {
+            "auroc": 0.7281209781209781,
+            "ci95": [
+              0.6659720698814788,
+              0.7862850553873059
+            ],
+            "n": 295,
+            "n_groups": 148
+          },
+          "test_ood": {
+            "auroc": 0.6356313131313132,
+            "ci95": [
+              0.5721074475662241,
+              0.6933286906768183
+            ],
+            "n": 398,
+            "n_groups": 199
+          }
+        },
+        "smoke": {
+          "test_iid": {
+            "auroc": 0.6002252252252253,
+            "ci95": [
+              0.5318762989356701,
+              0.6672213924632353
+            ],
+            "n": 295,
+            "n_groups": 148
+          },
+          "test_ood": {
+            "auroc": 0.5896969696969697,
+            "ci95": [
+              0.5271788441321308,
+              0.654212951332566
+            ],
+            "n": 398,
+            "n_groups": 199
+          }
+        }
+      },
+      "features": [
+        "flow_u_mean",
+        "flow_v_mean",
+        "flow_u_std",
+        "flow_v_std",
+        "flow_divergence",
+        "flow_vorticity_abs",
+        "region_area",
+        "area_growth",
+        "centroid_dx",
+        "centroid_dz",
+        "boundary_roughness",
+        "anchor_stability"
+      ],
+      "oracle": {
+        "fog": {
+          "test_iid": {
+            "auroc": 0.7505478451424398,
+            "ci95": [
+              0.6679506939784833,
+              0.8330684261840978
+            ],
+            "n": 148,
+            "n_groups": 148
+          },
+          "test_ood": {
+            "auroc": 0.6633333333333333,
+            "ci95": [
+              0.5868017921683527,
+              0.7346214854088856
+            ],
+            "n": 199,
+            "n_groups": 199
+          }
+        },
+        "smoke": {
+          "test_iid": {
+            "auroc": 0.7825054784514244,
+            "ci95": [
+              0.708777638024626,
+              0.854765625
+            ],
+            "n": 148,
+            "n_groups": 148
+          },
+          "test_ood": {
+            "auroc": 0.7449494949494949,
+            "ci95": [
+              0.6747129109848801,
+              0.8066661500426804
+            ],
+            "n": 199,
+            "n_groups": 199
+          }
+        }
+      }
+    },
+    "region": {
+      "camera": {
+        "fog": {
+          "test_iid": {
+            "auroc": 0.732947232947233,
+            "ci95": [
+              0.6759144569198917,
+              0.7900477154058028
+            ],
+            "n": 295,
+            "n_groups": 148
+          },
+          "test_ood": {
+            "auroc": 0.6798989898989899,
+            "ci95": [
+              0.620288024476045,
+              0.7379973654240733
+            ],
+            "n": 398,
+            "n_groups": 199
+          }
+        },
+        "smoke": {
+          "test_iid": {
+            "auroc": 0.6151176686890972,
+            "ci95": [
+              0.5510631756200615,
+              0.6810557935310978
+            ],
+            "n": 295,
+            "n_groups": 148
+          },
+          "test_ood": {
+            "auroc": 0.5259848484848485,
+            "ci95": [
+              0.46359663120567374,
+              0.590183837125532
+            ],
+            "n": 398,
+            "n_groups": 199
+          }
+        }
+      },
+      "features": [
+        "region_area",
+        "area_growth",
+        "centroid_dx",
+        "centroid_dz",
+        "boundary_roughness",
+        "anchor_stability"
+      ],
+      "oracle": {
+        "fog": {
+          "test_iid": {
+            "auroc": 0.7269905040175311,
+            "ci95": [
+              0.6451425575649539,
+              0.8075140874465199
+            ],
+            "n": 148,
+            "n_groups": 148
+          },
+          "test_ood": {
+            "auroc": 0.7684848484848484,
+            "ci95": [
+              0.6983767236056803,
+              0.836180218446602
+            ],
+            "n": 199,
+            "n_groups": 199
+          }
+        },
+        "smoke": {
+          "test_iid": {
+            "auroc": 0.714572680788897,
+            "ci95": [
+              0.6298133636227838,
+              0.7962361249324291
+            ],
+            "n": 148,
+            "n_groups": 148
+          },
+          "test_ood": {
+            "auroc": 0.7344444444444445,
+            "ci95": [
+              0.6626642036124795,
+              0.7978852971462195
+            ],
+            "n": 199,
+            "n_groups": 199
+          }
+        }
+      }
+    },
+    "velocity": {
+      "camera": {
+        "fog": {
+          "test_iid": {
+            "auroc": 0.6249770178341607,
+            "ci95": [
+              0.5527232489077109,
+              0.6929280865449627
+            ],
+            "n": 295,
+            "n_groups": 148
+          },
+          "test_ood": {
+            "auroc": 0.566969696969697,
+            "ci95": [
+              0.5057732557211707,
+              0.6307859848484848
+            ],
+            "n": 398,
+            "n_groups": 199
+          }
+        },
+        "smoke": {
+          "test_iid": {
+            "auroc": 0.5517098731384446,
+            "ci95": [
+              0.4790861322834242,
+              0.6174305140946243
+            ],
+            "n": 295,
+            "n_groups": 148
+          },
+          "test_ood": {
+            "auroc": 0.6026767676767677,
+            "ci95": [
+              0.5420926036068816,
+              0.6680489523528138
+            ],
+            "n": 398,
+            "n_groups": 199
+          }
+        }
+      },
+      "features": [
+        "flow_u_mean",
+        "flow_v_mean",
+        "flow_u_std",
+        "flow_v_std",
+        "flow_divergence",
+        "flow_vorticity_abs"
+      ],
+      "oracle": {
+        "fog": {
+          "test_iid": {
+            "auroc": 0.6283783783783784,
+            "ci95": [
+              0.5435486100657334,
+              0.7209534322749375
+            ],
+            "n": 148,
+            "n_groups": 148
+          },
+          "test_ood": {
+            "auroc": 0.48777777777777775,
+            "ci95": [
+              0.4073552416052416,
+              0.5662505907742029
+            ],
+            "n": 199,
+            "n_groups": 199
+          }
+        },
+        "smoke": {
+          "test_iid": {
+            "auroc": 0.7443389335281227,
+            "ci95": [
+              0.6635792496346364,
+              0.8193798167845742
+            ],
+            "n": 148,
+            "n_groups": 148
+          },
+          "test_ood": {
+            "auroc": 0.7065656565656566,
+            "ci95": [
+              0.6321699434332334,
+              0.7731183261183261
+            ],
+            "n": 199,
+            "n_groups": 199
+          }
+        }
+      }
+    }
+  },
+  "region": {
+    "line_of_sight_m": 100.0,
+    "min_cells": 4,
+    "tau_min": 0.1,
+    "view_margin_cells": 6
+  },
+  "univariate_auroc_train": {
+    "fog": {
+      "anchor_stability": {
+        "camera": 0.547,
+        "oracle": 0.524
+      },
+      "area_growth": {
+        "camera": 0.524,
+        "oracle": 0.554
+      },
+      "boundary_roughness": {
+        "camera": 0.625,
+        "oracle": 0.557
+      },
+      "centroid_dx": {
+        "camera": 0.504,
+        "oracle": 0.532
+      },
+      "centroid_dz": {
+        "camera": 0.52,
+        "oracle": 0.546
+      },
+      "flow_divergence": {
+        "camera": 0.535,
+        "oracle": 0.542
+      },
+      "flow_u_mean": {
+        "camera": 0.524,
+        "oracle": 0.54
+      },
+      "flow_u_std": {
+        "camera": 0.522,
+        "oracle": 0.543
+      },
+      "flow_v_mean": {
+        "camera": 0.513,
+        "oracle": 0.503
+      },
+      "flow_v_std": {
+        "camera": 0.565,
+        "oracle": 0.567
+      },
+      "flow_vorticity_abs": {
+        "camera": 0.549,
+        "oracle": 0.506
+      },
+      "region_area": {
+        "camera": 0.625,
+        "oracle": 0.576
+      }
+    },
+    "smoke": {
+      "anchor_stability": {
+        "camera": 0.558,
+        "oracle": 0.555
+      },
+      "area_growth": {
+        "camera": 0.556,
+        "oracle": 0.527
+      },
+      "boundary_roughness": {
+        "camera": 0.539,
+        "oracle": 0.538
+      },
+      "centroid_dx": {
+        "camera": 0.531,
+        "oracle": 0.508
+      },
+      "centroid_dz": {
+        "camera": 0.514,
+        "oracle": 0.55
+      },
+      "flow_divergence": {
+        "camera": 0.541,
+        "oracle": 0.563
+      },
+      "flow_u_mean": {
+        "camera": 0.522,
+        "oracle": 0.529
+      },
+      "flow_u_std": {
+        "camera": 0.572,
+        "oracle": 0.596
+      },
+      "flow_v_mean": {
+        "camera": 0.518,
+        "oracle": 0.596
+      },
+      "flow_v_std": {
+        "camera": 0.558,
+        "oracle": 0.698
+      },
+      "flow_vorticity_abs": {
+        "camera": 0.569,
+        "oracle": 0.561
+      },
+      "region_area": {
+        "camera": 0.518,
+        "oracle": 0.55
+      }
+    }
+  }
+}
