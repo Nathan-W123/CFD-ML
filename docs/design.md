@@ -32,9 +32,14 @@ validated on real camera footage.
 ## 1. Physics model (summary)
 
 Incompressible flow with Boussinesq buoyancy in a vertical x-z section,
-solved with a D2Q9 BGK lattice-Boltzmann method (weakly compressible,
-low Mach), Guo forcing, Smagorinsky subgrid viscosity (still a BGK
-single-relaxation-time collision, with a local tau).
+solved with a D2Q9 lattice-Boltzmann method (weakly compressible, low
+Mach): a regularized single-relaxation-time (BGK) collision — the raw
+non-equilibrium stress projected on the second-order Hermite term (Latt &
+Chopard) plus the first-order -F/2 term that Guo's half-force velocity
+implies — with Guo forcing and a Smagorinsky local tau (strain estimated
+from the half-force-corrected stress). Up to second order it equals
+BGK-Guo (tested); it only filters the ghost moments, which plain BGK at the
+low viscosities used here does not survive.
 
 Buoyancy (per unit mass, +z up), relative to the horizontally uniform
 ambient state at rest:
@@ -69,10 +74,17 @@ Boundaries:
   buoyancy instead). Scalars: where the face velocity points into the domain
   the ghost value is the prescribed inflow profile, otherwise zero-gradient.
   Wind can blow from either side, so there is no mirroring.
-* Forcing: buoyancy, gust acceleration dU/dt applied everywhere, the
-  ambient-maintaining force and a divergence-free stochastic turbulence
-  forcing advected with the wind. A source-free precursor spins up the flow
-  before the scenario starts.
+* Forcing: buoyancy, gust acceleration dU/dt applied everywhere and the
+  ambient-maintaining force. (A stochastic turbulence forcing was tried and
+  removed: in 2D it fed the inverse cascade and destabilised runs.) A
+  source-free precursor spins up the flow before the scenario starts.
+* Drifting features (fog patches, fog-bank fronts, advected smoke layers)
+  are placed by their position at the first frame (`drift_start`); a part
+  that starts upwind of the domain enters through the inflow boundary only
+  once its front reaches it.
+* The ambient wind may accelerate over the observation window (`ramp_factor`,
+  drawn for every category alike, end speed inside the split's wind range);
+  fog_dissipating can use such a context as its clearing mechanism.
 
 Lattice units: `dx` (m), `dt` (s); `u_lat = u dt/dx`,
 `nu_lat = nu dt/dx^2`, `tau = 0.5 + 3 nu_lat`, `a_lat = a dt^2/dx`.
@@ -80,7 +92,10 @@ The starting `dt` (0.1 s) is halved before the run when the expected peak
 speed would exceed `target_lattice_speed`, and the run is restarted with a
 halved `dt` (up to `max_dt_halvings`) if the measured lattice speed ever
 exceeds `max_lattice_speed`. A run that still fails, or fails any check in
-`src/cfd/validation.py`, is rejected and never rendered.
+`src/cfd/validation.py`, is rejected and never rendered. On 5 m cells with
+winds to 7 m/s and hot plumes most runs need it: in the full dataset 25 %
+of accepted runs used 0.1 s, 44 % 0.05 s and 31 % 0.025 s (frame times are
+physical and identical for all).
 
 ## 2. `src/cfd/lbm.py`  (owner: LBM)
 
@@ -398,11 +413,16 @@ Pipeline (identical for synthetic and real input):
    representation in a single private function.
 2. Stabilise: a bounded similarity transform of every observation and lag
    frame onto observation frame 0, estimated ONLY from pixels outside the
-   dilated union of candidate masks (>= 20 % textured background required),
+   dilated union of candidate masks (>= 3 % of the image textured background
+   and >= 12 corners; inlier and residual checks guard each estimate),
    warped with BORDER_REPLICATE; masks follow; a frame whose estimate fails
    or exceeds the bound gets `flow_valid = 0`. Skipped entirely (and
-   recorded) when the background is insufficient, so a frame-filling fog
-   bank is never "stabilised away".
+   recorded) when the background is insufficient, unreliable or drifting,
+   so a frame-filling fog bank is never "stabilised away"; a skipped clip
+   then has its flow gate closed (`stabilization_unavailable`) unless
+   `FeatureConfig.require_stabilization = False` (rigid static mounts
+   only), because camera shake would otherwise be read as aerosol motion
+   (with the old 20 % rule about 45 % of clips kept shake in their flow).
 3. Persistent-component filter: a mask component is kept only if, dilated
    by a few pixels, it overlaps a component in the previous or next
    observation (drops single-frame false positives; keeps multi-object
