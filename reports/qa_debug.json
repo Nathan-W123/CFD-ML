@@ -1,0 +1,225 @@
+{
+  "feature_auc": {
+    "fog": {
+      "anchor_stability": 0.5593,
+      "area_growth": 0.4613,
+      "boundary_roughness": 0.6318,
+      "centroid_dx": 0.4979,
+      "centroid_dz": 0.5088,
+      "flow_divergence": 0.4998,
+      "flow_u_mean": 0.4104,
+      "flow_u_std": 0.5284,
+      "flow_v_mean": 0.4857,
+      "flow_v_std": 0.4765,
+      "flow_valid": 0.6497,
+      "flow_vorticity_abs": 0.5141,
+      "mask_valid": 0.6371,
+      "region_area": 0.5777
+    },
+    "smoke": {
+      "anchor_stability": 0.5042,
+      "area_growth": 0.5428,
+      "boundary_roughness": 0.5313,
+      "centroid_dx": 0.4864,
+      "centroid_dz": 0.4743,
+      "flow_divergence": 0.5018,
+      "flow_u_mean": 0.4836,
+      "flow_u_std": 0.5726,
+      "flow_v_mean": 0.488,
+      "flow_v_std": 0.5428,
+      "flow_valid": 0.5547,
+      "flow_vorticity_abs": 0.5607,
+      "mask_valid": 0.5349,
+      "region_area": 0.5446
+    }
+  },
+  "flags": [
+    "validity flag mask_valid predicts fog (AUC 0.637)",
+    "validity flag flow_valid predicts fog (AUC 0.650)",
+    "parameter diffusivity_m2s predicts smoke (folded AUC 0.6472)"
+  ],
+  "flow_consistency": {
+    "horizontal": {
+      "correlation": 0.8228843852502639,
+      "n_moving": 183,
+      "sign_agreement_where_cfd_moves": 0.912568306010929
+    },
+    "n": 189,
+    "vertical": {
+      "correlation": 0.1601293275327599,
+      "n_moving": 17,
+      "sign_agreement_where_cfd_moves": 0.8823529411764706
+    }
+  },
+  "n": 360,
+  "parameter_audit": {
+    "flagged": [
+      {
+        "folded_auc": 0.6472,
+        "label": "smoke",
+        "parameter": "diffusivity_m2s"
+      }
+    ],
+    "n": 360,
+    "per_label": {
+      "fog": {
+        "background_haze": 0.55,
+        "diffusivity_m2s": 0.5575,
+        "gust_fraction": 0.5564,
+        "hint_distant_cloud": 0.55,
+        "hint_fp_boost": 0.5167,
+        "hint_shadow": 0.525,
+        "hint_strong_artifact": 0.5417,
+        "lapse_dtheta_dz": 0.5167,
+        "mask_source=bbox": 0.525,
+        "mask_source=degraded": 0.5333,
+        "mask_source=detector": 0.5083,
+        "nu_m2s": 0.5719,
+        "render_background_haze_opacity": 0.5227,
+        "render_brightness_offset": 0.5021,
+        "render_camera_rotation_deg": 0.5554,
+        "render_camera_shake_px": 0.5186,
+        "render_contrast": 0.5441,
+        "render_exposure_flicker": 0.5707,
+        "render_foreground_band": 0.5356,
+        "render_fp_boost": 0.5167,
+        "render_global_haze": 0.5081,
+        "render_jpeg": 0.5278,
+        "render_jpeg_quality": 0.5099,
+        "render_noise_sigma": 0.5322,
+        "render_smoke_mass_extinction_m2_mg": 0.5,
+        "render_tracer_mass_extinction_m2_mg": 0.5,
+        "render_zoom": 0.5054,
+        "render_zoom_jitter": 0.5417,
+        "spinup_s": 0.5358,
+        "terrain_height_m": 0.546,
+        "terrain_kind=flat": 0.5667,
+        "terrain_kind=hill": 0.5583,
+        "terrain_kind=slope": 0.55,
+        "terrain_kind=valley": 0.5417,
+        "theta_ground_k": 0.5128,
+        "wind_sign": 0.55,
+        "wind_speed_ms": 0.5658
+      },
+      "smoke": {
+        "background_haze": 0.5167,
+        "diffusivity_m2s": 0.6472,
+        "gust_fraction": 0.5058,
+        "hint_distant_cloud": 0.5,
+        "hint_fp_boost": 0.5333,
+        "hint_shadow": 0.525,
+        "hint_strong_artifact": 0.5083,
+        "lapse_dtheta_dz": 0.5206,
+        "mask_source=bbox": 0.5083,
+        "mask_source=degraded": 0.5,
+        "mask_source=detector": 0.5083,
+        "nu_m2s": 0.5072,
+        "render_background_haze_opacity": 0.5132,
+        "render_brightness_offset": 0.5012,
+        "render_camera_rotation_deg": 0.5049,
+        "render_camera_shake_px": 0.5177,
+        "render_contrast": 0.5086,
+        "render_exposure_flicker": 0.5187,
+        "render_foreground_band": 0.5121,
+        "render_fp_boost": 0.5333,
+        "render_global_haze": 0.5058,
+        "render_jpeg": 0.5222,
+        "render_jpeg_quality": 0.5156,
+        "render_noise_sigma": 0.5261,
+        "render_smoke_mass_extinction_m2_mg": 0.5,
+        "render_tracer_mass_extinction_m2_mg": 0.5,
+        "render_zoom": 0.5531,
+        "render_zoom_jitter": 0.5101,
+        "spinup_s": 0.5103,
+        "terrain_height_m": 0.5597,
+        "terrain_kind=flat": 0.55,
+        "terrain_kind=hill": 0.5083,
+        "terrain_kind=slope": 0.5167,
+        "terrain_kind=valley": 0.5417,
+        "theta_ground_k": 0.5236,
+        "wind_sign": 0.55,
+        "wind_speed_ms": 0.5642
+      }
+    },
+    "threshold": 0.6
+  },
+  "per_category": {
+    "both": {
+      "feature_median": {
+        "anchor_stability": 0.2074599266052246,
+        "area_growth": -0.0007040205580944364,
+        "boundary_roughness": 0.8682978333848896,
+        "centroid_dx": -0.00014302807606079364,
+        "centroid_dz": -0.00028347719526576875,
+        "flow_divergence": 0.0003851000918075442,
+        "flow_u_mean": -0.001133081710173024,
+        "flow_u_std": 0.003026635230829318,
+        "flow_v_mean": -0.0002523399831261486,
+        "flow_v_std": 0.0011595369909297337,
+        "flow_vorticity_abs": 0.02944196263949076,
+        "region_area": 0.13133324517144096
+      },
+      "flow_valid_rate": 0.8009259104728699,
+      "mask_valid_rate": 0.8583333492279053,
+      "n": 90
+    },
+    "fog_only": {
+      "feature_median": {
+        "anchor_stability": 0.21319978766971165,
+        "area_growth": 0.0012498753653331237,
+        "boundary_roughness": 0.8692194620768229,
+        "centroid_dx": -6.405368912965059e-05,
+        "centroid_dz": -0.00022564212688141398,
+        "flow_divergence": 0.0013450350379571319,
+        "flow_u_mean": -0.001837148434585995,
+        "flow_u_std": 0.0021854811771349473,
+        "flow_v_mean": -0.0001226469175890088,
+        "flow_v_std": 0.0009961469437588346,
+        "flow_vorticity_abs": 0.028927765786647797,
+        "region_area": 0.06056906960227273
+      },
+      "flow_valid_rate": 0.7722222208976746,
+      "mask_valid_rate": 0.845370352268219,
+      "n": 90
+    },
+    "neither": {
+      "feature_median": {
+        "anchor_stability": 0.15600145811384375,
+        "area_growth": -0.00011078111658042127,
+        "boundary_roughness": 0.3643138647079468,
+        "centroid_dx": 0.00017202530183236706,
+        "centroid_dz": -0.0001613823519114198,
+        "flow_divergence": 0.0010743512539193034,
+        "flow_u_mean": 0.0026534032076597214,
+        "flow_u_std": 0.001983201690018177,
+        "flow_v_mean": -6.452604914860179e-05,
+        "flow_v_std": 0.001281937041009466,
+        "flow_vorticity_abs": 0.022318428754806517,
+        "region_area": 0.0524169921875
+      },
+      "flow_valid_rate": 0.5740740895271301,
+      "mask_valid_rate": 0.6805555820465088,
+      "n": 90
+    },
+    "smoke_only": {
+      "feature_median": {
+        "anchor_stability": 0.17969586551189423,
+        "area_growth": 0.002388026099652052,
+        "boundary_roughness": 0.5180517037709553,
+        "centroid_dx": 7.153797196224332e-05,
+        "centroid_dz": -0.0003662103968155053,
+        "flow_divergence": 0.0009690616861917078,
+        "flow_u_mean": 0.0013883815069372454,
+        "flow_u_std": 0.0025258188375808076,
+        "flow_v_mean": 5.236445213085972e-05,
+        "flow_v_std": 0.0010700281709432602,
+        "flow_vorticity_abs": 0.02697016133202447,
+        "region_area": 0.05153656005859375
+      },
+      "flow_valid_rate": 0.6499999761581421,
+      "mask_valid_rate": 0.7425925731658936,
+      "n": 90
+    }
+  },
+  "split": "train"
+}
