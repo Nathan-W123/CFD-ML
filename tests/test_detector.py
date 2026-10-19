@@ -122,3 +122,21 @@ def test_train_detector_end_to_end(tmp_path, monkeypatch):
     det = Detector.load(out)
     assert det.thresholds["smoke"]["deploy"] == pytest.approx(thr)
     assert "Held-out test cameras" in rep.with_suffix(".md").read_text()
+
+
+def test_embed_crops_grid_and_normalisation():
+    import embed_windows as EW
+
+    img = np.zeros((680, 1020, 3), np.uint8)
+    img[510:, 850:] = 255                                        # exactly the bottom-right tile of a 4 x 6 grid
+    img[:5] = 255                                                # banner rows: blanked before cropping
+    default = EW.crops(img)
+    assert len(default) == 7 and all(c.shape == (3, 224, 224) for c in default)
+    fine = EW.crops(img, 4, 6, full=False)
+    assert len(fine) == 24
+    white = (1.0 - EW.CLIP_MEAN) / EW.CLIP_STD
+    black = (0.0 - EW.CLIP_MEAN) / EW.CLIP_STD
+    np.testing.assert_allclose(fine[-1].mean(axis=(1, 2)), white, atol=2e-3)
+    np.testing.assert_allclose(fine[0].mean(axis=(1, 2)), black, atol=2e-3)     # banner blanked
+    dino = EW.crops(img, 4, 6, False, EW.IMAGENET_MEAN, EW.IMAGENET_STD)
+    np.testing.assert_allclose(dino[-1].mean(axis=(1, 2)), (1.0 - EW.IMAGENET_MEAN) / EW.IMAGENET_STD, atol=2e-3)

@@ -21,9 +21,9 @@ Per head (smoke, fog), on the dev rows with a known label:
    (out-of-fold AUROC); the best is refitted on all dev rows;
 2. thresholds from the out-of-fold predictions of the chosen configuration
    (never from the refitted model's own training predictions): "balanced"
-   (maximum Youden J) for both heads; for smoke also "deploy", the
-   (1 - --max-false-smoke) quantile of P(smoke) over the dev fog windows
-   (fog 1, smoke 0), i.e. at most 5 % of them raise a smoke alarm.
+   (maximum Youden J) for both heads; for smoke also "deploy", the lowest
+   threshold at which at most --max-false-smoke (5 %) of the dev fog windows
+   (fog 1, smoke 0) raise a smoke alarm.
 
 Reported: the cross-validated dev results, and with --final the held-out
 test cameras (evaluated once): fog AUROC, smoke AUROC (all smoke-labelled
@@ -130,6 +130,14 @@ def select(rows, head, T):
     return {"groups": list(best[1]), "C": best[2], "cv_auroc": best[0]}, scores, best[3]
 
 
+def deploy_threshold(p_fog, max_rate):
+    """The lowest threshold at which at most max_rate of the fog windows have P(smoke) >= it: just above the
+    (k+1)-th highest, k = floor(max_rate * n) (an interpolated quantile can let one more window through)."""
+    p = np.sort(np.asarray(p_fog, np.float64))[::-1]
+    k = int(np.floor(max_rate * len(p) + 1e-9))
+    return float(np.nextafter(p[k], np.inf)) if k < len(p) else 0.0
+
+
 def youden(p, y):
     t, rec = M.threshold_max_youden(p, y)
     return float(t)
@@ -201,7 +209,7 @@ def main(argv=None) -> int:
         thresholds[head] = {"balanced": youden(oof_p, y)}
         if head == "smoke":
             fog_win = np.array([(r["fog"] == 1) and (r["smoke"] == 0) for r in hr])
-            thresholds[head]["deploy"] = float(np.quantile(oof_p[fog_win], 1.0 - args.max_false_smoke))
+            thresholds[head]["deploy"] = deploy_threshold(oof_p[fog_win], args.max_false_smoke)
         oof[head] = {r["window_id"]: p for r, p in zip(hr, oof_p)}
         print(f"{head}: best {best} on {len(hr)} dev windows", file=sys.stderr)
     det = Detector(heads=heads, text=T, thresholds=thresholds,
