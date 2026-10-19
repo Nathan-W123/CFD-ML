@@ -22,8 +22,9 @@ frames, and real footage goes through the same feature extractor.
 > far-field model was tested on real wildfire camera footage (HPWREN FIgLib,
 > 880 windows from 137 cameras) for smoke only, because FIgLib does not
 > annotate fog. Zero-shot on cameras it has never seen it reaches smoke
-> AUROC 0.61 ± 0.02 (three seeds), about what it reaches on its own
-> synthetic test set. Training the same network on the real footage, from
+> AUROC 0.61 ± 0.02 (three seeds), slightly above what it reaches on its
+> own synthetic test sets (0.56 ± 0.01 on test_iid, 0.59 ± 0.01 on
+> test_ood). Training the same network on the real footage, from
 > scratch or by fine-tuning the pretrained model, does no better, and the
 > synthetic thresholds do not transfer. The near-field model has only a
 > five-window sanity check on real video. No labelled real footage with fog
@@ -68,12 +69,14 @@ built-in fallback detector, as there is no vision model yet.
   is no worse than learning from 439 real windows, and fine-tuning adds
   nothing; the intervals overlap, so B, C and D cannot be told apart.
 * **The synthetic thresholds do not transfer.** Real windows score in a
-  narrow band around P(smoke) 0.6. At the balanced point the zero-shot
-  model finds 106 of the 136 smoke windows it decides on (78 %), but calls
-  smoke on 74 of the 107 smoke-free windows it decides on (69 %). At the
-  low-false-alarm point it raises no false alarm (0 of 117) and finds 3 of
-  129. Over all windows it abstains on 78 %: 43 % have fewer than two
-  valid flow frames and 23 % fewer than three valid masks.
+  narrow band (P(smoke) 0.38-0.69, median 0.52) that straddles the
+  synthetic thresholds (0.51 balanced, 0.61 low-false-alarm). Over all 880
+  windows, at the balanced point the zero-shot model finds 106 of the 136
+  smoke windows it decides on (78 %), but calls smoke on 74 of the 107
+  smoke-free windows it decides on (69 %). At the low-false-alarm point it
+  raises no false alarm (0 of 117) and finds 3 of 129. It abstains on
+  78 % of the windows: 43 % have fewer than two valid flow frames and 23 %
+  fewer than three valid masks.
 * **No real low-false-alarm point.** B and D recalibrate on the real
   `val_calib` split, but without fog labels there are no fog_only clips to
   fit the low-false-alarm threshold on, so it equals the balanced one. This
@@ -90,9 +93,10 @@ built-in fallback detector, as there is no vision model yet.
 **FIRESENSE, near field**
 ([`reports/real_zero_shot_firesense.md`](reports/real_zero_shot_firesense.md)).
 [FIRESENSE](https://zenodo.org/records/836749) (CC BY 4.0) is close-range
-smoke video, not wildfire views. Only 5 windows from 3 videos fit the
-12 x 5 s window with 1 s lag frames: 3 smoke windows and 2 smoke-free ones,
-with no fog. All 3 smoke windows score above both smoke-free ones. The
+smoke video, not wildfire views. Only 5 windows from 3 videos are usable:
+the other clips are shorter than one 12 x 5 s window with 1 s lag frames,
+or are excluded as edited, mis-clocked or undecodable. That leaves 3 smoke
+windows and 2 smoke-free ones, with no fog. All 3 smoke windows score above both smoke-free ones. The
 balanced point detects the 3 smoke windows and decides on neither
 smoke-free one; the low-false-alarm point decides on one window of each
 and gets both right. One smoke window is called fog (P(fog) 0.67). This
@@ -113,8 +117,9 @@ also its check.
 
 ### Near field, synthetic
 
-**Data.** 1200 simulation slots. 28 CFD attempts failed the numerical and
-label-support checks and were re-drawn; 2 slots kept no sequence because
+**Data.** 1200 simulation slots. 28 CFD attempts failed the label-support
+check (fog or smoke not visible in enough frames) and were re-drawn; 2
+slots kept no sequence because
 no render variant passed the visibility check. That leaves 3247
 sequences:
 
@@ -138,12 +143,14 @@ sequences:
   the held-out recipes. Counting only the fog_only clips the model decides
   on, the balanced point calls smoke on 76 % (16/21 test_iid) and 92 %
   (46/50 test_ood), the low-false-alarm point on 0/37 and 5/41.
-* **Abstention.** The model abstains on 75 % of test_iid clips:
+* **Abstention.** At the balanced point the model abstains on 75 % of
+  test_iid clips (62 % at the default low-false-alarm point):
   * 32 % have fewer than two frames with measurable flow;
   * 6 % have fewer than three valid masks;
   * the rest are within the calibrated margin of a threshold.
 
-  On the clips it decides, it is right on 57 % (smoke) and 74 % (fog).
+  On the clips it decides it is right on 57 % (smoke) and 74 % (fog) at
+  the balanced point, and on 51 % and 74 % at the low-false-alarm point.
 * **The GRU against the baselines.** It beats the motion-cue baseline A
   on AUROC, by a lot on fog. It is on par with a time-pooled logistic
   regression (0.60 / 0.73). It is not a stand-alone smoke detector; it is
@@ -214,7 +221,7 @@ re-drawn, and 1 slot kept no sequence. That leaves 3248 sequences:
 * test_iid 296 (148 simulations);
 * test_ood 400 (200 simulations; wind 12-15 m/s, sources on 700-1000 m
   hills);
-* plus 1176 robustness re-renders.
+* plus 1177 robustness re-renders.
 
 | | smoke AUROC | fog AUROC | false smoke on fog_only, balanced / low-false-alarm | ECE smoke / fog |
 |---|---|---|---|---|
@@ -228,8 +235,10 @@ re-drawn, and 1 slot kept no sequence. That leaves 3248 sequences:
   low-false-alarm point gives 8.1 ± 4.9 % and 6.7 ± 2.5 % false smoke on
   fog_only, so it misses its 5 % target. On the fog_only clips the
   exported model decides on, it calls no smoke (0/25, 0/34).
-* **On smoke the GRU is no better than the four-cue heuristic A.** On fog
-  it is better (0.67 against 0.61). It abstains on 79 % of test_iid clips,
+* **On test_iid the GRU is no better on smoke than the four-cue
+  heuristic A** (0.55 against 0.58); on test_ood (held-out recipes) it is
+  ahead (0.59 against 0.54). On fog it is better (0.67 against 0.61 on
+  test_iid). At the balanced point it abstains on 79 % of test_iid clips,
   33 % for too few flow frames.
 * **The one-minute camera is the bottleneck, not the simulation**
   ([`reports/far/oracle_diagnostic.md`](reports/far/oracle_diagnostic.md)).
