@@ -245,6 +245,8 @@ def main(argv=None):
             "feature_meta": {k: v for k, v in r["info"]["feature_meta"].items() if k in ("roi", "flow_mode", "timing", "counts")},
             "stabilization": {k: r["info"]["feature_meta"].get("stabilization", {}).get(k) for k in ("applied", "reason", "textured_frac", "n_corners")},
             "roi_scale": r["info"]["feature_config"]["roi_scale"],
+            # everything else the extractor was configured with (inference must reproduce it)
+            "feature_config": {k: v for k, v in r["info"]["feature_config"].items() if k != "roi_scale"},
             "sim_path": r["sim_path"], "seq_path": r["seq_path"],
         } for r in rows],
         source="synthetic",
@@ -290,6 +292,8 @@ def main(argv=None):
         "config_sha256": cfg_sha,
         "slots": len(tasks),
         "slots_without_valid_simulation": sum(1 for r in results if r["sim_id"] is None),
+        # a valid simulation none of whose render variants passed the label-visibility check (not re-drawn)
+        "slots_without_sequences": sum(1 for r in results if r["sim_id"] is not None and not r["rows"]),
         "simulations_accepted": len(sim_rows),
         "simulation_attempts_rejected": sum(1 for r in rejected if r["stage"] == "simulation"),
         "render_retries": sum(1 for r in rejected if r["stage"] == "render"),
@@ -310,7 +314,7 @@ def main(argv=None):
         robustness(out, cfg, rows, args.workers)
     if args.examples:
         write_examples(out, rows, args.examples)
-    print(json.dumps({k: summary[k] for k in ("simulations_accepted", "simulation_attempts_rejected", "render_retries", "sequences", "slots_without_valid_simulation")}), flush=True)
+    print(json.dumps({k: summary[k] for k in ("simulations_accepted", "simulation_attempts_rejected", "render_retries", "sequences", "slots_without_valid_simulation", "slots_without_sequences")}), flush=True)
     print(f"done in {wall:.0f} s -> {out}", flush=True)
     return 0
 

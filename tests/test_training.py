@@ -304,18 +304,32 @@ def test_baselines_and_audit_skip_without_train_or_val_calib(tmp_path, fs):
 def test_preprocessing_record_takes_timing_from_the_extraction_meta(fs):
     from src.training.train import _preprocessing_record
 
+    from dataclasses import asdict
+
+    from src.data.features import FeatureConfig
+
     cfg = _cfg()
     tr = fs.split("train")
-    rec = _preprocessing_record(tr, cfg)                   # no timing recorded: defaults
-    assert rec["feature_config"] == {"expected_interval_s": 5.0, "flow_lag_s": 1.0}
+    defaults = {k: v for k, v in asdict(FeatureConfig()).items() if k != "roi_scale"}
+    rec = _preprocessing_record(tr, cfg)                   # nothing recorded: the full code defaults
+    assert rec["feature_config"] == defaults
+    assert rec["feature_config_source"] == "code_defaults_at_training"
     assert rec["feature_timing_source"] == {"expected_interval_s": "default", "flow_lag_s": "default"}
     timed = copy.deepcopy(tr)
     for m in timed.meta:
         m["feature_meta"] = {"flow_mode": "lag", "timing": {"expected_interval_s": 4.0, "expected_flow_lag_s": 0.5}}
+        m["feature_config"] = dict(defaults, flow_erode_px=3, roi_scale=1.7)
     rec = _preprocessing_record(timed, cfg)
-    assert rec["feature_config"] == {"expected_interval_s": 4.0, "flow_lag_s": 0.5}
+    assert rec["feature_config"] == dict(defaults, flow_erode_px=3, expected_interval_s=4.0, flow_lag_s=0.5)
+    assert rec["feature_config_source"] == "train_feature_meta" and "roi_scale" not in rec["feature_config"]
     assert set(rec["feature_timing_source"].values()) == {"train_feature_meta"}
     assert rec["training_flow_modes"] == {"lag": len(timed)}
+    # The exported settings rebuild the extractor configuration at inference.
+    FeatureConfig(**rec["feature_config"])
+    timed.meta[0]["feature_config"] = dict(defaults, flow_erode_px=2)
+    with pytest.raises(ValueError, match="feature configs"):
+        _preprocessing_record(timed, cfg)
+    timed.meta[0]["feature_config"] = dict(defaults, flow_erode_px=3)
     timed.meta[0]["feature_meta"]["timing"]["expected_flow_lag_s"] = 1.0
     with pytest.raises(ValueError, match="flow_lag_s"):
         _preprocessing_record(timed, cfg)

@@ -37,6 +37,7 @@ from __future__ import annotations
 
 import copy
 import csv
+import json
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -316,16 +317,26 @@ def _counts(fs: FeatureSet) -> Dict[str, Any]:
 
 
 def _preprocessing_record(fs: FeatureSet, cfg: Mapping[str, Any]) -> Dict[str, Any]:
-    """What inference must reproduce: extraction timing and the flow mode the model saw.
+    """What inference must reproduce: the extractor configuration and the flow mode the model saw.
 
-    The timing (expected_interval_s, flow_lag_s) is what the extractor recorded per row
-    (feature_meta.timing, or a stored feature_config); cfg["features"] and the defaults are
-    used only when no row records it. Rows extracted with different timings are refused.
+    feature_config is the full FeatureConfig the rows were extracted with (stored per row by the
+    dataset generator; roi_scale, drawn per synthetic variant, excluded), so inference never
+    depends on code defaults. The timing (expected_interval_s, flow_lag_s) is what the extractor
+    recorded per row (feature_meta.timing, or the stored feature_config); cfg["features"] and the
+    defaults are used only when no row records it. Rows extracted with different settings are refused.
     """
+    from dataclasses import asdict
+
+    from src.data.features import FeatureConfig
+
     flow_modes: Dict[str, int] = {}
     roi_scales = []
     timing: Dict[str, set] = {"expected_interval_s": set(), "flow_lag_s": set()}
+    stored_cfgs = set()
     for m in fs.meta:
+        if m.get("feature_config"):
+            stored_cfgs.add(json.dumps({k: v for k, v in m["feature_config"].items() if k != "roi_scale"},
+                                       sort_keys=True))
         fmeta = m.get("feature_meta") or {}
         mode = fmeta.get("flow_mode")
         if mode:
@@ -337,18 +348,24 @@ def _preprocessing_record(fs: FeatureSet, cfg: Mapping[str, Any]) -> Dict[str, A
             v = rec.get(rec_key, stored.get(key))
             if v is not None:
                 timing[key].add(float(v))
-    fcfg = dict(cfg.get("features", {}) or {})
+    if len(stored_cfgs) > 1:
+        raise ValueError(f"the train rows were extracted with {len(stored_cfgs)} different feature configs")
+    defaults = {k: v for k, v in asdict(FeatureConfig()).items() if k != "roi_scale"}
+    if stored_cfgs:
+        fcfg, config_source = {**defaults, **json.loads(stored_cfgs.pop())}, "train_feature_meta"
+    else:
+        fcfg, config_source = {**defaults, **dict(cfg.get("features", {}) or {})}, "code_defaults_at_training"
     timing_source = {}
     for key, values in timing.items():
         if len(values) > 1:
             raise ValueError(f"the train rows were extracted with different {key}: {sorted(values)}")
-        timing_source[key] = "train_feature_meta" if values else ("config" if key in fcfg else "default")
+        timing_source[key] = ("train_feature_meta" if values else
+                              "config" if key in (cfg.get("features") or {}) else "default")
         if values:
             fcfg[key] = values.pop()
-    fcfg.setdefault("expected_interval_s", 5.0)
-    fcfg.setdefault("flow_lag_s", 1.0)
     return {
         "feature_config": fcfg,
+        "feature_config_source": config_source,
         "feature_timing_source": timing_source,
         "training_flow_modes": flow_modes,
         "training_roi_scale_range": [min(roi_scales), max(roi_scales)] if roi_scales else None,
