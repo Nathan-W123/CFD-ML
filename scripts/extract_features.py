@@ -5,7 +5,11 @@ Synthetic (re-extraction from data/<name>/seqs, e.g. to measure the mask-source 
         --mask-source detector [--splits test_iid,test_ood]
 
 Real footage (Stage B; the same extractor as for synthetic data):
-    python scripts/extract_features.py --real-manifest real.csv --out data/real/features.npz
+    python scripts/extract_features.py --real-manifest real.csv --artifacts artifacts --out data/real/features.npz
+
+    --artifacts takes every extractor setting from the exported model
+    (preprocessing.feature_config), exactly as PhysicsExpert.features_from_frames
+    does; without it the FeatureConfig defaults are used.
 
 real.csv columns: video_path, camera_id, video_id, smoke (0/1), fog (0/1),
 optional: split (train/val_select/val_calib/test_iid), start_s, stride_s
@@ -55,9 +59,31 @@ def parse_args(argv=None):
     ap.add_argument("--mask-source", choices=["stored", "detector"], default="stored",
                     help="synthetic: use the stored candidate masks or re-detect them from the frames")
     ap.add_argument("--splits", default=None, help="synthetic: comma list of splits to process")
-    ap.add_argument("--interval-s", type=float, default=5.0)
-    ap.add_argument("--flow-lag-s", type=float, default=1.0)
+    ap.add_argument("--interval-s", type=float, default=None, help="observation spacing (default 5.0)")
+    ap.add_argument("--flow-lag-s", type=float, default=None, help="flow lag (default 1.0)")
+    ap.add_argument("--artifacts", default=None,
+                    help="real footage: take the extractor settings from this exported model "
+                         "(preprocessing.feature_config), exactly as PhysicsExpert.features_from_frames does")
     return ap.parse_args(argv)
+
+
+def real_feature_config(args):
+    """The FeatureConfig for real footage: the exported model's settings when --artifacts is given."""
+    stored = {}
+    if args.artifacts:
+        from dataclasses import fields as dc_fields
+
+        from src.utils.io import read_yaml
+
+        cfg = read_yaml(Path(args.artifacts) / "model_config.yaml")
+        known = {f.name for f in dc_fields(FeatureConfig)}
+        stored = {k: v for k, v in ((cfg.get("preprocessing") or {}).get("feature_config") or {}).items()
+                  if k in known}
+    if args.interval_s is not None:
+        stored["expected_interval_s"] = args.interval_s
+    if args.flow_lag_s is not None:
+        stored["flow_lag_s"] = args.flow_lag_s
+    return FeatureConfig(**stored)
 
 
 def synthetic(args):
@@ -74,8 +100,9 @@ def synthetic(args):
         masks = seq["masks"]
         if args.mask_source == "detector":
             masks = detect_candidate_masks(seq["frames"], seq["timestamps"])
-        fcfg = FeatureConfig(roi_scale=float(meta.get("roi_scale", 3.0)), flow_lag_s=args.flow_lag_s,
-                             expected_interval_s=args.interval_s)
+        fcfg = FeatureConfig(roi_scale=float(meta.get("roi_scale", 3.0)),
+                             flow_lag_s=1.0 if args.flow_lag_s is None else args.flow_lag_s,
+                             expected_interval_s=5.0 if args.interval_s is None else args.interval_s)
         X[i], _ = extract_features_with_meta(seq["frames"], seq["timestamps"], masks,
                                              seq["lag_frames"], seq["lag_timestamps"], fcfg)
         sources.append("detector" if args.mask_source == "detector" else fs.mask_sources[i])
@@ -139,7 +166,8 @@ def real(args):
     rows = list(csv.DictReader(open(args.real_manifest, newline="", encoding="utf-8")))
     feats, y, seq_ids, sim_ids, groups, splits, metas, sources = [], [], [], [], [], [], [], []
     skipped = []
-    fcfg = FeatureConfig(flow_lag_s=args.flow_lag_s, expected_interval_s=args.interval_s)
+    fcfg = real_feature_config(args)
+    args.interval_s, args.flow_lag_s = fcfg.expected_interval_s, fcfg.flow_lag_s
     for row in rows:
         path = Path(row["video_path"])
         try:
@@ -193,7 +221,9 @@ def real(args):
             sources.append(msrc)
             metas.append({"video_path": str(path), "camera_id": cam, "window": k,
                           "native_dt": float(win["native_dt"]), "obs_times": obs_t.tolist(),
-                          "feature_meta": {kk: meta[kk] for kk in ("roi", "flow_mode") if kk in meta}})
+                          "feature_meta": {kk: meta[kk] for kk in ("roi", "flow_mode", "timing") if kk in meta},
+                          "stabilization": {kk: (meta.get("stabilization") or {}).get(kk)
+                                            for kk in ("applied", "reason", "textured_frac", "n_corners")}})
             k += 1
     if not feats:
         print("no windows extracted", file=sys.stderr)

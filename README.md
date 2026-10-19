@@ -131,6 +131,26 @@ D (CFD-pretrained, fine-tuned on real data) are `null` in
 timing was available. Nothing here measures real-world accuracy or shows
 a reduction of fog false alarms on real cameras.
 
+**Zero-shot sanity check on public real video (FIRESENSE).** The exported
+model, unchanged and with its synthetic thresholds, was run on the
+[FIRESENSE](https://zenodo.org/records/836749) smoke clips
+([`reports/real_zero_shot_firesense.md`](reports/real_zero_shot_firesense.md)).
+Only 5 of its 22 clips are long enough for one 56 s window (the other 16
+were refused for timing, one crashes OpenCV's decoder): 4 close-range smoke
+videos and 1 smoke-free one, 9 windows, no fog, masks from the built-in
+fallback detector. All 7 smoke windows score a higher smoke probability than
+both smoke-free windows, but the smoke-free side is one video. At the
+balanced point the model decides on 3 windows (2 smoke detected, 1 correct
+"no smoke", no false smoke) and abstains on the rest (the handheld clip
+has no stabilisable background, so no flow; others are near the
+threshold); at the low-false-alarm point it raises no smoke alarm at all,
+missing the 3 smoke windows it decides on. It calls 2 smoke windows "fog"
+(P(fog) 0.70), the confusion this model is meant to resolve. This shows the real-footage path works end to end; it
+says nothing reliable about accuracy. Wildfire camera archives
+(HPWREN/FIgLib, AlertWildfire, PyroNear) record one frame per minute and
+are refused by design; a real evaluation needs camera footage at about
+1 frame/s with smoke, fog and both.
+
 **Single-core CPU cost** ([`reports/benchmark_cpu.md`](reports/benchmark_cpu.md);
 every library pinned to one thread):
 
@@ -324,7 +344,7 @@ experiments B and D are `null`. With such footage:
 
 ```bash
 # real.csv: video_path, camera_id, video_id, smoke, fog[, split, start_s, stride_s, max_windows, mask_dir]
-python scripts/extract_features.py --real-manifest real.csv --out data/real/features.npz
+python scripts/extract_features.py --real-manifest real.csv --artifacts artifacts --out data/real/features.npz
 python scripts/evaluate_physics.py --features data/synthetic/features.npz --artifacts artifacts \
     --reports reports --real data/real/features.npz     # trains B (scratch) and D (fine-tune), evaluates B, C, D
 ```
@@ -336,6 +356,12 @@ epochs, patience, seeds and normaliser policy, and the calibration is
 refitted on the real `val_calib` split. `scripts/train_physics.py --stage
 finetune|scratch` runs either one on its own.
 
+Before Stage B, `scripts/evaluate_real_zero_shot.py` runs the exported model
+unchanged on any real FeatureSet and lists, per window, what was measurable,
+the probabilities, the decisions and the abstention reasons;
+`scripts/prepare_firesense.py` downloads and prepares the public FIRESENSE
+clips used for the zero-shot check above.
+
 ## Repository layout
 
 ```
@@ -346,7 +372,8 @@ src/models/   physics_gru
 src/training/ train, evaluate, metrics, baselines, audit
 src/inference/predict (no training dependencies)
 scripts/      generate_dataset, qa_dataset, extract_features, train_physics, evaluate_physics,
-              oracle_diagnostic, benchmark_cpu, summarize_results
+              oracle_diagnostic, benchmark_cpu, summarize_results,
+              prepare_firesense, evaluate_real_zero_shot
 tests/        test_lbm, test_scalars, test_simulation, test_render, test_features, test_pipeline,
               test_model, test_training
 docs/         spec.md (requirements), design.md (interface contract and design decisions)
