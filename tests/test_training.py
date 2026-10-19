@@ -427,3 +427,18 @@ def test_loro_and_synthetic_proxy(tmp_path, fs):
     assert proxy["not_real_world_evidence"] is True
     assert {"C_zero_shot", "D_finetuned", "B_scratch"} <= set(proxy)
     assert proxy["D_finetuned"]["lr"] == pytest.approx(1e-4) and proxy["B_scratch"]["lr"] == pytest.approx(1e-3)
+
+
+def test_youden_threshold_does_not_degenerate_on_weak_scores():
+    from src.training.metrics import threshold_max_f1, threshold_max_youden
+
+    rng = np.random.default_rng(0)
+    y = np.r_[np.ones(200), np.zeros(200)]
+    score = np.r_[rng.normal(0.3, 1.0, 200), rng.normal(0.0, 1.0, 200)]   # weak signal
+    thr_f1, info_f1 = threshold_max_f1(score, y)
+    thr_j, info_j = threshold_max_youden(score, y)
+    assert info_f1["recall"] > 0.9                    # max F1 predicts (nearly) everything positive
+    assert info_j["fpr"] < 0.8 and info_j["youden_j"] > 0.0
+    # Separable scores: Youden puts the threshold between the classes.
+    thr, info = threshold_max_youden(np.r_[np.full(10, 2.0), np.full(10, -2.0)], np.r_[np.ones(10), np.zeros(10)])
+    assert -2.0 < thr <= 2.0 and info["youden_j"] == 1.0

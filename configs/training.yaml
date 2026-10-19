@@ -33,7 +33,8 @@ calibration:
 
 thresholds:
   operating_points:
-    balanced: f1             # per-label threshold maximising F1
+    balanced: youden         # per-label threshold maximising TPR - FPR (max F1 degenerates to
+                             # "all positive" on weak scores with balanced classes); or f1
     low_false_alarm: {max_false_smoke_on_fog_only: 0.05}
   min_calibration_sims_per_category: 20   # below this: store insufficient_calibration_data
 

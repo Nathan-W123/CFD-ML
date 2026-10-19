@@ -477,6 +477,31 @@ def threshold_max_f1(score, y, weights=None) -> Tuple[float, Dict[str, Any]]:
                              "recall": _ratio(tp[k], tp[k] + fn[k])}
 
 
+def threshold_max_youden(score, y, weights=None) -> Tuple[float, Dict[str, Any]]:
+    """Threshold maximising Youden's J = TPR - FPR (balanced accuracy), weighted.
+
+    Unlike maximum F1, it does not degenerate to "everything positive" when
+    the score is weak and the classes are balanced (F1 = 2/3 there for free).
+    """
+    s = np.asarray(score, dtype=np.float64).ravel()
+    t = _bool(y)
+    w = _weights(weights, len(s))
+    cands = _candidate_thresholds(s)
+    if not t.any() or t.all():
+        return float(cands[-1] if not t.any() else cands[0]), {"youden_j": None, "reason": "one_class"}
+    order = np.argsort(s)
+    s_sorted, pos_w, neg_w = s[order], (w * t)[order], (w * ~t)[order]
+    below = np.searchsorted(s_sorted, cands, side="left")
+    cpos, cneg = np.r_[0.0, np.cumsum(pos_w)], np.r_[0.0, np.cumsum(neg_w)]
+    tpr = (cpos[-1] - cpos[below]) / cpos[-1]
+    fpr = (cneg[-1] - cneg[below]) / cneg[-1]
+    j = tpr - fpr
+    k = int(np.argmax(j))
+    tp, fp = cpos[-1] - cpos[below][k], cneg[-1] - cneg[below][k]
+    return float(cands[k]), {"youden_j": float(j[k]), "tpr": float(tpr[k]), "fpr": float(fpr[k]),
+                             "precision": _ratio(tp, tp + fp), "recall": float(tpr[k])}
+
+
 def threshold_max_false_rate(score, negatives, max_rate: float, weights=None) -> Tuple[float, Dict[str, Any]]:
     """Smallest threshold whose (weighted) rate of `negatives` at or above it is <= max_rate.
 
@@ -543,7 +568,8 @@ def fit_operating_points(score, y, categories, groups, cfg: Dict[str, Any],
                          names: Sequence[str] = LABEL_NAMES) -> Dict[str, Any]:
     """Per-label thresholds (on the calibrated-logit scale) for every operating point.
 
-    `balanced`: maximum F1 per label. `low_false_alarm`: the smoke threshold
+    `balanced`: maximum Youden's J per label (thresholds.operating_points.balanced
+    = "youden", the default) or maximum F1 ("f1"). `low_false_alarm`: the smoke threshold
     whose false-smoke rate on fog_only sequences is <= the configured maximum
     (never more permissive than the balanced one); fog keeps its balanced
     threshold. Every count is weighted per group (simulation), so a
@@ -557,10 +583,14 @@ def fit_operating_points(score, y, categories, groups, cfg: Dict[str, Any],
                     .get("low_false_alarm", {}).get("max_false_smoke_on_fog_only", 0.05))
     thresholds: Dict[str, Dict[str, Dict[str, float]]] = {"balanced": {}, "low_false_alarm": {}}
     fit: Dict[str, Dict[str, Any]] = {"balanced": {}, "low_false_alarm": {}}
+    objective = str(cfg.get("thresholds", {}).get("operating_points", {}).get("balanced", "youden"))
     for j, name in enumerate(names):
-        thr, info = threshold_max_f1(s[:, j], t[:, j], w)
+        if objective == "f1":
+            thr, info = threshold_max_f1(s[:, j], t[:, j], w)
+        else:
+            thr, info = threshold_max_youden(s[:, j], t[:, j], w)
         thresholds["balanced"][name] = {"logit": thr, "prob": float(sigmoid(thr))}
-        fit["balanced"][name] = {"criterion": "max_f1", **info}
+        fit["balanced"][name] = {"criterion": "max_f1" if objective == "f1" else "max_youden_j", **info}
     for j, name in enumerate(names):
         bal = thresholds["balanced"][name]["logit"]
         if j == 0:
