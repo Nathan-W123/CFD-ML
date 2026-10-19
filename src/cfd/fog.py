@@ -19,13 +19,33 @@ evaporation and transport of liquid water produce the fog the camera sees.
 * steam_fog          cold air over a warm, wet surface strip: rising wisps of
                      condensate anchored at a source (a deliberate hard
                      negative for "rises from a fixed source")
+* ridge_cloud        orographic cap / low cloud: humid, near-neutral to weakly
+                     stable air carried over a ridge or hill condenses where it
+                     is lifted (no liquid is prescribed; the saturation
+                     adjustment makes it). The ambient humidity is set so that
+                     air lifted by `lcl_frac` of the ridge height saturates;
+                     the cloud base sits on the windward slope and the cloud
+                     stays anchored over the crest while the air moves through
+                     it (a stationary cloud in moving air); it evaporates where
+                     the air descends in the lee near the ground and, the
+                     stratification being close to moist-neutral, trails
+                     downstream aloft as a cloud deck. Needs a hill or ridge
+                     and wind.
 
 Fog starts established (the 60 s window is far too short to form a fog bank
 from clear air) and evolves through transport, mixing, cooling and warming.
+(The ridge cloud is the exception: it forms during the spin-up, within one
+advective time over the ridge, from the class-independent wind.)
 The air around established fog is near saturation (RH 0.92-0.99; drier air
 only where a regime calls for it, e.g. dry inflow eroding a fog), and fog air
 starts close to neutrally buoyant (saturated at about the ambient
 temperature), so banks neither slump nor lift as an artefact of the set-up.
+
+Scales: physical ranges (layer tops, inversions, patch sizes, depths,
+periods) come from the profile config, regime blocks overriding the shared
+`scenarios.fog` keys; numerical widths (front ramps, layer softness, minimum
+thicknesses, texture) scale with dx; the dissipation onset scales with the
+frame interval (see scenario_util).
 
 Where this fits: `scenarios.sample_scenario` calls `sample_fog`;
 `scenarios.build_spec` calls `fog_reference` (moist ambient profiles) and
@@ -42,8 +62,8 @@ import numpy as np
 
 from src.cfd import thermo
 from src.cfd.scenario_util import (
-    Component, Grid, drift_start, layer_profile, sample_noise_spec, smooth_noise, smooth_profile_noise,
-    smooth_texture, uniform,
+    Component, Grid, block_range, drift_start, layer_profile, sample_noise_spec, smooth_noise,
+    smooth_profile_noise, smooth_texture, time_scale, uniform,
 )
 
 DRIFT_FACTOR = 0.85  # drifting features move a little slower than the free-stream wind at their height
@@ -55,8 +75,26 @@ FOG_WIND = {
     "fog_patch": (0.0, 7.0),
     "fog_dissipating": (0.0, 9.0),
     "steam_fog": (0.0, 5.0),
+    "ridge_cloud": (3.0, 15.0),
 }
 AMBIENT_LAYER_REGIMES = ("radiation_fog", "terrain_fog", "fog_dissipating")
+RIDGE_TERRAIN = ("hill", "ridge")
+RIDGE_DEFAULTS = {
+    "min_terrain_height_m": 15.0,      # a resolvable obstacle (near-field default: 3 cells)
+    "lcl_frac": [0.3, 0.7],            # lift (fraction of the ridge height) that saturates the inflow
+    "moist_top_frac": [1.5, 3.0],      # humid layer depth in ridge heights
+    "rh_above": [0.3, 0.7],            # drier air above the humid layer
+    "max_lapse_dtheta_dz": 0.004,      # K/m: near-neutral / weakly stable, so the flow goes over (Fr > ~1)
+}
+
+
+def ridge_cloud_possible(context: Dict[str, Any], cfg: Dict[str, Any]) -> bool:
+    """Terrain requirement of ridge_cloud: a hill or ridge at least min_terrain_height_m tall."""
+    block = cfg.get("scenarios", {}).get("fog", {}).get("ridge_cloud", {})
+    terrain = context["terrain"]
+    return (terrain["kind"] in RIDGE_TERRAIN
+            and float(terrain.get("height_m", 0.0)) >= float(block.get("min_terrain_height_m",
+                                                                       RIDGE_DEFAULTS["min_terrain_height_m"])))
 
 
 def fog_wind_range(regime: str, cfg: Dict[str, Any]):
@@ -80,8 +118,10 @@ def steam_supersaturation(theta_ground: float, excess: float, rh: float, p: floa
 def sample_fog(regime: str, rng: np.random.Generator, cfg: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
     fc = cfg.get("scenarios", {}).get("fog", {})
     block = fc.get(regime, {})
-    lwc = uniform(rng, fc.get("lwc_g_m3", [0.05, 0.4]))
-    top = uniform(rng, fc.get("fog_top_m", [40.0, 160.0]))
+    ts = time_scale(context.get("timing", {}).get("frame_interval_s", 5.0))
+    # A regime block may override the shared liquid-water and layer-top ranges.
+    lwc = uniform(rng, block_range(block, "lwc_g_m3", fc.get("lwc_g_m3", [0.05, 0.4])))
+    top = uniform(rng, block_range(block, "fog_top_m", fc.get("fog_top_m", [40.0, 160.0])))
     rh_outside = fc.get("rh_outside", [0.92, 0.99])
     out: Dict[str, Any] = {
         "regime": regime,
@@ -92,6 +132,8 @@ def sample_fog(regime: str, rng: np.random.Generator, cfg: Dict[str, Any], conte
         "texture_seed": int(rng.integers(0, 2**31 - 1)),
         "top_seed": int(rng.integers(0, 2**31 - 1)),
         "rh_above": uniform(rng, rh_outside if regime != "fog_dissipating" else (0.8, 0.97)),
+        # Height of the capping inversion above the fog top (physical, from the profile).
+        "inversion_offset_m": float(fc.get("inversion_offset_m", 20.0)),
     }
     if regime == "radiation_fog":
         out.update(inversion_dtheta_dz=uniform(rng, block.get("inversion_dtheta_dz", [0.01, 0.06])),
@@ -100,25 +142,25 @@ def sample_fog(regime: str, rng: np.random.Generator, cfg: Dict[str, Any], conte
         out.update(front_frac=uniform(rng, block.get("front_x_frac", [0.1, 0.6])),
                    bank_dtheta_k=uniform(rng, (-0.5, 0.3)),
                    domain_rh=uniform(rng, rh_outside),
-                   modulation=sample_noise_spec(rng, (10.0, 40.0)),
-                   inversion_dtheta_dz=uniform(rng, (0.0, 0.03)))
+                   modulation=sample_noise_spec(rng, block.get("modulation_period_s", [10.0, 40.0])),
+                   inversion_dtheta_dz=uniform(rng, block.get("inversion_dtheta_dz", [0.0, 0.03])))
     elif regime == "terrain_fog":
         out.update(cold_layer_k=uniform(rng, block.get("cold_layer_k", [0.5, 3.0])),
-                   cold_layer_depth_m=uniform(rng, (8.0, 20.0)),
-                   fill_frac=uniform(rng, (0.5, 1.1)),
-                   inversion_dtheta_dz=uniform(rng, (0.01, 0.05)),
-                   surface_cooling_k_s=uniform(rng, (0.0003, 0.002)))
+                   cold_layer_depth_m=uniform(rng, block.get("cold_layer_depth_m", [8.0, 20.0])),
+                   fill_frac=uniform(rng, block.get("fill_frac", [0.5, 1.1])),
+                   inversion_dtheta_dz=uniform(rng, block.get("inversion_dtheta_dz", [0.01, 0.05])),
+                   surface_cooling_k_s=uniform(rng, block.get("surface_cooling_k_s", [0.0003, 0.002])))
     elif regime == "fog_patch":
         out.update(center_frac=uniform(rng, (0.15, 0.85)),
-                   center_height_m=uniform(rng, (0.0, 90.0)),
+                   center_height_m=uniform(rng, block.get("center_height_m", [0.0, 90.0])),
                    radius_m=uniform(rng, block.get("patch_radius_m", [20.0, 70.0])),
                    aspect=uniform(rng, (0.4, 1.0)),
                    ambient_rh=uniform(rng, block.get("ambient_rh", rh_outside)),
                    patch_dtheta_k=uniform(rng, (-0.3, 0.1)),
                    moist_inflow=bool(rng.random() < 0.3),
                    inflow_rh=uniform(rng, (0.98, 1.01)),
-                   inflow_depth_m=uniform(rng, (20.0, 100.0)),
-                   inversion_dtheta_dz=uniform(rng, (0.0, 0.03)))
+                   inflow_depth_m=uniform(rng, block.get("inflow_depth_m", [20.0, 100.0])),
+                   inversion_dtheta_dz=uniform(rng, block.get("inversion_dtheta_dz", [0.0, 0.03])))
     elif regime == "fog_dissipating":
         # "wind_ramp" only where the class-independent context already accelerates the wind.
         mechs = ["dry_inflow", "surface_warming"]
@@ -126,14 +168,15 @@ def sample_fog(regime: str, rng: np.random.Generator, cfg: Dict[str, Any], conte
             mechs.append("wind_ramp")
         mech = mechs[int(rng.integers(0, len(mechs)))]
         out.update(mechanism=mech,
-                   mechanism_onset_s=uniform(rng, (-30.0, 10.0)),   # relative to the first frame
-                   inversion_dtheta_dz=uniform(rng, (0.005, 0.04)),
+                   # relative to the first frame (near-field seconds x the profile's time scale)
+                   mechanism_onset_s=uniform(rng, (-30.0 * ts, 10.0 * ts)),
+                   inversion_dtheta_dz=uniform(rng, block.get("inversion_dtheta_dz", [0.005, 0.04])),
                    dry_inflow_rh=uniform(rng, block.get("dry_inflow_rh", [0.4, 0.85])),
                    surface_warming_k_s=uniform(rng, block.get("surface_warming_k_s", [0.002, 0.02])))
     elif regime == "steam_fog":
         # Re-draw until mixing surface air with ambient air actually supersaturates.
         for _ in range(50):
-            theta_g = uniform(rng, (263.0, 280.0))
+            theta_g = uniform(rng, block.get("theta_ground_k", [263.0, 280.0]))
             excess = uniform(rng, block.get("surface_excess_k", [8.0, 15.0]))
             rh = uniform(rng, block.get("ambient_rh", [0.85, 0.98]))
             ss = steam_supersaturation(theta_g, excess, rh)
@@ -142,10 +185,17 @@ def sample_fog(regime: str, rng: np.random.Generator, cfg: Dict[str, Any], conte
         out.update(surface_excess_k=excess,
                    strip_center_frac=uniform(rng, (0.2, 0.8)),
                    strip_width_m=uniform(rng, block.get("strip_width_m", [20.0, 120.0])),
-                   exchange_time_s=uniform(rng, (2.0, 6.0)),
+                   exchange_time_s=uniform(rng, block.get("exchange_time_s", [2.0, 6.0])),
                    theta_ground_k=theta_g,
                    ambient_rh=rh,
                    mixing_supersaturation=ss)
+    elif regime == "ridge_cloud":
+        rb = dict(RIDGE_DEFAULTS)
+        rb.update(block)
+        out.update(lcl_frac=uniform(rng, rb["lcl_frac"]),
+                   moist_top_frac=uniform(rng, rb["moist_top_frac"]),
+                   rh_above=uniform(rng, rb["rh_above"]),
+                   max_lapse_dtheta_dz=float(rb["max_lapse_dtheta_dz"]))
     else:
         raise ValueError(f"unknown fog regime {regime!r}")
     return out
@@ -155,11 +205,48 @@ def _ql_from_lwc(lwc_g_m3: float, rho_air: float) -> float:
     return lwc_g_m3 / (rho_air * 1000.0)
 
 
-def _layer_lwc_shape(z: np.ndarray, top: float) -> np.ndarray:
-    """Vertical LWC shape of a fog layer: grows with height, peaks near 0.8 top, soft top."""
+def _layer_lwc_shape(z: np.ndarray, top: float, soft_min: float = 4.0) -> np.ndarray:
+    """Vertical LWC shape of a fog layer: grows with height, peaks near 0.8 top, soft top
+    (softness 8 % of the top, at least soft_min; callers pass 0.8 dx)."""
     top = np.maximum(np.asarray(top, dtype=float), 1.0)
     s = np.clip(z / top, 0.0, None)
-    return (0.35 + 0.65 * np.clip(s / 0.8, 0.0, 1.0)) * 0.5 * (1.0 - np.tanh((z - top) / np.maximum(4.0, 0.08 * top)))
+    return (0.35 + 0.65 * np.clip(s / 0.8, 0.0, 1.0)) * 0.5 * (1.0 - np.tanh((z - top) / np.maximum(soft_min, 0.08 * top)))
+
+
+def _lifted_pressure(z: np.ndarray, p: np.ndarray, dz: float) -> np.ndarray:
+    """Reference pressure at z + dz (log-linear in z, extrapolated above the top)."""
+    lnp = np.log(p)
+    zl = z + dz
+    out = np.interp(zl, z, lnp)
+    slope = (lnp[-1] - lnp[-2]) / (z[-1] - z[-2]) if len(z) > 1 else -1.2e-4
+    above = zl > z[-1]
+    out[above] = lnp[-1] + (zl[above] - z[-1]) * slope
+    return np.exp(out)
+
+
+def ridge_cloud_reference(fog: Dict[str, Any], grid: Grid, atm: Dict[str, Any], p: np.ndarray,
+                          pi: np.ndarray):
+    """(theta, q_v) profiles for ridge_cloud: air at every level of the humid layer saturates
+    when lifted dry-adiabatically by lcl_frac x the ridge height (theta conserved, so the
+    lifted temperature is theta(z) Exner(p(z + dz))); above it the air is drier. Every
+    level stays sub-saturated at rest (at most 99.5 % RH), so all condensate comes from lifting."""
+    z = grid.z
+    lapse = min(max(float(atm["lapse_dtheta_dz"]), 0.0), float(fog["max_lapse_dtheta_dz"]))
+    theta = atm["theta_ground_k"] + lapse * z
+    H = max(float(grid.ground_height.max()), grid.dx)
+    dz_c = float(fog["lcl_frac"]) * H
+    T = theta * pi
+    qs = thermo.saturation_mixing_ratio(T, p)
+    p_lift = _lifted_pressure(z, p, dz_c)
+    T_lift = theta * thermo.exner(p_lift)
+    q_moist = np.minimum(thermo.saturation_mixing_ratio(T_lift, p_lift), 0.995 * qs)
+    q_dry = float(fog["rh_above"]) * qs
+    top = float(fog["moist_top_frac"]) * H
+    inside = layer_profile(z, 0.0, top, soft_m=2.0 * grid.dx)
+    qv = np.minimum(inside * q_moist + (1.0 - inside) * q_dry, 0.995 * qs)
+    fog["lift_to_saturation_m"] = dz_c
+    fog["moist_top_m"] = top
+    return theta, qv
 
 
 def fog_reference(fog: Optional[Dict[str, Any]], grid: Grid, atm: Dict[str, Any], p: np.ndarray,
@@ -170,11 +257,15 @@ def fog_reference(fog: Optional[Dict[str, Any]], grid: Grid, atm: Dict[str, Any]
     inversion and, for ambient fog layers, a saturated layer holding liquid.
     """
     z = grid.z
+    dx = grid.dx
     theta = atm["theta_ground_k"] + atm["lapse_dtheta_dz"] * z
     rh = np.full_like(z, atm["relative_humidity"])
     ql = np.zeros_like(z)
     if fog is not None:
         regime = fog["regime"]
+        if regime == "ridge_cloud":
+            theta, qv = ridge_cloud_reference(fog, grid, atm, p, pi)
+            return theta, qv, ql
         if regime == "steam_fog":
             theta = fog["theta_ground_k"] + max(atm["lapse_dtheta_dz"], 0.0) * z
             rh[:] = fog["ambient_rh"]
@@ -187,15 +278,15 @@ def fog_reference(fog: Optional[Dict[str, Any]], grid: Grid, atm: Dict[str, Any]
                 top = max(fog["fog_top_m"], fog["fill_frac"] * float(grid.ground_height.max()))
                 fog["effective_top_m"] = top
             inv = fog.get("inversion_dtheta_dz", 0.0)
-            h_inv = top + 20.0
+            h_inv = top + float(fog.get("inversion_offset_m", 20.0))
             theta = atm["theta_ground_k"] + inv * np.minimum(z, h_inv) + max(atm["lapse_dtheta_dz"], 0.0) * np.maximum(z - h_inv, 0.0)
             above = fog["rh_above"]
             if regime in AMBIENT_LAYER_REGIMES:
-                inside = layer_profile(z, 0.0, top, soft_m=max(3.0, 0.05 * top))
+                inside = layer_profile(z, 0.0, top, soft_m=max(0.6 * dx, 0.05 * top))
                 rh = above + (1.0 - above) * inside
-                ql = _ql_from_lwc(fog["lwc_g_m3"], rho_air) * _layer_lwc_shape(z, top)
+                ql = _ql_from_lwc(fog["lwc_g_m3"], rho_air) * _layer_lwc_shape(z, top, 0.8 * dx)
             elif regime == "advected_fog_bank":
-                inside = layer_profile(z, 0.0, top, soft_m=10.0)
+                inside = layer_profile(z, 0.0, top, soft_m=2.0 * dx)
                 rh = above + (fog["domain_rh"] - above) * inside
             elif regime == "fog_patch":
                 rh[:] = fog["ambient_rh"]
@@ -209,15 +300,23 @@ def fog_component(fog: Dict[str, Any], grid: Grid, refs, p: np.ndarray, pi: np.n
     regime = fog["regime"]
     theta_ref, qv_ref, ql_ref = refs
     comp = Component()
-    tex = smooth_texture(grid, fog["texture_seed"], scale_m=50.0, contrast=fog["heterogeneity"])
+    dx = grid.dx
+    # Numerical widths in cells (texture 50 m, fronts 15 m, softness 8 m at dx = 5 m).
+    tex = smooth_texture(grid, fog["texture_seed"], scale_m=10.0 * dx, contrast=fog["heterogeneity"])
     ql_max = _ql_from_lwc(fog["lwc_g_m3"], rho_air)
     surface = grid.surface_cells()
+
+    if regime == "ridge_cloud":
+        # Nothing prescribed: the humid reference inflow condenses where the ridge lifts it.
+        comp.info["lift_to_saturation_m"] = float(fog.get("lift_to_saturation_m", 0.0))
+        comp.info["moist_top_m"] = float(fog.get("moist_top_m", 0.0))
+        return comp
 
     if regime in AMBIENT_LAYER_REGIMES:
         top = fog.get("effective_top_m", fog["fog_top_m"])
         undul = 1.0 + fog["top_undulation"] * smooth_profile_noise(grid.nx, fog["top_seed"], scale_cells=12.0)
-        top_x = np.maximum(top * undul, 5.0)
-        ql0 = ql_max * _layer_lwc_shape(grid.zz, top_x[None, :]) * tex
+        top_x = np.maximum(top * undul, dx)
+        ql0 = ql_max * _layer_lwc_shape(grid.zz, top_x[None, :], 0.8 * dx) * tex
 
         def initial(fields):
             # Only the liquid changes (heterogeneity, undulating top): the reference layer is
@@ -268,17 +367,17 @@ def fog_component(fog: Dict[str, Any], grid: Grid, refs, p: np.ndarray, pi: np.n
 
     if regime == "advected_fog_bank":
         top = fog["fog_top_m"]
-        layer = layer_profile(grid.z, 0.0, top, soft_m=8.0)
+        layer = layer_profile(grid.z, 0.0, top, soft_m=1.6 * dx)
         theta_bank = theta_ref + fog["bank_dtheta_k"] * layer
         qv_bank = np.where(layer > 0.05, thermo.saturation_mixing_ratio(theta_bank * pi, p), qv_ref)
-        ql_bank = ql_max * _layer_lwc_shape(grid.z, top)
+        ql_bank = ql_max * _layer_lwc_shape(grid.z, top, 0.8 * dx)
         upwind_left = grid.wind_sign >= 0
         target = grid.view_x(fog["front_frac"] if upwind_left else 1.0 - fog["front_frac"])
         k_mid = int(np.clip(0.5 * top / grid.dx, 0, grid.nz - 1))
         u_drift = DRIFT_FACTOR * float(wind_fn(0.0)[k_mid])
         front_x = drift_start(target, u_drift, first_frame_s)
         dist = (front_x - grid.xx) if upwind_left else (grid.xx - front_x)
-        inside = 0.5 * (1.0 + np.tanh(dist / 15.0))
+        inside = 0.5 * (1.0 + np.tanh(dist / (3.0 * dx)))
 
         def initial(fields):
             fields["theta"] += inside * (theta_bank - theta_ref)[:, None]
@@ -292,7 +391,7 @@ def fog_component(fog: Dict[str, Any], grid: Grid, refs, p: np.ndarray, pi: np.n
         def inflow(t, ghosts):
             # The bank enters only once its front (front_x at t = 0, drifting at
             # u_drift) has reached the upwind boundary; until then the inflow is ambient.
-            w_b = 0.5 * (1.0 + math.tanh(s_dir * (front_x + u_drift * t - x_b) / 15.0))
+            w_b = 0.5 * (1.0 + math.tanh(s_dir * (front_x + u_drift * t - x_b) / (3.0 * dx)))
             if w_b < 1e-6:
                 return
             side = "left" if upwind_left else "right"
@@ -348,7 +447,7 @@ def fog_component(fog: Dict[str, Any], grid: Grid, refs, p: np.ndarray, pi: np.n
         comp.inflow.append(patch_inflow)
         if fog["moist_inflow"]:
             T_ref = theta_ref * pi
-            moist = layer_profile(grid.z, 0.0, fog["inflow_depth_m"], soft_m=8.0)
+            moist = layer_profile(grid.z, 0.0, fog["inflow_depth_m"], soft_m=1.6 * dx)
             qv_in = qv_ref + moist * (fog["inflow_rh"] * thermo.saturation_mixing_ratio(T_ref, p) - qv_ref)
 
             def inflow(t, ghosts):

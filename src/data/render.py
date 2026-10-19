@@ -15,15 +15,28 @@ Optical model (docs/design.md section 6):
    cropped) whose bottom edge is the simulated floor; a textured foreground
    ground band fills the image below it, terrain (sim.solid) is drawn as
    ground. Each frame has its own camera shake / rotation (and zoom jitter
-   with a strong artefact). The frame's pixel -> world mapping is used for
-   everything (background, fields, texture, occluders, shadow, cloud), so
-   frames, opacities and masks all live in the same shaken coordinates.
+   with a strong artefact), a stationary Ornstein-Uhlenbeck (AR(1)) process
+   evaluated at the actual frame times: stationary std camera_shake_px /
+   camera_rotation_deg / zoom_jitter, correlation time camera_shake_tau_s,
+   so a lag frame 1 s before its observation shakes almost with it while
+   frames a minute apart are independent. The frame's pixel -> world mapping
+   is used for everything (background, fields, texture, occluders, shadow,
+   cloud), so frames, opacities and masks all live in the same shaken
+   coordinates.
 3. tau is upsampled bilinearly (cv2.remap) and modulated by an ADVECTED
    TEXTURE: a tileable multi-octave noise pattern in metres is sampled at
    the advected coordinates sim.texcoords (pairs a and b blended with
    sim.tex_weights, normalised so the texture variance does not dip during
    a cross-fade), giving a factor exp(g n - g^2 / 2) with one gain g per
    sequence for all components. The texture moves exactly with the air.
+   Where the simulation provides the subgrid (Smagorinsky) velocity scale
+   sim.sgs_u, the sampling coordinates are further displaced by a smooth,
+   zero-mean random field D(x, z, t) (random Fourier modes a few cells long
+   whose phases follow integrated OU processes, one eddy clock per octave
+   of u_sgs) with local velocity scale texture.sgs_gain * u_sgs and local
+   correlation time ~ eddy size / u_sgs, so the texture also "boils" with
+   the unresolved turbulence, wherever it is and whatever the class (see
+   _sgs_displacement). Without sim.sgs_u, or with sgs_gain 0, nothing moves.
 4. Exposure normalisation per group, on the untextured in-view peak tau of
    the observation frames (lag frames get the same scale): primary smoke /
    fog / neither-aerosol tracer -> render.peak_opacity, background-haze
@@ -38,14 +51,28 @@ Optical model (docs/design.md section 6):
    contrast + shadow brightness change) via masks.degrade_masks, boxes of
    those, or masks.detect_candidate_masks on the rendered frames.
 
+Lag frames: a simulation with lag snapshots (sim.lag_times, `_lag` fields)
+gets one lag frame per observation, rendered with the same parameters. A
+simulation without them (flow_lag_s null or 0, e.g. the one-frame-per-minute
+far-field profile) gets the observation frames only and
+`RenderedSequence.lag_frames` / `lag_timestamps` are None; masks,
+visibility and exposure are computed from the observations in both cases.
+
 Randomness: `sample_render_params` draws every per-variant value (it never
 sees the class; hints only switch nuisances on, and the stream is the same
-with or without them). Background, texture, occluder, shadow and cloud
-shapes come from seeds stored in the params. `render_sequence` draws the
-per-frame values from its `rng` in a fixed order (camera, flicker, noise,
-then masks), so a rendering is a deterministic function of (sim, params,
-rng seed), and two simulations rendered with the same params and seed get
-the same camera motion and sensor noise.
+with or without them; the version-2 keys camera_shake_tau_s and
+texture.sgs_gain / sgs_seed are drawn last, so every earlier value is what
+version 1 drew; stored version-1 params, which lack them, still render as
+before: independent shake per frame, no subgrid displacement).
+Background, texture, subgrid-turbulence, occluder, shadow
+and cloud shapes come from seeds stored in the params. `render_sequence`
+draws the per-frame values from its `rng` in a fixed order (camera: one
+4-vector of shake innovations per frame, observation and lag frames
+interleaved in time order; exposure flicker; sensor noise; then masks),
+with F = 2T frames with lag frames and F = T without, so a rendering is a
+deterministic function of (sim, params, rng seed), and two simulations
+with the same frame times rendered with the same params and seed get the
+same camera motion and sensor noise.
 
 Where this fits: the dataset generator calls sample_render_params ->
 render_sequence -> check_label_visibility for every rendered variant of a
@@ -80,7 +107,9 @@ HINT_KEYS: Tuple[str, ...] = ("shadow", "strong_artifact", "fp_boost", "distant_
 PRIMARY_TRACER_REGIMES: Tuple[str, ...] = ("haze_drift", "dust_burst")
 PEAK_OPACITY_FLOOR = 0.05      # lower floor of a primary group's target peak opacity
 RAW_TAU_MIN = 1e-6             # a group with a smaller raw peak tau is not normalised
-PARAMS_VERSION = 1
+PARAMS_VERSION = 2             # 2: camera_shake_tau_s, texture.sgs_gain / sgs_seed
+SHAKE_TAU_S_DEFAULT = (0.5, 4.0)   # render.camera_shake_tau_s when the config has none
+SGS_GAIN_DEFAULT = (0.5, 1.5)      # render.texture.sgs_gain when the config has none
 
 _MAX_OPACITY = 0.999
 _PATTERN_SIZE = 384            # texture tile side, pattern pixels (period > the widest view)
@@ -90,15 +119,21 @@ _CANVAS_MARGIN = 40            # static scene canvas margin around the frame (sh
 _PEAK_BOX_PX = 5               # visibility peaks: max of a 5x5 box mean (ignores single-pixel speckle)
 _DEGRADE_KEYS = ("threshold_contrast", "morph_px", "boundary_noise", "drop_component_prob",
                  "false_positive_prob", "frame_dropout_prob", "min_area_frac")
+_SHAKE_CLIP = 3.0              # camera-shake process clipped at +-3 stationary std
+# Subgrid texture turbulence (_sgs_displacement).
+_SGS_MODES = 12                # random Fourier modes of the displacement field
+_SGS_WAVELENGTH_CELLS = (3.0, 8.0)   # mode wavelengths, grid cells (log-uniform): scales with dx
+_SGS_STRAIN = 0.3              # rms |grad D|: keeps the texture warp fold-free
+_SGS_BANDS = 10                # velocity octaves below the peak u_sgs, each with its own eddy clock
 
 
 @dataclass
 class RenderedSequence:
     frames: np.ndarray          # (T, H, W) uint8 grayscale at the observation times
-    lag_frames: np.ndarray      # (T, H, W) uint8 at the lag times (t_k - flow_lag_s)
+    lag_frames: Optional[np.ndarray]      # (T, H, W) uint8 at the lag times (t_k - flow_lag_s); None without lag
     masks: np.ndarray           # (T, H, W) bool candidate masks at the observation times
     timestamps: np.ndarray      # (T,) float64 s (= sim.times)
-    lag_timestamps: np.ndarray  # (T,) float64 s (= sim.lag_times)
+    lag_timestamps: Optional[np.ndarray]  # (T,) float64 s (= sim.lag_times); None without lag
     mask_source: str            # "degraded" | "bbox" | "detector"
     opacity: np.ndarray         # (T, H, W) float32 total visible aerosol opacity (diagnostic only)
     component_opacity: dict     # {"smoke","fog","tracer","cloud"} -> (T, H, W) float16 (diagnostic only)
@@ -284,6 +319,13 @@ def sample_render_params(rng: np.random.Generator, cfg: Dict[str, Any], hints: O
     }
     if isinstance(mk.get("detector"), dict):
         p["masks"]["detector"] = copy.deepcopy(mk["detector"])
+    # Version 2, drawn last so every value above keeps its place in the stream: correlation time
+    # of the camera-shake process (0 = independent per frame, the version-1 model) and the
+    # subgrid-turbulence displacement of the texture (gain 0 disables it).
+    p["camera_shake_tau_s"] = max(_u(rng, r.get("camera_shake_tau_s") or list(SHAKE_TAU_S_DEFAULT)), 0.0)
+    sgs_gain = tex.get("sgs_gain")
+    p["texture"]["sgs_gain"] = max(_u(rng, list(SGS_GAIN_DEFAULT) if sgs_gain is None else sgs_gain), 0.0)
+    p["texture"]["sgs_seed"] = _seed(rng)
     p["hints"] = hints_n
     return p
 
@@ -585,9 +627,36 @@ def _scene_canvas(sim: SimulationResult, rp: Mapping[str, Any], view: _View):
 
 
 # ---------------------------------------------------------------------- camera and nuisances
-def _camera_affines(rng: np.random.Generator, rp: Mapping[str, Any], n: int, view: _View) -> np.ndarray:
-    """(n, 2, 3) frame-pixel -> canvas affines: shake (px), rotation (deg) and zoom jitter about the centre."""
-    z = np.clip(rng.standard_normal((n, 4)), -3.0, 3.0)
+def _shake_process(rng: np.random.Generator, times: np.ndarray, tau_s: float) -> np.ndarray:
+    """(n, 4) unit-variance camera-shake coordinates (x, y, rotation, zoom) at `times` (frame order).
+
+    A stationary Ornstein-Uhlenbeck process sampled exactly at the frame
+    times: in time order, z_0 = e_0 and z_j = rho z_{j-1} + sqrt(1 - rho^2) e_j
+    with rho = exp(-(t_j - t_{j-1}) / tau_s), so every frame has unit
+    variance and two frames dt apart correlate as exp(-dt / tau_s). The
+    innovations e are drawn in time order (n x 4 standard normals, the same
+    number of draws as before). tau_s <= 0 gives the version-1 model:
+    independent per frame, drawn in frame order. Clipped at +-3.
+    """
+    t = np.asarray(times, dtype=np.float64).ravel()
+    e = rng.standard_normal((t.size, 4))
+    if not tau_s > 0.0:
+        return np.clip(e, -_SHAKE_CLIP, _SHAKE_CLIP)
+    order = np.argsort(t, kind="stable")
+    z = np.empty_like(e)
+    z[order[0]] = e[0]
+    for j in range(1, t.size):
+        f, prev = order[j], order[j - 1]
+        rho = math.exp(-max(t[f] - t[prev], 0.0) / tau_s)
+        z[f] = rho * z[prev] + math.sqrt(max(1.0 - rho * rho, 0.0)) * e[j]
+    return np.clip(z, -_SHAKE_CLIP, _SHAKE_CLIP)
+
+
+def _camera_affines(rng: np.random.Generator, rp: Mapping[str, Any], times: np.ndarray, view: _View) -> np.ndarray:
+    """(n, 2, 3) frame-pixel -> canvas affines at the n frame `times`: shake (px), rotation (deg) and
+    zoom jitter about the centre, each the stationary std of the correlated process _shake_process."""
+    z = _shake_process(rng, times, float(rp.get("camera_shake_tau_s") or 0.0))
+    n = z.shape[0]
     shake = float(rp["camera_shake_px"])
     rot = math.radians(float(rp["camera_rotation_deg"]))
     zj = float(rp.get("zoom_jitter", 0.0))
@@ -679,24 +748,32 @@ def _optical_depth_grid(sim: SimulationResult, rp: Mapping[str, Any], lag: bool)
     return np.nan_to_num(out, nan=0.0, posinf=0.0, neginf=0.0)
 
 
-def _texcoord_grid(sim: SimulationResult, lag: bool, inv_p: float, offset_b: Tuple[float, float]):
+def _texcoord_grid(sim: SimulationResult, lag: bool, inv_p: float, offset_b: Tuple[float, float],
+                   disp: Optional[np.ndarray] = None):
     """Texture coordinates in pattern pixels on the grid, (T, nz, nx, 4) [Xa, Za, Xb, Zb], and blend weights.
 
     Pair b is read at a fixed offset of about half a tile, so pairs a and b
     sample unrelated texture even where their coordinates coincide (then the
     variance-preserving blend weights w / |w| are exact). Without
-    sim.texcoords the texture is static (identity coordinates).
+    sim.texcoords the texture is static (identity coordinates). `disp`
+    ((T, nz, nx, 2) [D_x, D_z] metres, see _sgs_displacement) is subtracted
+    from both pairs: the label of the air at x is that of x - D, so the
+    texture appears displaced by +D.
     """
     n_t = int(sim.n_frames)
     nz, nx = sim.solid.shape
-    tc = sim.texcoords_lag if lag else sim.texcoords
-    wts = sim.tex_weights_lag if lag else sim.tex_weights
+    tc = getattr(sim, "texcoords_lag", None) if lag else sim.texcoords
+    wts = getattr(sim, "tex_weights_lag", None) if lag else sim.tex_weights
     advected = tc is not None
     if tc is None:
         X, Z = np.meshgrid((np.arange(nx) + 0.5) * float(sim.dx), (np.arange(nz) + 0.5) * float(sim.dx))
         tc = np.broadcast_to(np.stack([X, Z, X, Z])[None], (n_t, 4, nz, nx))
         wts = None
     out = np.asarray(tc, dtype=np.float64) * inv_p
+    if disp is not None:
+        d = np.asarray(disp, dtype=np.float64).transpose(0, 3, 1, 2) * inv_p      # (T, 2, nz, nx)
+        out[:, 0:2] -= d
+        out[:, 2:4] -= d
     out[:, 2] += offset_b[0]
     out[:, 3] += offset_b[1]
     # Whole-period shifts (exact for a periodic pattern) keep lookups inside the 3 x 3 tile.
@@ -706,6 +783,125 @@ def _texcoord_grid(sim: SimulationResult, lag: bool, inv_p: float, offset_b: Tup
     norm = np.sqrt((w ** 2).sum(axis=1, keepdims=True))
     coef = np.divide(w, norm, out=np.zeros_like(w), where=norm > 1e-12)
     return out, coef, advected
+
+
+def _sgs_velocity(sim: SimulationResult, has_lag: bool) -> Optional[np.ndarray]:
+    """(F, nz, nx) subgrid velocity scale u_sgs (m/s, >= 0) at the observation then lag frames, or None.
+
+    Lag frames use sim.sgs_u_lag, or the observation's own sim.sgs_u when the
+    simulation stored none (u_sgs changes little over the lag).
+    """
+    obs = getattr(sim, "sgs_u", None)
+    if obs is None:
+        return None
+    shape = (int(sim.n_frames),) + tuple(sim.solid.shape)
+    parts = [obs]
+    if has_lag:
+        lag = getattr(sim, "sgs_u_lag", None)
+        parts.append(obs if lag is None else lag)
+    out = []
+    for name, a in zip(("sgs_u", "sgs_u_lag"), parts):
+        a = np.asarray(a, dtype=np.float32)
+        if a.shape != shape:
+            raise ValueError(f"simulation {sim.sim_id}: {name} has shape {a.shape}, expected {shape}")
+        out.append(a)
+    u = np.concatenate(out)
+    return np.clip(np.nan_to_num(u, nan=0.0, posinf=0.0, neginf=0.0), 0.0, None)
+
+
+def _sgs_displacement(u_sgs: Optional[np.ndarray], times: np.ndarray, dx: float, texture: Mapping[str, Any]):
+    """Subgrid-turbulence displacement of the texture, (F, nz, nx, 2) [D_x, D_z] metres (or None), and a
+    JSON-able record.
+
+    Eddies of size ~A turn over in ~A / u_sgs, and u_sgs spans orders of magnitude within one
+    scene (wall shear in the first cell row, a plume, quiet air), so the field is built per
+    velocity octave: band b has the velocity u_b = u_max 2^-b (b < _SGS_BANDS) and its own eddy
+    time theta_b(t) = g u_b (t - t_first) / A. In band b
+      D_b(x, t) = A (u_sgs / u_b) f_b(x, theta_b(t)),
+      f_b = sum_m c_m e_m sin(k_m . x + phi_bm(theta_b)): _SGS_MODES random Fourier modes, shared by
+          the bands, wavelengths _SGS_WAVELENGTH_CELLS grid cells (so they scale with dx), random
+          directions, each mode divergence-free (e_m perpendicular to k_m), c_m = sqrt(2 / M), so
+          rms |f| = 1;
+      phi_bm = phi0_bm + integral of omega_bm, omega_bm a unit-variance OU process in eddy time
+          with unit correlation, so rms |df/dtheta| = 1, and f_b decorrelates over ~1.5 eddy
+          times (phase variance 2 (dtheta - 1 + exp(-dtheta))); the pair (omega, phi) is advanced
+          exactly between the frame times (no time stepping);
+      A = _SGS_STRAIN / k_rms, the rms displacement that keeps the texture warp fold-free.
+    Every cell blends the two bands bracketing its u_sgs, linearly in log2 u with variance-
+    preserving weights w / |w|. Both bands move at rms g u_sgs, so dD/dt has rms g u_sgs (vector
+    magnitude) wherever u_sgs >= u_max 2^-(B-1), and less below; D is ~A in size, zero-mean (random
+    phases; no net drift), decorrelates over ~1.5 A / (g u_sgs) (eddy size over eddy velocity,
+    within a factor 2) and vanishes where u_sgs does. A lag frame 1 s before its observation is
+    therefore displaced by ~ g u_sgs x 1 s relative to it; frames much further apart than the
+    correlation time by ~ sqrt(2) A. Class-independent: it acts wherever u_sgs is, smoke, fog or
+    clear air alike. Randomness: np.random.default_rng(texture["sgs_seed"]): modes, initial
+    phases and rates, then the innovations of every frame step (fixed counts).
+    """
+    gain = float(texture.get("sgs_gain", 0.0) or 0.0)
+    record: Dict[str, Any] = {"applied": False, "gain": gain}
+    if u_sgs is None or gain <= 0.0:
+        return None, record
+    u = np.asarray(u_sgs, dtype=np.float64)
+    u_max = float(u.max(initial=0.0))
+    if not u_max > 0.0:
+        return None, record
+    seed = texture.get("sgs_seed")
+    rng = np.random.default_rng(int(seed) if seed is not None else [int(texture.get("seed", 0)), 0x5C5])
+    M, B = _SGS_MODES, _SGS_BANDS
+    lam = dx * np.exp(rng.uniform(math.log(_SGS_WAVELENGTH_CELLS[0]), math.log(_SGS_WAVELENGTH_CELLS[1]), M))
+    ang = rng.uniform(0.0, math.pi, M)
+    k = 2.0 * math.pi / lam
+    amp = _SGS_STRAIN / math.sqrt(float(np.mean(k ** 2)))
+    u_band = u_max * 2.0 ** -np.arange(B)
+    # Phases of every band and mode at every frame: the integrated unit OU process (omega, phi),
+    # stepped exactly over each eddy-time interval d (innovation covariance [[1 - e^-2d, (1 - e^-d)^2],
+    # [., 2 d - 4 (1 - e^-d) + 1 - e^-2d]]), in time order.
+    t = np.asarray(times, dtype=np.float64)
+    n_t = t.size
+    phi = rng.uniform(0.0, 2.0 * math.pi, (B, M))
+    omega = rng.standard_normal((B, M))
+    eps = rng.standard_normal((max(n_t - 1, 0), B, M, 2))
+    order = np.argsort(t, kind="stable")
+    phase = np.empty((n_t, B, M))
+    phase[order[0]] = phi
+    rate = (gain * u_band / amp)[:, None]                      # eddy times per second, (B, 1)
+    for j in range(1, n_t):
+        d = max(t[order[j]] - t[order[j - 1]], 0.0) * rate
+        a = -np.expm1(-d)                                       # 1 - e^-d
+        var_w = -np.expm1(-2.0 * d)
+        var_i = np.where(d < 1e-3, 2.0 * d ** 3 / 3.0, 2.0 * d - 4.0 * a + var_w)
+        l11 = np.sqrt(var_w)
+        l21 = np.divide(a * a, l11, out=np.zeros_like(d), where=l11 > 0.0)
+        l22 = np.sqrt(np.maximum(var_i - l21 ** 2, 0.0))
+        x1, x2 = eps[j - 1, ..., 0], eps[j - 1, ..., 1]
+        phi = phi + a * omega + l21 * x1 + l22 * x2
+        omega = (1.0 - a) * omega + l11 * x1
+        phase[order[j]] = phi
+    # Every band's field f_b at every frame, (F, B, 2, N): sin(k.x + b) = sin(k.x) cos b + cos(k.x) sin b,
+    # i.e. 2M basis fields times per-frame coefficients (one matrix product for all bands).
+    _, nz, nx = u.shape
+    N = nz * nx
+    X = (np.arange(nx) + 0.5) * dx
+    Z = (np.arange(nz) + 0.5) * dx
+    arg = (k * np.cos(ang))[:, None, None] * X[None, None, :] + (k * np.sin(ang))[:, None, None] * Z[None, :, None]
+    basis = np.concatenate([np.sin(arg), np.cos(arg)]).reshape(2 * M, N).astype(np.float32)
+    e_perp = math.sqrt(2.0 / M) * np.stack([-np.sin(ang), np.cos(ang)])   # c_m e_m, e_m perpendicular to k_m
+    coef = np.concatenate([np.cos(phase)[:, :, None, :] * e_perp, np.sin(phase)[:, :, None, :] * e_perp], axis=-1)
+    f = (coef.reshape(-1, 2 * M).astype(np.float32) @ basis).reshape(n_t, B, 2, N)
+    # Band blend per cell and frame: p = log2(u_max / u) in [0, B - 1], bands floor(p) and floor(p) + 1
+    # (u = 0 lands in the last band with zero amplitude), each scaled by A u / u_b.
+    uf = u.reshape(n_t, N)
+    p = np.clip(np.log2(u_max / np.maximum(uf, u_max * 2.0 ** -(B + 1))), 0.0, B - 1.0)
+    lo = np.minimum(np.floor(p).astype(np.int64), B - 2)
+    frac = p - lo
+    norm = np.hypot(1.0 - frac, frac)
+    disp = np.zeros((n_t, 2, N), dtype=np.float32)
+    for band, w in ((lo, (1.0 - frac) / norm), (lo + 1, frac / norm)):
+        g = np.take_along_axis(f, np.broadcast_to(band[:, None, None, :], (n_t, 1, 2, N)), axis=1)[:, 0]
+        disp += (w * amp * uf / u_band[band]).astype(np.float32)[:, None, :] * g
+    record.update(applied=True, u_max_ms=u_max, amplitude_m=float(amp),
+                  correlation_time_s_at_u_max=float(1.5 * amp / (gain * u_max)))
+    return np.ascontiguousarray(disp.reshape(n_t, 2, nz, nx).transpose(0, 2, 3, 1)), record
 
 
 def _sample_layers(view: _View, scene: np.ndarray, tau_grid: np.ndarray, tc_grid: np.ndarray, coef: np.ndarray,
@@ -942,12 +1138,15 @@ def _visibility(comp: np.ndarray, total: np.ndarray, masks: np.ndarray, detect: 
 
 # ---------------------------------------------------------------------- public API
 def render_sequence(sim: SimulationResult, render_params: Dict[str, Any], rng: np.random.Generator) -> RenderedSequence:
-    """Render observation frames, lag frames and candidate masks of one variant (see module docstring)."""
+    """Render observation frames, lag frames (when the simulation has lag snapshots) and candidate
+    masks of one variant (see module docstring)."""
     rp = render_params
     T = int(sim.n_frames)
-    for name in ("smoke_lag", "lwc_lag", "tracer_lag", "lag_times"):
-        if getattr(sim, name, None) is None:
-            raise ValueError(f"simulation {sim.sim_id} has no {name}: lag frames cannot be rendered")
+    has_lag = getattr(sim, "lag_times", None) is not None
+    if has_lag:
+        for name in ("smoke_lag", "lwc_lag", "tracer_lag"):
+            if getattr(sim, name, None) is None:
+                raise ValueError(f"simulation {sim.sim_id} has lag_times but no {name}: lag frames cannot be rendered")
     declared = (sim.params or {}).get("render_hints") or {}
     if declared and _normalise_hints(declared) != _normalise_hints(rp.get("hints")):
         # Nuisance presence is decided by the simulation's hints only (an illumination_change
@@ -956,9 +1155,11 @@ def render_sequence(sim: SimulationResult, render_params: Dict[str, Any], rng: n
                          f"{sim.sim_id} declares {_normalise_hints(declared)}; pass sim.params['render_hints']")
     view = _view(sim, rp)
     H, W = view.H, view.W
-    F = 2 * T                                         # observation frames, then their lag frames
-    times = np.concatenate([np.asarray(sim.times, dtype=np.float64), np.asarray(sim.lag_times, dtype=np.float64)])
-    tau_grid = np.concatenate([_optical_depth_grid(sim, rp, False), _optical_depth_grid(sim, rp, True)])
+    lags = (True,) if has_lag else ()
+    F = (1 + len(lags)) * T                           # observation frames, then their lag frames (if any)
+    times = np.concatenate([np.asarray(sim.times, dtype=np.float64)]
+                           + [np.asarray(sim.lag_times, dtype=np.float64) for _ in lags])
+    tau_grid = np.concatenate([_optical_depth_grid(sim, rp, lag) for lag in (False,) + lags])
     active = [j for j in range(3) if tau_grid[:, j].max(initial=0.0) > 0.0]
 
     # Advected texture: octaves from max(lam_lo, 2.5 image px) to lam_hi on a 384 px tile.
@@ -968,18 +1169,23 @@ def render_sequence(sim: SimulationResult, render_params: Dict[str, Any], rng: n
     pixel_m = lam_lo / _PATTERN_PX_PER_WAVELENGTH
     pattern = _texture_pattern(int(rp["texture"]["seed"]), round(pixel_m, 6), round(lam_lo, 6), round(lam_hi, 6))
     off = (0.5 * _PATTERN_SIZE + 37.3, 0.5 * _PATTERN_SIZE + 71.9)
-    tc_obs, coef_obs, advected = _texcoord_grid(sim, False, 1.0 / pixel_m, off)
-    tc_lag, coef_lag, _ = _texcoord_grid(sim, True, 1.0 / pixel_m, off)
+    # Subgrid turbulence (None without sim.sgs_u or with sgs_gain 0): extra texture displacement.
+    disp, sgs_record = _sgs_displacement(_sgs_velocity(sim, has_lag), times, float(sim.dx), rp["texture"])
+    tex_parts = [_texcoord_grid(sim, lag, 1.0 / pixel_m, off,
+                                None if disp is None else disp[i * T:(i + 1) * T])
+                 for i, lag in enumerate((False,) + lags)]
+    advected = tex_parts[0][2]
 
     scene, airlight, occluded = _scene_canvas(sim, rp, view)
     shadow, cloud = _nuisance_layers(rp, view, times)
     # The only draws from `rng`, in this order: camera, exposure flicker, sensor noise, masks.
-    affines = _camera_affines(rng, rp, F, view)
+    affines = _camera_affines(rng, rp, times, view)
     gains = 1.0 + float(rp["exposure_flicker"]) * np.clip(rng.standard_normal(F), -3.0, 3.0)
     noise_idx = np.frombuffer(rng.bytes(2 * F * H * W), dtype="<u2").reshape(F, H, W)
 
-    L = _sample_layers(view, scene, tau_grid, np.concatenate([tc_obs, tc_lag]),
-                       np.concatenate([coef_obs, coef_lag]), pattern, affines, times, shadow, cloud, active, occluded)
+    L = _sample_layers(view, scene, tau_grid, np.concatenate([p[0] for p in tex_parts]),
+                       np.concatenate([p[1] for p in tex_parts]), pattern, affines, times, shadow, cloud, active,
+                       occluded)
     scales, groups = _exposure_scales(sim, rp, L, T)
 
     haze, con, offset = float(rp["global_haze"]), float(rp["contrast"]), float(rp["brightness_offset"])
@@ -1020,12 +1226,13 @@ def render_sequence(sim: SimulationResult, render_params: Dict[str, Any], rng: n
                 clear = (1.0 - alpha) if alpha is not None else 1.0
                 total[f] = (1.0 - clear * (1.0 - (a_cloud if a_cloud is not None else 0.0))) * visible
 
-    obs_frames, lag_frames = frames[:T], frames[T:]
+    obs_frames, lag_frames = frames[:T], (frames[T:] if has_lag else None)
     masks = _candidate_masks(rp, detect, occ_obs, obs_frames, np.asarray(sim.times), rng)
     visibility = _visibility(comp, total, masks, detect)
     visibility["peak_contrast_by_component"] = comp_contrast
     visibility["groups"] = groups
     visibility["texture_advected"] = bool(advected)
+    visibility["sgs_texture"] = sgs_record
     visibility["metres_per_pixel"] = float(view.s)
     visibility["floor_row"] = int(view.H_sim)
     return RenderedSequence(
@@ -1033,7 +1240,7 @@ def render_sequence(sim: SimulationResult, render_params: Dict[str, Any], rng: n
         lag_frames=lag_frames,
         masks=masks.astype(bool),
         timestamps=np.asarray(sim.times, dtype=np.float64).copy(),
-        lag_timestamps=np.asarray(sim.lag_times, dtype=np.float64).copy(),
+        lag_timestamps=np.asarray(sim.lag_times, dtype=np.float64).copy() if has_lag else None,
         mask_source=str(rp["masks"]["source"]),
         opacity=total,
         component_opacity={c: (comp[j].astype(np.float16) if comp[j].any() else np.zeros(comp[j].shape, np.float16))

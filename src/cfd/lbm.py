@@ -23,6 +23,13 @@ Boundaries (see docs/design.md section 1):
   "periodic" or "wall";
 * top: "open" (buoyant plumes leave freely) or "wall".
 
+Subgrid velocity scale: `sgs_velocity()` reports u_sgs = C_s dx |S| (m/s),
+with |S| = sqrt(2 S:S) the resolved strain-rate magnitude estimated, exactly
+as the collision's Smagorinsky model does, from the local non-equilibrium
+stress, S = -Pi_neq / (2 rho c_s^2 tau dt) (half-force corrected, local tau).
+It is recomputed from the current populations on demand (the simulation asks
+only at its snapshot times), so the time loop pays nothing for it.
+
 At an open boundary the populations that would stream in from outside the
 domain are set to an equilibrium:
 * lateral inflow (the ambient wind enters through this side, |u_amb| above a
@@ -336,6 +343,8 @@ class LBMSolver:
         self._jx = np.zeros((nz, nx))
         self._jz = np.zeros((nz, nx))
         self._zero = np.zeros((nz, nx))
+        self._last_ax = self._zero
+        self._last_az = self._zero
         self.steps = 0
 
     def _build_sponge(self) -> Tuple[np.ndarray, int]:
@@ -388,12 +397,42 @@ class LBMSolver:
         self.uz_lat += 0.5 * azl
         self.ux_lat[self.solid] = 0.0
         self.uz_lat[self.solid] = 0.0
+        self._last_ax, self._last_az = axl, azl
         self.steps += 1
 
     def velocity(self) -> Tuple[np.ndarray, np.ndarray]:
         """Physical velocity (ux, uz) in m/s at cell centres; zero inside solids."""
         units = self.cfg.units
         return units.velocity_to_physical(self.ux_lat), units.velocity_to_physical(self.uz_lat)
+
+    def strain_rate(self) -> np.ndarray:
+        """Resolved strain-rate magnitude |S| = sqrt(2 S:S) in 1/s, (nz, nx), 0 in solids.
+
+        Estimated like the collision's Smagorinsky model: from the half-force-
+        corrected non-equilibrium stress of the current populations and the
+        local relaxation time it implies (the force is the last step's).
+        """
+        f = self.f
+        rho = self.rho
+        u, v = self.ux_lat, self.uz_lat
+        fx, fz = rho * self._last_ax, rho * self._last_az
+        eu = u[..., None] * EXF + v[..., None] * EZF
+        feq = W * rho[..., None] * (1.0 + 3.0 * eu + 4.5 * eu * eu - 1.5 * (u * u + v * v)[..., None])
+        d = f - feq
+        pxx = d @ (EXF * EXF) + u * fx
+        pzz = d @ (EZF * EZF) + v * fz
+        pxz = d @ (EXF * EZF) + 0.5 * (u * fz + v * fx)
+        qn = np.sqrt(pxx * pxx + 2.0 * pxz * pxz + pzz * pzz)
+        tau0 = self.tau0
+        cs = float(self.cfg.smagorinsky_cs)
+        smag = 18.0 * math.sqrt(2.0) * cs * cs
+        tau = 0.5 * (tau0 + np.sqrt(tau0 * tau0 + smag * qn / rho)) if smag > 0.0 else np.full_like(qn, tau0)
+        s_lat = 1.5 * math.sqrt(2.0) * qn / (rho * tau)      # per lattice step
+        return np.where(self.fluid, s_lat / self.cfg.units.dt, 0.0)
+
+    def sgs_velocity(self) -> np.ndarray:
+        """Subgrid (Smagorinsky) turbulent velocity scale u_sgs = C_s dx |S| in m/s, (nz, nx)."""
+        return float(self.cfg.smagorinsky_cs) * self.cfg.units.dx * self.strain_rate()
 
     def max_lattice_speed(self) -> float:
         speed = np.sqrt(self.ux_lat ** 2 + self.uz_lat ** 2)

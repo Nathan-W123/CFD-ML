@@ -1,19 +1,22 @@
-"""Coupled-simulation checks: steady ambient state, plumes, fog, budgets, scenarios."""
+"""Coupled-simulation checks: steady ambient state, plumes, fog, budgets, scenarios, profiles."""
 
+import collections
 import copy
 
 import numpy as np
 import pytest
 
 from src.cfd.lbm import LatticeUnits, LBMConfig, LBMSolver, ambient_maintaining_acceleration
+from src.cfd.results import ALL_LAG_FIELDS, MissingLagFields, SimulationResult
 from src.cfd.scenarios import (
-    HOLDOUT_TAGS, SPLITS, build_spec, run_scenario, sample_scenario, scenario_seed,
+    HOLDOUT_TAGS, SPLITS, build_spec, regime_weight, run_scenario, sample_scenario, scenario_seed,
 )
 from src.cfd.simulation import run_simulation
-from src.constants import CATEGORIES, FOG_REGIMES, NEITHER_REGIMES, SMOKE_REGIMES
-from src.utils.config import load_simulation_config
+from src.constants import CATEGORIES, FOG_REGIMES, NEITHER_REGIMES, OPT_IN_REGIMES, SMOKE_REGIMES
+from src.utils.config import REPO_ROOT, load_simulation_config
 
 CFG = load_simulation_config()
+FAR_CFG = load_simulation_config(REPO_ROOT / "configs" / "simulation_far.yaml")
 
 
 def _short(cfg, n_frames=4):
@@ -230,15 +233,59 @@ def test_holdout_recipes_are_reachable_and_never_in_training():
         assert p["wind"]["speed_ms"] <= 7.0 and p["terrain"]["height_m"] <= 40.0 and not p["holdout_tags"]
 
 
-def test_every_regime_can_be_sampled():
+def _sampled_regimes(cfg, n):
     seen = set()
-    for i in range(400):
+    for i in range(n):
         for c in CATEGORIES:
-            p = sample_scenario(c, "train", i, CFG)
+            p = sample_scenario(c, "train", i, cfg)
             for key in ("smoke_regime", "fog_regime", "distractor_regime"):
                 if p[key]:
                     seen.add(p[key])
-    assert set(SMOKE_REGIMES) | set(FOG_REGIMES) | set(NEITHER_REGIMES) <= seen
+    return seen
+
+
+def test_every_regime_can_be_sampled():
+    # Updated for engine v2: the opt-in regimes (ridge_cloud, rain_shaft) have weight 0 in
+    # the near profile and must never appear there; every other regime still must.
+    seen = _sampled_regimes(CFG, 400)
+    weights = CFG["scenarios"]["regime_weights"]
+    enabled = {r for cat, regs in (("smoke_only", SMOKE_REGIMES), ("fog_only", FOG_REGIMES), ("neither", NEITHER_REGIMES))
+               for r in regs if regime_weight(r, weights[cat]) > 0}
+    assert enabled == (set(SMOKE_REGIMES) | set(FOG_REGIMES) | set(NEITHER_REGIMES)) - set(OPT_IN_REGIMES)
+    assert seen == enabled
+
+
+def test_every_regime_can_be_sampled_in_the_far_profile():
+    assert _sampled_regimes(FAR_CFG, 300) == set(SMOKE_REGIMES) | set(FOG_REGIMES) | set(NEITHER_REGIMES)
+
+
+def test_regime_weights_absent_means_never_sampled():
+    assert regime_weight("ridge_cloud", {"fog_patch": 1.0}) == 0.0          # missing from a block
+    assert regime_weight("fog_patch", {"fog_patch": 0.5}) == 0.5
+    assert regime_weight("fog_patch", None) == 1.0                          # no block: uniform ...
+    assert regime_weight("rain_shaft", None) == 0.0                         # ... except opt-in regimes
+
+
+def test_near_field_lookalikes_are_not_under_sampled():
+    """illumination_change, camera_artifact and distant_cloud each make >= ~12 % of neither scenes."""
+    n = 1500
+    counts = collections.Counter(sample_scenario("neither", "train", i, CFG)["distractor_regime"] for i in range(n))
+    for regime in ("illumination_change", "camera_artifact", "distant_cloud"):
+        assert counts[regime] / n >= 0.12, (regime, counts)
+    assert counts["haze_drift"] / n > 0.25 and counts["dust_burst"] / n > 0.15
+
+
+@pytest.mark.parametrize("profile", ["near", "far"])
+def test_nuisance_hints_are_class_independent(profile):
+    cfg = CFG if profile == "near" else FAR_CFG
+    n = 400
+    rates = {c: np.mean([[sample_scenario(c, "train", i, cfg)["render_hints"][h]
+                          for h in ("shadow", "strong_artifact", "fp_boost", "distant_cloud")] for i in range(n)], axis=0)
+             for c in CATEGORIES}
+    nuis = cfg["scenarios"]["nuisance"]
+    expected = np.array([nuis["shadow_prob"], nuis["strong_artifact_prob"], nuis["fp_boost_prob"], nuis["distant_cloud_prob"]])
+    for c in CATEGORIES:
+        assert np.abs(rates[c] - expected).max() < 0.07, (c, rates[c])
 
 
 def test_run_is_deterministic():
@@ -251,6 +298,176 @@ def test_run_is_deterministic():
     assert np.array_equal(r1.texcoords, r2.texcoords)
 
 
+# ------------------------------------------------------------------ engine v2: lag frames, SGS velocity
+def test_profile_without_lag_frames_stores_none_and_round_trips(tmp_path):
+    cfg = _short(CFG, n_frames=3)
+    p = sample_scenario("smoke_only", "train", 2, cfg)
+    p["timing"]["spinup_s"] = 10.0
+    with_lag = run_scenario(p, cfg)
+    assert with_lag.has_lag and with_lag.sgs_u_lag is not None and with_lag.sgs_u_lag.shape == with_lag.smoke.shape
+    for value in (None, 0.0):
+        cfg["time"]["flow_lag_s"] = value
+        res = run_scenario(p, cfg)
+        assert not res.has_lag
+        assert all(getattr(res, name) is None for name in ALL_LAG_FIELDS)
+        assert res.sgs_u is not None and res.sgs_u.shape == res.smoke.shape
+        # The observation snapshots do not depend on whether lag snapshots are taken.
+        assert np.array_equal(res.smoke, with_lag.smoke) and np.array_equal(res.texcoords, with_lag.texcoords)
+        with pytest.raises(MissingLagFields, match="no lag snapshots"):
+            res.field_at("smoke", lag=True)
+        assert res.field_at("lwc") is res.lwc
+    path = res.save(tmp_path / "nolag.npz")
+    back = SimulationResult.load(path)
+    assert not back.has_lag and all(getattr(back, name) is None for name in ALL_LAG_FIELDS)
+    assert np.array_equal(back.smoke, res.smoke) and back.valid == res.valid
+    np.testing.assert_allclose(back.sgs_u, res.sgs_u, rtol=2e-3, atol=1e-4)      # float16 on disk
+    back_lag = SimulationResult.load(with_lag.save(tmp_path / "lag.npz"))
+    assert back_lag.has_lag and np.array_equal(back_lag.smoke_lag, with_lag.smoke_lag)
+    np.testing.assert_allclose(back_lag.sgs_u_lag, with_lag.sgs_u_lag, rtol=2e-3, atol=1e-4)
+    # A record with lag fields but no lag times is inconsistent.
+    with pytest.raises(ValueError):
+        SimulationResult(sim_id="x", category="smoke_only", regime="r", labels=(1, 0), seed=0, params={},
+                         dx=5.0, times=res.times, smoke=res.smoke, lwc=res.lwc, tracer=res.tracer, solid=res.solid,
+                         valid=True, validity={}, texcoords=res.texcoords, tex_weights=res.tex_weights,
+                         smoke_lag=res.smoke)
+
+
+def test_sgs_velocity_is_larger_inside_a_plume_than_in_calm_ambient():
+    cfg = _short(CFG, n_frames=3)
+    p = _hot_plume(cfg)
+    p["smoke"]["onset_s"] = -25.0
+    p["timing"]["spinup_s"] = 30.0
+    p["mixing"].update(nu_m2s=2.3, smagorinsky_cs=0.15, diffusivity_m2s=1.0)
+    res = run_scenario(p, cfg)
+    assert res.validity["finite"] and res.validity["max_mach"] < 0.25      # 3 frames: too few for label support
+    assert np.isfinite(res.sgs_u).all() and res.sgs_u.min() >= 0.0
+    assert np.all(res.sgs_u[:, res.solid] == 0.0)
+    last_smoke, last_sgs = res.smoke[-1], res.sgs_u[-1]
+    plume = last_smoke > 0.05 * last_smoke.max()
+    calm = (last_smoke < 1e-4 * last_smoke.max()) & ~res.solid
+    calm[:, 20:44] = False                                   # stay well away from the plume column
+    assert plume.sum() > 10 and calm.sum() > 100
+    assert last_sgs[plume].mean() > 5.0 * last_sgs[calm].mean()
+    assert 0.0 < last_sgs.max() < 5.0                        # m/s: a fraction of the plume velocity
+
+
+# ------------------------------------------------------------------ engine v2: far-field profile
+def _far_short(n_frames=6, label_min_frames=4):
+    cfg = copy.deepcopy(FAR_CFG)
+    cfg["time"]["n_frames"] = n_frames
+    cfg["time"]["precursor_s"] = 60.0
+    cfg["validation"]["label_min_frames"] = label_min_frames     # the shortened window has fewer frames
+    return cfg
+
+
+def _find_far(category, regime_key, regime, cfg, limit=600):
+    return _find(category, regime_key, regime, cfg, limit=limit)
+
+
+def test_far_profile_samples_far_field_scales():
+    cfg = FAR_CFG
+    dx = cfg["grid"]["domain_width_m"] / cfg["grid"]["nx"]
+    assert dx == 50.0 and cfg["time"]["frame_interval_s"] == 60.0 and cfg["time"]["flow_lag_s"] is None
+    kinds = set()
+    for i in range(80):
+        for c in CATEGORIES:
+            p = sample_scenario(c, "train", i, cfg)
+            assert p["wind"]["speed_ms"] * p["wind"]["ramp_factor"] <= 12.0 + 1e-9
+            assert p["timing"]["frame_interval_s"] == 60.0 and 120.0 <= p["timing"]["spinup_s"] <= 900.0
+            assert 15.0 <= p["mixing"]["nu_m2s"] <= 40.0
+            t = p["terrain"]
+            kinds.add(t["kind"])
+            if t["kind"] != "flat":
+                assert 50.0 <= t["height_m"] <= 600.0 and t["width_m"] >= 250.0
+            smoke = p["smoke"]
+            if smoke and smoke["regime"] != "advected_smoke":
+                assert 50.0 <= smoke["source_width_m"] <= 400.0
+                assert smoke["onset_ramp_s"] == 36.0                 # 3 s x (60 s / 5 s)
+            if p["fog"] and p["fog"]["regime"] not in ("steam_fog", "ridge_cloud"):
+                assert 50.0 <= p["fog"]["fog_top_m"] <= 800.0
+            haze = p["background_haze"]
+            if haze:
+                assert haze["texture_scale_m"] >= 300.0 and haze["layer_depth_m"] >= 400.0
+    assert kinds == {"flat", "hill", "valley", "slope", "ridge"}
+    for c in CATEGORIES:
+        for i in range(4):
+            p = sample_scenario(c, "test_ood", i, cfg)
+            if "fast_wind" in p["holdout_tags"]:
+                assert p["wind"]["speed_ms"] >= 12.0
+            if "elevated_source" in p["holdout_tags"]:
+                assert p["terrain"]["height_m"] >= 700.0
+
+
+@pytest.mark.parametrize("category,regime_key,regime", [("smoke_only", "smoke_regime", "hot_plume"),
+                                                         ("fog_only", "fog_regime", "advected_fog_bank")])
+def test_short_far_run_validates(category, regime_key, regime):
+    cfg = _far_short()
+    p = _find_far(category, regime_key, regime, cfg)
+    # Calm for the plume (its rise is then unambiguous; in a crosswind this coarse 2D source
+    # makes a low, bent-over warm layer in both profiles), a light wind for the drifting bank.
+    p["wind"].update(speed_ms=0.0 if category == "smoke_only" else 3.0, gust_fraction=0.0, ramp_factor=1.0, flip=False)
+    p["terrain"] = {"kind": "flat", "height_m": 0.0}
+    p["timing"]["spinup_s"] = 300.0
+    if category == "smoke_only":
+        p["smoke"].update(onset_s=-240.0, offset_s=None, source_x_frac=0.5, buoyancy_flux_m3s3=100.0)
+    else:
+        p["fog"]["front_frac"] = 0.4
+    res = run_scenario(p, cfg)
+    assert res.valid, res.validity["reasons"]
+    assert res.dx == 50.0 and not res.has_lag
+    assert np.allclose(np.diff(res.times), 60.0)
+    assert res.sgs_u.shape == res.smoke.shape and res.sgs_u.min() >= 0.0
+    if category == "smoke_only":
+        z = (np.arange(res.smoke.shape[1]) + 0.5) * res.dx
+        c = res.smoke[-1]
+        assert (c.sum(axis=1) * z).sum() / c.sum() > 300.0          # a wildfire plume rises hundreds of metres
+        assert res.validity["max_theta_anomaly_k"] <= FAR_CFG["physics"]["heat_cap_k"] + 1.0
+
+
+def test_ridge_cloud_condenses_over_the_ridge():
+    cfg = _far_short(n_frames=4, label_min_frames=3)
+    p = _find_far("fog_only", "fog_regime", "ridge_cloud", cfg)
+    p["terrain"] = {"kind": "ridge", "height_m": 450.0, "center_frac": 0.5, "width_m": 400.0,
+                    "direction": 1.0, "lee_width_frac": 0.7}
+    p["wind"].update(speed_ms=8.0, sign=1.0, gust_fraction=0.0, ramp_factor=1.0, flip=False)
+    p["atmosphere"]["lapse_dtheta_dz"] = 0.003
+    p["fog"].update(lcl_frac=0.4, moist_top_frac=2.0)
+    p["timing"]["spinup_s"] = 300.0
+    p["background_haze"] = None
+    spec = build_spec(p, cfg)
+    assert np.all(spec.ql_ref == 0.0) and np.all(spec.initial["ql"] == 0.0)      # nothing prescribed
+    res = run_simulation(spec, cfg)
+    assert res.valid, res.validity["reasons"]
+    lwc = res.lwc[-1]
+    assert lwc.max() > 0.05
+    x = (np.arange(lwc.shape[1]) + 0.5) * res.dx
+    crest = x[np.argmax(res.solid.sum(axis=0))]
+    cx = (lwc.sum(axis=0) * x).sum() / lwc.sum()
+    assert abs(cx - crest) < 600.0                                   # anchored over the ridge ...
+    assert lwc[:, :14].max() < 1e-3                                  # ... not in the sub-saturated inflow
+    assert res.validity["label_support"]["fog_visible_frames"] == res.n_frames
+
+
+def test_rain_shaft_falls_from_cloud_base():
+    cfg = _far_short(n_frames=4)
+    p = _find_far("neither", "distractor_regime", "rain_shaft", cfg)
+    p["wind"].update(speed_ms=2.0, sign=1.0, gust_fraction=0.0, ramp_factor=1.0, flip=False)
+    p["terrain"] = {"kind": "flat", "height_m": 0.0}
+    p["background_haze"] = None
+    p["timing"]["spinup_s"] = 120.0
+    p["distractor"].update(cloud_base_m=2200.0, fall_speed_ms=5.0, onset_s=-60.0, intermittency=0.0,
+                           evaporation_rate_s=0.0, center_frac=0.5)
+    res = run_scenario(p, cfg)
+    assert res.valid, res.validity["reasons"]
+    assert res.smoke.max() == 0.0 and res.lwc.max() == 0.0
+    z = (np.arange(res.tracer.shape[1]) + 0.5) * res.dx
+    heights = [float((c.sum(axis=1) * z).sum() / c.sum()) for c in res.tracer]
+    assert all(b < a - 50.0 for a, b in zip(heights, heights[1:]))     # the curtain descends frame by frame
+    lowest = [float(z[np.nonzero(c.max(axis=1) > 0.01 * c.max())[0].min()]) for c in res.tracer]
+    assert lowest[-1] < lowest[0] - 400.0 and lowest[-1] < 1000.0
+    assert "precip" in res.validity["budgets"] and abs(res.validity["mass_residuals"]["precip"]) < 1e-6
+
+
 # ------------------------------------------------------------------ slow
 @pytest.mark.slow
 @pytest.mark.parametrize("category", CATEGORIES)
@@ -261,6 +478,18 @@ def test_categories_run_and_mostly_validate(category):
         p = sample_scenario(category, "train", i, cfg)
         res = run_scenario(p, cfg)
         assert res.validity["finite"]
+        valid += res.valid
+    assert valid >= 2
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize("category", CATEGORIES)
+def test_far_profile_categories_run_and_mostly_validate(category):
+    cfg = copy.deepcopy(FAR_CFG)                    # the full 12-frame, one-frame-per-minute window
+    valid = 0
+    for i in range(3):
+        res = run_scenario(sample_scenario(category, "train", i, cfg), cfg)
+        assert res.validity["finite"] and not res.has_lag
         valid += res.valid
     assert valid >= 2
 

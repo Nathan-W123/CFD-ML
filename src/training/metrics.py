@@ -12,6 +12,13 @@ expert exists to reduce); abstention rate and selective accuracy.
 Undefined values (a precision with no positive predictions, an AUROC with one
 class) are None, never NaN, so they serialise to JSON as null.
 
+Unknown labels: a target may be NaN (real footage whose fog is not
+annotated). Every label-dependent function here uses only the rows where
+that label is known: per-label metrics, the 4-class confusion (rows with
+BOTH labels known), the false-smoke rate (fog_only needs both labels), the
+fitted decision rules and the bootstrap. A label with no known rows gets
+None metrics and status "no_labels", never 0.
+
 Confidence intervals: `grouped_bootstrap` resamples GROUPS (sim_id for
 synthetic data, camera id for real footage) with replacement, because the
 rendered variants of one simulation are not independent samples.
@@ -56,6 +63,21 @@ def _ratio(a: float, b: float) -> Optional[float]:
     return None if b <= 0 else float(a / b)
 
 
+def known_mask(y) -> np.ndarray:
+    """True where a target is known (NaN = unknown, e.g. unannotated fog on real footage); y's shape."""
+    return ~np.isnan(np.asarray(y, dtype=np.float64))
+
+
+def _drop_unknown(y, *arrays):
+    """(y, *arrays) restricted to the rows where the 1-D target y is known (None arrays pass through)."""
+    t = np.asarray(y, dtype=np.float64).ravel()
+    k = ~np.isnan(t)
+    if k.all():
+        return (y, *arrays)
+    out = [None if a is None else np.asarray(a).ravel()[k] for a in arrays]
+    return (t[k], *out)
+
+
 def sigmoid(z) -> np.ndarray:
     z = np.asarray(z, dtype=np.float64)
     return np.where(z >= 0, 1.0 / (1.0 + np.exp(-np.abs(z))), np.exp(-np.abs(z)) / (1.0 + np.exp(-np.abs(z))))
@@ -79,6 +101,7 @@ def per_group_weights(groups) -> np.ndarray:
 
 
 def confusion_counts(y_true, y_pred, weights=None) -> Dict[str, float]:
+    y_true, y_pred, weights = _drop_unknown(y_true, y_pred, weights)
     t, p = _bool(y_true), _bool(y_pred)
     w = _weights(weights, len(t))
     return {"tp": float(w[t & p].sum()), "fp": float(w[~t & p].sum()),
@@ -110,6 +133,7 @@ def _average_ranks(score: np.ndarray) -> np.ndarray:
 
 def auroc(score, y) -> Optional[float]:
     """Area under the ROC curve (Mann-Whitney, ties count one half); None with one class."""
+    y, score = _drop_unknown(y, score)
     s = np.asarray(score, dtype=np.float64).ravel()
     t = _bool(y)
     n_pos, n_neg = int(t.sum()), int((~t).sum())
@@ -121,6 +145,7 @@ def auroc(score, y) -> Optional[float]:
 
 def _descending_counts(score, y) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Distinct thresholds (descending) and cumulative TP / FP when predicting score >= threshold."""
+    y, score = _drop_unknown(y, score)
     s = np.asarray(score, dtype=np.float64).ravel()
     t = _bool(y)
     if s.size == 0:
@@ -154,6 +179,7 @@ def pr_curve(score, y) -> Dict[str, np.ndarray]:
 def auprc(score, y) -> Optional[float]:
     """Average precision sum_k (R_k - R_{k-1}) P_k over distinct thresholds; None without positives
     (or without negatives, where it is trivially 1 and says nothing)."""
+    y, score = _drop_unknown(y, score)
     t = _bool(y)
     if t.sum() == 0 or (~t).sum() == 0:
         return None
@@ -168,6 +194,7 @@ def auprc(score, y) -> Optional[float]:
 
 
 def brier_score(prob, y) -> Optional[float]:
+    y, prob = _drop_unknown(y, prob)
     p = np.asarray(prob, dtype=np.float64).ravel()
     if p.size == 0:
         return None
@@ -175,7 +202,8 @@ def brier_score(prob, y) -> Optional[float]:
 
 
 def reliability_bins(prob, y, n_bins: int = 10) -> List[Dict[str, float]]:
-    """Equal-mass bins (sorted by probability, split into n_bins nearly equal groups)."""
+    """Equal-mass bins (sorted by probability, split into n_bins nearly equal groups); known labels only."""
+    y, prob = _drop_unknown(y, prob)
     p = np.asarray(prob, dtype=np.float64).ravel()
     t = _bool(y).astype(np.float64)
     order = np.argsort(p, kind="mergesort")
@@ -189,7 +217,8 @@ def reliability_bins(prob, y, n_bins: int = 10) -> List[Dict[str, float]]:
 
 
 def expected_calibration_error(prob, y, n_bins: int = 10) -> Optional[float]:
-    """sum_b (n_b / N) |mean(y_b) - mean(p_b)| over equal-mass bins."""
+    """sum_b (n_b / N) |mean(y_b) - mean(p_b)| over equal-mass bins (N = rows with a known label)."""
+    y, prob = _drop_unknown(y, prob)
     p = np.asarray(prob).ravel()
     if p.size == 0:
         return None
@@ -213,9 +242,15 @@ def categories_from_decisions(decisions) -> np.ndarray:
 
 
 def confusion_4class(y_true, decisions) -> Dict[str, Any]:
-    """Rows: true category; columns: predicted category; abstentions counted separately per row."""
-    true_cat = categories_from_decisions(np.asarray(y_true) > 0.5)
-    pred_cat = categories_from_decisions(decisions)
+    """Rows: true category; columns: predicted category; abstentions counted separately per row.
+
+    Only rows with BOTH labels known have a true category; the others are
+    counted in "n_unknown_labels" and left out.
+    """
+    y_true = np.asarray(y_true, dtype=np.float64).reshape(-1, len(LABEL_NAMES))
+    both = known_mask(y_true).all(axis=1)
+    true_cat = categories_from_decisions(y_true[both] > 0.5)
+    pred_cat = categories_from_decisions(np.asarray(decisions).reshape(-1, len(LABEL_NAMES))[both])
     m = np.zeros((len(CATEGORIES), len(CATEGORIES)), dtype=np.int64)
     abstained = np.zeros(len(CATEGORIES), dtype=np.int64)
     for i in range(len(CATEGORIES)):
@@ -224,7 +259,7 @@ def confusion_4class(y_true, decisions) -> Dict[str, Any]:
         for j in range(len(CATEGORIES)):
             m[i, j] = int(np.sum(pred_cat[rows] == j))
     return {"classes": list(CATEGORIES), "matrix": m.tolist(), "abstained": abstained.tolist(),
-            "n": int(len(true_cat))}
+            "n": int(len(true_cat)), "n_unknown_labels": int((~both).sum())}
 
 
 def smoke_fog_confusion(conf: Dict[str, Any]) -> Dict[str, Optional[float]]:
@@ -260,16 +295,19 @@ def abstain_rate(decisions, names: Sequence[str] = LABEL_NAMES) -> Dict[str, Opt
 
 
 def selective_accuracy(y_true, decisions, names: Sequence[str] = LABEL_NAMES) -> Dict[str, Optional[float]]:
-    """Accuracy over non-abstained decisions, per label and jointly (both labels decided and right)."""
-    t = (np.asarray(y_true) > 0.5).astype(np.int64)
+    """Accuracy over non-abstained decisions, per label (rows with that label known) and jointly
+    (rows with both labels known, both decided and right). coverage_joint is over every row."""
+    y = np.asarray(y_true, dtype=np.float64)
+    known = known_mask(y)
+    t = (y > 0.5).astype(np.int64)
     d = np.asarray(decisions).astype(np.int64)
     out: Dict[str, Optional[float]] = {}
     for j, n in enumerate(names):
-        ok = d[:, j] != ABSTAIN
+        ok = (d[:, j] != ABSTAIN) & known[:, j]
         out[n] = _ratio(float(np.sum(d[ok, j] == t[ok, j])), float(ok.sum()))
-    both = np.all(d != ABSTAIN, axis=1)
+    both = np.all(d != ABSTAIN, axis=1) & known.all(axis=1)
     out["joint"] = _ratio(float(np.sum(np.all(d[both] == t[both], axis=1))), float(both.sum()))
-    out["coverage_joint"] = float(both.mean()) if len(d) else None
+    out["coverage_joint"] = float(np.all(d != ABSTAIN, axis=1).mean()) if len(d) else None
     return out
 
 
@@ -278,7 +316,20 @@ def selective_accuracy(y_true, decisions, names: Sequence[str] = LABEL_NAMES) ->
 # =============================================================================
 
 
+LABEL_METRIC_KEYS: Tuple[str, ...] = ("precision", "recall", "f1", "auroc", "auprc", "brier", "ece", "n", "n_pos",
+                                      "prevalence", "abstain_rate", "selective_accuracy", "selective_precision",
+                                      "selective_recall")
+
+
 def _label_metrics(t, p, hard, dec, n_bins) -> Dict[str, Any]:
+    """Metrics of one label on the rows where it is known; a label with no known row is all None."""
+    n_rows = int(len(np.asarray(t).ravel()))
+    t, p, hard, dec = _drop_unknown(t, p, hard, dec)
+    n_unknown = n_rows - int(len(t))
+    if len(t) == 0:
+        out: Dict[str, Any] = {k: None for k in LABEL_METRIC_KEYS}
+        out.update(n=0, n_pos=None, n_unknown=n_unknown, status="no_labels")
+        return out
     prf = precision_recall_f1(t, hard)
     out = {k: prf[k] for k in ("precision", "recall", "f1")}
     out.update({
@@ -286,6 +337,7 @@ def _label_metrics(t, p, hard, dec, n_bins) -> Dict[str, Any]:
         "ece": expected_calibration_error(p, t, n_bins),
         "n": int(len(t)), "n_pos": int(_bool(t).sum()),
         "prevalence": _ratio(float(_bool(t).sum()), float(len(t))),
+        "n_unknown": n_unknown, "status": "evaluated",
     })
     if dec is not None:
         ok = dec != ABSTAIN
@@ -300,20 +352,29 @@ def classification_metrics(y, probs, hard, decisions=None, categories=None,
                            names: Sequence[str] = LABEL_NAMES, n_bins: int = 10) -> Dict[str, Any]:
     """Point estimates for one set of predictions.
 
-    y (N, 2) targets; probs (N, 2) calibrated probabilities; hard (N, 2) 0/1
-    threshold decisions; decisions (N, 2) with -1 for abstain (default: hard);
-    categories (N,) str (for the false-smoke rate; derived from y when omitted).
+    y (N, 2) targets (NaN = unknown); probs (N, 2) calibrated probabilities;
+    hard (N, 2) 0/1 threshold decisions; decisions (N, 2) with -1 for abstain
+    (default: hard); categories (N,) str (for the false-smoke rate; derived
+    from y when omitted). Per-label entries use only the rows where that label
+    is known ("status": "evaluated" / "no_labels"); the 4-class confusion and
+    the false-smoke rate only rows with both labels known.
     """
     y = np.asarray(y, dtype=np.float64).reshape(-1, len(names))
     probs = np.asarray(probs, dtype=np.float64).reshape(-1, len(names))
     hard = np.asarray(hard).astype(np.int64).reshape(-1, len(names))
     dec = hard if decisions is None else np.asarray(decisions).astype(np.int64).reshape(-1, len(names))
+    known = known_mask(y)
+    both = known.all(axis=1)
     if categories is None:
-        categories = np.array([CATEGORIES[k] for k in categories_from_decisions(y > 0.5)]) if len(y) else np.array([])
+        categories = np.array([CATEGORIES[k] if b else "unknown" for k, b in
+                               zip(categories_from_decisions(y > 0.5), both)]) if len(y) else np.array([])
+    # A category needs both labels: rows with an unknown label never count as fog_only.
+    categories = np.where(both, np.asarray(categories).astype(str), "unknown") if len(y) else np.array([])
     conf = confusion_4class(y, hard)
     conf_sel = confusion_4class(y, dec)
     return {
         "n": int(len(y)),
+        "n_known": {**{n: int(known[:, j].sum()) for j, n in enumerate(names)}, "both": int(both.sum())},
         "per_label": {n: _label_metrics(y[:, j], probs[:, j], hard[:, j], dec[:, j], n_bins)
                       for j, n in enumerate(names)},
         "confusion_4class": conf,
@@ -412,12 +473,16 @@ def fit_temperature(logits, y, bounds: Tuple[float, float] = (0.5, 5.0), weights
     uninformative) the bound itself is used, with `clipped` set: by
     convexity it has a lower calibration NLL than T = 1.
     """
+    y, logits, weights = _drop_unknown(y, logits, weights)
     z = np.asarray(logits, dtype=np.float64).ravel()
     t = _bool(y)
     w = _weights(weights, len(z))
     info: Dict[str, Any] = {"bounds": list(bounds), "fitted_T": None, "at_bound": None, "fallback": False,
                             "reason": None, "nll_T1": _weighted_bce(z, t, w) if len(z) else None}
-    if len(z) == 0 or t.all() or (~t).all():
+    if len(z) == 0:
+        info.update(fallback=True, reason="no_known_labels")
+        return 1.0, info
+    if t.all() or (~t).all():
         info.update(fallback=True, reason="single_class")
         return 1.0, info
     lo, hi = 1.0 / bounds[1], 1.0 / bounds[0]           # search a = 1 / T
@@ -460,6 +525,7 @@ def _candidate_thresholds(score: np.ndarray) -> np.ndarray:
 
 def threshold_max_f1(score, y, weights=None) -> Tuple[float, Dict[str, Any]]:
     """Threshold (on the score scale; predict score >= threshold) maximising the (weighted) F1."""
+    y, score, weights = _drop_unknown(y, score, weights)
     s = np.asarray(score, dtype=np.float64).ravel()
     t = _bool(y)
     w = _weights(weights, len(s))
@@ -487,6 +553,7 @@ def threshold_max_youden(score, y, weights=None) -> Tuple[float, Dict[str, Any]]
     Unlike maximum F1, it does not degenerate to "everything positive" when
     the score is weak and the classes are balanced (F1 = 2/3 there for free).
     """
+    y, score, weights = _drop_unknown(y, score, weights)
     s = np.asarray(score, dtype=np.float64).ravel()
     t = _bool(y)
     w = _weights(weights, len(s))
@@ -535,11 +602,17 @@ def fit_abstain_margin(score, y, threshold: float, floor: float = 0.25, target_e
     Starting at `floor`, widen to the smallest m whose confident (non-abstained)
     weighted error is <= target_error while the abstention rate stays <= max_rate.
     When no such m exists, take the m with the lowest confident error among
-    those within max_rate (flagged `target_reached = False`).
+    those within max_rate (flagged `target_reached = False`). Rows with an
+    unknown label are left out; with none known the margin is the floor.
     """
+    y, score, weights = _drop_unknown(y, score, weights)
     s = np.asarray(score, dtype=np.float64).ravel()
     t = _bool(y)
     w = _weights(weights, len(s))
+    if len(s) == 0:
+        return float(floor), {"abstain_rate": None, "confident_error": None, "error_without_abstention": None,
+                              "target_reached": False, "floor": float(floor), "target_error": float(target_error),
+                              "max_rate": float(max_rate), "reason": "no_known_labels"}
     dist = np.abs(s - threshold)
     err = ((s >= threshold) != t).astype(np.float64)
     order = np.argsort(dist)
@@ -577,11 +650,17 @@ def fit_operating_points(score, y, categories, groups, cfg: Dict[str, Any],
     whose false-smoke rate on fog_only sequences is <= the configured maximum
     (never more permissive than the balanced one); fog keeps its balanced
     threshold. Every count is weighted per group (simulation), so a
-    simulation rendered three times counts once. Returns
+    simulation rendered three times counts once. Each label uses only the rows
+    where it is known (a label with none gets threshold 0 and reason
+    "no_known_labels"); the fog_only negatives need both labels known, and
+    without any the low-false-alarm smoke threshold equals the balanced one
+    (constraint_fitted = False). Returns
     {"thresholds": {op: {label: {"logit", "prob"}}}, "fit": {op: {label: info}}}.
     """
     s = np.asarray(score, dtype=np.float64).reshape(-1, len(names))
     t = np.asarray(y, dtype=np.float64).reshape(-1, len(names))
+    groups = np.asarray(groups)
+    known = known_mask(t)
     w = per_group_weights(groups)
     max_fsr = float(cfg.get("thresholds", {}).get("operating_points", {})
                     .get("low_false_alarm", {}).get("max_false_smoke_on_fog_only", 0.05))
@@ -589,19 +668,31 @@ def fit_operating_points(score, y, categories, groups, cfg: Dict[str, Any],
     fit: Dict[str, Dict[str, Any]] = {"balanced": {}, "low_false_alarm": {}}
     objective = str(cfg.get("thresholds", {}).get("operating_points", {}).get("balanced", "youden"))
     for j, name in enumerate(names):
-        if objective == "f1":
-            thr, info = threshold_max_f1(s[:, j], t[:, j], w)
+        k = known[:, j]
+        # Weights per group over the known rows (identical to w when every label is known).
+        wj = w if k.all() else per_group_weights(groups[k])
+        if not k.any():
+            thr, info = 0.0, {"reason": "no_known_labels"}
+        elif objective == "f1":
+            thr, info = threshold_max_f1(s[k, j], t[k, j], wj)
         else:
-            thr, info = threshold_max_youden(s[:, j], t[:, j], w)
+            thr, info = threshold_max_youden(s[k, j], t[k, j], wj)
         thresholds["balanced"][name] = {"logit": thr, "prob": float(sigmoid(thr))}
-        fit["balanced"][name] = {"criterion": "max_f1" if objective == "f1" else "max_youden_j", **info}
+        fit["balanced"][name] = {"criterion": "max_f1" if objective == "f1" else "max_youden_j",
+                                 "n_known": int(k.sum()), **info}
+    fog_only = (np.asarray(categories).astype(str) == "fog_only") & known.all(axis=1)
     for j, name in enumerate(names):
         bal = thresholds["balanced"][name]["logit"]
         if j == 0:
-            thr, info = threshold_max_false_rate(s[:, 0], np.asarray(categories).astype(str) == "fog_only",
-                                                 max_fsr, w)
+            thr, info = threshold_max_false_rate(s[:, 0], fog_only, max_fsr, w)
+            fitted = bool(fog_only.any())
             fit["low_false_alarm"][name] = {"criterion": f"false_smoke_on_fog_only<={max_fsr}", **info,
-                                            "constraint_active": bool(thr > bal)}
+                                            "constraint_active": bool(fitted and thr > bal),
+                                            "constraint_fitted": fitted}
+            if not fitted:
+                fit["low_false_alarm"][name]["reason"] = ("no fog_only sequences with both labels known: "
+                                                          "the threshold equals the balanced one")
+                thr = bal
             thr = max(thr, bal)
         else:
             thr = bal

@@ -15,6 +15,12 @@ Stage B (real labelled footage, camera-disjoint splits):
         --init artifacts --out runs/finetune_real            # experiment D (lr 1e-4)
     python scripts/train_physics.py --stage scratch --features data/real/features.npz \\
         --out runs/scratch_real                              # experiment B (same data, random init)
+
+Targets may be NaN = unknown (e.g. real footage whose fog is not annotated):
+they are left out of the loss, early stopping and every calibration fit; a
+label with too few known val_calib targets keeps the pretrained calibration
+(finetune) or the neutral defaults (scratch), recorded in model_config.yaml
+under calibration.label_support.
 """
 
 import _bootstrap  # noqa: F401
@@ -24,6 +30,9 @@ import json
 import sys
 from pathlib import Path
 
+import numpy as np
+
+from src.constants import LABEL_NAMES
 from src.data.dataset import FeatureSet, assert_no_group_leakage
 from src.training.train import run_finetune, run_pretraining
 from src.utils.config import load_training_config
@@ -42,6 +51,13 @@ def main(argv=None):
     cfg = load_training_config(args.config, args.set)
     fs = FeatureSet.load(args.features)
     assert_no_group_leakage(fs)
+    for j, name in enumerate(LABEL_NAMES):
+        known = fs.known[:, j]
+        if not known.all():
+            per_split = ", ".join(f"{s} {int(known[fs.splits == s].sum())}/{int(np.sum(fs.splits == s))}"
+                                  for s in sorted(set(fs.splits)))
+            print(f"note: {name} targets known for {int(known.sum())} / {len(fs)} sequences ({per_split}); "
+                  "unknown targets are left out of the loss and calibration", file=sys.stderr)
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     write_yaml(out / "training_config_used.yaml", cfg)

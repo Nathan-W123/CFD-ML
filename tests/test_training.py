@@ -314,7 +314,9 @@ def test_preprocessing_record_takes_timing_from_the_extraction_meta(fs):
     rec = _preprocessing_record(tr, cfg)                   # nothing recorded: the full code defaults
     assert rec["feature_config"] == defaults
     assert rec["feature_config_source"] == "code_defaults_at_training"
-    assert rec["feature_timing_source"] == {"expected_interval_s": "default", "flow_lag_s": "default"}
+    # The timing tolerance max_offset_s is part of the timing record (far-field profile: 10 s).
+    assert rec["feature_timing_source"] == {"expected_interval_s": "default", "flow_lag_s": "default",
+                                            "max_offset_s": "default"}
     timed = copy.deepcopy(tr)
     for m in timed.meta:
         m["feature_meta"] = {"flow_mode": "lag", "timing": {"expected_interval_s": 4.0, "expected_flow_lag_s": 0.5}}
@@ -326,6 +328,16 @@ def test_preprocessing_record_takes_timing_from_the_extraction_meta(fs):
     assert rec["training_flow_modes"] == {"lag": len(timed)}
     # The exported settings rebuild the extractor configuration at inference.
     FeatureConfig(**rec["feature_config"])
+    # Consecutive-flow rows (far-field profile): lag None / 0 and the recorded timing tolerance are exported.
+    far = copy.deepcopy(timed)
+    for m in far.meta:
+        m["feature_meta"] = {"flow_mode": "consecutive",
+                             "timing": {"expected_interval_s": 60.0, "expected_flow_lag_s": 0.0, "max_offset_s": 10.0}}
+        m["feature_config"] = dict(defaults, expected_interval_s=60.0, flow_lag_s=None, max_offset_s=10.0)
+    rec = _preprocessing_record(far, cfg)
+    assert rec["feature_config"]["flow_lag_s"] == 0.0 and rec["feature_config"]["max_offset_s"] == 10.0
+    assert rec["feature_config"]["expected_interval_s"] == 60.0
+    assert rec["training_flow_modes"] == {"consecutive": len(far)}
     timed.meta[0]["feature_config"] = dict(defaults, flow_erode_px=2)
     with pytest.raises(ValueError, match="feature configs"):
         _preprocessing_record(timed, cfg)
@@ -501,3 +513,242 @@ def test_youden_threshold_does_not_degenerate_on_weak_scores():
     # Separable scores: Youden puts the threshold between the classes.
     thr, info = threshold_max_youden(np.r_[np.full(10, 2.0), np.full(10, -2.0)], np.r_[np.ones(10), np.zeros(10)])
     assert -2.0 < thr <= 2.0 and info["youden_j"] == 1.0
+
+
+# ============================================================================= unknown (NaN) labels, real Stage B
+def _fog_unknown(fs):
+    """Smoke-only supervision: every fog target NaN (unknown), categories as extract_features writes them."""
+    from src.data.dataset import label_category
+
+    out = copy.deepcopy(fs)
+    out.y[:, 1] = np.nan
+    out.categories = np.array([label_category(s, f) for s, f in out.y])
+    return out
+
+
+def _real_set(seed=9, fog_unknown=True):
+    real = make_feature_set(sims={"train": 10, "val_select": 4, "val_calib": 5, "test_iid": 4}, seed=seed,
+                            source="real", groups=lambda split, c, i: f"cam-{split}-{i % 3}")
+    return _fog_unknown(real) if fog_unknown else real
+
+
+def test_masked_loss_ignores_unknown_targets():
+    from src.training.train import masked_bce_with_logits
+
+    bce = torch.nn.functional.binary_cross_entropy_with_logits
+    torch.manual_seed(0)
+    z = torch.randn(8, 2)
+    y = (torch.rand(8, 2) > 0.5).float()
+    pw = torch.tensor([2.0, 0.5])
+    assert torch.equal(masked_bce_with_logits(z, y), bce(z, y))              # all known: the plain loss
+    assert torch.equal(masked_bce_with_logits(z, y, pw), bce(z, y, pos_weight=pw))
+    part = y.clone()
+    part[::2, 1] = float("nan")                                               # per label over its known entries
+    want = 0.5 * (bce(z[:, 0], y[:, 0]) + bce(z[1::2, 1], y[1::2, 1]))
+    assert float(masked_bce_with_logits(z, part)) == pytest.approx(float(want), rel=1e-6)
+    fog_nan = y.clone()
+    fog_nan[:, 1] = float("nan")                                              # a label never known: not averaged in
+    zz = z.clone().requires_grad_(True)
+    loss = masked_bce_with_logits(zz, fog_nan)
+    assert float(loss.detach()) == pytest.approx(float(bce(z[:, 0], y[:, 0])), rel=1e-6)
+    loss.backward()
+    assert torch.isfinite(zz.grad).all() and torch.all(zz.grad[:, 1] == 0)
+    none = masked_bce_with_logits(z.clone().requires_grad_(True), torch.full((8, 2), float("nan")))
+    assert float(none.detach()) == 0.0 and none.requires_grad
+
+
+def test_metrics_and_decision_rules_ignore_unknown_labels():
+    rng = np.random.default_rng(0)
+    n = 200
+    y = np.stack([rng.random(n) < 0.5, rng.random(n) < 0.5], axis=1).astype(float)
+    probs = np.clip(0.6 * y + 0.4 * rng.random((n, 2)), 0, 1)
+    hard = (probs >= 0.5).astype(int)
+    dec = np.where(rng.random((n, 2)) < 0.1, -1, hard)
+    cats = np.array([CATEGORIES[k] for k in M.categories_from_decisions(y)])
+    part = y.copy()
+    part[::2, 1] = np.nan
+    known = ~np.isnan(part[:, 1])
+    doc = M.classification_metrics(part, probs, hard, dec, cats)
+    ref = M.classification_metrics(y[known], probs[known], hard[known], dec[known], cats[known])
+    for key in ("precision", "recall", "f1", "auroc", "auprc", "brier", "ece", "selective_accuracy"):
+        assert doc["per_label"]["fog"][key] == pytest.approx(ref["per_label"]["fog"][key])
+    assert doc["per_label"]["fog"]["n"] == known.sum() and doc["per_label"]["fog"]["n_unknown"] == n - known.sum()
+    assert doc["per_label"]["smoke"]["n"] == n and doc["per_label"]["fog"]["status"] == "evaluated"
+    assert doc["confusion_4class"]["n"] == known.sum() == ref["confusion_4class"]["n"]
+    assert doc["confusion_4class"]["matrix"] == ref["confusion_4class"]["matrix"]
+    assert doc["false_smoke_on_fog_only"] == ref["false_smoke_on_fog_only"]
+    assert doc["n_known"] == {"smoke": n, "fog": int(known.sum()), "both": int(known.sum())}
+
+    # Fog never annotated: every fog metric, the 4-class confusion and false smoke are null, never 0.
+    none = y.copy()
+    none[:, 1] = np.nan
+    doc = M.classification_metrics(none, probs, hard, dec, cats)
+    fog = doc["per_label"]["fog"]
+    assert fog["status"] == "no_labels" and fog["n"] == 0
+    assert all(fog[k] is None for k in ("precision", "recall", "f1", "auroc", "auprc", "brier", "ece",
+                                        "selective_accuracy", "prevalence"))
+    assert doc["per_label"]["smoke"]["auroc"] is not None
+    assert doc["confusion_4class"]["n"] == 0 and doc["false_smoke_on_fog_only"]["rate"] is None
+    assert doc["selective_accuracy"]["joint"] is None and doc["selective_accuracy"]["smoke"] is not None
+    ci = M.bootstrap_classification_ci(none, probs, hard, dec, cats, np.arange(n) % 40, n_boot=30)
+    assert ci["fog.auroc"]["lo"] is None and ci["smoke.auroc"]["lo"] is not None
+    json.dumps(doc, allow_nan=False)
+
+    # Decision rules: fitted on the known rows only, neutral when nothing is known.
+    z = M.logit(probs[:, 1])
+    assert M.fit_temperature(z, part[:, 1]) == M.fit_temperature(z[known], y[known, 1])
+    T, info = M.fit_temperature(z, none[:, 1])
+    assert T == 1.0 and info["reason"] == "no_known_labels"
+    assert M.threshold_max_youden(z, part[:, 1]) == M.threshold_max_youden(z[known], y[known, 1])
+    m, info = M.fit_abstain_margin(z, none[:, 1], 0.0, floor=0.25)
+    assert m == 0.25 and info["reason"] == "no_known_labels"
+    ops = M.fit_operating_points(M.logit(probs), none, np.array(["unknown"] * n), np.arange(n) % 40, _cfg())
+    assert ops["fit"]["balanced"]["fog"]["reason"] == "no_known_labels"
+    lfa = ops["fit"]["low_false_alarm"]["smoke"]
+    assert lfa["constraint_fitted"] is False and lfa["reason"]
+    assert ops["thresholds"]["low_false_alarm"]["smoke"] == ops["thresholds"]["balanced"]["smoke"]
+
+
+def test_featureset_and_sequences_with_unknown_labels_or_no_lag_frames(tmp_path, fs):
+    from src.data.dataset import label_category, parse_label
+
+    real = _fog_unknown(fs.split(["train", "test_iid"]))
+    real.source = "real"
+    back = FeatureSet.load(real.save(tmp_path / "real.npz"))
+    np.testing.assert_array_equal(np.isnan(back.y), np.isnan(real.y))
+    assert np.isnan(back.y[:, 1]).all() and not np.isnan(back.y[:, 0]).any()
+    assert back.known[:, 0].all() and not back.known[:, 1].any()
+    assert set(back.categories) == {"smoke_fog_unknown", "no_smoke_fog_unknown"}
+    assert_no_group_leakage(back)
+    _, y = SequenceTensorDataset(back)[0]
+    assert torch.isnan(y[1]) and not torch.isnan(y[0])
+    with pytest.raises(ValueError, match=r"\[0, 1\]"):
+        FeatureSet(X=fs.X[:1], y=[[2.0, 0.0]], seq_ids=["a"], sim_ids=["a"], groups=["a"], splits=["train"],
+                   categories=["smoke_only"], regimes=["r"], tags=[""], mask_sources=["degraded"])
+    assert label_category(0, 1) == "fog_only" and label_category(1, np.nan) == "smoke_fog_unknown"
+    assert np.isnan(parse_label("")) and np.isnan(parse_label("unknown")) and parse_label("1") == 1.0
+    with pytest.raises(ValueError):
+        parse_label("0.5")
+
+    # A far-field sequence has no lag frames: stored without them, loaded back as None.
+    rng = np.random.default_rng(0)
+    T, H, W = 12, 16, 20
+    rendered = SimpleNamespace(frames=rng.integers(0, 255, (T, H, W), dtype=np.uint8), lag_frames=None,
+                               masks=rng.random((T, H, W)) > 0.7, timestamps=np.arange(T) * 60.0,
+                               lag_timestamps=None, mask_source="degraded", visibility={}, render_params={})
+    sim = SimpleNamespace(sim_id="s", category="fog_only", regime="ridge_cloud", labels=(0, 1), seed=1,
+                          params={"split": "train"}, valid=True, validity={}, dx=50.0)
+    seq = load_sequence(save_sequence(tmp_path / "far", rendered, sim, "s-v0"))
+    assert seq["lag_frames"] is None and seq["lag_timestamps"] is None and seq["meta"]["has_lag_frames"] is False
+    np.testing.assert_array_equal(seq["frames"], rendered.frames)
+    np.testing.assert_array_equal(seq["masks"], rendered.masks)
+
+
+def test_training_and_calibration_with_unknown_fog_labels(fs):
+    from src.training.baselines import run_baselines
+    from src.training.evaluate import shortcut_audit
+    from src.utils.io import dumps_json
+
+    nan_fs = _fog_unknown(fs)
+    res, norm = _train_one(nan_fs, max_epochs=8)
+    assert np.isfinite(res.best_val_loss)
+    assert all(h["val_auroc_fog"] is None and h["val_auroc_smoke"] is not None for h in res.history)
+    test = nan_fs.split("test_iid")
+    z = model_logits(res.model, norm, test.X)
+    assert M.auroc(z[:, 0], test.y[:, 0]) > 0.7               # the smoke signal is still learned
+    vc = nan_fs.split("val_calib")
+    cfg = _cfg()
+    cal = fit_calibration(model_logits(res.model, norm, vc.X), vc, cfg, "real_val_calib")
+    sup = cal["calibration"]["label_support"]
+    assert sup["fog"]["n_known"] == 0 and sup["fog"]["calibration"] == "default_unfitted"
+    assert sup["smoke"]["calibration"] == "fitted" and sup["smoke"]["n_known"] == len(vc)
+    assert cal["temperatures"]["fog"] == 1.0 and cal["thresholds"]["balanced"]["fog"]["logit"] == 0.0
+    assert cal["calibration"]["prevalence"]["fog"]["per_sequence"] is None
+    assert cal["thresholds"]["low_false_alarm"]["smoke"] == cal["thresholds"]["balanced"]["smoke"]
+    # Fine-tuning: a label without known calibration rows keeps the pretrained model's rules.
+    pre = {"temperatures": {"smoke": 1.3, "fog": 2.2},
+           "thresholds": {op: {"smoke": {"logit": 0.1}, "fog": {"logit": 0.7}} for op in ("balanced", "low_false_alarm")},
+           "abstain": {"margins": {op: {"smoke": 0.3, "fog": 0.45} for op in ("balanced", "low_false_alarm")}}}
+    kept = fit_calibration(model_logits(res.model, norm, vc.X), vc, cfg, "real_val_calib", fallback=pre)
+    assert kept["temperatures"]["fog"] == 2.2 and kept["thresholds"]["balanced"]["fog"]["logit"] == 0.7
+    assert kept["abstain"]["margins"]["low_false_alarm"]["fog"] == 0.45
+    assert kept["calibration"]["label_support"]["fog"]["calibration"] == "kept_pretrained"
+    assert kept["temperatures"]["smoke"] == cal["temperatures"]["smoke"]      # known labels are still fitted
+    dumps_json(kept)                                                          # finite, JSON / YAML-safe
+
+    base = run_baselines(nan_fs, cfg, n_boot=10)
+    a = base["A_heuristic"]
+    assert a["skipped_labels"] == {"fog": "no known labels in the train split"} and a["coefficients"]["fog"] is None
+    fog = a["results"]["test_iid"]["balanced"]["per_label"]["fog"]
+    assert fog["status"] == "not_fitted" and fog["auroc"] is None
+    assert a["results"]["test_iid"]["balanced"]["per_label"]["smoke"]["auroc"] > 0.6
+    audit = shortcut_audit(nan_fs, cfg)
+    assert audit["flags_only"]["pooled"]["auroc"]["fog"] is None
+    assert audit["parameters"]["per_label"]["fog"] == {}
+    dumps_json({"baselines": base, "audit": audit})
+
+
+def test_stage_b_on_smoke_only_real_data(tmp_path, fs):
+    import importlib
+    import sys
+
+    from src.training.evaluate import build_evaluation, compact, evaluate_real, update_real_section
+
+    cfg = _cfg("training.max_epochs=3", "finetune.max_epochs=2")
+    run_pretraining(fs, cfg, tmp_path / "pre", log=None)
+    real = _real_set()
+    d = run_finetune(real, cfg, tmp_path / "pre", tmp_path / "D", log=None)
+    b = run_finetune(real, cfg, tmp_path / "pre", tmp_path / "B", from_scratch=True, log=None)
+    assert d["label_support"]["fog"]["calibration"] == "kept_pretrained"
+    assert b["label_support"]["fog"]["calibration"] == "default_unfitted"
+    pre, cd = read_yaml(tmp_path / "pre" / "model_config.yaml"), read_yaml(tmp_path / "D" / "model_config.yaml")
+    assert cd["temperatures"]["fog"] == pre["temperatures"]["fog"]
+    assert cd["thresholds"]["balanced"]["fog"] == pre["thresholds"]["balanced"]["fog"]
+    assert cd["temperatures"]["smoke"] != pre["temperatures"]["smoke"] or \
+        cd["thresholds"]["balanced"]["smoke"] != pre["thresholds"]["balanced"]["smoke"]
+    assert cd["fit"]["known_labels"]["train"] == {"smoke": int(np.sum(real.splits == "train")), "fog": 0}
+    assert cd["fit"]["training"]["loss"] == "bce_with_logits_masked_unknown"
+
+    res = evaluate_real(real, cfg, {"B": tmp_path / "B", "C": tmp_path / "pre", "D": tmp_path / "D"}, n_boot=20)
+    assert res["status"] == "partial" and res["evaluated_labels"] == ["smoke"]
+    assert res["label_status"]["smoke"]["status"] == "evaluated"
+    assert res["label_status"]["fog"]["status"] == "no_labels" and "fog" in res["label_status"]["fog"]["reason"]
+    assert res["counts"]["test_iid"]["known_labels"]["fog"] == 0
+    for exp in ("B", "C", "D"):
+        ov = res[exp]["test_iid"]["balanced"]["overall"]
+        assert ov["per_label"]["smoke"]["auroc"] is not None and ov["per_label"]["smoke"]["n"] == len(real.split("test_iid"))
+        assert ov["per_label"]["fog"]["status"] == "no_labels"
+        assert all(ov["per_label"]["fog"][k] is None for k in ("precision", "recall", "f1", "auroc", "ece"))
+        assert ov["false_smoke_on_fog_only"]["rate"] is None and ov["confusion_4class"]["n"] == 0
+        assert ov["ci95"]["fog.auroc"]["lo"] is None and compact(ov)["fog"]["status"] == "no_labels"
+    doc = build_evaluation({"model": "C"}, None, None, None, real=res)
+    assert doc["ablations"]["B"] is res["B"] and doc["ablations"]["real_label_status"]["fog"]["status"] == "no_labels"
+    merged = update_real_section({"synthetic": {"kept": True}, "real": {"status": "pending"},
+                                  "ablations": {"A": {"a": 1}, "B": None, "C": {"c": 1}, "D": None,
+                                                "reasons": {"B": "x", "D": "x"}}}, res)
+    assert merged["synthetic"] == {"kept": True} and merged["real"]["status"] == "partial"
+    assert merged["ablations"]["A"] == {"a": 1} and merged["ablations"]["D"] is res["D"]
+    assert "B" not in merged["ablations"]["reasons"]
+    write_json(tmp_path / "eval.json", merged)                            # finite JSON only
+
+    # The script: Stage B on its own keeps the synthetic sections of an existing evaluation.json.
+    import shutil
+
+    art = tmp_path / "art"
+    shutil.copytree(tmp_path / "pre", art)
+    write_json(art / "evaluation.json", {"synthetic": {"kept": True}, "real": {"status": "pending"},
+                                         "ablations": {"A": None, "B": None, "C": None, "D": None, "reasons": {}}})
+    real.save(tmp_path / "real.npz")
+    scripts = str(__import__("pathlib").Path(__file__).resolve().parents[1] / "scripts")
+    sys.path.insert(0, scripts)
+    try:
+        ev = importlib.import_module("evaluate_physics")
+        assert ev.main(["--artifacts", str(art), "--reports", str(tmp_path / "rep"), "--real", str(tmp_path / "real.npz"),
+                        "--real-out", str(tmp_path / "runs"), "--n-boot", "10", "--set", "training.seeds=[0]",
+                        "--set", "training.max_epochs=2", "--set", "finetune.max_epochs=2"]) == 0
+    finally:
+        sys.path.remove(scripts)
+    out = read_json(tmp_path / "rep" / "evaluation.json")
+    assert out["synthetic"] == {"kept": True} and out["real"]["status"] == "partial"
+    assert out["real"]["D"]["test_iid"]["balanced"]["overall"]["per_label"]["fog"]["auroc"] is None
+    assert out["ablations"]["B"] is not None and out["ablations"]["D"] is not None

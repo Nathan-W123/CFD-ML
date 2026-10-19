@@ -133,7 +133,12 @@ def test_normalizer_uses_only_the_data_it_is_fitted_on():
 
 
 # ----------------------------------------------------------------------------- artifacts
-def _artifacts(tmp_path, seed=0):
+NEAR_PRE = {"feature_config": {"expected_interval_s": 5.0, "flow_lag_s": 1.0}}
+FAR_PRE = {"feature_config": {"expected_interval_s": 60.0, "flow_lag_s": 0.0, "max_offset_s": 10.0},
+           "training_flow_modes": {"consecutive": 32}}
+
+
+def _artifacts(tmp_path, seed=0, preprocessing=None, name="art"):
     torch.manual_seed(seed)
     model = PhysicsGRU().eval()
     X = _features(32, seed=seed)
@@ -146,8 +151,8 @@ def _artifacts(tmp_path, seed=0):
                                      "low_false_alarm": {"smoke": 0.3, "fog": 0.25}},
                          "input_validity": {"min_mask_frames": 3, "min_flow_frames": 2, "max_clip_fraction": 0.2}},
              "calibration": {"fit_source": "synthetic_val_calib"},
-             "preprocessing": {"feature_config": {"expected_interval_s": 5.0, "flow_lag_s": 1.0}}}
-    paths = save_model_artifacts(model, tmp_path / "art", norm, extra)
+             "preprocessing": NEAR_PRE if preprocessing is None else preprocessing}
+    paths = save_model_artifacts(model, tmp_path / name, norm, extra)
     return model, norm, X, paths
 
 
@@ -176,7 +181,7 @@ def test_physics_expert_predict_decisions_and_abstention(tmp_path):
     emb = expert.encode(X)
     assert emb.shape == (len(X), 16) and emb.dtype == np.float32
     assert expert.encode(X[0]).shape == (1, 16)
-    out = expert.predict(X)
+    out = expert.predict(X, operating_point="balanced")      # the default is low_false_alarm (below)
     assert out["calibration_source"] == "synthetic_val_calib"
     probs, dec, z = out["probs"], out["decisions"], out["calibrated_logits"]
     assert probs.shape == (len(X), 2) and np.all((probs >= 0) & (probs <= 1))
@@ -218,6 +223,126 @@ def test_physics_expert_predict_decisions_and_abstention(tmp_path):
         expert.predict(ok, operating_point="nope")
 
 
+TIMING_REASONS = {"consecutive_flow", "lag_flow", "incompatible_frame_interval"}
+
+
+def _timing(intervals, lags=None):
+    """A minimal extractor record: the achieved intervals (and lags) between observations."""
+    return {"intervals_s": [float(v) for v in intervals], "flow_lags_s": None if lags is None else list(lags)}
+
+
+def test_predict_defaults_to_the_low_false_alarm_point(tmp_path):
+    _, _, X, _ = _artifacts(tmp_path)
+    expert = PhysicsExpert.load(tmp_path / "art")
+    out = expert.predict(X)
+    assert out["operating_point"] == "low_false_alarm"
+    assert out["thresholds"]["smoke"] == pytest.approx(1 / (1 + np.exp(-1.0)))
+    np.testing.assert_array_equal(out["hard_decisions"],
+                                  (out["calibrated_logits"] >= np.array([1.0, -0.2])).astype(int))
+    explicit = expert.predict(X, operating_point="low_false_alarm")
+    np.testing.assert_array_equal(out["decisions"], explicit["decisions"])
+    assert out["abstain_reasons"] == explicit["abstain_reasons"]
+
+
+def test_flow_mode_and_timing_rules_follow_the_training_profile(tmp_path):
+    _, _, X, _ = _artifacts(tmp_path)
+    _artifacts(tmp_path, preprocessing=FAR_PRE, name="far")
+    near, far = PhysicsExpert.load(tmp_path / "art"), PhysicsExpert.load(tmp_path / "far")
+    assert near.training_flow_modes == ("lag",) and not near.consecutive_native
+    assert far.training_flow_modes == ("consecutive",) and far.consecutive_native
+    ok = X[:1].copy()
+    ok[0, :, 12:] = 1.0
+
+    def reasons(expert, meta, **kw):
+        return set(expert.predict(ok, meta=meta, **kw)["abstain_reasons"][0]) & TIMING_REASONS
+
+    minute = {"flow_mode": "consecutive", "timing": _timing([60.0] * 11)}
+    # A far-field model takes consecutive one-minute flow as its native input, lag pairs not.
+    assert reasons(far, minute) == set()
+    assert reasons(far, {"flow_mode": "lag", "timing": _timing([60.0] * 11, [1.0] * 12)}) == {"lag_flow"}
+    # ... and judges intervals with its own tolerance (60 +- 2 x max_offset_s = 10 s).
+    assert reasons(far, {"flow_mode": "consecutive",
+                         "timing": _timing([60, 75, 45, 79.5, 60, 60, 41, 60, 60, 60, 60])}) == set()
+    assert reasons(far, {"flow_mode": "consecutive", "timing": _timing([60.0] * 5 + [85.0] + [60.0] * 5)}) \
+        == {"incompatible_frame_interval"}
+    assert reasons(far, {"flow_mode": "consecutive", "timing": _timing([5.0] * 11)}) == {"incompatible_frame_interval"}
+    # A lag-trained (near-field) model refuses consecutive flow unless allowed, and one-minute spacing always.
+    assert reasons(near, minute) == {"consecutive_flow", "incompatible_frame_interval"}
+    assert reasons(near, minute, allow_consecutive=True) == {"incompatible_frame_interval"}
+    assert reasons(near, {"flow_mode": "lag", "timing": _timing([5.0] * 11, [1.0] * 12)}) == set()
+    assert reasons(near, {"flow_mode": "lag", "timing": _timing([5.0] * 11, [1.0] * 11 + [1.8])}) \
+        == {"incompatible_frame_interval"}
+    # The model's own timing decides, not the flag of an extractor configured differently ...
+    other = dict(_timing([60.0] * 11, [1.0] * 12), interval_compatible=True, lag_compatible=True, compatible=True)
+    assert reasons(near, {"flow_mode": "lag", "timing": other}) == {"incompatible_frame_interval"}
+    # ... while a record without the achieved intervals falls back to its own flags.
+    assert reasons(far, {"flow_mode": "consecutive", "timing": {"interval_compatible": False}}) \
+        == {"incompatible_frame_interval"}
+    assert reasons(far, {"flow_mode": "consecutive", "timing": {}}) == set()
+
+
+def test_training_flow_modes_of_older_and_mixed_exports(tmp_path):
+    # Without a training_flow_modes record the exported feature_config decides (flow_lag_s 0: consecutive).
+    _artifacts(tmp_path, preprocessing={"feature_config": {"expected_interval_s": 60.0, "flow_lag_s": 0.0}}, name="a")
+    _artifacts(tmp_path, preprocessing={}, name="b")
+    _artifacts(tmp_path, preprocessing={"training_flow_modes": {"lag": 5, "consecutive": 5}}, name="c")
+    assert PhysicsExpert.load(tmp_path / "a").consecutive_native
+    assert PhysicsExpert.load(tmp_path / "b").training_flow_modes == ("lag",)      # every pre-v2 model
+    mixed = PhysicsExpert.load(tmp_path / "c")
+    assert mixed.training_flow_modes == ("consecutive", "lag") and not mixed.consecutive_native
+
+
+def _drifting_clip(times, speed_px_s=0.1, size=160, seed=0):
+    """Textured disc drifting right over a static textured background: uint8 frames, bool masks."""
+    import cv2
+
+    rng = np.random.default_rng(seed)
+    tex = cv2.GaussianBlur(rng.standard_normal((512, 512)).astype(np.float32), (0, 0), 3.0)
+    tex /= tex.std()
+    bg = cv2.GaussianBlur(rng.standard_normal((size, size)).astype(np.float32), (0, 0), 2.0)
+    bg = 0.35 + 0.08 * bg / bg.std()
+    yy, xx = np.mgrid[0:size, 0:size].astype(np.float32)
+    frames, masks = [], []
+    for t in np.asarray(times, dtype=float):
+        cx = float(50.0 + speed_px_s * t)
+        inside = cv2.remap(tex, xx - cx + 256, yy - 80 + 256, cv2.INTER_LINEAR)
+        r = np.hypot(xx - cx, yy - 80)
+        alpha = np.clip((22.0 - r) / 1.5 + 0.5, 0.0, 1.0)
+        frames.append(np.rint(np.clip((1 - alpha) * bg + alpha * (0.65 + 0.12 * inside), 0, 1) * 255))
+        masks.append(r <= 22.0)
+    return np.stack(frames).astype(np.uint8), np.stack(masks)
+
+
+def test_features_from_frames_reproduce_the_far_training_extractor(tmp_path):
+    _artifacts(tmp_path)
+    _artifacts(tmp_path, preprocessing=FAR_PRE, name="far")
+    far = PhysicsExpert.load(tmp_path / "far")
+    ts = np.arange(12) * 60.0 + np.random.default_rng(1).uniform(-4.0, 4.0, 12)
+    frames, masks = _drifting_clip(ts)
+    lag_frames, _ = _drifting_clip(ts - 1.0)
+    X, meta = far.features_from_frames(frames, ts, masks, lag_frames, ts - 1.0)
+    assert X.shape == (12, 14) and meta["mask_source"] == "provided"
+    assert meta["flow_mode"] == "consecutive" and meta["lag_frames_ignored"]       # what the model saw in training
+    assert meta["config"]["expected_interval_s"] == 60.0 and meta["config"]["max_offset_s"] == 10.0
+    assert meta["timing"]["compatible"] and X[0, 13] == 0.0 and X[1:, 13].sum() >= 9
+    X_nolag, _ = far.features_from_frames(frames, ts, masks)
+    np.testing.assert_array_equal(X_nolag, X)
+    assert not set(far.predict(X, meta=meta)["abstain_reasons"][0]) & TIMING_REASONS
+    # An export that recorded only consecutive training rows (no flow_lag_s) still extracts consecutive flow.
+    _artifacts(tmp_path, preprocessing={"training_flow_modes": {"consecutive": 3},
+                                        "feature_config": {"expected_interval_s": 60.0, "max_offset_s": 10.0}},
+               name="far_old")
+    X_old, meta_old = PhysicsExpert.load(tmp_path / "far_old").features_from_frames(
+        frames, ts, masks, lag_frames, ts - 1.0)
+    assert meta_old["flow_mode"] == "consecutive"
+    np.testing.assert_array_equal(X_old, X)
+    # The near-field model on the same one-minute clip: consecutive flow at the wrong spacing -> abstains.
+    near = PhysicsExpert.load(tmp_path / "art")
+    Xn, mn = near.features_from_frames(frames, ts, masks)
+    assert mn["flow_mode"] == "consecutive" and not mn["timing"]["compatible"]
+    assert {"consecutive_flow", "incompatible_frame_interval"} <= set(near.predict(Xn, meta=mn)["abstain_reasons"][0])
+
+
 def test_inference_does_not_import_training_code(tmp_path):
     _artifacts(tmp_path)
     np.save(tmp_path / "x.npy", _features(3, seed=7))
@@ -243,3 +368,4 @@ def test_inference_does_not_import_training_code(tmp_path):
 
     doc = json.loads(cli.stdout)
     assert np.asarray(doc["probs"]).shape == (3, 2) and np.asarray(doc["embedding"]).shape == (3, 16)
+    assert doc["operating_point"] == "low_false_alarm"

@@ -4,12 +4,21 @@ Usage:
     python scripts/generate_dataset.py --out data/synthetic_debug --n-per-category 50
     python scripts/generate_dataset.py --out data/synthetic --n-per-category 250 --ood-per-category 50
     python scripts/generate_dataset.py ... --set render.zoom=[0.5,1.0] --workers 3
+    python scripts/generate_dataset.py --config configs/simulation_far.yaml --out data/synthetic_far ...
+
+--config selects the simulation profile: configs/simulation.yaml (default,
+near field: 12 observations 5 s apart, each with a lag frame 1 s earlier) or
+configs/simulation_far.yaml (far field: one frame per minute, no lag frames,
+flow between consecutive observations). The feature extractor's timing
+(expected interval, flow lag, tolerance) comes from the profile's `time`
+block and is stored with every row, so a model trained on the output
+reproduces it at inference.
 
 Output layout (under --out):
     config_used.yaml      the merged configuration (with its sha256 in summary.json)
     sims/<split>/*.npz    SimulationResult per accepted simulation (fields, texcoords, validity)
-    seqs/<split>/*.npz    rendered sequences: 12 frames + 12 lag frames, masks, timestamps,
-                          labels, parameters, seeds, validity metadata
+    seqs/<split>/*.npz    rendered sequences: 12 frames (+ 12 lag frames when the profile has
+                          them), masks, timestamps, labels, parameters, seeds, validity metadata
     features.npz          FeatureSet (12 x 14 raw features per sequence + provenance)
     manifest.csv          one row per sequence
     rejected.csv          every rejected simulation attempt and render retry, with parameters
@@ -37,7 +46,7 @@ import numpy as np
 
 from src.cfd.scenarios import SPLITS
 from src.constants import CATEGORIES
-from src.data.pipeline import process_slot, split_counts
+from src.data.pipeline import feature_timing, process_slot, split_counts
 from src.utils.config import load_simulation_config
 from src.utils.io import dumps_json, write_json, write_yaml
 
@@ -98,6 +107,20 @@ def build_tasks(cfg, out_dir, splits):
     return tasks, counts
 
 
+def _feature_record(info):
+    """What a FeatureSet row records about its feature extraction (inference reproduces feature_config)."""
+    fmeta = info["feature_meta"]
+    return {
+        "flow_mode": fmeta["flow_mode"],            # "lag" | "consecutive" (far-field profile)
+        "feature_meta": {k: v for k, v in fmeta.items() if k in ("roi", "flow_mode", "timing", "counts")},
+        "stabilization": {k: fmeta.get("stabilization", {}).get(k)
+                          for k in ("applied", "reason", "textured_frac", "n_corners")},
+        "roi_scale": info["feature_config"]["roi_scale"],
+        # everything else the extractor was configured with (inference must reproduce it)
+        "feature_config": {k: v for k, v in info["feature_config"].items() if k != "roi_scale"},
+    }
+
+
 def _suite_task(task):
     from src.cfd.results import SimulationResult
     from src.data.pipeline import render_and_extract
@@ -137,6 +160,9 @@ def robustness(out, cfg, rows, workers):
             X.append(feats)
             y.append(r["labels"])
             rec.append((r, task["suite"], info))
+    if not rec:
+        print("robustness: no sequence passed the label-visibility check", file=sys.stderr)
+        return
     fs = FeatureSet(
         X=np.stack(X).astype(np.float32), y=np.array(y, dtype=np.float32),
         seq_ids=np.array([f"{r['sim_id']}-{suite}-v{info['variant']}" for r, suite, info in rec]),
@@ -150,7 +176,8 @@ def robustness(out, cfg, rows, workers):
         meta=[{"suite": suite, "render_seed": info["render_seed"], "smoke_regime": r["smoke_regime"],
                "fog_regime": r["fog_regime"], "distractor_regime": r["distractor_regime"],
                "context": r["context"], "render": {k: v for k, v in info["render_params"].items()
-                                                   if isinstance(v, (int, float, str, bool))}}
+                                                   if isinstance(v, (int, float, str, bool))},
+               **_feature_record(info)}
               for r, suite, info in rec],
         source="synthetic",
     )
@@ -174,8 +201,19 @@ def write_csv(path, rows):
             w.writerow({k: (json.dumps(v) if isinstance(v, (list, dict)) else v) for k, v in r.items()})
 
 
-def wind_bin(speed):
-    return f"{int(min(speed, 8.99) // 1.5) * 1.5:.1f}-{int(min(speed, 8.99) // 1.5) * 1.5 + 1.5:.1f}"
+def max_wind_speed(cfg):
+    """Largest wind speed any split of the profile samples (m/s): the top of the acceptance bins."""
+    sc = cfg.get("scenarios", {}).get("common", {})
+    hi = [float(sc.get("wind_speed_ms", [0.0, 9.0])[1])]
+    hi += [float(v["wind_speed_ms"][1]) for v in (cfg.get("holdout") or {}).values()
+           if isinstance(v, dict) and "wind_speed_ms" in v]
+    return max(hi)
+
+
+def wind_bin(speed, top=9.0):
+    """1.5 m/s acceptance bin; speeds at or above `top` fall into the last bin below it."""
+    lo = int(min(speed, top - 0.01) // 1.5) * 1.5
+    return f"{lo:.1f}-{lo + 1.5:.1f}"
 
 
 def main(argv=None):
@@ -242,11 +280,7 @@ def main(argv=None):
             "fog_regime": r["fog_regime"], "distractor_regime": r["distractor_regime"],
             "render_seed": r["info"]["render_seed"], "variant": r["info"]["variant"],
             "context": r["context"], "render": r["render"],
-            "feature_meta": {k: v for k, v in r["info"]["feature_meta"].items() if k in ("roi", "flow_mode", "timing", "counts")},
-            "stabilization": {k: r["info"]["feature_meta"].get("stabilization", {}).get(k) for k in ("applied", "reason", "textured_frac", "n_corners")},
-            "roi_scale": r["info"]["feature_config"]["roi_scale"],
-            # everything else the extractor was configured with (inference must reproduce it)
-            "feature_config": {k: v for k, v in r["info"]["feature_config"].items() if k != "roi_scale"},
+            **_feature_record(r["info"]),
             "sim_path": r["sim_path"], "seq_path": r["seq_path"],
         } for r in rows],
         source="synthetic",
@@ -270,15 +304,16 @@ def main(argv=None):
     for r in rows:
         sim_rows.setdefault(r["sim_id"], r)
     acc = defaultdict(lambda: Counter())
+    wind_top = max_wind_speed(cfg)
     for r in sim_rows.values():
         for key in (("category", r["category"]), ("regime", r["regime"]),
-                    ("wind", f"{r['category']}:{wind_bin(r['context']['wind_speed_ms'])}")):
+                    ("wind", f"{r['category']}:{wind_bin(r['context']['wind_speed_ms'], wind_top)}")):
             acc[key[0]][key[1] + "|accepted"] += 1
     for rej in rejected:
         if rej["stage"] != "simulation":
             continue
         for key in (("category", rej["category"]), ("regime", rej["regime"]),
-                    ("wind", f"{rej['category']}:{wind_bin(rej['wind_speed_ms'])}")):
+                    ("wind", f"{rej['category']}:{wind_bin(rej['wind_speed_ms'], wind_top)}")):
             acc[key[0]][key[1] + "|rejected"] += 1
     acceptance = {}
     for level, counter in acc.items():
@@ -301,6 +336,9 @@ def main(argv=None):
         "sequences_per_split": dict(Counter(r["split"] for r in rows)),
         "sequences_per_category_split": {f"{c}/{s}": n for (c, s), n in Counter((r["category"], r["split"]) for r in rows).items()},
         "mask_sources": dict(Counter(r["info"]["mask_source"] for r in rows)),
+        # the profile's frame timing and the flow mode the features were measured in
+        "profile": {**feature_timing(cfg), "n_frames": int(cfg.get("time", {}).get("n_frames", 12)),
+                    "flow_modes": dict(Counter(r["info"]["flow_mode"] for r in rows))},
         "acceptance": acceptance,
         "timing": {
             "wall_s": wall, "workers": args.workers,

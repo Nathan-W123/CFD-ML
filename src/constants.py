@@ -38,6 +38,7 @@ FOG_REGIMES: Tuple[str, ...] = (
     "fog_patch",          # localised patch drifting and evaporating at its edges
     "fog_dissipating",    # established fog eroded by dry air or warming, or shifted by wind
     "steam_fog",          # warm moist strip under cold air: rising condensate wisps (hard negative)
+    "ridge_cloud",        # orographic cap / low cloud: humid flow lifted over a ridge condenses
 )
 
 NEITHER_REGIMES: Tuple[str, ...] = (
@@ -46,7 +47,12 @@ NEITHER_REGIMES: Tuple[str, ...] = (
     "illumination_change",  # moving cloud shadow / exposure change, no aerosol
     "camera_artifact",      # shake, zoom jitter, flicker with spurious detector regions
     "distant_cloud",        # a bright cloud drifting slowly in the sky band (classic false positive)
+    "rain_shaft",           # precipitation curtain falling from cloud base, drifting with the wind
 )
+
+# Regimes a profile must enable explicitly with a positive weight in
+# scenarios.regime_weights (the near-field profile leaves them at 0).
+OPT_IN_REGIMES: Tuple[str, ...] = ("ridge_cloud", "rain_shaft")
 
 CATEGORY_INDEX: Dict[str, int] = {name: i for i, name in enumerate(CATEGORIES)}
 

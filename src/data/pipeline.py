@@ -10,6 +10,14 @@ re-rendered with a fresh render seed (also logged). Every random stream is
 derived from the slot's seed, so the output does not depend on how many
 worker processes ran or in which order.
 
+Profiles: the configuration is a whole simulation profile (near field:
+configs/simulation.yaml, observations 5 s apart with lag frames 1 s
+earlier; far field: configs/simulation_far.yaml, one frame per minute and no
+lag frames). The feature extractor is configured from the profile's `time`
+block (`feature_timing`), so a far-field dataset gets consecutive-observation
+flow with 60 s timing checks, and the FeatureSet records exactly that
+configuration for the exported model to reproduce at inference.
+
 Where this fits: `scripts/generate_dataset.py` (orchestration, CLI) calls
 `process_slot`; `scripts/evaluate_physics.py` calls `render_and_extract` to
 re-render test simulations for the robustness suites.
@@ -30,11 +38,28 @@ from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 from src.cfd.results import SimulationResult
 from src.cfd.scenarios import run_scenario, sample_scenario
-from src.cfd.simulation import SimulationUnstable
+from src.cfd.simulation import SimulationUnstable, has_lag_frames
 from src.utils.runtime import STREAM_RENDER_PARAMS, child_rng, derive_seed
 
 ROI_SCALE_RANGE = (1.5, 2.5)   # synthetic ROI scale; inference uses the fixed FeatureConfig default
 _CFD_DIR = Path(__file__).resolve().parents[1] / "cfd"
+
+
+def feature_timing(cfg: Mapping[str, Any]) -> Dict[str, float]:
+    """FeatureConfig timing of a simulation profile (its `time` block).
+
+    expected_interval_s = time.frame_interval_s; flow_lag_s = time.flow_lag_s,
+    or 0.0 (consecutive-observation flow) when it is null / 0; max_offset_s =
+    time.max_offset_s (0.5 when absent). The near-field profile gives the
+    FeatureConfig defaults (5.0, 1.0, 0.5).
+    """
+    t = cfg.get("time", {}) or {}
+    lag = t.get("flow_lag_s", 1.0)
+    max_off = t.get("max_offset_s")
+    interval = t.get("frame_interval_s")
+    return {"expected_interval_s": 5.0 if interval is None else float(interval),
+            "flow_lag_s": float(lag) if has_lag_frames(lag) else 0.0,
+            "max_offset_s": 0.5 if max_off is None else float(max_off)}
 
 
 def cfd_fingerprint(cfg: Mapping[str, Any]) -> str:
@@ -134,7 +159,9 @@ def render_and_extract(sim: SimulationResult, cfg: Dict[str, Any], variant: int,
                        max_retries: int = 4, feature_cfg=None):
     """Render one camera variant of `sim` (re-drawing on label-visibility failure) and extract features.
 
-    Returns (features (12, 14), info dict, rendered sequence or None, list of rejection dicts).
+    Without lag frames (a profile with time.flow_lag_s null / 0) the renderer
+    returns none and the flow is measured between consecutive observations.
+    Returns (features (T, 14), info dict, rendered sequence or None, list of rejection dicts).
     """
     from src.data.features import FeatureConfig, extract_features_with_meta
     from src.data.render import check_label_visibility, render_sequence, sample_render_params
@@ -155,18 +182,16 @@ def render_and_extract(sim: SimulationResult, cfg: Dict[str, Any], variant: int,
             continue
         if feature_cfg is None:
             roi_scale = float(child_rng(render_seed, 3).uniform(*ROI_SCALE_RANGE))
-            fcfg = FeatureConfig(roi_scale=roi_scale,
-                                 flow_lag_s=float(cfg.get("time", {}).get("flow_lag_s", 1.0)),
-                                 expected_interval_s=float(cfg.get("time", {}).get("frame_interval_s", 5.0)))
+            fcfg = FeatureConfig(roi_scale=roi_scale, **feature_timing(cfg))
         else:
             fcfg = feature_cfg
         feats, fmeta = extract_features_with_meta(
             rendered.frames, rendered.timestamps, rendered.masks,
-            rendered.lag_frames, rendered.lag_timestamps, fcfg)
+            getattr(rendered, "lag_frames", None), getattr(rendered, "lag_timestamps", None), fcfg)
         info = {
             "render_seed": int(render_seed), "variant": int(variant), "retry": int(retry), "suite": suite,
             "mask_source": rendered.mask_source, "render_params": rp,
-            "feature_config": asdict(fcfg), "feature_meta": fmeta,
+            "feature_config": asdict(fcfg), "feature_meta": fmeta, "flow_mode": fmeta["flow_mode"],
             "visibility": rendered.visibility,
         }
         return feats, info, rendered, rejected

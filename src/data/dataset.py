@@ -8,12 +8,15 @@ Two on-disk record types, both compressed .npz written by `src.utils.io.save_npz
   grouped splitting and sliced evaluation (sim id, group, split, category,
   regime, hold-out tags, mask source) plus a JSON meta dict per row (seed,
   scenario context, render settings, feature-extraction record).
+  A target may be NaN = unknown (real footage whose fog is not annotated);
+  such a row's category is one of PARTIAL_CATEGORIES (`label_category`).
 * rendered sequences (seqs/<split>/<seq_id>.npz, `save_sequence` /
-  `load_sequence`): the 12 observation frames, 12 lag frames, candidate masks
-  (bit-packed), timestamps, labels, the simulation parameters, seed and
-  numerical-validity record, the render parameters, and optionally the
-  opacity diagnostics. Enough to re-extract features (e.g. with detector
-  masks) without re-rendering.
+  `load_sequence`): the 12 observation frames, 12 lag frames (none for a
+  profile without lag frames, e.g. the far-field one-frame-per-minute one),
+  candidate masks (bit-packed), timestamps, labels, the simulation
+  parameters, seed and numerical-validity record, the render parameters, and
+  optionally the opacity diagnostics. Enough to re-extract features (e.g.
+  with detector masks) without re-rendering.
 
 Leakage rules (docs/design.md section 12): a group (synthetic: sim_id; real:
 camera id) and an original simulation / video never span two splits, and no
@@ -39,6 +42,7 @@ from typing import Any, Dict, Iterable, List, Optional, Union
 import numpy as np
 import torch
 
+from src.constants import CATEGORY_LABELS
 from src.data.feature_spec import N_FEATURES, N_STEPS
 from src.utils.io import PathLike, load_npz, save_npz, to_jsonable
 
@@ -48,6 +52,37 @@ SEQUENCE_FORMAT_VERSION = 1
 _STR_FIELDS = ("seq_ids", "sim_ids", "groups", "splits", "categories", "regimes", "tags", "mask_sources")
 # Keys of a scenario-parameter dict that identify a sample rather than describe it.
 _ID_KEYS = ("sim_id", "split", "index", "attempt", "seed", "holdout_tags", "category")
+
+# Categories of rows with an unknown (NaN) target, keyed by (smoke, fog) with None = unknown.
+PARTIAL_CATEGORIES: Dict[tuple, str] = {
+    (1, None): "smoke_fog_unknown",
+    (0, None): "no_smoke_fog_unknown",
+    (None, 1): "fog_smoke_unknown",
+    (None, 0): "no_fog_smoke_unknown",
+    (None, None): "unlabelled",
+}
+
+
+def label_category(smoke: float, fog: float) -> str:
+    """Category of a (smoke, fog) target pair; NaN = unknown gives one of PARTIAL_CATEGORIES."""
+    key = tuple(None if v is None or not np.isfinite(float(v)) else int(float(v) > 0.5) for v in (smoke, fog))
+    if None in key:
+        return PARTIAL_CATEGORIES[key]
+    for name, pair in CATEGORY_LABELS.items():
+        if pair == key:
+            return name
+    raise ValueError(f"no category for labels {key}")       # unreachable: CATEGORY_LABELS covers {0, 1}^2
+
+
+def parse_label(value) -> float:
+    """A manifest label: 0 / 1, or NaN (unknown) for an empty cell, "nan", "unknown", "?" or "-"."""
+    text = str(value if value is not None else "").strip().lower()
+    if text in ("", "nan", "none", "null", "unknown", "?", "-"):
+        return float("nan")
+    v = float(text)
+    if v not in (0.0, 1.0):
+        raise ValueError(f"label {value!r} must be 0, 1 or empty (unknown)")
+    return v
 
 
 def _str_array(values, n: int, name: str) -> np.ndarray:
@@ -63,12 +98,12 @@ def _str_array(values, n: int, name: str) -> np.ndarray:
 @dataclass
 class FeatureSet:
     X: np.ndarray                  # (N, 12, 14) float32 raw features (closed gates 0)
-    y: np.ndarray                  # (N, 2) float32 (smoke, fog)
+    y: np.ndarray                  # (N, 2) float32 (smoke, fog) in [0, 1]; NaN = unknown (not annotated)
     seq_ids: np.ndarray            # (N,) str, unique
     sim_ids: np.ndarray            # (N,) str, original simulation (real: video id)
     groups: np.ndarray             # (N,) str, the leakage unit (synthetic: sim_id; real: camera id)
     splits: np.ndarray             # (N,) str, train / val_select / val_calib / test_iid / test_ood / robust:<suite>
-    categories: np.ndarray         # (N,) str, src.constants.CATEGORIES
+    categories: np.ndarray         # (N,) str, src.constants.CATEGORIES (PARTIAL_CATEGORIES with a NaN target)
     regimes: np.ndarray            # (N,) str
     tags: np.ndarray               # (N,) str, ";"-joined hold-out tags ("" for none)
     mask_sources: np.ndarray       # (N,) str, degraded / bbox / detector / provided / fallback_detector
@@ -85,6 +120,9 @@ class FeatureSet:
         self.y = np.asarray(self.y, dtype=np.float32).reshape(n, -1) if n else np.zeros((0, 2), np.float32)
         if self.y.shape[1] != 2:
             raise ValueError(f"FeatureSet.y must be (N, 2), got {self.y.shape}")
+        known = ~np.isnan(self.y)
+        if np.any(np.isinf(self.y)) or np.any((self.y[known] < 0) | (self.y[known] > 1)):
+            raise ValueError("FeatureSet.y must lie in [0, 1], or be NaN for an unknown label")
         for name in _STR_FIELDS:
             setattr(self, name, _str_array(getattr(self, name), n, name))
         self.meta = list(self.meta) if self.meta else [{} for _ in range(n)]
@@ -96,8 +134,14 @@ class FeatureSet:
     def __len__(self) -> int:
         return int(self.X.shape[0])
 
+    @property
+    def known(self) -> np.ndarray:
+        """(N, 2) bool: True where the target is known (not NaN)."""
+        return ~np.isnan(self.y)
+
     # ------------------------------------------------------------------ storage
     def save(self, path: PathLike) -> Path:
+        """Compressed .npz; NaN (unknown) targets are stored as NaN and come back as NaN."""
         arrays = {name: getattr(self, name) for name in _STR_FIELDS}
         return save_npz(path, X=self.X, y=self.y, meta=to_jsonable(self.meta),
                         info={"format": "feature_set", "version": FEATURESET_FORMAT_VERSION,
@@ -191,22 +235,30 @@ def save_sequence(path: PathLike, rendered, sim, seq_id: str, extra: Optional[Di
     """Store one rendered camera sequence with everything needed to re-extract and audit it.
 
     `rendered` is a `src.data.render.RenderedSequence`, `sim` the
-    `src.cfd.results.SimulationResult` it was rendered from. `extra` keys:
-    "diagnostics" (bool, default False) also stores the float16 opacity maps;
-    "render_info" and anything else go into the JSON meta.
+    `src.cfd.results.SimulationResult` it was rendered from. A sequence
+    without lag frames (`rendered.lag_frames` None: a profile with
+    time.flow_lag_s null / 0) stores none, and `load_sequence` returns None
+    for them. `extra` keys: "diagnostics" (bool, default False) also stores
+    the float16 opacity maps; "render_info" and anything else go into the
+    JSON meta.
     """
     extra = dict(extra or {})
     diagnostics = bool(extra.pop("diagnostics", False))
     masks = np.asarray(rendered.masks).astype(bool)
+    lag_frames = getattr(rendered, "lag_frames", None)
+    lag_ts = getattr(rendered, "lag_timestamps", None)
+    if (lag_frames is None) != (lag_ts is None):
+        raise ValueError("lag_frames and lag_timestamps must both be given or both be None")
     arrays: Dict[str, Any] = {
         "frames": np.asarray(rendered.frames, dtype=np.uint8),
-        "lag_frames": np.asarray(rendered.lag_frames, dtype=np.uint8),
         "masks_packed": np.packbits(masks, axis=-1),
         "masks_shape": np.asarray(masks.shape, dtype=np.int64),
         "timestamps": np.asarray(rendered.timestamps, dtype=np.float64),
-        "lag_timestamps": np.asarray(rendered.lag_timestamps, dtype=np.float64),
         "labels": np.asarray(sim.labels, dtype=np.int8),
     }
+    if lag_frames is not None:
+        arrays["lag_frames"] = np.asarray(lag_frames, dtype=np.uint8)
+        arrays["lag_timestamps"] = np.asarray(lag_ts, dtype=np.float64)
     if diagnostics:
         if getattr(rendered, "opacity", None) is not None:
             arrays["opacity"] = np.asarray(rendered.opacity, dtype=np.float16)
@@ -230,6 +282,7 @@ def save_sequence(path: PathLike, rendered, sim, seq_id: str, extra: Optional[Di
         "mask_source": rendered.mask_source,
         "render_params": rendered.render_params,
         "visibility": rendered.visibility,
+        "has_lag_frames": lag_frames is not None,
         "diagnostics_stored": diagnostics,
         "extra": extra,
     }
@@ -240,7 +293,8 @@ def load_sequence(path: PathLike) -> Dict[str, Any]:
     """A stored sequence as a dict: arrays (frames, lag_frames, masks (T, H, W) bool, timestamps,
     lag_timestamps, labels) plus the meta fields (seq_id, sim_id, category, regime, seed, params,
     validity, render_params, mask_source, visibility, extra) and the full `meta` dict; with
-    diagnostics also opacity and component_opacity."""
+    diagnostics also opacity and component_opacity. lag_frames / lag_timestamps are None for a
+    sequence stored without lag frames."""
     data = load_npz(path)
     meta = data.pop("meta")
     if int(meta.get("version", 1)) > SEQUENCE_FORMAT_VERSION:
@@ -249,10 +303,10 @@ def load_sequence(path: PathLike) -> Dict[str, Any]:
     masks = np.unpackbits(data.pop("masks_packed"), axis=-1, count=shape[-1]).astype(bool).reshape(shape)
     out: Dict[str, Any] = {
         "frames": data.pop("frames"),
-        "lag_frames": data.pop("lag_frames"),
+        "lag_frames": data.pop("lag_frames", None),
         "masks": masks,
         "timestamps": data.pop("timestamps"),
-        "lag_timestamps": data.pop("lag_timestamps"),
+        "lag_timestamps": data.pop("lag_timestamps", None),
         "labels": tuple(int(v) for v in data.pop("labels")),
     }
     for key in ("seq_id", "sim_id", "category", "regime", "seed", "split", "params", "valid", "validity",
@@ -276,7 +330,8 @@ class SequenceTensorDataset(torch.utils.data.Dataset):
     """(x (12, 14), y (2,)) float32 tensors; normalised on construction when a normaliser is given.
 
     `X` is a FeatureSet (labels taken from it) or an array (N, 12, 14);
-    `y` defaults to zeros for unlabelled data.
+    `y` defaults to zeros for unlabelled data. NaN targets (unknown) are kept
+    as NaN; the training loss masks them.
     """
 
     def __init__(self, X, y=None, normalizer=None):

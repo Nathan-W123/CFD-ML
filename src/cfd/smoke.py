@@ -23,9 +23,18 @@ heating, onset time relative to the first frame (most plumes are already
 established, some ignite during the window, some switch off), intermittency
 and an optional residual smoke puff. Nothing forces smoke to rise.
 
-The same machinery provides the "dust_burst" distractor (an unheated,
-settling ground emission, possibly from a moving vehicle), which lives on the
-tracer field.
+The same machinery provides two "neither" distractors: "dust_burst" (an
+unheated, settling ground emission, possibly from a moving vehicle), which
+lives on the tracer field, and "rain_shaft" (precipitation generated at a
+cloud base drifting with the wind aloft, falling at several m/s, optionally
+intermittent and partly evaporating on the way down: virga), which lives on
+the separate fast-settling "precip" scalar and reaches the renderer as
+tracer.
+
+Scales: physical sizes, heights and periods come from the profile config
+(near-field values are the code defaults); numerical widths scale with dx and
+window-relative schedule times (onsets, switch-offs, ramps) with the frame
+interval (see scenario_util).
 
 Where this fits: `scenarios.sample_scenario` calls `sample_smoke` /
 `sample_dust`; `scenarios.build_spec` calls `smoke_component` /
@@ -42,8 +51,8 @@ import numpy as np
 
 from src.cfd import thermo
 from src.cfd.scenario_util import (
-    Component, Grid, activity_window, drift_start, layer_profile, log_uniform, smooth_noise01,
-    smooth_texture, sample_noise_spec, source_mask, uniform,
+    Component, Grid, activity_window, block_range, drift_start, layer_profile, log_uniform, smooth_noise01,
+    smooth_texture, sample_noise_spec, source_mask, time_scale, uniform,
 )
 
 SMOKE_DEFAULTS = {
@@ -54,7 +63,22 @@ SMOKE_DEFAULTS = {
                 "wind_speed_ms": [0.0, 7.0]},
     "advected_smoke": {"layer_base_m": [0.0, 120.0], "layer_depth_m": [20.0, 150.0],
                        "inflow_mg_m3": [0.5, 15.0], "intermittency": [0.3, 0.8],
-                       "residual_warmth_k": [0.1, 0.5], "wind_speed_ms": [1.0, 9.0]},
+                       "residual_warmth_k": [0.1, 0.5], "wind_speed_ms": [1.0, 9.0],
+                       "modulation_period_s": [5.0, 25.0]},
+}
+RAIN_DEFAULTS = {
+    "wind_speed_ms": [0.0, 15.0],
+    "cloud_base_m": [150.0, 260.0],        # generating level (near-field defaults; far: km)
+    "shaft_width_m": [40.0, 120.0],
+    "fall_speed_ms": [3.0, 8.0],           # raindrop terminal velocity (drizzle / virga to rain)
+    "emission_mg_m3_s": [5.0, 50.0],       # equivalent aerosol, rendered as tracer
+    "evaporation_rate_s": [0.0, 0.03],     # fractional loss per second on the way down (virga)
+    "intermittency": [0.0, 0.6],
+    "modulation_period_s": [10.0, 40.0],
+    "onset_s": [-30.0, 10.0],              # relative to the first frame, near-field seconds (x time scale)
+    # The precipitating cell moves slower than the wind at cloud base (cells propagate by
+    # regenerating on their flanks), which also keeps a shaft in view for more of the window.
+    "cloud_drift_factor": [0.4, 1.0],
 }
 
 
@@ -70,6 +94,7 @@ def sample_smoke(regime: str, rng: np.random.Generator, cfg: Dict[str, Any], con
     block.update(sc.get(regime, {}))
     out: Dict[str, Any] = {"regime": regime}
     first = float(context["timing"]["spinup_s"])
+    ts = time_scale(context["timing"].get("frame_interval_s", 5.0))
     if regime == "advected_smoke":
         out.update(
             layer_base_m=uniform(rng, block["layer_base_m"]),
@@ -78,7 +103,7 @@ def sample_smoke(regime: str, rng: np.random.Generator, cfg: Dict[str, Any], con
             intermittency=uniform(rng, block["intermittency"]),
             residual_warmth_k=uniform(rng, block["residual_warmth_k"]),
             front_frac=uniform(rng, (0.25, 0.85)),   # how far into the view the layer reaches at t=0
-            modulation=sample_noise_spec(rng, (5.0, 25.0)),
+            modulation=sample_noise_spec(rng, block["modulation_period_s"]),
             texture_seed=int(rng.integers(0, 2**31 - 1)),
             buoyancy_flux_m3s3=0.0,
         )
@@ -100,24 +125,28 @@ def sample_smoke(regime: str, rng: np.random.Generator, cfg: Dict[str, Any], con
     # Onset relative to the first frame, inside the (class-independent) spin-up: mostly
     # established plumes, some ignitions in view. The spin-up is never lengthened for
     # smoke; doing so made spin-up predict the smoke label (folded AUC 0.74 in the audit).
+    # The window-relative times below are near-field seconds times the profile's time scale.
     spin = float(context["timing"]["spinup_s"])
-    if rng.random() < 0.75 and spin > 25.0:
-        onset = uniform(rng, (-(spin - 5.0), -20.0))
+    if rng.random() < 0.75 and spin > 25.0 * ts:
+        onset = uniform(rng, (-(spin - 5.0 * ts), -20.0 * ts))
     else:
-        onset = uniform(rng, (-min(20.0, spin - 5.0), 25.0))
+        onset = uniform(rng, (-min(20.0 * ts, spin - 5.0 * ts), 25.0 * ts))
     out["onset_s"] = onset
-    out["offset_s"] = uniform(rng, (15.0, 50.0)) if rng.random() < 0.15 else None
+    out["offset_s"] = uniform(rng, (15.0 * ts, 50.0 * ts)) if rng.random() < 0.15 else None
+    out["onset_ramp_s"] = 3.0 * ts                              # ignition / switch-off ramp
+    out["source_lift_cells"] = int(sc.get("source_lift_cells", 1))
     if regime == "pulsing":
         out.update(pulse_period_s=uniform(rng, block["pulse_period_s"]),
                    duty_cycle=uniform(rng, block["duty_cycle"]),
                    pulse_phase=uniform(rng, (0.0, 1.0)))
     out["residual"] = None
     if rng.random() < 0.35:
+        # A puff left over from earlier burning (sizes from the profile config).
         out["residual"] = {
             "mg_m3": uniform(rng, (0.3, 3.0)),
-            "height_m": uniform(rng, (40.0, 160.0)),
-            "radius_m": uniform(rng, (25.0, 60.0)),
-            "dx_m": uniform(rng, (-60.0, 60.0)),
+            "height_m": uniform(rng, block_range(sc, "residual_height_m", (40.0, 160.0))),
+            "radius_m": uniform(rng, block_range(sc, "residual_radius_m", (25.0, 60.0))),
+            "dx_m": uniform(rng, block_range(sc, "residual_offset_m", (-60.0, 60.0))),
         }
     out["first_frame_s"] = first
     return out
@@ -140,7 +169,8 @@ def smoke_component(smoke: Dict[str, Any], grid: Grid, first_frame_s: float,
     xc = grid.view_x(smoke["source_x_frac"])
     if smoke.get("on_hilltop"):
         xc = grid.hilltop_x()
-    mask = source_mask(grid, xc, smoke["source_width_m"], smoke["source_height_m"], lift_cells=1, rows=2)
+    mask = source_mask(grid, xc, smoke["source_width_m"], smoke["source_height_m"],
+                       lift_cells=int(smoke.get("source_lift_cells", 1)), rows=2)
     t_on = first_frame_s + float(smoke["onset_s"])
     t_off = None if smoke.get("offset_s") is None else first_frame_s + float(smoke["offset_s"])
     emission = float(smoke["emission_mg_m3_s"])
@@ -151,9 +181,10 @@ def smoke_component(smoke: Dict[str, Any], grid: Grid, first_frame_s: float,
     period = float(smoke.get("pulse_period_s", 1.0))
     duty = float(smoke.get("duty_cycle", 1.0))
     phase = float(smoke.get("pulse_phase", 0.0))
+    ramp = float(smoke.get("onset_ramp_s", 3.0))
 
     def activity(t: float) -> float:
-        a = activity_window(t, t_on, t_off, ramp_s=3.0)
+        a = activity_window(t, t_on, t_off, ramp_s=ramp)
         if a <= 0.0:
             return 0.0
         if pulsing:
@@ -198,8 +229,10 @@ def _advected(smoke: Dict[str, Any], grid: Grid, comp: Component, first_frame_s:
     c_in = float(smoke["inflow_mg_m3"])
     inter = float(smoke["intermittency"])
     mod = smoke["modulation"]
-    profile = layer_profile(grid.z, base, base + depth, soft_m=12.0)
-    tex = smooth_texture(grid, smoke["texture_seed"], scale_m=40.0, contrast=0.5)
+    dx = grid.dx
+    # Edge softness, puff texture and front ramps in cells (12 m, 40 m, 30 m and 15 m at dx = 5 m).
+    profile = layer_profile(grid.z, base, base + depth, soft_m=2.4 * dx)
+    tex = smooth_texture(grid, smoke["texture_seed"], scale_m=8.0 * dx, contrast=0.5)
     upwind_left = grid.wind_sign >= 0
     # Layer present from the upwind boundary to `front_frac` of the view at the first frame.
     target = grid.view_x(smoke["front_frac"] if upwind_left else 1.0 - smoke["front_frac"])
@@ -210,7 +243,7 @@ def _advected(smoke: Dict[str, Any], grid: Grid, comp: Component, first_frame_s:
     front_x = drift_start(target, u_drift, first_frame_s)
     xx = grid.xx
     reach = (xx <= front_x) if upwind_left else (xx >= front_x)
-    edge = np.clip(1.0 - np.abs(xx - front_x) / 30.0, 0.0, 1.0)
+    edge = np.clip(1.0 - np.abs(xx - front_x) / (6.0 * dx), 0.0, 1.0)
     init = c_in * profile[:, None] * tex * np.where(reach, 1.0, edge)
 
     def initial(fields):
@@ -227,7 +260,7 @@ def _advected(smoke: Dict[str, Any], grid: Grid, comp: Component, first_frame_s:
     def inflow(t, ghosts):
         # The layer enters only once its front (front_x at t = 0, drifting at
         # u_drift) has reached the upwind boundary.
-        w_b = 0.5 * (1.0 + math.tanh(s_dir * (front_x + u_drift * t - x_b) / 15.0))
+        w_b = 0.5 * (1.0 + math.tanh(s_dir * (front_x + u_drift * t - x_b) / (3.0 * dx)))
         if w_b < 1e-6:
             return
         puff = smooth_noise01(t, mod)
@@ -245,17 +278,20 @@ def _advected(smoke: Dict[str, Any], grid: Grid, comp: Component, first_frame_s:
 # ------------------------------------------------------------------ dust (neither)
 def sample_dust(rng: np.random.Generator, cfg: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
     block = cfg.get("scenarios", {}).get("neither", {}).get("dust_burst", {})
-    moving = rng.random() < 0.4
+    ts = time_scale(context["timing"].get("frame_interval_s", 5.0))
+    moving = rng.random() < float(block.get("moving_prob", 0.4))
     return {
         "regime": "dust_burst",
         "emission_mg_m3_s": uniform(rng, block.get("emission_mg_m3_s", [10.0, 120.0])),
         "duration_s": uniform(rng, block.get("duration_s", [2.0, 12.0])),
         "settling_ms": uniform(rng, block.get("settling_ms", [0.1, 0.6])),
-        "onset_s": uniform(rng, (-8.0, 30.0)),          # relative to the first frame
+        "onset_s": uniform(rng, (-8.0 * ts, 30.0 * ts)),          # relative to the first frame
         "source_x_frac": uniform(rng, (0.1, 0.9)),
-        "source_width_m": uniform(rng, (5.0, 25.0)),
-        "vehicle_speed_ms": uniform(rng, (2.0, 10.0)) * (1 if rng.random() < 0.5 else -1) if moving else 0.0,
-        "flicker": sample_noise_spec(rng, (1.0, 6.0)),
+        "source_width_m": uniform(rng, block.get("source_width_m", [5.0, 25.0])),
+        "vehicle_speed_ms": uniform(rng, block.get("vehicle_speed_ms", [2.0, 10.0])) * (1 if rng.random() < 0.5 else -1)
+        if moving else 0.0,
+        "flicker": sample_noise_spec(rng, block.get("flicker_period_s", [1.0, 6.0])),
+        "ramp_s": 1.0 * ts,
     }
 
 
@@ -270,8 +306,10 @@ def dust_component(dust: Dict[str, Any], grid: Grid, first_frame_s: float) -> Co
     flicker = dust["flicker"]
     lo, hi = grid.view_x(0.0), grid.view_x(1.0)
 
+    ramp = float(dust.get("ramp_s", 1.0))
+
     def sources(t, fields, rates):
-        a = activity_window(t, t_on, t_off, ramp_s=1.0)
+        a = activity_window(t, t_on, t_off, ramp_s=ramp)
         if a <= 0.0:
             return
         x = x0 + speed * (t - t_on)
@@ -283,4 +321,68 @@ def dust_component(dust: Dict[str, Any], grid: Grid, first_frame_s: float) -> Co
 
     comp.sources.append(sources)
     comp.settling = float(dust["settling_ms"])
+    return comp
+
+
+# ------------------------------------------------------------------ rain shaft (neither)
+def sample_rain(rng: np.random.Generator, cfg: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+    """A precipitation curtain from a drifting cloud base (no smoke, no fog)."""
+    block = dict(RAIN_DEFAULTS)
+    block.update(cfg.get("scenarios", {}).get("neither", {}).get("rain_shaft", {}))
+    ts = time_scale(context["timing"].get("frame_interval_s", 5.0))
+    onset = block["onset_s"]
+    return {
+        "regime": "rain_shaft",
+        "cloud_base_m": uniform(rng, block["cloud_base_m"]),
+        "shaft_width_m": uniform(rng, block["shaft_width_m"]),
+        "fall_speed_ms": uniform(rng, block["fall_speed_ms"]),
+        "emission_mg_m3_s": uniform(rng, block["emission_mg_m3_s"]),
+        "evaporation_rate_s": uniform(rng, block["evaporation_rate_s"]),
+        "intermittency": uniform(rng, block["intermittency"]),
+        "modulation": sample_noise_spec(rng, block["modulation_period_s"]),
+        "onset_s": uniform(rng, (float(onset[0]) * ts, float(onset[1]) * ts)),   # relative to the first frame
+        "center_frac": uniform(rng, (0.2, 0.8)),      # across the view at mid-window
+        "ramp_s": 3.0 * ts,
+        "cloud_drift_factor": uniform(rng, block["cloud_drift_factor"]),
+    }
+
+
+def rain_component(rain: Dict[str, Any], grid: Grid, first_frame_s: float, window_s: float, wind_fn) -> Component:
+    """Precipitation generated in a two-cell band at cloud base under a cloud drifting at
+    `cloud_drift_factor` x the wind at that level; it falls at `fall_speed_ms` relative to the air (settling of the
+    "precip" scalar), is carried by the resolved wind on the way down, deposits at the ground
+    and evaporates at `evaporation_rate_s` (a fractional sink, booked as a negative source)."""
+    comp = Component()
+    width = float(rain["shaft_width_m"])
+    k_b = int(np.clip(round(float(rain["cloud_base_m"]) / grid.dx - 0.5), 1, grid.nz - 2))
+    band = np.zeros((grid.nz, grid.nx), dtype=bool)
+    band[k_b:k_b + 2, :] = True
+    band &= grid.fluid
+    u_cloud = float(rain.get("cloud_drift_factor", 1.0)) * float(wind_fn(0.0)[k_b])
+    # Placed by its position at mid-window, like drifting fog patches (scenario_util.drift_start).
+    x0 = drift_start(grid.view_x(rain["center_frac"]), u_cloud, first_frame_s + 0.5 * window_s)
+    t_on = first_frame_s + float(rain["onset_s"])
+    ramp = float(rain.get("ramp_s", 3.0))
+    emission = float(rain["emission_mg_m3_s"])
+    inter = float(rain["intermittency"])
+    mod = rain["modulation"]
+    evap = float(rain["evaporation_rate_s"])
+    soft = max(grid.dx, 0.15 * width)
+
+    def sources(t, fields, rates):
+        if evap > 0.0:
+            rates["precip"] = rates.get("precip", 0.0) - evap * fields["precip"]
+        a = activity_window(t, t_on, None, ramp_s=ramp)
+        if a <= 0.0:
+            return
+        xc = x0 + u_cloud * t
+        # Soft-edged curtain (at least one cell of softness so a narrow shaft is not one column).
+        prof = 0.5 * (1.0 - np.tanh((np.abs(grid.x - xc) - 0.5 * width) / soft))
+        a *= 1.0 - inter + inter * smooth_noise01(t, mod)
+        rates["precip"] = rates.get("precip", 0.0) + np.where(band, a * emission * prof[None, :], 0.0)
+
+    comp.sources.append(sources)
+    comp.precip_settling = float(rain["fall_speed_ms"])
+    comp.info["rain_base_row"] = k_b
+    comp.info["rain_cloud_speed_ms"] = u_cloud
     return comp

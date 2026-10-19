@@ -21,7 +21,12 @@ bin (1.5 m/s) and mask source.
 * "robustness": every robustness suite against its matched nominal
   re-render; "loro": leave-one-regime-out results if supplied;
 * "real": {"status": "pending", ...} until real results are supplied
-  (`evaluate_real`, Stage B artifacts on camera-disjoint real test data);
+  (`evaluate_real`, Stage B artifacts on camera-disjoint real test data;
+  "complete" when every label was evaluated, "partial" when some label has
+  no known targets on the real test split, e.g. smoke-only supervision with
+  unannotated fog: that label's metrics are null and its per-label status is
+  "no_labels" with the reason, never fabricated); `update_real_section`
+  merges such a result into an existing evaluation.json;
   "synthetic_proxy": optional `run_synthetic_proxy` (pretrained vs scratch
   on a small shifted synthetic domain, flagged not_real_world_evidence);
   "data": counts and generation acceptance;
@@ -60,8 +65,12 @@ WIND_BIN_MS = 1.5
 DISCLAIMER = ("Synthetic evaluation only: these numbers measure how well the motion signal of simulated, "
               "rendered sequences is learned and how robust it is to simulated nuisances. They are not "
               "real-world accuracy and do not show that the model reduces fog-related false alarms on real cameras.")
-REAL_PENDING_REASON = ("No labelled real surveillance footage with compatible frame timing (12 observations ~5 s "
-                       "apart, each with a frame ~1 s earlier) was available; real-world validation is pending.")
+REAL_PENDING_REASON = ("No labelled real surveillance footage with frame timing compatible with the model (its "
+                       "exported observation interval and flow lag, e.g. 12 observations ~5 s apart each with a "
+                       "frame ~1 s earlier for the near-field profile) was available; real-world validation is "
+                       "pending.")
+NO_LABELS_REASON = ("no known {label} targets on the real {split} split ({label} not annotated: NaN = unknown); "
+                    "{label} metrics are null, not 0")
 BD_REASON = ("Requires labelled real footage (Stage B: fine-tuning D and the from-scratch comparison B on the "
              "same camera-disjoint real splits); none was available.")
 
@@ -113,8 +122,10 @@ def compact(doc: Mapping[str, Any]) -> Dict[str, Any]:
     out: Dict[str, Any] = {"n": doc["n"]}
     for name in LABEL_NAMES:
         pl = doc["per_label"][name]
-        out[name] = {k: pl[k] for k in ("precision", "recall", "f1", "auroc", "auprc", "brier", "ece",
-                                        "abstain_rate", "selective_accuracy", "n_pos")}
+        out[name] = {k: pl.get(k) for k in ("precision", "recall", "f1", "auroc", "auprc", "brier", "ece",
+                                            "abstain_rate", "selective_accuracy", "n_pos")}
+        if pl.get("status", "evaluated") != "evaluated":
+            out[name]["status"] = pl["status"]
     out["false_smoke_on_fog_only"] = doc["false_smoke_on_fog_only"]["rate"]
     out["fog_only_with_smoke"] = doc["smoke_fog_confusion"]["fog_only_with_smoke"]
     out["smoke_only_with_fog"] = doc["smoke_fog_confusion"]["smoke_only_with_fog"]
@@ -418,11 +429,13 @@ def data_counts(fs: FeatureSet) -> Dict[str, Any]:
     out: Dict[str, Any] = {}
     for split in sorted(set(fs.splits)):
         sub = fs.split(split)
+        cats = list(CATEGORIES) + sorted(set(sub.categories) - set(CATEGORIES))   # + partially labelled rows
         out[split] = {"sequences": len(sub), "simulations": int(len(np.unique(sub.sim_ids))),
                       "groups": int(len(np.unique(sub.groups))),
                       "per_category": {c: {"sequences": int(np.sum(sub.categories == c)),
                                            "simulations": int(len(np.unique(sub.sim_ids[sub.categories == c])))}
-                                       for c in CATEGORIES},
+                                       for c in cats},
+                      "known_labels": {n: int(M.known_mask(sub.y[:, j]).sum()) for j, n in enumerate(LABEL_NAMES)},
                       "mask_sources": {s: int(np.sum(sub.mask_sources == s)) for s in sorted(set(sub.mask_sources))}}
     return out
 
@@ -437,10 +450,7 @@ def build_evaluation(synthetic: Mapping[str, Any], ablation_a: Optional[Mapping[
     real_doc = dict(real) if real else {"status": "pending", "reason": REAL_PENDING_REASON}
     ablations: Dict[str, Any] = {"A": ablation_a, "B": None, "C": ablation_c, "D": None,
                                  "reasons": {"B": BD_REASON, "D": BD_REASON}}
-    if real and real.get("status") == "complete":
-        ablations["B"] = real.get("B")
-        ablations["D"] = real.get("D")
-        ablations["reasons"] = {k: v for k, v in ablations["reasons"].items() if ablations[k] is None}
+    _real_ablations(ablations, real)
     if extra_baselines:
         ablations["extra_baselines"] = dict(extra_baselines)
     proxy = None
@@ -459,34 +469,96 @@ def build_evaluation(synthetic: Mapping[str, Any], ablation_a: Optional[Mapping[
     }
 
 
+def _real_ablations(ablations: Dict[str, Any], real: Optional[Mapping[str, Any]]) -> None:
+    """Fill ablations B / D from a "real" section that evaluated at least one label (in place)."""
+    if not real or real.get("status") not in ("complete", "partial"):
+        return
+    ablations["B"] = real.get("B")
+    ablations["D"] = real.get("D")
+    ablations["reasons"] = {k: v for k, v in ablations.get("reasons", {}).items() if ablations.get(k) is None}
+    ablations["real_label_status"] = real.get("label_status")
+
+
+def real_label_status(fs_real: FeatureSet, split: str = "test_iid") -> Dict[str, Dict[str, Any]]:
+    """Per label: "evaluated" when the real `split` has known targets for it, else "no_labels" with the reason."""
+    sub = fs_real.split(split)
+    out: Dict[str, Dict[str, Any]] = {}
+    for j, name in enumerate(LABEL_NAMES):
+        known = M.known_mask(sub.y[:, j])
+        rec: Dict[str, Any] = {"n_known": int(known.sum()), "n_pos": int(np.sum(sub.y[known, j] > 0.5)),
+                               "n_unknown": int((~known).sum()),
+                               "known_per_split": {s: int(M.known_mask(fs_real.split(s).y[:, j]).sum())
+                                                   for s in sorted(set(fs_real.splits))}}
+        if known.any():
+            rec["status"] = "evaluated"
+        else:
+            rec.update(status="no_labels", reason=NO_LABELS_REASON.format(label=name, split=split))
+        out[name] = rec
+    return out
+
+
 def evaluate_real(fs_real: FeatureSet, cfg: Mapping[str, Any], artifacts: Mapping[str, PathLike],
                   split: str = "test_iid", n_boot: Optional[int] = None) -> Dict[str, Any]:
     """Real-footage results ("real" section) for the artifacts of experiments B, C (zero-shot) and D.
 
     `artifacts` maps experiment name -> artifact directory. Camera-disjoint
-    splits are required (groups = camera ids).
+    splits are required (groups = camera ids). Targets may be NaN (unknown):
+    every label is evaluated only on the rows where it is known, and a label
+    with no known target on the test split is reported as "no_labels" (its
+    metrics null with the reason). "status" is "complete" when every label was
+    evaluated, "partial" when only some were ("evaluated_labels" lists them).
     """
     from src.data.dataset import assert_no_group_leakage
 
     if fs_real.source != "real":
         raise ValueError("evaluate_real needs a FeatureSet with source == 'real'")
     assert_no_group_leakage(fs_real)
+    if len(fs_real.split(split)) == 0:
+        raise ValueError(f"the real FeatureSet has no {split} sequences")
     n_bins = int(cfg.get("evaluation", {}).get("calibration_bins", 10))
     n_boot = int(cfg.get("evaluation", {}).get("bootstrap_resamples", 1000) if n_boot is None else n_boot)
-    out: Dict[str, Any] = {"status": "complete", "split": split}
+    status = real_label_status(fs_real, split)
+    evaluated = [n for n in LABEL_NAMES if status[n]["status"] == "evaluated"]
+    out: Dict[str, Any] = {"status": "complete" if len(evaluated) == len(LABEL_NAMES) else
+                           "partial" if evaluated else "no_labels",
+                           "split": split, "label_status": status, "evaluated_labels": evaluated}
+    if not evaluated:
+        out["reason"] = f"no known target for any label on the real {split} split"
     counts = {}
     for s in sorted(set(fs_real.splits)):
         sub = fs_real.split(s)
         counts[s] = {"sequences": len(sub), "videos": int(len(np.unique(sub.sim_ids))),
-                     "cameras": int(len(np.unique(sub.groups)))}
+                     "cameras": int(len(np.unique(sub.groups))),
+                     "known_labels": {n: int(M.known_mask(sub.y[:, j]).sum()) for j, n in enumerate(LABEL_NAMES)}}
     out["counts"] = counts
     for name, d in artifacts.items():
         expert = PhysicsExpert.load(d)
         res = evaluate_model(expert, fs_real, (split,), OPERATING_POINTS, slices=("category", "mask_source"),
                              n_bins=n_bins, n_boot=n_boot)
         out[name] = {"artifacts": str(d), "calibration_source": expert.calibration_source,
+                     "calibration_label_support": (expert.config.get("calibration") or {}).get("label_support"),
                      "seeds": evaluate_seeds(d, fs_real, (split,), OPERATING_POINTS, n_bins)["mean_sd"],
                      **res}
+    return out
+
+
+def update_real_section(doc: Optional[Mapping[str, Any]], real: Mapping[str, Any]) -> Dict[str, Any]:
+    """An evaluation.json document with its "real" section (and ablations B / D) replaced by `real`.
+
+    For a Stage B run on its own (scripts/evaluate_physics.py --real without
+    --features): the synthetic sections of `doc` are kept as they are; with
+    no existing document they are recorded as not run.
+    """
+    out = dict(doc) if doc else build_evaluation({"status": "not_run"}, None, None, None)
+    out["real"] = dict(real)
+    ablations = dict(out.get("ablations") or {})
+    ablations.setdefault("reasons", {})
+    for k in ("B", "D"):
+        ablations.setdefault(k, None)
+        if ablations[k] is None:
+            ablations["reasons"].setdefault(k, BD_REASON)
+    _real_ablations(ablations, real)
+    out["ablations"] = ablations
     return out
 
 

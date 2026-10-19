@@ -2,9 +2,11 @@
 
 SimulationResult fixtures are built analytically (the CFD run is not needed):
 a smoke blob translating at a known speed with texture coordinates advected
-by the same velocity, a static fog layer, empty fields.
+by the same velocity, a static fog layer, empty fields; `without_lag` turns
+any of them into a simulation stored without lag snapshots.
 """
 
+import dataclasses
 import math
 
 import cv2
@@ -15,7 +17,8 @@ from src.cfd.results import SimulationResult
 from src.constants import CATEGORIES, CATEGORY_LABELS
 from src.data.masks import boxes_from_masks, degrade_masks, detect_candidate_masks
 from src.data.render import (
-    MASK_SOURCES, RenderedSequence, check_label_visibility, render_sequence, sample_render_params,
+    MASK_SOURCES, SGS_GAIN_DEFAULT, SHAKE_TAU_S_DEFAULT, RenderedSequence, check_label_visibility,
+    render_sequence, sample_render_params,
 )
 from src.utils.config import load_simulation_config
 from src.utils.io import dumps_json
@@ -120,6 +123,20 @@ def fog_layer_sim(u=1.0, category="fog_only", **kw):
 def plume_sim(u=1.5, w=2.5):
     return make_sim("smoke_only", smoke=_plume(TIMES, u=u, w_rise=w), smoke_lag=_plume(LAG_TIMES, u=u, w_rise=w),
                     tex_uv=(u, w))
+
+
+def without_lag(sim):
+    """The same simulation stored without lag snapshots (flow_lag_s null / 0)."""
+    return dataclasses.replace(sim, lag_times=None, smoke_lag=None, lwc_lag=None, tracer_lag=None,
+                               texcoords_lag=None, tex_weights_lag=None, sgs_u_lag=None)
+
+
+def with_sgs(sim, u_obs, u_lag=None):
+    """Attach a subgrid velocity field u_sgs (m/s; a scalar means uniform) at the observation and lag times."""
+    full = lambda u: np.broadcast_to(np.asarray(u, np.float32), (T, NZ, NX)).copy()
+    sim.sgs_u = full(u_obs)
+    sim.sgs_u_lag = None if u_lag is None else full(u_lag)
+    return sim
 
 
 def _params(seed=0, overrides=None, hints=None):
@@ -453,6 +470,197 @@ def test_real_background_from_manifest_and_fallback(tmp_path):
     dumps_json(rp)
 
 
+# ---------------------------------------------------------------------- no lag frames (far-field profile)
+def test_render_without_lag_frames_shapes_and_determinism():
+    sim = without_lag(smoke_blob_sim())
+    rp = _params(1)
+    rp["peak_opacity"]["smoke"] = 0.5
+    out = render_sequence(sim, rp, np.random.default_rng(2))
+    H, W = CFG["render"]["native_size"]
+    assert out.lag_frames is None and out.lag_timestamps is None
+    assert out.frames.shape == (T, H, W) and out.frames.dtype == np.uint8
+    assert out.masks.shape == (T, H, W) and out.masks.dtype == bool
+    assert out.opacity.shape == (T, H, W)
+    assert all(v.shape == (T, H, W) and v.dtype == np.float16 for v in out.component_opacity.values())
+    np.testing.assert_array_equal(out.timestamps, TIMES)
+    assert len(out.visibility["peak_opacity"]["smoke"]) == T and len(out.visibility["mask_area_frac"]) == T
+    dumps_json(out.visibility)
+    assert check_label_visibility(out, (1, 0), CFG)[0]
+    again = render_sequence(sim, rp, np.random.default_rng(2))
+    np.testing.assert_array_equal(out.frames, again.frames)
+    np.testing.assert_array_equal(out.masks, again.masks)
+    assert out.visibility == again.visibility
+    assert not np.array_equal(out.frames, render_sequence(sim, rp, np.random.default_rng(3)).frames)
+
+
+def test_dropping_lag_frames_leaves_the_observations_unchanged():
+    """With every random nuisance off, observation frames, opacities and exposure do not depend on
+    whether lag frames are rendered (only the length of the random stream does)."""
+    rp = _params(5, _clean(texture={"gain": [0.4, 0.4]}))
+    rp["peak_opacity"]["smoke"] = 0.6
+    sim = smoke_blob_sim(u=3.0, w=1.0)
+    lag = render_sequence(sim, rp, np.random.default_rng(0))
+    nolag = render_sequence(without_lag(sim), rp, np.random.default_rng(0))
+    np.testing.assert_array_equal(lag.frames, nolag.frames)
+    np.testing.assert_array_equal(lag.opacity, nolag.opacity)
+    assert lag.visibility["groups"] == nolag.visibility["groups"]
+    assert lag.visibility["peak_opacity"] == nolag.visibility["peak_opacity"]
+    assert check_label_visibility(nolag, (1, 0), CFG)[0]
+
+
+# ---------------------------------------------------------------------- correlated camera shake
+def test_shake_process_is_stationary_and_correlated_in_time():
+    """OU shake at far-field frame times (observations 60 s apart, lag frames 1 s before them)."""
+    from src.data.render import _shake_process
+
+    obs = np.arange(T) * 60.0
+    times = np.concatenate([obs, obs - 1.0])
+    for tau, lag_corr, far_corr in ((20.0, math.exp(-1.0 / 20.0), math.exp(-3.0)), (2.0, math.exp(-0.5), 0.0)):
+        z = np.stack([_shake_process(np.random.default_rng(s), times, tau) for s in range(2000)])   # (n, 2T, 4)
+        assert z.std() == pytest.approx(1.0, abs=0.03), tau
+        c_lag = np.mean([np.corrcoef(z[:, k, 0], z[:, T + k, 0])[0, 1] for k in range(T)])
+        c_far = np.mean([np.corrcoef(z[:, k, 1], z[:, k + 1, 1])[0, 1] for k in range(T - 1)])
+        assert c_lag == pytest.approx(lag_corr, abs=0.03), tau
+        assert c_far == pytest.approx(far_corr, abs=0.03), tau
+    # tau 0 (version-1 params): independent per frame, drawn in frame order.
+    np.testing.assert_array_equal(_shake_process(np.random.default_rng(4), times, 0.0),
+                                  np.clip(np.random.default_rng(4).standard_normal((2 * T, 4)), -3.0, 3.0))
+
+
+def test_camera_affines_have_the_sampled_stationary_std():
+    from src.data.render import _camera_affines, _view
+
+    sim = make_sim("smoke_only")
+    rp = _params(12, _clean(camera_shake_px=[3.0, 3.0], camera_rotation_deg=[0.5, 0.5]))
+    rp["camera_shake_tau_s"] = 4.0
+    view = _view(sim, rp)
+    times = np.concatenate([TIMES, LAG_TIMES])
+    A = np.stack([_camera_affines(np.random.default_rng(s), rp, times, view) for s in range(500)])
+    c0 = np.array([(view.W - 1) / 2.0, (view.H - 1) / 2.0])
+    shift = A[..., :2] @ c0 + A[..., 2] - c0 - view.margin            # where the image centre lands
+    rot = np.degrees(np.arctan2(A[..., 1, 0], A[..., 0, 0]))
+    assert shift.std() == pytest.approx(3.0, rel=0.06)
+    assert rot.std() == pytest.approx(0.5, rel=0.06)
+    assert abs(shift.mean()) < 0.15 and abs(rot.mean()) < 0.03
+
+
+def test_lag_frame_shakes_with_its_observation_for_a_slow_process():
+    """Image shift between each lag frame and its observation (1 s apart) on an empty scene: ~0 for a
+    slow shake process, ~sqrt(2) x the shake per axis for an (almost) independent one."""
+    sim = make_sim("smoke_only")
+    rp = _params(12, _clean(camera_shake_px=[5.0, 5.0]))
+    rms = {}
+    for tau in (3000.0, 0.01):
+        rp["camera_shake_tau_s"] = tau
+        out = render_sequence(sim, rp, np.random.default_rng(3))
+        d = [cv2.phaseCorrelate(out.lag_frames[k].astype(np.float32), out.frames[k].astype(np.float32))[0]
+             for k in range(T)]
+        rms[tau] = float(np.sqrt(np.mean(np.square(d))))
+    assert rms[3000.0] < 0.5
+    assert 0.6 * math.sqrt(2.0) * 5.0 < rms[0.01] < 1.4 * math.sqrt(2.0) * 5.0
+
+
+# ---------------------------------------------------------------------- subgrid texture turbulence
+def test_sgs_displacement_field_statistics():
+    """D(x, z, t): off without u_sgs or gain, local velocity scale gain * u_sgs, zero mean, scales with dx."""
+    from src.data.render import _sgs_displacement
+
+    times = np.concatenate([TIMES, LAG_TIMES])
+    tex = {"sgs_gain": 1.0, "sgs_seed": 5}
+    full = lambda v: np.full((2 * T, NZ, NX), v, np.float32)
+    assert _sgs_displacement(None, times, DX, tex)[0] is None
+    assert _sgs_displacement(full(0.0), times, DX, tex)[0] is None
+    assert _sgs_displacement(full(0.3), times, DX, {**tex, "sgs_gain": 0.0})[0] is None
+    D, rec = _sgs_displacement(full(0.1), times, DX, tex)
+    assert D.shape == (2 * T, NZ, NX, 2) and D.dtype == np.float32 and rec["applied"]
+    np.testing.assert_array_equal(D, _sgs_displacement(full(0.1), times, DX, tex)[0])
+    assert not np.array_equal(D, _sgs_displacement(full(0.1), times, DX, {**tex, "sgs_seed": 6})[0])
+    # Velocity over the 1 s lag and displacement over 5 s, averaged over realisations.
+    vel, disp5 = [], []
+    for u in (0.05, 0.2, 0.6):
+        v1, d5, means, rms = [], [], [], []
+        for seed in range(20):
+            D, _ = _sgs_displacement(full(u), times, DX, {"sgs_gain": 1.0, "sgs_seed": seed})
+            v1.append(np.sqrt(((D[:T] - D[T:]) ** 2).sum(-1).mean()))
+            d5.append(np.sqrt(((D[1:T] - D[:T - 1]) ** 2).sum(-1).mean()))
+            means.append(D.mean(axis=(1, 2)))
+            rms.append(np.sqrt((D ** 2).sum(-1).mean()))
+        vel.append(np.mean(v1))
+        disp5.append(np.mean(d5))
+        assert np.abs(np.stack(means)).max() < 0.05 * np.mean(rms), u       # no net drift in any frame
+        if u <= 0.2:                                                        # 1 s << correlation time
+            assert vel[-1] == pytest.approx(u, rel=0.1), u
+    assert vel[0] < vel[1] < vel[2] and disp5[0] < disp5[1] < disp5[2]
+    # Velocity proportional to the gain; length scales with the grid spacing.
+    D, _ = _sgs_displacement(full(0.05), times, DX, {"sgs_gain": 0.5, "sgs_seed": 0})
+    D1, _ = _sgs_displacement(full(0.05), times, DX, {"sgs_gain": 1.0, "sgs_seed": 0})
+    v = lambda d: np.sqrt(((d[:T] - d[T:]) ** 2).sum(-1).mean())
+    assert v(D) == pytest.approx(0.5 * v(D1), rel=0.15)
+    _, far = _sgs_displacement(full(0.05), times, 10 * DX, {"sgs_gain": 1.0, "sgs_seed": 0})
+    _, near = _sgs_displacement(full(0.05), times, DX, {"sgs_gain": 1.0, "sgs_seed": 0})
+    assert far["amplitude_m"] == pytest.approx(10 * near["amplitude_m"])
+    # Local: no displacement where there is no subgrid motion ...
+    u = full(0.3)
+    u[:, :, : NX // 2] = 0.0
+    D, _ = _sgs_displacement(u, times, DX, tex)
+    assert np.abs(D[:, :, : NX // 2]).max() == 0.0 and np.abs(D[:, :, NX // 2:]).max() > 0.1
+    # ... and quiet air (0.02 m/s) next to a turbulent region (0.5 m/s) each moves at its own
+    # velocity, with a similar displacement size and its own correlation time (eddy size / u_sgs).
+    u = full(0.5)
+    u[:, :, : NX // 2] = 0.02
+    sides = {"quiet": (slice(None), slice(4, NX // 2 - 4)), "turbulent": (slice(None), slice(NX // 2 + 4, NX - 4))}
+    stats = {name: {"v": [], "size": [], "corr5": []} for name in sides}
+    for seed in range(20):
+        D, rec = _sgs_displacement(u, times, DX, {"sgs_gain": 1.0, "sgs_seed": seed})
+        for name, (rows, cols) in sides.items():
+            d = D[:, rows, cols]
+            stats[name]["v"].append(np.sqrt(((d[:T] - d[T:]) ** 2).sum(-1).mean()))
+            stats[name]["size"].append(np.sqrt((d ** 2).sum(-1).mean()))
+            stats[name]["corr5"].append(np.mean([np.corrcoef(d[k].ravel(), d[k + 1].ravel())[0, 1] for k in range(T - 1)]))
+    s = {name: {key: float(np.mean(v)) for key, v in st.items()} for name, st in stats.items()}
+    assert s["quiet"]["v"] == pytest.approx(0.02, rel=0.15)
+    assert s["turbulent"]["v"] == pytest.approx(0.5, rel=0.25)          # 1 s is not << its 3 s correlation time
+    for name in sides:
+        assert s[name]["size"] == pytest.approx(rec["amplitude_m"], rel=0.25), name
+    assert s["quiet"]["corr5"] > 0.9 and s["turbulent"]["corr5"] < 0.6
+
+
+def test_sgs_turbulence_in_rendered_frames():
+    """A static fog layer with a static texture: identical lag and observation frames without subgrid
+    motion (sgs_u None, zero, or gain 0, all rendering the same frames); with it the texture boils
+    with an rms flow growing with u_sgs and no net drift."""
+    rp = _params(4, _clean(texture={"gain": [0.6, 0.6], "sgs_gain": [1.0, 1.0]}, peak_opacity=[0.95, 0.95]))
+
+    def fog():
+        return make_sim("fog_only", lwc=_fog_layer(TIMES, top=150.0), lwc_lag=_fog_layer(LAG_TIMES, top=150.0),
+                        texcoords=False)
+
+    ref = render_sequence(fog(), rp, np.random.default_rng(0))
+    assert ref.visibility["sgs_texture"]["applied"] is False
+    off_gain = {**rp, "texture": {**rp["texture"], "sgs_gain": 0.0}}
+    for sim, params in ((with_sgs(fog(), 0.0), rp), (with_sgs(fog(), 0.5, 0.5), off_gain)):
+        out = render_sequence(sim, params, np.random.default_rng(0))
+        np.testing.assert_array_equal(out.frames, ref.frames)
+        np.testing.assert_array_equal(out.lag_frames, ref.lag_frames)
+    dense = cv2.blur(ref.component_opacity["fog"][5].astype(np.float32), (9, 9)) > 0.85
+    region = cv2.erode(dense.astype(np.uint8), np.ones((9, 9), np.uint8)).astype(bool)
+    assert region.sum() > 1000
+    rms = []
+    for u in (0.0, 0.4, 1.5):
+        out = ref if u == 0.0 else render_sequence(with_sgs(fog(), u, u), rp, np.random.default_rng(0))
+        diff = np.abs(out.frames.astype(np.int16) - out.lag_frames.astype(np.int16))[:, region]
+        flow = np.concatenate([_dis_flow(out.lag_frames[k], out.frames[k])[region] for k in range(T)])
+        rms.append(float(np.sqrt((flow ** 2).sum(-1).mean())))
+        if u == 0.0:
+            assert diff.max() == 0
+        else:
+            assert out.visibility["sgs_texture"]["applied"] and diff.mean() > 0.5
+            # No net drift (loose: the dense-fog band is only a few eddies tall; the field test
+            # checks the zero mean tightly).
+            assert np.abs(flow.mean(axis=0)).max() < 0.3 * rms[-1]
+    assert rms[0] < rms[1] < rms[2] and rms[2] > 0.1
+
+
 # ---------------------------------------------------------------------- parameters
 def _flatten(d, prefix=""):
     """Numeric leaves of a params dict; optional blocks get a `key?` presence flag; strings
@@ -519,6 +727,41 @@ def test_hints_only_switch_nuisances_on():
     assert on["masks"]["false_positive_prob"] == CFG["render"]["masks"]["false_positive_prob_boost"]
     assert {k: v for k, v in off["masks"].items() if k != "false_positive_prob"} == \
            {k: v for k, v in on["masks"].items() if k != "false_positive_prob"}
+
+
+def test_v2_params_come_from_config_and_are_drawn_last():
+    """camera_shake_tau_s and texture.sgs_gain come from the config (code defaults without it) and are
+    drawn after every version-1 value: overriding them changes nothing else."""
+    p = _params(30)
+    assert p["version"] == 2
+    lo, hi = CFG["render"].get("camera_shake_tau_s") or SHAKE_TAU_S_DEFAULT
+    assert lo <= p["camera_shake_tau_s"] <= hi
+    lo, hi = CFG["render"]["texture"].get("sgs_gain", SGS_GAIN_DEFAULT)
+    assert lo <= p["texture"]["sgs_gain"] <= hi and isinstance(p["texture"]["sgs_seed"], int)
+    q = _params(30, {"camera_shake_tau_s": [10.0, 10.0], "texture": {"sgs_gain": [0.0, 0.0]}})
+    assert q["camera_shake_tau_s"] == 10.0 and q["texture"]["sgs_gain"] == 0.0
+
+    def v1(d):
+        out = {k: v for k, v in d.items() if k != "camera_shake_tau_s"}
+        out["texture"] = {k: v for k, v in d["texture"].items() if k != "sgs_gain"}
+        return out
+
+    assert v1(p) == v1(q)
+    dumps_json(p)
+
+
+def test_version1_params_render_with_independent_shake_and_no_subgrid_motion():
+    """Stored version-1 params (no camera_shake_tau_s, no texture.sgs_*) render like tau 0 and gain 0,
+    even for a simulation that carries sgs_u."""
+    rp = _params(31, hints={})
+    old = {k: v for k, v in rp.items() if k != "camera_shake_tau_s"}
+    old["texture"] = {k: v for k, v in rp["texture"].items() if not k.startswith("sgs_")}
+    off = {**rp, "camera_shake_tau_s": 0.0, "texture": {**rp["texture"], "sgs_gain": 0.0}}
+    a = render_sequence(with_sgs(smoke_blob_sim(), 0.5), old, np.random.default_rng(1))
+    b = render_sequence(smoke_blob_sim(), off, np.random.default_rng(1))
+    np.testing.assert_array_equal(a.frames, b.frames)
+    np.testing.assert_array_equal(a.lag_frames, b.lag_frames)
+    np.testing.assert_array_equal(a.masks, b.masks)
 
 
 def test_robustness_overrides_are_applied():

@@ -5,6 +5,18 @@ as plain JSON. Everything time-dependent (gusts, intermittency, pulsing) is a
 deterministic function of stored phases and periods, so a SimulationSpec can
 be rebuilt from the stored parameters alone.
 
+Profiles (scale-agnostic code): a profile is a full simulation config (the
+near-field 320 m / 5 m-cell / 5 s profile in configs/simulation.yaml, the
+far-field 3.2 km / 50 m-cell / one-frame-per-minute profile in
+configs/simulation_far.yaml). Physical ranges (sizes, heights, depths,
+periods) come from the config, with the near-field values as code defaults.
+What is left in code follows two rules: numerical widths (edge ramps, tanh
+fronts, layer softness, minimum thicknesses) scale with the cell size dx
+(written as multiples of dx that equal the old near-field metres at
+dx = 5 m), and schedule times defined relative to the observation window
+(onsets, switch-offs, activity ramps) scale with the frame interval through
+`time_scale` (1 in the near-field profile).
+
 Where this fits: used by smoke.py, fog.py and scenarios.py.
 Calls into: numpy only.
 """
@@ -16,6 +28,26 @@ from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Sequence
 
 import numpy as np
+
+
+REFERENCE_FRAME_INTERVAL_S = 5.0   # the near-field profile the built-in schedule times were written for
+
+
+def grid_dx(cfg: Dict[str, Any]) -> float:
+    """Cell size (m) of a profile."""
+    g = cfg.get("grid", {})
+    return float(g.get("domain_width_m", 320.0)) / int(g.get("nx", 64))
+
+
+def time_scale(frame_interval_s: float) -> float:
+    """Factor applied to window-relative schedule times: frame interval / 5 s (1 near field, 12 far field)."""
+    return float(frame_interval_s) / REFERENCE_FRAME_INTERVAL_S
+
+
+def block_range(block: Dict[str, Any], key: str, default: Sequence[float]) -> Sequence[float]:
+    """A [lo, hi] range from a config block, falling back to the near-field default."""
+    value = block.get(key) if block else None
+    return default if value is None else value
 
 
 def uniform(rng: np.random.Generator, bounds: Sequence[float]) -> float:
@@ -116,7 +148,8 @@ class Component:
     initial: List[Callable[[Dict[str, np.ndarray]], None]] = field(default_factory=list)
     inflow: List[Callable[[float, Dict[str, Dict[str, np.ndarray]]], None]] = field(default_factory=list)
     sources: List[Callable[[float, Dict[str, np.ndarray], Dict[str, Any]], None]] = field(default_factory=list)
-    settling: float = 0.0
+    settling: float = 0.0           # tracer settling velocity, m/s
+    precip_settling: float = 0.0    # > 0: the component emits into the separate "precip" scalar
     info: Dict[str, Any] = field(default_factory=dict)
 
 

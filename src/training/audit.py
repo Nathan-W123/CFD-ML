@@ -67,14 +67,14 @@ def _columns(records: List[Mapping[str, Any]]) -> Dict[str, np.ndarray]:
 
 def parameter_audit(records: List[Mapping[str, Any]], y: np.ndarray, label_names: Iterable[str] = ("smoke", "fog"),
                     threshold: float = 0.6) -> Dict[str, Any]:
-    """Folded AUROC of every scalar parameter for every label; flags those above `threshold`."""
+    """Folded AUROC of every scalar parameter for every label (rows with that label known); flags > `threshold`."""
     cols = _columns(records)
-    y = np.asarray(y)
+    y = np.asarray(y, dtype=np.float64)
     out: Dict[str, Any] = {"threshold": threshold, "n": int(len(records)), "per_label": {}, "flagged": []}
     for j, name in enumerate(label_names):
         res = {}
         for k, v in cols.items():
-            ok = np.isfinite(v)
+            ok = np.isfinite(v) & ~np.isnan(y[:, j])        # NaN target = unknown label
             if ok.sum() < 10 or np.nanstd(v) == 0:
                 continue
             a = folded(auroc(v[ok], y[ok, j] > 0.5))

@@ -18,6 +18,10 @@
 * `univariate_aucs`: folded AUROC of every pooled feature per label (0.5 =
   uninformative, 1 = separates perfectly in either direction).
 
+Unknown (NaN) targets: every fit uses, per label, only the rows where that
+label is known; a label with no known train rows is skipped (no model, its
+metrics null with status "not_fitted"), never fitted on guessed labels.
+
 Where this fits: `src.training.evaluate` runs these next to the GRU and
 writes them into evaluation.json ("ablations.A", "shortcut_audit").
 Calls into: numpy, `src.training.metrics`, `src.data.feature_spec`.
@@ -117,7 +121,8 @@ class _PooledBaseline:
 
     def __init__(self, l2: float = 1.0):
         self.l2 = l2
-        self.models: List[_LogisticRegression] = []
+        self.models: List[Optional[_LogisticRegression]] = []
+        self.skipped: Dict[str, str] = {}       # label -> why it has no model (no known train labels)
         self.thresholds: Dict[str, Dict[str, Dict[str, float]]] = {}
         self.threshold_fit: Dict[str, Any] = {}
 
@@ -125,20 +130,37 @@ class _PooledBaseline:
         return pooled_features(X)[:, list(self.columns)]
 
     def fit(self, train: FeatureSet) -> "_PooledBaseline":
-        """Coefficients from the train split only (each simulation weighted once)."""
+        """Coefficients from the train split only (each simulation weighted once), per label on known rows."""
         F = self.inputs(train.X)
-        w = M.per_group_weights(train.groups)
-        self.models = [_LogisticRegression(self.l2).fit(F, train.y[:, j], w) for j in range(len(LABEL_NAMES))]
+        self.models, self.skipped = [], {}
+        for j, name in enumerate(LABEL_NAMES):
+            known = M.known_mask(train.y[:, j])
+            if not known.any():
+                self.models.append(None)
+                self.skipped[name] = "no known labels in the train split"
+                continue
+            w = M.per_group_weights(train.groups[known])
+            self.models.append(_LogisticRegression(self.l2).fit(F[known], train.y[known, j], w))
         return self
 
     def logits(self, X) -> np.ndarray:
+        """(N, 2) logits; 0 for a skipped label (its decisions are never reported)."""
         F = self.inputs(X)
-        return np.stack([m.decision_function(F) for m in self.models], axis=1)
+        return np.stack([m.decision_function(F) if m is not None else np.zeros(len(F)) for m in self.models],
+                        axis=1)
+
+    def mask_skipped(self, y: np.ndarray) -> np.ndarray:
+        """A copy of targets with the skipped labels set to NaN (unknown), so nothing is fitted or scored on them."""
+        y = np.array(y, dtype=np.float64, copy=True)
+        for j, name in enumerate(LABEL_NAMES):
+            if name in self.skipped:
+                y[:, j] = np.nan
+        return y
 
     def calibrate(self, val_calib: FeatureSet, cfg: Mapping[str, Any]) -> "_PooledBaseline":
         """Operating-point thresholds on val_calib (same rules as the GRU; no temperature, no abstention)."""
-        ops = M.fit_operating_points(self.logits(val_calib.X), val_calib.y, val_calib.categories,
-                                     val_calib.groups, cfg)
+        ops = M.fit_operating_points(self.logits(val_calib.X), self.mask_skipped(val_calib.y),
+                                     val_calib.categories, val_calib.groups, cfg)
         self.thresholds, self.threshold_fit = ops["thresholds"], ops["fit"]
         return self
 
@@ -150,14 +172,17 @@ class _PooledBaseline:
 
     def describe(self) -> Dict[str, Any]:
         names = pooled_feature_names()
+        fitted = [m for m in self.models if m is not None]
         return {
             "inputs": [names[c] for c in self.columns],
-            "coefficients": {n: {"intercept": float(m.coef[0]),
-                                 **{names[c]: float(v) for c, v in zip(self.columns, m.coef[1:])}}
+            "coefficients": {n: None if m is None else
+                             {"intercept": float(m.coef[0]),
+                              **{names[c]: float(v) for c, v in zip(self.columns, m.coef[1:])}}
                              for n, m in zip(LABEL_NAMES, self.models)},
-            "input_mean": [float(v) for v in self.models[0].mu] if self.models else None,
-            "input_std": [float(v) for v in self.models[0].sd] if self.models else None,
-            "converged": [bool(m.converged) for m in self.models],
+            "input_mean": [float(v) for v in fitted[0].mu] if fitted else None,
+            "input_std": [float(v) for v in fitted[0].sd] if fitted else None,
+            "converged": [None if m is None else bool(m.converged) for m in self.models],
+            "skipped_labels": dict(self.skipped),
             "l2": self.l2,
             "thresholds": self.thresholds,
             "threshold_fit_source": "val_calib",
@@ -207,15 +232,19 @@ def flags_only_probe(fs: FeatureSet, threshold: float = 0.6, train_split: str = 
     if len(train) == 0 or len(held) == 0:
         out.update(status="skipped", flag=False)
         return out
-    w = M.per_group_weights(train.groups)
     F = _flag_inputs(train.X)
-    models = [_LogisticRegression(1.0).fit(F, train.y[:, j], w) for j in range(len(LABEL_NAMES))]
+    models: List[Optional[_LogisticRegression]] = []
+    for j in range(len(LABEL_NAMES)):
+        known = M.known_mask(train.y[:, j])           # unknown (NaN) targets are left out
+        models.append(_LogisticRegression(1.0).fit(F[known], train.y[known, j],
+                                                   M.per_group_weights(train.groups[known]))
+                      if known.any() else None)
 
     def score(part: FeatureSet) -> Dict[str, Optional[float]]:
         Fe = _flag_inputs(part.X)
         res = {}
         for j, name in enumerate(LABEL_NAMES):
-            auc = M.auroc(models[j].decision_function(Fe), part.y[:, j])
+            auc = None if models[j] is None else M.auroc(models[j].decision_function(Fe), part.y[:, j])
             res[name] = None if auc is None else round(auc, 4)
         return res
 
@@ -262,11 +291,14 @@ def _evaluate(baseline: _PooledBaseline, fs: FeatureSet, splits: Sequence[str], 
         if len(ev) == 0:
             continue
         out[split] = {}
+        y = baseline.mask_skipped(ev.y)              # a label without a model is never scored
         for op in OPERATING_POINTS:
             p = baseline.predict(ev.X, op)
-            doc = M.classification_metrics(ev.y, p["probs"], p["hard"], p["decisions"], ev.categories, n_bins=n_bins)
+            doc = M.classification_metrics(y, p["probs"], p["hard"], p["decisions"], ev.categories, n_bins=n_bins)
+            for name, reason in baseline.skipped.items():
+                doc["per_label"][name].update(status="not_fitted", reason=reason)
             if n_boot:
-                doc["ci95"] = M.bootstrap_classification_ci(ev.y, p["probs"], p["hard"], p["decisions"],
+                doc["ci95"] = M.bootstrap_classification_ci(y, p["probs"], p["hard"], p["decisions"],
                                                             ev.categories, ev.groups, n_boot=n_boot, seed=seed,
                                                             n_bins=n_bins)
             out[split][op] = doc

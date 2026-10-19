@@ -34,6 +34,8 @@ H = W = 192
 T = 12
 LAG_S = 1.0
 TS = np.arange(T) * 5.0
+TS60 = np.arange(T) * 60.0                    # far-field profile: one frame per minute, no lag frames
+FAR = FeatureConfig(expected_interval_s=60.0, flow_lag_s=0.0, max_offset_s=10.0)
 FI = FEATURE_INDEX
 PAIR_FEATURES = [FI[k] for k in ("area_growth", "centroid_dx", "centroid_dz", "anchor_stability")]
 FLOW_FEATURES = [FI[k] for k in ("flow_u_mean", "flow_v_mean", "flow_u_std", "flow_v_std",
@@ -226,6 +228,128 @@ def test_consecutive_mode_without_lag_frames():
     ok = X[:, FI["flow_valid"]] == 1.0
     expected = 6.0 / _roi_side(meta) / 5.0
     np.testing.assert_allclose(np.median(X[ok, FI["flow_u_mean"]]), expected, rtol=0.15)
+
+
+# ---------------------------------------------------------------------------
+# consecutive-flow profile (far field: one frame per minute)
+# ---------------------------------------------------------------------------
+
+
+def test_feature_config_flow_mode_and_validation():
+    assert FeatureConfig().flow_mode == "lag"
+    assert FeatureConfig(flow_lag_s=0.0).flow_mode == FeatureConfig(flow_lag_s=None).flow_mode == "consecutive"
+    frames = np.zeros((3, 32, 32), np.uint8)
+    for bad in (FeatureConfig(flow_lag_s=-1.0), FeatureConfig(expected_interval_s=0.0),
+                FeatureConfig(max_offset_s=-0.1)):
+        with pytest.raises(ValueError):
+            extract_features(frames, np.arange(3.0), None, cfg=bad)
+
+
+def test_consecutive_profile_recovers_drift_at_one_minute_spacing():
+    rng = np.random.default_rng(19)
+    speed = 0.1                                   # native px / s: 6 px between one-minute frames
+    frames, _, masks = _blob_sequence(rng, lambda t: (63 + speed * TS60[t], 96), lambda t: (0, 0))
+    X, meta = extract_features_with_meta(frames, TS60, masks, None, None, FAR)
+    assert meta["flow_mode"] == "consecutive" and not meta["lag_frames_ignored"]
+    timing = meta["timing"]
+    assert timing["compatible"] and timing["reasons"] == [] and timing["interval_compatible"]
+    assert timing["expected_flow_mode"] == "consecutive" and timing["lag_compatible"] is None
+    assert timing["expected_flow_lag_s"] == 0.0 and timing["expected_interval_s"] == 60.0
+    assert meta["stabilization"]["applied"]
+    # no pair at t = 0, so no flow there; every later pair is measured
+    assert X[0, FI["flow_valid"]] == 0.0 and meta["flow"]["status"][0] == "no_pair"
+    assert np.all(X[1:, FI["flow_valid"]] == 1.0)
+    expected = speed / _roi_side(meta)            # L / s
+    u = X[1:, FI["flow_u_mean"]]
+    np.testing.assert_allclose(np.median(u), expected, rtol=0.1)
+    np.testing.assert_allclose(u, expected, rtol=0.2)
+    np.testing.assert_allclose(X[1:, FI["centroid_dx"]], expected, rtol=0.1)
+    assert np.all(np.abs(X[1:, FI["flow_v_mean"]]) < 0.1 * expected)
+    dumps_json(meta)
+    # The same clip judged by the near-field (lag-pair, 5 s) configuration is flagged twice.
+    _, near = extract_features_with_meta(frames, TS60, masks)
+    assert not near["timing"]["compatible"]
+    assert {"observation_interval", "consecutive_flow"} <= set(near["timing"]["reasons"])
+
+
+def test_consecutive_profile_ignores_lag_frames():
+    """A model trained on consecutive flow measures it whatever the caller passes."""
+    rng = np.random.default_rng(20)
+    obs = lambda t: (70 + 0.08 * TS60[t], 100)
+    frames, lags, masks = _blob_sequence(rng, obs, lambda t: (69 + 0.08 * TS60[t], 100))
+    X, meta = extract_features_with_meta(frames, TS60, masks, None, None, FAR)
+    X_lag, meta_lag = extract_features_with_meta(frames, TS60, masks, lags, TS60 - LAG_S, FAR)
+    np.testing.assert_array_equal(X_lag, X)
+    assert meta_lag["lag_frames_ignored"] and meta_lag["flow_mode"] == "consecutive"
+    assert meta_lag["timing"]["flow_lags_s"] is None and meta_lag["timing"]["compatible"]
+    # lag frames under a lag configuration are used as before
+    _, meta_near = extract_features_with_meta(frames, TS, masks, lags, TS - LAG_S)
+    assert meta_near["flow_mode"] == "lag" and not meta_near["lag_frames_ignored"]
+
+
+def test_consecutive_timing_tolerance_is_max_offset_s():
+    rng = np.random.default_rng(21)
+    frames, _, masks = _blob_sequence(rng, lambda t: (96, 96), lambda t: (96, 96))
+    jitter = TS60 + np.array([0.0, 8.0, -9.0, 5.0, -4.0, 9.5, 0.0, -9.5, 3.0, -2.0, 7.0, 0.0])
+    _, meta = extract_features_with_meta(frames, jitter, masks, None, None, FAR)
+    assert meta["timing"]["compatible"]                       # every interval within 60 +- 2 x 10 s
+    late = TS60.copy()
+    late[6:] += 25.0                                          # one interval of 85 s
+    _, meta = extract_features_with_meta(frames, late, masks, None, None, FAR)
+    assert not meta["timing"]["compatible"] and meta["timing"]["reasons"] == ["observation_interval"]
+    _, meta = extract_features_with_meta(frames, TS, masks, None, None, FAR)   # 5 s clip, 60 s model
+    assert not meta["timing"]["interval_compatible"]
+    strict = FeatureConfig(expected_interval_s=60.0, flow_lag_s=0.0, max_offset_s=0.5)
+    _, meta = extract_features_with_meta(frames, jitter, masks, None, None, strict)
+    assert not meta["timing"]["interval_compatible"] and meta["timing"]["max_offset_s"] == 0.5
+
+
+def test_consecutive_flow_starts_from_the_centroid_displacement(monkeypatch):
+    """A patch jumping 50 native px (33 working px) between minutes is beyond what DIS tracks from rest."""
+    rng = np.random.default_rng(22)
+    x = lambda t: 70.0 + 50.0 * (t % 2)          # overlaps itself, so the persistence filter keeps it
+    frames, _, masks = _blob_sequence(rng, lambda t: (x(t), 96), lambda t: (0, 0), radius=34.0)
+    X, meta = extract_features_with_meta(frames, TS60, masks, None, None, FAR)
+    ok = X[:, FI["flow_valid"]] == 1.0
+    assert ok.sum() >= 9
+    assert all(meta["flow"]["start"][t] == "centroid" for t in np.flatnonzero(ok))
+    step = np.array([0.0] + [50.0 if t % 2 else -50.0 for t in range(1, T)])     # native px, t-1 -> t
+    expected = step / _roi_side(meta) / 60.0
+    assert meta["roi"]["work_px_per_native_px"] * 50.0 > 30.0                     # the test has teeth
+    np.testing.assert_allclose(X[ok, FI["flow_u_mean"]], expected[ok], rtol=0.1)
+    # From rest only, the same pairs are lost or measured wrong.
+    import src.data.features as features_module
+
+    monkeypatch.setattr(features_module, "_GUESS_MIN_PX", float("inf"))
+    X0, meta0 = extract_features_with_meta(frames, TS60, masks, None, None, FAR)
+    ok0 = X0[:, FI["flow_valid"]] == 1.0
+    assert set(s for s in meta0["flow"]["start"] if s) <= {"zero"}
+    right = ok0 & np.isclose(X0[:, FI["flow_u_mean"]], expected, rtol=0.2)
+    assert right.sum() < ok.sum() / 2
+
+
+def test_select_window_consecutive_accepts_one_minute_imagery():
+    rng = np.random.default_rng(23)
+    ts = np.arange(30) * 60.0 + rng.uniform(-3.0, 3.0, 30)          # camera-network stills, jittered stamps
+    for lag in (None, 0.0):
+        sel = select_window(ts, interval_s=60.0, max_offset_s=10.0, flow_lag_s=lag)
+        assert sel["flow_mode"] == "consecutive"
+        assert sel["lag_idx"] is None and sel["lag_times"] is None and sel["lag_offsets"] is None
+        np.testing.assert_array_equal(sel["obs_idx"], np.arange(12))
+        assert np.all(np.abs(sel["offsets"]) <= 10.0)
+    # a 10 fps video gives one observation per minute
+    video = np.arange(0, 700, 0.1)
+    sel = select_window(video, interval_s=60.0, max_offset_s=10.0, flow_lag_s=None)
+    assert np.all(np.diff(sel["obs_idx"]) == 600) and sel["obs_times"][0] == 0.0
+    with pytest.raises(IncompatibleFrameTiming):
+        select_window(np.arange(10) * 60.0, interval_s=60.0, max_offset_s=10.0, flow_lag_s=None)  # too short
+    gap = np.r_[np.arange(6) * 60.0, np.arange(6, 20) * 60.0 + 30.0]                              # 30 s late
+    with pytest.raises(IncompatibleFrameTiming):
+        select_window(gap, interval_s=60.0, max_offset_s=10.0, flow_lag_s=None)
+    with pytest.raises(IncompatibleFrameTiming):                      # lag pairs: still refused
+        select_window(ts, interval_s=60.0, max_offset_s=10.0)
+    with pytest.raises(ValueError):
+        select_window(ts, interval_s=60.0, flow_lag_s=-1.0)
 
 
 # ---------------------------------------------------------------------------

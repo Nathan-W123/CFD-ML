@@ -7,6 +7,10 @@ Prognostic variables (all on the LBM grid):
   anomaly, theta_l = theta - L_v / (c_p Exner) q_l;
 * q_t' = q_t - q_t_ref(z): total-water anomaly, q_t = q_v + q_l;
 * smoke and tracer concentrations (mg/m^3);
+* precipitation ("precip", mg/m^3 equivalent, only in scenes with a rain
+  shaft): a second distractor aerosol with its own fast settling velocity, so
+  the background haze sharing the tracer field is not rained out with it. It
+  is reported to the renderer as part of `tracer` (tracer + precip);
 * four passive texture coordinates (two pairs, see results.py).
 
 theta_l and q_t are conserved by condensation and evaporation, so phase
@@ -34,7 +38,12 @@ Each step:
    plume instabilities, and sub-grid texture from the advected coordinates;
 3. transport of every scalar; 4. sources (emission, heating, surface fluxes,
    buoyancy relaxation in the top sponge); 5. checks; snapshots are stored at
-   each observation time and at its lag partner (t - flow_lag_s).
+   each observation time and, when the profile has lag frames, at its lag
+   partner (t - flow_lag_s). With `flow_lag_s` None or 0 (far-field profile,
+   flow between consecutive observations) no lag snapshot exists and every
+   `_lag` field of the result is None. Each snapshot also stores the subgrid
+   velocity scale u_sgs = C_s dx |S| (LBMSolver.sgs_velocity, from the local
+   non-equilibrium stress, computed only at snapshot times).
 
 Before t = 0 a source-free precursor spins up the ambient flow (no impulsive
 start in the observed window); the scenario's initial fields are applied at
@@ -66,7 +75,13 @@ from src.cfd.validation import summarize_validity, view_slices
 
 TRANSPORTED = ("thetal", "qt", "smoke", "tracer", "tex_xa", "tex_za", "tex_xb", "tex_zb")
 TEX_NAMES = ("tex_xa", "tex_za", "tex_xb", "tex_zb")
+PRECIP = "precip"          # transported only when spec.precip_settling > 0
 CHECK_EVERY = 10
+
+
+def has_lag_frames(flow_lag_s: Optional[float]) -> bool:
+    """A profile stores lag snapshots unless its flow lag is None or 0."""
+    return flow_lag_s is not None and float(flow_lag_s) > 0.0
 
 
 class SimulationUnstable(RuntimeError):
@@ -101,7 +116,8 @@ class SimulationSpec:
     tracer_settling: float
     spinup_s: float
     frame_times: np.ndarray               # (T,) s after spin-up
-    flow_lag_s: float = 1.0
+    flow_lag_s: Optional[float] = 1.0     # None / 0: no lag snapshots (consecutive-frame flow)
+    precip_settling: float = 0.0          # m/s; > 0 adds the "precip" scalar (rain shaft)
     precursor_s: float = 30.0
     tex_period_s: float = 30.0
     top_sponge_theta_rate: float = 0.5    # 1/s, buoyancy relaxation in the top sponge
@@ -186,12 +202,16 @@ def run_simulation(spec: SimulationSpec, cfg: Optional[Mapping[str, Any]] = None
                   sponge_width=spec.sponge_width, sponge_rate=spec.sponge_rate),
         solid=solid, u_ambient=spec.wind(-spec.precursor_s),
     )
+    with_precip = float(spec.precip_settling) > 0.0
     specs = [
         ScalarSpec("thetal", spec.diffusivity, nonnegative=False),
         ScalarSpec("qt", spec.diffusivity, nonnegative=False),
         ScalarSpec("smoke", spec.diffusivity),
         ScalarSpec("tracer", spec.diffusivity, settling_velocity=spec.tracer_settling),
-    ] + [ScalarSpec(name, 0.0, nonnegative=False) for name in TEX_NAMES]
+    ]
+    if with_precip:
+        specs.append(ScalarSpec(PRECIP, spec.diffusivity, settling_velocity=float(spec.precip_settling)))
+    specs += [ScalarSpec(name, 0.0, nonnegative=False) for name in TEX_NAMES]
     transport = ScalarTransport(nx, nz, units, solid, specs,
                                 scheme=str(cfg.get("scalars", {}).get("scheme", "muscl")))
     # Top sponge rows: buoyancy (theta_l') is relaxed there instead of momentum.
@@ -231,6 +251,8 @@ def run_simulation(spec: SimulationSpec, cfg: Optional[Mapping[str, Any]] = None
         "smoke": np.where(fluid, init["smoke"], 0.0).astype(np.float64),
         "tracer": np.where(fluid, init["tracer"], 0.0).astype(np.float64),
     }
+    if with_precip:
+        fields[PRECIP] = np.where(fluid, init.get(PRECIP, 0.0), 0.0).astype(np.float64)
     tex_reset = {"a": 0.0, "b": -0.5 * spec.tex_period_s}
     fields["tex_xa"], fields["tex_za"] = xx.copy(), zz.copy()
     fields["tex_xb"], fields["tex_zb"] = xx.copy(), zz.copy()
@@ -260,6 +282,9 @@ def run_simulation(spec: SimulationSpec, cfg: Optional[Mapping[str, Any]] = None
         }
         out["smoke"] = g["smoke"]
         out["tracer"] = g["tracer"]
+        if with_precip:
+            # Explicit zero ghosts: a zero-gradient top would feed falling rain back in.
+            out[PRECIP] = g.get(PRECIP, {"left": np.zeros(nz), "right": np.zeros(nz), "top": np.zeros(nx)})
         width = nx * spec.dx
         height = nz * spec.dx
         for pair in ("a", "b"):
@@ -270,19 +295,22 @@ def run_simulation(spec: SimulationSpec, cfg: Optional[Mapping[str, Any]] = None
 
     # ---- output bookkeeping ------------------------------------------------------------
     T = len(spec.frame_times)
+    with_lag = has_lag_frames(spec.flow_lag_s)
     obs_t = spec.spinup_s + np.asarray(spec.frame_times, dtype=float)
-    lag_t = obs_t - spec.flow_lag_s
     obs_steps = np.rint(obs_t / dt).astype(int)
-    lag_steps = np.rint(lag_t / dt).astype(int)
-    if lag_steps.min() < 0:
-        raise ValueError("spin-up shorter than the flow lag")
-    snap_names = ("smoke", "lwc", "tracer")
+    lag_steps = np.zeros(0, dtype=int)
+    if with_lag:
+        lag_steps = np.rint((obs_t - float(spec.flow_lag_s)) / dt).astype(int)
+        if lag_steps.min() < 0:
+            raise ValueError("spin-up shorter than the flow lag")
+    snap_names = ("smoke", "lwc", "tracer", "sgs_u")
+    n_lag = T if with_lag else 0
     obs = {name: np.zeros((T, nz, nx), dtype=np.float32) for name in snap_names}
-    lag = {name: np.zeros((T, nz, nx), dtype=np.float32) for name in snap_names}
+    lag = {name: np.zeros((n_lag, nz, nx), dtype=np.float32) for name in snap_names}
     obs_tex = np.zeros((T, 4, nz, nx), dtype=np.float32)
-    lag_tex = np.zeros((T, 4, nz, nx), dtype=np.float32)
+    lag_tex = np.zeros((n_lag, 4, nz, nx), dtype=np.float32)
     obs_w = np.zeros((T, 2), dtype=np.float32)
-    lag_w = np.zeros((T, 2), dtype=np.float32)
+    lag_w = np.zeros((n_lag, 2), dtype=np.float32)
     diag = {name: np.zeros((T, nz, nx), dtype=np.float32) for name in ("theta_anom", "qv", "ux", "uz")}
     rho_air = float(cfg.get("physics", {}).get("rho_air", 1.2))
     by_step: Dict[int, list] = {}
@@ -292,11 +320,17 @@ def run_simulation(spec: SimulationSpec, cfg: Optional[Mapping[str, Any]] = None
         by_step.setdefault(int(s), []).append(("lag", k))
 
     def store(t: float, theta, qv, ql):
-        for kind, k in by_step.get(step_now[0], []):
+        entries = by_step.get(step_now[0], [])
+        if not entries:
+            return
+        sgs = lbm.sgs_velocity()
+        aerosol = fields["tracer"] + fields[PRECIP] if with_precip else fields["tracer"]
+        for kind, k in entries:
             tgt, tex, wts = (obs, obs_tex, obs_w) if kind == "obs" else (lag, lag_tex, lag_w)
             tgt["smoke"][k] = fields["smoke"]
-            tgt["tracer"][k] = fields["tracer"]
+            tgt["tracer"][k] = aerosol
             tgt["lwc"][k] = thermo.lwc_from_ql(ql, rho_air)
+            tgt["sgs_u"][k] = sgs
             for j, name in enumerate(TEX_NAMES):
                 tex[k, j] = fields[name]
             wts[k] = tex_weights(t)
@@ -339,9 +373,11 @@ def run_simulation(spec: SimulationSpec, cfg: Optional[Mapping[str, Any]] = None
             transport.step(fields, ux, uz, ghosts(t, u_now))
         except ValueError as exc:   # advective CFL limit
             raise SimulationUnstable(f"{exc} at t = {t:.1f} s (dt = {dt})") from exc
-        rates = dict(spec.sources(t, {"theta": theta, "qv": qv, "ql": ql,
-                                       "theta_anom": theta - theta_ref[:, None],
-                                       "smoke": fields["smoke"], "tracer": fields["tracer"]}))
+        state = {"theta": theta, "qv": qv, "ql": ql, "theta_anom": theta - theta_ref[:, None],
+                 "smoke": fields["smoke"], "tracer": fields["tracer"]}
+        if with_precip:
+            state[PRECIP] = fields[PRECIP]
+        rates = dict(spec.sources(t, state))
         # theta and q_v sources act on the conserved variables.
         rates["thetal"] = rates.pop("theta", 0.0) - uz * dthl_dz[:, None] - top_relax * fields["thetal"]
         rates["qt"] = rates.pop("qv", 0.0) - uz * dqt_dz[:, None]
@@ -368,23 +404,29 @@ def run_simulation(spec: SimulationSpec, cfg: Optional[Mapping[str, Any]] = None
         if step in by_step:
             store(t, theta, qv, ql)
 
+    final = {"thetal": fields["thetal"], "qt": fields["qt"], "smoke": fields["smoke"],
+             "tracer": fields["tracer"], "ql": ql, "qv": qv}
+    if with_precip:
+        final[PRECIP] = fields[PRECIP]
     validity = summarize_validity(
-        fields={"thetal": fields["thetal"], "qt": fields["qt"], "smoke": fields["smoke"],
-                "tracer": fields["tracer"], "ql": ql, "qv": qv},
+        fields=final,
         transport=transport, solid=solid, max_lattice_speed=max_speed,
         max_density_deviation=max_rho_dev, max_theta_anomaly=max_theta_anom, spec=spec,
         smoke_frames=obs["smoke"], lwc_frames=obs["lwc"], tracer_frames=obs["tracer"],
         uz_frames=diag["uz"], cfg=cfg,
     )
     times = np.asarray(spec.frame_times, dtype=np.float64)
+    lag_fields: Dict[str, Any] = {}
+    if with_lag:
+        lag_fields = dict(lag_times=times - float(spec.flow_lag_s), smoke_lag=lag["smoke"], lwc_lag=lag["lwc"],
+                          tracer_lag=lag["tracer"], texcoords_lag=lag_tex, tex_weights_lag=lag_w,
+                          sgs_u_lag=lag["sgs_u"])
     return SimulationResult(
         sim_id=spec.sim_id, category=spec.category, regime=spec.regime, labels=tuple(spec.labels),
         seed=int(spec.seed), params=spec.params, dx=float(spec.dx), times=times,
         smoke=obs["smoke"], lwc=obs["lwc"], tracer=obs["tracer"], solid=solid.copy(),
         valid=bool(validity["valid"]), validity=validity,
-        texcoords=obs_tex, tex_weights=obs_w, lag_times=times - spec.flow_lag_s,
-        smoke_lag=lag["smoke"], lwc_lag=lag["lwc"], tracer_lag=lag["tracer"],
-        texcoords_lag=lag_tex, tex_weights_lag=lag_w,
+        texcoords=obs_tex, tex_weights=obs_w,
         theta_anom=diag["theta_anom"], qv=diag["qv"], ux=diag["ux"], uz=diag["uz"],
-        extra=dict(spec.extra),
+        sgs_u=obs["sgs_u"], extra=dict(spec.extra), **lag_fields,
     )

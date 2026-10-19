@@ -9,10 +9,22 @@ Sampling is context-first, to keep label shortcuts out of the data:
    distributions for every category, so e.g. |wind| or P(terrain) carries no
    information about the label.
 2. A regime compatible with that context is chosen for the category (a calm
-   radiation fog needs light wind, terrain fog needs a valley, a "camera
-   artefact" negative needs a strong artefact to exist, ...), with the
-   configured regime weights renormalised over the compatible regimes.
+   radiation fog needs light wind, terrain fog needs a valley, a ridge cloud
+   needs a hill or ridge and wind, a "camera artefact" negative needs a
+   strong artefact to exist, ...), with the configured regime weights
+   renormalised over the compatible regimes. A regime missing from a
+   category's weight block (or weighted 0) is never sampled; with no block
+   at all every regime has weight 1 except the opt-in ones
+   (constants.OPT_IN_REGIMES: ridge_cloud, rain_shaft).
 3. Component parameters (smoke source, fog layer, distractor) are sampled.
+
+Profiles: everything physical comes from the config (the near-field
+configs/simulation.yaml or the far-field configs/simulation_far.yaml); code
+defaults are the near-field values. Terrain kinds (hill, valley, slope and,
+in the far profile, ridge) and their widths, the wind's reference height and
+profile cap, the background haze layer and the humidity ranges are config
+keys; numerical widths scale with dx (see scenario_util). With
+`time.flow_lag_s` null or 0 the simulation stores no lag snapshots.
 
 Seeds: every simulation's seed is derived from (base seed, split, category,
 index, attempt), and every component draws from its own child stream, so no
@@ -20,11 +32,13 @@ two simulations in different splits share random streams and a rejected
 simulation is replaced by re-drawing with the next attempt number.
 
 Held-out (test_ood) recipes, never seen in train / val / test_iid:
-* "fast_wind"        wind of 7-9 m/s (training wind is 0-7 m/s) in EVERY
-                     category, so fast-moving fog has matched fast negatives;
-* "elevated_source"  a tall hill (45-80 m; training terrain is <= 40 m) in
-                     every category, with the smoke source on the hilltop
-                     for smoke-bearing categories.
+* "fast_wind"        wind of 7-9 m/s (training wind is 0-7 m/s; far field:
+                     12-15 against 0-12) in EVERY category, so fast-moving
+                     fog has matched fast negatives;
+* "elevated_source"  a tall hill (45-80 m; training terrain is <= 40 m; far
+                     field 700-1000 m against <= 600 m) in every category,
+                     with the smoke source on the hilltop for smoke-bearing
+                     categories.
 
 Where this fits: `scripts/generate_dataset.py` calls `sample_scenario` and
 `run_scenario`; tests call `build_spec` with small step budgets.
@@ -40,17 +54,20 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
 from src.cfd import thermo
-from src.cfd.fog import fog_component, fog_reference, fog_wind_range, sample_fog
+from src.cfd.fog import fog_component, fog_reference, fog_wind_range, ridge_cloud_possible, sample_fog
 from src.cfd.results import SimulationResult
 from src.cfd.scenario_util import (
-    Component, Grid, layer_profile, log_uniform, sample_noise_spec, smooth_noise, smooth_noise01,
-    smooth_texture, uniform,
+    Component, Grid, block_range, grid_dx, layer_profile, log_uniform, sample_noise_spec, smooth_noise,
+    smooth_noise01, smooth_texture, uniform,
 )
-from src.cfd.simulation import SimulationSpec, SimulationUnstable, run_simulation
+from src.cfd.simulation import SimulationSpec, SimulationUnstable, has_lag_frames, run_simulation
 from src.cfd.smoke import (
-    dust_component, sample_dust, sample_smoke, smoke_component, smoke_wind_range,
+    RAIN_DEFAULTS, dust_component, rain_component, sample_dust, sample_rain, sample_smoke, smoke_component,
+    smoke_wind_range,
 )
-from src.constants import CATEGORIES, CATEGORY_INDEX, CATEGORY_LABELS, FOG_REGIMES, SMOKE_REGIMES
+from src.constants import (
+    CATEGORIES, CATEGORY_INDEX, CATEGORY_LABELS, FOG_REGIMES, OPT_IN_REGIMES, SMOKE_REGIMES,
+)
 from src.utils.runtime import child_rng, derive_seed
 
 SPLITS: Tuple[str, ...] = ("train", "val_select", "val_calib", "test_iid", "test_ood")
@@ -58,6 +75,8 @@ SPLIT_KEYS = {name: i + 1 for i, name in enumerate(SPLITS)}
 HOLDOUT_TAGS: Tuple[str, ...] = ("fast_wind", "elevated_source")
 _STREAM_CONTEXT, _STREAM_REGIME, _STREAM_SMOKE, _STREAM_FOG, _STREAM_DISTRACTOR = 1, 2, 3, 4, 5
 CALM_ONLY_FOG = ("radiation_fog", "terrain_fog")
+TERRAIN_KINDS = ("hill", "valley", "slope")          # near-field default; profiles may add "ridge"
+TERRAIN_WIDTH_M = {"hill": (30.0, 80.0), "valley": (50.0, 110.0), "slope": (50.0, 110.0), "ridge": (25.0, 60.0)}
 
 
 # ---------------------------------------------------------------------- helpers
@@ -67,9 +86,12 @@ def _sc(cfg: Dict[str, Any]) -> Dict[str, Any]:
 
 def _holdout(cfg: Dict[str, Any]) -> Dict[str, Any]:
     h = cfg.get("holdout", {})
+    elev = h.get("elevated_source", {})
     return {
         "fast_wind_ms": tuple(h.get("fast_wind", {}).get("wind_speed_ms", [7.0, 9.0])),
-        "tall_terrain_m": tuple(h.get("elevated_source", {}).get("terrain_height_m", [45.0, 80.0])),
+        "tall_terrain_m": tuple(elev.get("terrain_height_m", [45.0, 80.0])),
+        "tall_width_m": tuple(elev.get("width_m", [35.0, 70.0])),
+        "tall_center_frac": tuple(elev.get("center_frac", [0.3, 0.7])),
     }
 
 
@@ -81,8 +103,18 @@ def sim_id_for(split: str, category: str, index: int, attempt: int = 0) -> str:
     return f"{split}-{category}-{index:04d}-a{attempt}"
 
 
+def regime_weight(regime: str, weights: Optional[Dict[str, float]]) -> float:
+    """Sampling weight of a regime: from the category's block (missing -> 0); with no block
+    at all 1, except the opt-in regimes, which a profile must enable explicitly."""
+    if weights:
+        return float(weights.get(regime, 0.0))
+    return 0.0 if regime in OPT_IN_REGIMES else 1.0
+
+
 def _weighted_choice(rng: np.random.Generator, options: List[str], weights: Dict[str, float]) -> str:
-    w = np.array([float(weights.get(o, 1.0)) for o in options], dtype=float)
+    # Zero-weight regimes are dropped first, so they never change which regime a draw picks.
+    options = [o for o in options if regime_weight(o, weights) > 0.0]
+    w = np.array([regime_weight(o, weights) for o in options], dtype=float)
     if not len(options) or w.sum() <= 0:
         raise ValueError("no compatible regime")
     return options[int(rng.choice(len(options), p=w / w.sum()))]
@@ -107,7 +139,11 @@ def sample_context(rng: np.random.Generator, cfg: Dict[str, Any], category: str,
         "shear_exponent": uniform(rng, common.get("wind_shear_exponent", [0.1, 0.3])),
         "gust_fraction": uniform(rng, common.get("wind_gust_fraction", [0.0, 0.3])),
         "gusts": sample_noise_spec(rng, common.get("wind_gust_period_s", [8.0, 40.0])),
-        "flip": bool(speed < 2.0 and rng.random() < float(common.get("wind_direction_flip_prob", 0.05))),
+        "flip": bool(speed < float(common.get("wind_flip_max_speed_ms", 2.0))
+                     and rng.random() < float(common.get("wind_direction_flip_prob", 0.05))),
+        # Power-law profile (z / reference height)^shear, capped (see wind_function).
+        "reference_height_m": float(common.get("wind_reference_height_m", 50.0)),
+        "profile_cap": float(common.get("wind_profile_cap", 1.3)),
     }
     # An accelerating wind over the observation window, for every category alike
     # (fog_dissipating may use it as its clearing mechanism, it never creates it).
@@ -124,13 +160,18 @@ def sample_context(rng: np.random.Generator, cfg: Dict[str, Any], category: str,
     }
     if "elevated_source" in holdout_tags:
         terrain = {"kind": "hill", "height_m": uniform(rng, hold["tall_terrain_m"]),
-                   "center_frac": uniform(rng, (0.3, 0.7)), "width_m": uniform(rng, (35.0, 70.0))}
+                   "center_frac": uniform(rng, hold["tall_center_frac"]), "width_m": uniform(rng, hold["tall_width_m"])}
     elif rng.random() < float(common.get("terrain_prob", 0.35)):
-        kind = ["hill", "valley", "slope"][int(rng.integers(0, 3))]
+        kinds = list(common.get("terrain_kinds", TERRAIN_KINDS))
+        kind = kinds[int(rng.integers(0, len(kinds)))]
+        widths = dict(TERRAIN_WIDTH_M)
+        widths.update(common.get("terrain_width_m", {}))
         terrain = {"kind": kind, "height_m": uniform(rng, common.get("terrain_height_m", [5.0, 40.0])),
                    "center_frac": uniform(rng, (0.25, 0.75)),
-                   "width_m": uniform(rng, (30.0, 80.0) if kind == "hill" else (50.0, 110.0)),
+                   "width_m": uniform(rng, widths[kind]),
                    "direction": 1.0 if rng.random() < 0.5 else -1.0}
+        if kind == "ridge":
+            terrain["lee_width_frac"] = uniform(rng, (0.5, 1.0))   # a steeper slope on one side
     else:
         terrain = {"kind": "flat", "height_m": 0.0}
     fog_present = CATEGORY_LABELS[category][1] == 1
@@ -139,7 +180,8 @@ def sample_context(rng: np.random.Generator, cfg: Dict[str, Any], category: str,
         "lapse_dtheta_dz": uniform(rng, common.get("lapse_dtheta_dz", [-0.002, 0.03])),
         # Non-fog scenes stay well below saturation so lifted air cannot condense
         # into unlabelled cloud; fog scenes set their own humidity in fog.py.
-        "relative_humidity": uniform(rng, (0.6, 0.95) if fog_present else common.get("relative_humidity_dry", [0.3, 0.7])),
+        "relative_humidity": uniform(rng, common.get("relative_humidity_fog", [0.6, 0.95]) if fog_present
+                                     else common.get("relative_humidity_dry", [0.3, 0.7])),
     }
     spin = common.get("spinup_s", cfg.get("time", {}).get("spinup_s", [10.0, 60.0]))
     timing = {
@@ -156,22 +198,24 @@ def sample_context(rng: np.random.Generator, cfg: Dict[str, Any], category: str,
     }
     haze = None
     if rng.random() < float(common.get("background_haze_prob", 0.3)):
-        haze = _sample_haze(rng, background=True)
+        haze = _sample_haze(rng, background=True, block=common.get("background_haze", {}))
     return {"wind": wind, "mixing": mixing, "terrain": terrain, "atmosphere": atmosphere,
             "timing": timing, "render_hints": hints, "background_haze": haze}
 
 
 def _sample_haze(rng: np.random.Generator, background: bool, block: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """A drifting haze layer: the haze_drift distractor, or faint background haze in any category
+    (`scenarios.common.background_haze`); sizes and periods from the config block."""
     block = block or {}
     return {
         "background": bool(background),
-        "inflow_mg_m3": uniform(rng, (0.05, 1.0) if background else block.get("inflow_mg_m3", [0.2, 4.0])),
-        "layer_base_m": uniform(rng, (0.0, 100.0)),
-        "layer_depth_m": uniform(rng, block.get("layer_depth_m", [40.0, 250.0])),
+        "inflow_mg_m3": uniform(rng, block_range(block, "inflow_mg_m3", (0.05, 1.0) if background else (0.2, 4.0))),
+        "layer_base_m": uniform(rng, block_range(block, "layer_base_m", (0.0, 100.0))),
+        "layer_depth_m": uniform(rng, block_range(block, "layer_depth_m", (40.0, 250.0))),
         "patchiness": uniform(rng, (0.2, 0.8)),
         "texture_seed": int(rng.integers(0, 2**31 - 1)),
-        "texture_scale_m": uniform(rng, (30.0, 120.0)),
-        "modulation": sample_noise_spec(rng, (8.0, 40.0)),
+        "texture_scale_m": uniform(rng, block_range(block, "texture_scale_m", (30.0, 120.0))),
+        "modulation": sample_noise_spec(rng, block_range(block, "modulation_period_s", (8.0, 40.0))),
     }
 
 
@@ -196,6 +240,8 @@ def compatible_fog_regimes(context: Dict[str, Any], cfg: Dict[str, Any], tags: L
             continue
         if r == "steam_fog" and kind != "flat":
             continue
+        if r == "ridge_cloud" and not ridge_cloud_possible(context, cfg):
+            continue
         if "fast_wind" in tags:
             if r in CALM_ONLY_FOG:
                 continue
@@ -208,10 +254,14 @@ def compatible_fog_regimes(context: Dict[str, Any], cfg: Dict[str, Any], tags: L
 def compatible_neither_regimes(context: Dict[str, Any], cfg: Dict[str, Any], tags: List[str]) -> List[str]:
     hints = context["render_hints"]
     speed = context["wind"]["speed_ms"]
-    dust_range = _sc(cfg).get("neither", {}).get("dust_burst", {}).get("wind_speed_ms", [1.5, 9.0])
+    neither = _sc(cfg).get("neither", {})
+    dust_range = neither.get("dust_burst", {}).get("wind_speed_ms", [1.5, 9.0])
+    rain_range = neither.get("rain_shaft", {}).get("wind_speed_ms", RAIN_DEFAULTS["wind_speed_ms"])
     out = ["haze_drift"]
     if "fast_wind" in tags or _in_range(speed, dust_range):
         out.append("dust_burst")
+    if "fast_wind" in tags or _in_range(speed, rain_range):
+        out.append("rain_shaft")
     if hints["shadow"]:
         out.append("illumination_change")
     if hints["strong_artifact"]:
@@ -257,6 +307,8 @@ def sample_scenario(category: str, split: str, index: int, cfg: Dict[str, Any], 
                                                                  block=_sc(cfg).get("neither", {}).get("haze_drift", {}))}
         elif regime == "dust_burst":
             distractor = sample_dust(drng, cfg, context)
+        elif regime == "rain_shaft":
+            distractor = sample_rain(drng, cfg, context)
         else:
             distractor = {"regime": regime}
     else:
@@ -296,6 +348,12 @@ def terrain_heights(terrain: Dict[str, Any], x: np.ndarray, view_x) -> np.ndarra
     if kind == "slope":
         s = terrain.get("direction", 1.0) * (x - xc) / w
         return H * 0.5 * (1.0 + np.tanh(s))
+    if kind == "ridge":
+        # A sharper crest than a hill (exp(-|s|^1.5)), one side steeper (lee_width_frac x w).
+        lee = float(terrain.get("lee_width_frac", 1.0))
+        downstream = terrain.get("direction", 1.0) * (x - xc) > 0
+        s = np.abs(x - xc) / np.where(downstream, w * lee, w)
+        return H * np.exp(-s ** 1.5)
     raise ValueError(f"unknown terrain kind {kind!r}")
 
 
@@ -315,7 +373,8 @@ def wind_function(params: Dict[str, Any], grid: Grid):
     """Mean ambient wind profile u(z, t) in m/s: power law, gusts, optional ramp or slow reversal."""
     w = params["wind"]
     U, sign = float(w["speed_ms"]), float(w["sign"])
-    prof = np.minimum((grid.z / 50.0) ** float(w["shear_exponent"]), 1.3)
+    z_ref = float(w.get("reference_height_m", 50.0))
+    prof = np.minimum((grid.z / z_ref) ** float(w["shear_exponent"]), float(w.get("profile_cap", 1.3)))
     gust_f = float(w["gust_fraction"])
     first = float(params["timing"]["spinup_s"])
     span = (params["timing"]["n_frames"] - 1) * params["timing"]["frame_interval_s"]
@@ -335,7 +394,8 @@ def wind_function(params: Dict[str, Any], grid: Grid):
 
 def haze_component(haze: Dict[str, Any], grid: Grid) -> Component:
     comp = Component()
-    profile = layer_profile(grid.z, haze["layer_base_m"], haze["layer_base_m"] + haze["layer_depth_m"], soft_m=20.0)
+    profile = layer_profile(grid.z, haze["layer_base_m"], haze["layer_base_m"] + haze["layer_depth_m"],
+                            soft_m=4.0 * grid.dx)       # 20 m at dx = 5 m
     tex = smooth_texture(grid, haze["texture_seed"], scale_m=haze["texture_scale_m"], contrast=haze["patchiness"])
     c0 = haze["inflow_mg_m3"]
     init = c0 * profile[:, None] * tex
@@ -358,7 +418,8 @@ def expected_peak_speed(params: Dict[str, Any], cfg: Dict[str, Any]) -> float:
     """A conservative estimate of the largest flow speed (m/s), used to pick dt:
     max_z u_amb (1 + 1.5 gust) combined with the plume rise 1.66 F^(1/3)."""
     w = params["wind"]
-    U = float(w["speed_ms"]) * 1.3 * float(w.get("ramp_factor", 1.0)) * (1.0 + 1.5 * float(w["gust_fraction"]))
+    U = (float(w["speed_ms"]) * float(w.get("profile_cap", 1.3)) * float(w.get("ramp_factor", 1.0))
+         * (1.0 + 1.5 * float(w["gust_fraction"])))
     plume = 0.0
     smoke = params.get("smoke")
     if smoke and smoke.get("buoyancy_flux_m3s3", 0.0) > 0:
@@ -372,7 +433,7 @@ def expected_peak_speed(params: Dict[str, Any], cfg: Dict[str, Any]) -> float:
 def choose_dt(params: Dict[str, Any], cfg: Dict[str, Any]) -> Tuple[float, int]:
     t = cfg.get("time", {})
     dt = float(t.get("dt_s", 0.1))
-    dx = float(cfg.get("grid", {}).get("domain_width_m", 320.0)) / int(cfg.get("grid", {}).get("nx", 64))
+    dx = grid_dx(cfg)
     target = float(cfg.get("lbm", {}).get("target_lattice_speed", 0.08))
     speed = expected_peak_speed(params, cfg)
     halvings = 0
@@ -402,8 +463,8 @@ def build_spec(params: Dict[str, Any], cfg: Dict[str, Any], dt: Optional[float] 
 
     components: List[Component] = []
     first = float(params["timing"]["spinup_s"])
+    window = (int(params["timing"]["n_frames"]) - 1) * float(params["timing"]["frame_interval_s"])
     if fog is not None:
-        window = (int(params["timing"]["n_frames"]) - 1) * float(params["timing"]["frame_interval_s"])
         components.append(fog_component(fog, grid, (theta_ref, qv_ref, ql_ref), p, pi, rho_air, wind, first, window))
     if params.get("smoke") is not None:
         components.append(smoke_component(params["smoke"], grid, first, theta0,
@@ -414,6 +475,8 @@ def build_spec(params: Dict[str, Any], cfg: Dict[str, Any], dt: Optional[float] 
             components.append(haze_component(distractor["haze"], grid))
         elif distractor["regime"] == "dust_burst":
             components.append(dust_component(distractor, grid, first))
+        elif distractor["regime"] == "rain_shaft":
+            components.append(rain_component(distractor, grid, first, window, wind))
     if params.get("background_haze") is not None:
         components.append(haze_component(params["background_haze"], grid))
 
@@ -437,6 +500,7 @@ def build_spec(params: Dict[str, Any], cfg: Dict[str, Any], dt: Optional[float] 
         "ql": {"left": ql_ref, "right": ql_ref, "top": zeros_x},
         "smoke": {"left": zeros_z, "right": zeros_z, "top": zeros_x},
         "tracer": {"left": zeros_z, "right": zeros_z, "top": zeros_x},
+        "precip": {"left": zeros_z, "right": zeros_z, "top": zeros_x},
     }
     inflow_fns = [fn for comp in components for fn in comp.inflow]
     source_fns = [fn for comp in components for fn in comp.sources]
@@ -454,6 +518,7 @@ def build_spec(params: Dict[str, Any], cfg: Dict[str, Any], dt: Optional[float] 
         return rates
 
     settling = max([c.settling for c in components] + [0.0])
+    precip_settling = max([c.precip_settling for c in components] + [0.0])
     timing = params["timing"]
     frame_times = np.arange(int(timing["n_frames"])) * float(timing["frame_interval_s"])
     info = {}
@@ -463,6 +528,7 @@ def build_spec(params: Dict[str, Any], cfg: Dict[str, Any], dt: Optional[float] 
     nu = float(mixing["nu_m2s"])
     cs = float(mixing.get("smagorinsky_cs", lbm_cfg.get("smagorinsky_cs", 0.12)))
     tcfg = cfg.get("time", {})
+    flow_lag = tcfg.get("flow_lag_s", 1.0)
     return SimulationSpec(
         sim_id=params["sim_id"], category=params["category"], regime=params["regime"],
         labels=tuple(params["labels"]), seed=int(params["seed"]), params=params,
@@ -473,7 +539,8 @@ def build_spec(params: Dict[str, Any], cfg: Dict[str, Any], dt: Optional[float] 
         solid=grid.solid, theta_ref=theta_ref, qv_ref=qv_ref, ql_ref=ql_ref,
         initial=initial, wind=wind, inflow=inflow, sources=sources,
         tracer_settling=float(settling), spinup_s=first, frame_times=frame_times,
-        flow_lag_s=float(tcfg.get("flow_lag_s", 1.0)),
+        flow_lag_s=float(flow_lag) if has_lag_frames(flow_lag) else None,
+        precip_settling=float(precip_settling),
         precursor_s=float(tcfg.get("precursor_s", 30.0)),
         tex_period_s=float(phys.get("texture_period_s", 30.0)),
         top_sponge_theta_rate=float(lbm_cfg.get("top_sponge_theta_rate_s", 0.5)),

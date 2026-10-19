@@ -20,6 +20,15 @@ that set; D starts from the pretrained artifacts with `finetune.lr`, B from
 random weights with `training.lr`; epochs, patience, seeds, splits and the
 normaliser policy (refit on the real train split) are identical.
 
+Unknown labels (NaN targets, e.g. real footage whose fog is not annotated):
+the loss is a masked BCEWithLogits (per label, averaged over the known
+entries, then over the labels that have any; identical to the plain loss when
+every target is known), early stopping uses the masked val_select loss, and
+every calibration fit uses the rows where its label is known. A label with
+too few known val_calib rows keeps the pretrained model's temperature,
+thresholds and margins when fine-tuning (D), or the neutral defaults
+otherwise (B), and the calibration record says why.
+
 `run_loro` trains one model per held-out regime (leave-one-regime-out) and
 reports how the unseen regime is handled.
 
@@ -79,19 +88,20 @@ class TrainResult:
 
 
 def _label_balance(y: np.ndarray, mode: str) -> Tuple[Optional[np.ndarray], str]:
-    """pos_weight per label (n_neg / n_pos) or None, and the balancing actually used.
+    """pos_weight per label (n_neg / n_pos over the KNOWN targets) or None, and the balancing used.
 
     "auto": pos_weight for the labels whose positive:negative ratio exceeds
     1.5 either way (others 1.0), nothing when every label is balanced;
     "pos_weight": always; "sampler": category-balanced sampling instead;
-    "none": nothing.
+    "none": nothing. A label without known targets gets 1.0.
     """
     if mode not in ("auto", "pos_weight", "sampler", "none"):
         raise ValueError(f"unknown training.balance {mode!r}")
     if mode in ("none", "sampler"):
         return None, mode
-    n_pos = y.sum(axis=0).astype(np.float64)
-    n_neg = len(y) - n_pos
+    known = M.known_mask(y)
+    n_pos = np.where(known, y, 0.0).sum(axis=0).astype(np.float64)
+    n_neg = known.sum(axis=0) - n_pos
     weight = np.maximum(n_neg, 1.0) / np.maximum(n_pos, 1.0)
     imbalanced = (weight > BALANCE_RATIO) | (weight < 1.0 / BALANCE_RATIO)
     if mode == "pos_weight":
@@ -102,10 +112,31 @@ def _label_balance(y: np.ndarray, mode: str) -> Tuple[Optional[np.ndarray], str]
 
 
 def _sampler_weights(y: np.ndarray) -> torch.Tensor:
-    """Per-sample weights giving every (smoke, fog) category equal total weight."""
-    code = (y[:, 0] > 0.5).astype(int) * 2 + (y[:, 1] > 0.5).astype(int)
-    counts = np.bincount(code, minlength=4).astype(np.float64)
+    """Per-sample weights giving every (smoke, fog) label pattern equal total weight (unknown is a value)."""
+    state = np.where(M.known_mask(y), (y > 0.5).astype(int), 2)          # 0, 1, 2 = unknown
+    code = state[:, 0] * 3 + state[:, 1]
+    counts = np.bincount(code, minlength=9).astype(np.float64)
     return torch.as_tensor(1.0 / counts[code], dtype=torch.float64)
+
+
+def masked_bce_with_logits(logits: torch.Tensor, y: torch.Tensor,
+                           pos_weight: Optional[torch.Tensor] = None) -> torch.Tensor:
+    """BCEWithLogits ignoring NaN targets: per label the mean over its known entries, then the mean
+    over the labels with at least one known entry (zero, with a gradient path, when none is known).
+
+    With every target known it is exactly BCEWithLogitsLoss(pos_weight) with mean reduction.
+    """
+    known = ~torch.isnan(y)
+    if bool(known.all()):
+        return nn.functional.binary_cross_entropy_with_logits(logits, y, pos_weight=pos_weight)
+    target = torch.where(known, y, torch.zeros_like(y))
+    per = nn.functional.binary_cross_entropy_with_logits(logits, target, pos_weight=pos_weight, reduction="none")
+    per = per * known.to(per.dtype)
+    n = known.sum(dim=0)
+    has = n > 0
+    if not bool(has.any()):
+        return (logits * 0.0).sum()
+    return (per.sum(dim=0)[has] / n[has].to(per.dtype)).mean()
 
 
 @torch.no_grad()
@@ -124,10 +155,11 @@ def train_model(model: PhysicsGRU, train: Tuple[np.ndarray, np.ndarray], val: Tu
                 freeze_encoder_epochs: int = 0, log: Optional[Callable[[str], None]] = None) -> TrainResult:
     """Train in place on NORMALISED features; early-stop on the val loss; restore the best epoch.
 
-    train / val: (X (N, 12, 14) normalised float32, y (N, 2)). `tcfg` is the
-    `training` section of training.yaml; lr / max_epochs / patience override it.
-    Deterministic for a given seed on one thread (shuffling uses its own
-    generator; dropout draws from torch's global generator, seeded by the caller).
+    train / val: (X (N, 12, 14) normalised float32, y (N, 2); NaN = unknown target,
+    left out of the loss). `tcfg` is the `training` section of training.yaml;
+    lr / max_epochs / patience override it. Deterministic for a given seed on
+    one thread (shuffling uses its own generator; dropout draws from torch's
+    global generator, seeded by the caller).
     """
     lr = float(tcfg.get("lr", 1e-3) if lr is None else lr)
     max_epochs = int(tcfg.get("max_epochs", 50) if max_epochs is None else max_epochs)
@@ -141,9 +173,15 @@ def train_model(model: PhysicsGRU, train: Tuple[np.ndarray, np.ndarray], val: Tu
     yva = torch.as_tensor(np.asarray(val[1], dtype=np.float32))
     if len(Xtr) == 0 or len(Xva) == 0:
         raise ValueError(f"empty training ({len(Xtr)}) or validation ({len(Xva)}) set")
+    for name, yy in (("training", ytr), ("validation", yva)):
+        if bool(torch.isnan(yy).all()):
+            raise ValueError(f"the {name} set has no known label (every target is NaN)")
 
     pos_weight, balance = _label_balance(ytr_np, str(tcfg.get("balance", "auto")))
-    loss_fn = nn.BCEWithLogitsLoss(pos_weight=None if pos_weight is None else torch.as_tensor(pos_weight))
+    pw = None if pos_weight is None else torch.as_tensor(pos_weight)
+
+    def loss_fn(z: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
+        return masked_bce_with_logits(z, t, pw)
     opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=float(tcfg.get("weight_decay", 1e-4)))
     gen = torch.Generator().manual_seed(int(seed))
     sample_w = _sampler_weights(ytr_np) if balance == "sampler" else None
@@ -207,7 +245,9 @@ def train_model(model: PhysicsGRU, train: Tuple[np.ndarray, np.ndarray], val: Tu
                        settings={"lr": lr, "max_epochs": max_epochs, "patience": patience, "batch_size": batch,
                                  "weight_decay": float(tcfg.get("weight_decay", 1e-4)), "grad_clip_norm": clip,
                                  "freeze_encoder_epochs": int(freeze_encoder_epochs), "seed": int(seed),
-                                 "loss": "bce_with_logits", "optimizer": "adamw"})
+                                 "loss": "bce_with_logits_masked_unknown", "optimizer": "adamw",
+                                 "known_train_targets": {n: int((~torch.isnan(ytr[:, j])).sum())
+                                                         for j, n in enumerate(LABEL_NAMES)}})
 
 
 # =============================================================================
@@ -222,28 +262,66 @@ def model_logits(model: PhysicsGRU, normalizer: FeatureNormalizer, X: np.ndarray
     return _logits(model, torch.from_numpy(normalizer.transform(X))).numpy().astype(np.float64)
 
 
+def _label_support(y: np.ndarray, min_known: int) -> Dict[str, Dict[str, Any]]:
+    """Per label: known / positive counts on the calibration rows and whether they suffice for a fit."""
+    out = {}
+    for j, name in enumerate(LABEL_NAMES):
+        known = M.known_mask(y[:, j])
+        n_known, n_pos = int(known.sum()), int(np.sum(y[known, j] > 0.5))
+        reason = None
+        if n_known == 0:
+            reason = "no known labels in the calibration split"
+        elif n_known < min_known:
+            reason = f"only {n_known} known labels in the calibration split (< {min_known})"
+        elif n_pos in (0, n_known):
+            reason = f"the {n_known} known labels in the calibration split are all {int(n_pos > 0)}"
+        out[name] = {"n_known": n_known, "n_pos": n_pos, "n_unknown": int(len(y) - n_known),
+                     "sufficient": reason is None, "reason": reason}
+    return out
+
+
 def fit_calibration(logits: np.ndarray, fs_calib: FeatureSet, cfg: Mapping[str, Any],
-                    fit_source: str) -> Dict[str, Any]:
+                    fit_source: str, fallback: Optional[Mapping[str, Any]] = None) -> Dict[str, Any]:
     """Temperatures, operating-point thresholds and abstain margins from val_calib logits.
 
-    Every count is per simulation (group), not per rendered variant. Returns
-    the dict merged into model_config.yaml.
+    Every count is per simulation (group), not per rendered variant, and per
+    label only over the rows where that label is known. A label with too few
+    known rows (calibration.min_known_per_label, default 10, or a single known
+    class) keeps the temperature, thresholds and margins of `fallback` (the
+    pretrained model's config, when fine-tuning) or, without one, gets
+    T = 1, threshold logit 0 and the margin floor when nothing is known; the
+    record's "label_support" says which and why. Returns the dict merged
+    into model_config.yaml.
     """
     z_raw = np.asarray(logits, dtype=np.float64)
     y = fs_calib.y
     w = M.per_group_weights(fs_calib.groups)
     ccfg = cfg.get("calibration", {})
     bounds = tuple(ccfg.get("temperature_bounds", (0.5, 5.0)))
+    support = _label_support(y, int(ccfg.get("min_known_per_label", 10)))
+    keep = {name: (not support[name]["sufficient"]) and fallback is not None and _has_calibration(fallback, name)
+            for name in LABEL_NAMES}
     temps, temp_fit = {}, {}
     for j, name in enumerate(LABEL_NAMES):
-        if ccfg.get("temperature_scaling", True):
-            T, info = M.fit_temperature(z_raw[:, j], y[:, j], bounds=bounds, weights=w)
+        known = M.known_mask(y[:, j])
+        wj = w if known.all() else M.per_group_weights(fs_calib.groups[known])
+        if keep[name]:
+            T, info = float(fallback["temperatures"][name]), {"fallback": True, "reason": "kept_pretrained",
+                                                              "detail": support[name]["reason"]}
+        elif ccfg.get("temperature_scaling", True):
+            T, info = M.fit_temperature(z_raw[known, j], y[known, j], bounds=bounds, weights=wj)
         else:
             T, info = 1.0, {"fallback": True, "reason": "disabled"}
         temps[name] = float(T)
         temp_fit[name] = info
     z = z_raw / np.array([temps[n] for n in LABEL_NAMES])
     ops = M.fit_operating_points(z, y, fs_calib.categories, fs_calib.groups, cfg)
+    for name in LABEL_NAMES:
+        if keep[name]:
+            for op in ops["thresholds"]:
+                thr = float(fallback["thresholds"][op][name]["logit"])
+                ops["thresholds"][op][name] = {"logit": thr, "prob": float(M.sigmoid(thr))}
+                ops["fit"][op][name] = {"criterion": "kept_pretrained", "reason": support[name]["reason"]}
 
     acfg = cfg.get("abstain", {})
     margins: Dict[str, Dict[str, float]] = {}
@@ -251,19 +329,34 @@ def fit_calibration(logits: np.ndarray, fs_calib: FeatureSet, cfg: Mapping[str, 
     for op, per_label in ops["thresholds"].items():
         margins[op], margin_fit[op] = {}, {}
         for j, name in enumerate(LABEL_NAMES):
-            m, info = M.fit_abstain_margin(z[:, j], y[:, j], per_label[name]["logit"],
-                                           floor=float(acfg.get("logit_margin_floor", 0.25)),
-                                           target_error=float(acfg.get("target_error", 0.05)),
-                                           max_rate=float(acfg.get("max_rate", 0.3)), weights=w)
+            if keep[name]:
+                m = float(fallback["abstain"]["margins"][op][name])
+                info = {"reason": "kept_pretrained", "detail": support[name]["reason"]}
+            else:
+                known = M.known_mask(y[:, j])
+                wj = w if known.all() else M.per_group_weights(fs_calib.groups[known])
+                m, info = M.fit_abstain_margin(z[known, j], y[known, j], per_label[name]["logit"],
+                                               floor=float(acfg.get("logit_margin_floor", 0.25)),
+                                               target_error=float(acfg.get("target_error", 0.05)),
+                                               max_rate=float(acfg.get("max_rate", 0.3)), weights=wj)
             margins[op][name] = m
             margin_fit[op][name] = info
 
     min_sims = int(cfg.get("thresholds", {}).get("min_calibration_sims_per_category", 20))
     sims_per_cat = {c: int(len(np.unique(fs_calib.groups[fs_calib.categories == c]))) for c in CATEGORIES}
     insufficient = [c for c, n in sims_per_cat.items() if n < min_sims]
-    prevalence = {name: {"per_sequence": float(y[:, j].mean()) if len(y) else None,
-                         "per_simulation": float(np.sum(w * y[:, j]) / np.sum(w)) if len(y) else None}
-                  for j, name in enumerate(LABEL_NAMES)}
+    prevalence = {}
+    for j, name in enumerate(LABEL_NAMES):
+        known = M.known_mask(y[:, j])
+        wk = w[known]
+        prevalence[name] = {
+            "per_sequence": float(y[known, j].mean()) if known.any() else None,
+            "per_simulation": float(np.sum(wk * y[known, j]) / np.sum(wk)) if known.any() else None}
+    for name in LABEL_NAMES:
+        support[name]["calibration"] = ("kept_pretrained" if keep[name] else
+                                        "fitted" if support[name]["sufficient"] else
+                                        "default_unfitted" if support[name]["n_known"] == 0 else
+                                        "fitted_on_insufficient_labels")
     return {
         "temperatures": temps,
         "thresholds": ops["thresholds"],
@@ -297,8 +390,23 @@ def fit_calibration(logits: np.ndarray, fs_calib: FeatureSet, cfg: Mapping[str, 
                                     for n in LABEL_NAMES},
             "threshold_fit": ops["fit"],
             "abstain_fit": margin_fit,
+            # per label: known / positive val_calib rows and how it was calibrated: "fitted",
+            # "kept_pretrained", "fitted_on_insufficient_labels" or "default_unfitted" (nothing known)
+            "label_support": support,
         },
     }
+
+
+def _has_calibration(cfg: Mapping[str, Any], name: str) -> bool:
+    """True when a model config carries a temperature, both thresholds and both margins for `name`."""
+    try:
+        float(cfg["temperatures"][name])
+        for op in ("balanced", "low_false_alarm"):
+            float(cfg["thresholds"][op][name]["logit"])
+            float(cfg["abstain"]["margins"][op][name])
+    except (KeyError, TypeError, ValueError):
+        return False
+    return True
 
 
 # =============================================================================
@@ -312,7 +420,11 @@ def _counts(fs: FeatureSet) -> Dict[str, Any]:
         sub = fs.split(split)
         out[split] = {"sequences": len(sub), "groups": int(len(np.unique(sub.groups))),
                       "originals": int(len(np.unique(sub.sim_ids))),
-                      "per_category": {c: int(np.sum(sub.categories == c)) for c in CATEGORIES}}
+                      "per_category": {c: int(np.sum(sub.categories == c)) for c in CATEGORIES},
+                      "known_labels": {n: int(M.known_mask(sub.y[:, j]).sum()) for j, n in enumerate(LABEL_NAMES)}}
+        other = sorted(set(sub.categories) - set(CATEGORIES))
+        if other:      # partially labelled rows (NaN targets), e.g. real footage without fog annotation
+            out[split]["per_category"].update({c: int(np.sum(sub.categories == c)) for c in other})
     return out
 
 
@@ -323,7 +435,8 @@ def _preprocessing_record(fs: FeatureSet, cfg: Mapping[str, Any]) -> Dict[str, A
     dataset generator; roi_scale, drawn per synthetic variant, excluded), so inference never
     depends on code defaults. The timing (expected_interval_s, flow_lag_s) is what the extractor
     recorded per row (feature_meta.timing, or the stored feature_config); cfg["features"] and the
-    defaults are used only when no row records it. Rows extracted with different settings are refused.
+    defaults are used only when no row records it (max_offset_s, the timing tolerance, likewise).
+    Rows extracted with different settings are refused.
     """
     from dataclasses import asdict
 
@@ -331,7 +444,7 @@ def _preprocessing_record(fs: FeatureSet, cfg: Mapping[str, Any]) -> Dict[str, A
 
     flow_modes: Dict[str, int] = {}
     roi_scales = []
-    timing: Dict[str, set] = {"expected_interval_s": set(), "flow_lag_s": set()}
+    timing: Dict[str, set] = {"expected_interval_s": set(), "flow_lag_s": set(), "max_offset_s": set()}
     stored_cfgs = set()
     for m in fs.meta:
         if m.get("feature_config"):
@@ -344,8 +457,11 @@ def _preprocessing_record(fs: FeatureSet, cfg: Mapping[str, Any]) -> Dict[str, A
         if "roi_scale" in m:
             roi_scales.append(float(m["roi_scale"]))
         rec, stored = fmeta.get("timing") or {}, m.get("feature_config") or {}
-        for key, rec_key in (("expected_interval_s", "expected_interval_s"), ("flow_lag_s", "expected_flow_lag_s")):
+        for key, rec_key in (("expected_interval_s", "expected_interval_s"), ("flow_lag_s", "expected_flow_lag_s"),
+                             ("max_offset_s", "max_offset_s")):
             v = rec.get(rec_key, stored.get(key))
+            if key == "flow_lag_s" and (rec_key in rec or key in stored) and v is None:
+                v = 0.0                       # None and 0 both mean consecutive-observation flow
             if v is not None:
                 timing[key].add(float(v))
     if len(stored_cfgs) > 1:
@@ -423,13 +539,17 @@ def _plot_training_curves(histories: Dict[int, List[Dict[str, Any]]], chosen: in
 def _run_seeds(fs: FeatureSet, cfg: Mapping[str, Any], out_dir: PathLike, *, stage: str, experiment: str,
                make_model: Callable[[int], PhysicsGRU], normalizer: FeatureNormalizer, lr: float,
                max_epochs: int, patience: int, freeze_encoder_epochs: int, fit_source: str,
-               provenance: Mapping[str, Any], log: Optional[Callable[[str], None]]) -> Dict[str, Any]:
+               provenance: Mapping[str, Any], log: Optional[Callable[[str], None]],
+               calibration_fallback: Optional[Mapping[str, Any]] = None) -> Dict[str, Any]:
     out = Path(out_dir)
     logs = out / "logs"
     train, vsel, vcal = fs.split("train"), fs.split("val_select"), fs.split("val_calib")
     for name, part in (("train", train), ("val_select", vsel), ("val_calib", vcal)):
         if len(part) == 0:
             raise ValueError(f"the FeatureSet has no {name} sequences")
+    for name, part in (("train", train), ("val_select", vsel)):
+        if not M.known_mask(part.y).any():
+            raise ValueError(f"the {name} split has no known label (every target is NaN)")
     Xtr, Xvs = normalizer.transform(train.X), normalizer.transform(vsel.X)
     tcfg = dict(cfg.get("training", {}))
     seeds = [int(s) for s in tcfg.get("seeds", [0, 1, 2])]
@@ -446,7 +566,8 @@ def _run_seeds(fs: FeatureSet, cfg: Mapping[str, Any], out_dir: PathLike, *, sta
         model = make_model(seed)
         res = train_model(model, (Xtr, train.y), (Xvs, vsel.y), tcfg, seed, lr=lr, max_epochs=max_epochs,
                           patience=patience, freeze_encoder_epochs=freeze_encoder_epochs, log=log)
-        calib = fit_calibration(model_logits(res.model, normalizer, vcal.X), vcal, cfg, fit_source)
+        calib = fit_calibration(model_logits(res.model, normalizer, vcal.X), vcal, cfg, fit_source,
+                                fallback=calibration_fallback)
         histories[seed], models[seed], calibs[seed] = res.history, res.model, calib
         results[seed] = {"best_epoch": res.best_epoch, "best_val_select_loss": res.best_val_loss,
                          "epochs_run": res.epochs_run, "stopped_early": res.stopped_early,
@@ -499,6 +620,7 @@ def _run_seeds(fs: FeatureSet, cfg: Mapping[str, Any], out_dir: PathLike, *, sta
         "calibration": {k: calibs[chosen][k] for k in ("temperatures", "thresholds")},
         "abstain_margins": calibs[chosen]["abstain"]["margins"],
         "insufficient_calibration_data": calibs[chosen]["calibration"]["insufficient_calibration_data"],
+        "label_support": calibs[chosen]["calibration"]["label_support"],
         "data_counts": counts,
         "provenance": dict(provenance),
     }
@@ -527,14 +649,19 @@ def run_finetune(features: FeatureSet, cfg: Mapping[str, Any], init_artifacts: O
                  log: Optional[Callable[[str], None]] = print) -> Dict[str, Any]:
     """Stage B on (real) labelled footage: D = fine-tune the pretrained GRU, B = same data from scratch.
 
-    Groups must be camera ids (camera-disjoint splits). Identical for B and D:
-    splits, seeds, max epochs and patience (`finetune` section), the
-    normaliser policy (refitted on this set's train split) and the
-    calibration procedure; only the initial weights and the learning rate
-    (B: training.lr, D: finetune.lr) differ.
+    Groups must be camera ids (camera-disjoint splits; checked against the
+    rows' camera_id meta when present). Identical for B and D: splits, seeds,
+    max epochs and patience (`finetune` section), the normaliser policy
+    (refitted on this set's train split) and the calibration procedure; only
+    the initial weights and the learning rate (B: training.lr, D: finetune.lr)
+    differ. Targets may be NaN (unknown, e.g. smoke-only supervision with
+    unannotated fog): they are left out of the loss and of every calibration
+    fit; a label too sparsely known on val_calib keeps the pretrained
+    calibration in D and the neutral defaults in B (recorded per label).
     """
     fs = features
     assert_no_group_leakage(fs)
+    _check_camera_groups(fs)
     ft = dict(cfg.get("finetune", {}))
     tcfg = dict(cfg.get("training", {}))
     normalizer = FeatureNormalizer(clip=float(cfg.get("normalization", {}).get("clip", 5.0)))
@@ -565,6 +692,8 @@ def run_finetune(features: FeatureSet, cfg: Mapping[str, Any], init_artifacts: O
         "real_counts": sources,
         "groups_are": "camera ids" if fs.source == "real" else "as given",
         "not_real_world_evidence": fs.source != "real",
+        "known_labels": {split: {n: int(M.known_mask(fs.split(split).y[:, j]).sum())
+                                 for j, n in enumerate(LABEL_NAMES)} for split in sorted(set(fs.splits))},
     }
     lr = float(tcfg.get("lr", 1e-3)) if from_scratch else float(ft.get("lr", 1e-4))
     return _run_seeds(
@@ -573,7 +702,19 @@ def run_finetune(features: FeatureSet, cfg: Mapping[str, Any], init_artifacts: O
         max_epochs=int(ft.get("max_epochs", tcfg.get("max_epochs", 50))),
         patience=int(ft.get("early_stopping_patience", tcfg.get("early_stopping_patience", 7))),
         freeze_encoder_epochs=0 if from_scratch else int(ft.get("freeze_encoder_epochs", 0)),
-        fit_source=f"{fs.source}_val_calib", provenance=provenance, log=log)
+        fit_source=f"{fs.source}_val_calib", provenance=provenance, log=log,
+        calibration_fallback=None if from_scratch else init_cfg)
+
+
+def _check_camera_groups(fs: FeatureSet) -> None:
+    """Real footage: every row's group must be its camera id (meta "camera_id"), so splits are camera-disjoint."""
+    if fs.source != "real":
+        return
+    bad = [(str(g), str(m.get("camera_id"))) for g, m in zip(fs.groups, fs.meta)
+           if isinstance(m, dict) and m.get("camera_id") is not None and str(m["camera_id"]) != str(g)]
+    if bad:
+        raise ValueError(f"real FeatureSet groups must be camera ids; {len(bad)} rows differ, e.g. "
+                         + ", ".join(f"group {g!r} vs camera {c!r}" for g, c in bad[:3]))
 
 
 # =============================================================================
@@ -627,21 +768,26 @@ def run_loro(fs: FeatureSet, cfg: Mapping[str, Any], regimes: Optional[Sequence[
                                "best_epoch": res.best_epoch, "labels": {}}
         for j, name in enumerate(LABEL_NAMES):
             thr = calib["thresholds"]["balanced"][name]["logit"]
-            yh = ev.y[ev_held, j] > 0.5
-            others = ~ev_held
+            known = M.known_mask(ev.y[:, j])
+            if not (ev_held & known).any():
+                rec["labels"][name] = {"role": "unknown", "reason": "no known labels among the held-out sequences"}
+                continue
+            yh = ev.y[ev_held & known, j] > 0.5
+            others = ~ev_held & known
+            held = ev_held & known
             if yh.all():
                 negs = others & (ev.y[:, j] < 0.5)
                 rec["labels"][name] = {
-                    "role": "positive", "recall": float(np.mean(z[ev_held, j] >= thr)),
-                    "auroc_vs_split_negatives": M.auroc(np.r_[z[ev_held, j], z[negs, j]],
-                                                        np.r_[np.ones(ev_held.sum()), np.zeros(negs.sum())])}
+                    "role": "positive", "recall": float(np.mean(z[held, j] >= thr)),
+                    "auroc_vs_split_negatives": M.auroc(np.r_[z[held, j], z[negs, j]],
+                                                        np.r_[np.ones(held.sum()), np.zeros(negs.sum())])}
             elif (~yh).all():
                 poss = others & (ev.y[:, j] > 0.5)
                 rec["labels"][name] = {
-                    "role": "negative", "false_positive_rate": float(np.mean(z[ev_held, j] >= thr)),
+                    "role": "negative", "false_positive_rate": float(np.mean(z[held, j] >= thr)),
                     "auroc_split_positives_vs_held_out": M.auroc(
-                        np.r_[z[poss, j], z[ev_held, j]], np.r_[np.ones(poss.sum()), np.zeros(ev_held.sum())])}
+                        np.r_[z[poss, j], z[held, j]], np.r_[np.ones(poss.sum()), np.zeros(held.sum())])}
             else:
-                rec["labels"][name] = {"role": "mixed", "accuracy": float(np.mean((z[ev_held, j] >= thr) == yh))}
+                rec["labels"][name] = {"role": "mixed", "accuracy": float(np.mean((z[held, j] >= thr) == yh))}
         out["regimes"][regime] = rec
     return out

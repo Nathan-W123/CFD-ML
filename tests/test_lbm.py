@@ -65,6 +65,44 @@ def test_body_force_channel_matches_poiseuille():
     assert np.abs(num - exact).max() / exact.max() < 0.02
 
 
+@pytest.mark.parametrize("cs", [0.0, 0.15])
+def test_strain_rate_and_sgs_velocity_in_channel_flow(cs):
+    """|S| from the non-equilibrium stress equals |du/dz| of the converged channel flow
+    (exactly the analytic Poiseuille shear without the subgrid model); u_sgs = Cs dx |S|."""
+    nz, nx = 32, 6
+    units = LatticeUnits(2.0, 0.5)                       # physical units: the conversion is part of the test
+    nu = (0.8 - 0.5) * CS2 * units.dx ** 2 / units.dt
+    s = LBMSolver(LBMConfig(nx=nx, nz=nz, units=units, nu=nu, smagorinsky_cs=cs,
+                            sponge_width=0, lateral="periodic", top="wall"))
+    a = 1e-6 * units.dx / units.dt ** 2
+    ax = np.full((nz, nx), a)
+    for _ in range(20000):
+        s.step(ax, None)
+    strain = s.strain_rate()[:, 0]
+    ux = s.velocity()[0][:, 0]
+    dudz = np.abs(np.gradient(ux, units.dx))
+    assert np.abs(strain[1:-1] - dudz[1:-1]).max() < 0.01 * dudz.max()
+    if cs == 0.0:
+        z = (np.arange(nz) + 0.5) * units.dx
+        exact = a / (2 * nu) * np.abs(nz * units.dx - 2 * z)
+        assert np.abs(strain - exact).max() < 1e-6 * exact.max()
+    np.testing.assert_allclose(s.sgs_velocity(), cs * units.dx * s.strain_rate())
+    assert s.sgs_velocity().min() >= 0.0
+
+
+def test_strain_rate_is_zero_at_rest_and_in_solids():
+    solid = np.zeros((48, 48), dtype=bool)
+    solid[:6, 20:28] = True
+    s = LBMSolver(_solver(), solid=solid)
+    for _ in range(50):
+        s.step()
+    assert s.strain_rate().max() < 1e-12
+    s = LBMSolver(_solver(), solid=solid, u_ambient=np.full(48, 4.0))
+    for _ in range(200):
+        s.step()
+    assert np.all(s.sgs_velocity()[solid] == 0.0) and s.sgs_velocity().max() > 0.0
+
+
 def test_warm_blob_rises():
     s = LBMSolver(_solver())
     zz, xx = np.mgrid[0:48, 0:48]

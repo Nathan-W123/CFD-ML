@@ -2,9 +2,24 @@
 
 The physics expert never sees CFD fields. It sees what a camera pipeline can
 measure: optical flow inside a candidate region and the region's geometry.
-This module turns a short clip (observation frames every ~5 s, each with an
-optional partner frame ~1 s earlier, plus one candidate mask per
-observation) into the 14-column array defined in `feature_spec.py`.
+This module turns a short clip (observation frames every `expected_interval_s`,
+each with an optional partner frame `flow_lag_s` earlier, plus one candidate
+mask per observation) into the 14-column array defined in `feature_spec.py`.
+
+Two flow modes, fixed by the `FeatureConfig` a model was trained with:
+
+* "lag" (near-field profile: observations 5 s apart, lag frames 1 s
+  earlier): flow over each short lag pair. Without lag frames the extractor
+  falls back to consecutive flow and flags it (`timing.reasons` gets
+  "consecutive_flow"; the inference API refuses it unless allowed).
+* "consecutive" (`flow_lag_s` None or 0; far-field profile, one frame per
+  minute as camera networks such as HPWREN / AlertWildfire record): flow
+  between consecutive observations. This is a first-class mode: lag frames,
+  if given, are ignored (recorded) so training and inference measure the same
+  thing, and because displacements over a minute can exceed what DIS tracks
+  from a zero start (~15 working px), each pair is also tried from the
+  displacement of the mask centroid and the candidate whose flow best
+  reconstructs the frame (photometric residual) is kept.
 
 Pipeline (docs/design.md section 7):
 
@@ -32,9 +47,9 @@ Pipeline (docs/design.md section 7):
    L = sqrt(H * W) of the resized ROI and every rate per second, so the
    features do not depend on how large the scene appears in the image.
 5. `_flow_stats`: DIS optical flow from the lag frame to the observation frame
-   (or between consecutive observations without lag frames), a
-   forward-backward check, and winsorised statistics, affine divergence and
-   mean |curl| on the eroded mask.
+   (or between consecutive observations, from zero and from the centroid
+   displacement), a forward-backward check, and winsorised statistics,
+   affine divergence and mean |curl| on the eroded mask.
 6. Geometry of the resized masks: area, log-area growth and centroid
    velocity between observations, `_roughness` and `_anchor_stability`.
 
@@ -103,6 +118,8 @@ _WINSOR_PCT = (5.0, 95.0)
 _FLOW_MARGIN_PX = 16            # flow is computed on the region's box + this margin (working px)
 _FLOW_MARGIN_CONSECUTIVE_PX = 32
 _FLOW_MIN_SIDE_PX = 32
+_GUESS_MIN_PX = 3.0             # consecutive mode: try the centroid displacement as a start if at least this
+_GUESS_MIN_GAIN = 0.05          # ... and keep it only if its photometric residual is this much lower
 _STATS_SUBSAMPLE_ABOVE_PX = 4096  # larger flow regions: statistics on a 2x2-strided subset
 _ANCHOR_DZ_SCALE = 0.02         # anchor decay length, fraction of L
 _IMAGE_EXTENSIONS = (".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff", ".webp")
@@ -128,9 +145,14 @@ class FeatureConfig:
     fb_max_px: float = 1.0          # forward-backward consistency (median, working px)
     anchor_band_px: int = 6         # bottom band (working px) whose columns define the anchor
     min_roughness_px: int = 100
-    expected_interval_s: float = 5.0
-    flow_lag_s: float = 1.0
-    max_offset_s: float = 0.5
+    expected_interval_s: float = 5.0          # observation spacing the model expects (far-field profile: 60)
+    flow_lag_s: Optional[float] = 1.0         # lag-frame offset; None or 0: consecutive-observation flow
+    max_offset_s: float = 0.5                 # timing tolerance: per frame; observation intervals get 2x
+
+    @property
+    def flow_mode(self) -> str:
+        """The flow mode this configuration measures: "lag" or "consecutive" (flow_lag_s None / 0)."""
+        return "lag" if self.flow_lag_s is not None and float(self.flow_lag_s) > 0.0 else "consecutive"
 
 
 # =============================================================================
@@ -151,7 +173,8 @@ def extract_features_with_meta(frames, timestamps, masks, lag_frames=None, lag_t
     frames      (T, H, W) or (T, H, W, 3) BGR; uint8, or float in [0, 1]
     timestamps  (T,) seconds of the observations (ideally ~`expected_interval_s` apart)
     masks       (T, H, W) candidate masks (bool / 0-1 / 0-255), or None (no candidate)
-    lag_frames  (T, H, W[, 3]) frames ~`flow_lag_s` before each observation, or None
+    lag_frames  (T, H, W[, 3]) frames ~`flow_lag_s` before each observation, or None;
+                ignored (meta "lag_frames_ignored") when cfg.flow_mode is "consecutive"
     lag_timestamps (T,) seconds of the lag frames (default: timestamps - cfg.flow_lag_s)
 
     Returns X (T, 14) float32 (finite; closed gates exactly 0.0) and a JSON-able
@@ -161,6 +184,10 @@ def extract_features_with_meta(frames, timestamps, masks, lag_frames=None, lag_t
     """
     cfg = cfg or FeatureConfig()
     _check_config(cfg)
+    # A consecutive-flow configuration measures the same thing whatever the caller has.
+    lag_ignored = lag_frames is not None and cfg.flow_mode == "consecutive"
+    if lag_ignored:
+        lag_frames = lag_timestamps = None
     if lag_frames is not None:
         obs, lag = _to_gray_u8(frames, lag_frames)
     else:
@@ -233,6 +260,7 @@ def extract_features_with_meta(frames, timestamps, masks, lag_frames=None, lag_t
     fb_err: List[Optional[float]] = [None] * n
     region_px = [0] * n
     status: List[str] = [""] * n
+    flow_start: List[Optional[str]] = [None] * n
     engine = _FlowEngine(cfg.flow_method)
     # stabilize=False asserts a static camera; otherwise an unremoved camera motion invalidates the flow.
     stab_required = bool(cfg.stabilize and cfg.require_stabilization)
@@ -261,10 +289,18 @@ def extract_features_with_meta(frames, timestamps, masks, lag_frames=None, lag_t
         if not (np.isfinite(dt) and dt > 0):
             status[t] = "bad_timing"
             continue
-        margin = _FLOW_MARGIN_PX if flow_mode == "lag" else _FLOW_MARGIN_CONSECUTIVE_PX
-        res = _flow_stats(prev, obs_w[t], masks_w[t], crop_masks, margin, cfg, engine)
+        if flow_mode == "lag":
+            margin, guesses = _FLOW_MARGIN_PX, ()
+        else:
+            # Over a long spacing the region may move further than DIS tracks from rest:
+            # also start from its centroid displacement (working px, image axes).
+            margin = _FLOW_MARGIN_CONSECUTIVE_PX
+            d = centroids[t] - centroids[t - 1]
+            guesses = ((float(d[0]), float(d[1])),) if math.hypot(*d) >= _GUESS_MIN_PX else ()
+        res = _flow_stats(prev, obs_w[t], masks_w[t], crop_masks, margin, cfg, engine, guesses)
         region_px[t] = res["region_px"]
         fb_err[t] = res["fb_px"]
+        flow_start[t] = res["start"]
         if res["status"] != "ok":
             status[t] = res["status"]
             continue
@@ -296,6 +332,7 @@ def extract_features_with_meta(frames, timestamps, masks, lag_frames=None, lag_t
         "n_frames": int(n),
         "frame_shape": [int(h), int(w)],
         "flow_mode": flow_mode,
+        "lag_frames_ignored": bool(lag_ignored),
         "flow_method": cfg.flow_method,
         "roi": {
             "mode": cfg.roi,
@@ -313,6 +350,7 @@ def extract_features_with_meta(frames, timestamps, masks, lag_frames=None, lag_t
             "dt_s": [_opt_float(v) for v in flow_dt],
             "fb_error_px": fb_err,
             "region_px": [int(v) for v in region_px],
+            "start": flow_start,               # "zero" | "centroid" (consecutive mode), None without flow
         },
         "counts": {
             "mask_valid": int(X[:, MASK_VALID_INDEX].sum()),
@@ -337,7 +375,9 @@ def stabilize_sequence(frames, masks, lag_frames=None
     back unchanged, every frame is usable and `info["applied"]` is False with
     the reason ("insufficient_textured_background", "too_few_background_corners",
     "unreliable_background", "background_moving"). Observations are assumed
-    5 s apart with lag frames 1 s earlier for the drift check;
+    5 s apart with lag frames 1 s earlier for the drift check (its threshold is
+    in pixels over the window and its t-statistic is scale-free, so evenly
+    spaced observations at any interval give the same answer);
     `extract_features_with_meta` passes the real timestamps.
     """
     if lag_frames is not None:
@@ -359,21 +399,31 @@ def stabilize_sequence(frames, masks, lag_frames=None
 
 
 def select_window(timestamps, n: int = 12, interval_s: float = 5.0, start: Optional[float] = None,
-                  max_offset_s: float = 0.5, flow_lag_s: float = 1.0) -> Dict[str, Any]:
+                  max_offset_s: float = 0.5, flow_lag_s: Optional[float] = 1.0) -> Dict[str, Any]:
     """Pick `n` observations `interval_s` apart, each with a lag frame `flow_lag_s` earlier.
 
     `timestamps` are the native frame times (s, strictly increasing). The first
     target is `start` (default: the earliest time that still has a lag frame).
     Returns {"obs_idx" (n,), "lag_idx" (n,), "offsets" (n,) obs time - target,
-    "lag_offsets", "targets", "obs_times", "lag_times", "native_dt"}.
+    "lag_offsets", "targets", "obs_times", "lag_times", "native_dt", "flow_mode"}.
 
     Raises IncompatibleFrameTiming when the native frame spacing exceeds
-    flow_lag_s / 2 (one-minute HPWREN / FIgLib imagery is refused, never
-    stretched into "motion"), the clip is too short, a selected frame is more
-    than `max_offset_s` from its target, or indices repeat.
+    flow_lag_s / 2 (one-minute HPWREN / FIgLib imagery cannot give lag pairs
+    and is refused, never stretched into "motion"), the clip is too short, a
+    selected frame is more than `max_offset_s` from its target, or indices
+    repeat.
+
+    flow_lag_s None or 0 selects for consecutive-observation flow (a model
+    trained that way, e.g. the far-field one-frame-per-minute profile): no lag
+    frames ("lag_idx", "lag_offsets", "lag_times" are None, "flow_mode" is
+    "consecutive"), the first target defaults to the first frame, and any
+    native frame rate that puts a frame within `max_offset_s` of every target
+    is accepted (one-minute imagery included).
     """
-    if n < 1 or not (interval_s > 0) or not (flow_lag_s > 0) or not (max_offset_s >= 0):
-        raise ValueError("select_window needs n >= 1, interval_s > 0, flow_lag_s > 0, max_offset_s >= 0")
+    consecutive = flow_lag_s is None or (np.isfinite(flow_lag_s) and float(flow_lag_s) == 0.0)
+    if n < 1 or not (interval_s > 0) or not (consecutive or flow_lag_s > 0) or not (max_offset_s >= 0):
+        raise ValueError("select_window needs n >= 1, interval_s > 0, flow_lag_s > 0 (or None / 0 for "
+                         "consecutive flow), max_offset_s >= 0")
     ts = np.asarray(timestamps, dtype=np.float64).ravel()
     if ts.size < 2:
         raise IncompatibleFrameTiming(f"need at least two frames, got {ts.size}")
@@ -383,17 +433,18 @@ def select_window(timestamps, n: int = 12, interval_s: float = 5.0, start: Optio
     if np.any(d <= 0):
         raise IncompatibleFrameTiming("timestamps must be strictly increasing (repeated or unordered frames)")
     native_dt = float(np.median(d))
-    if native_dt > flow_lag_s / 2.0:
+    lag = 0.0 if consecutive else float(flow_lag_s)
+    if not consecutive and native_dt > lag / 2.0:
         raise IncompatibleFrameTiming(
-            f"native frame spacing {native_dt:.3g} s exceeds flow_lag_s / 2 = {flow_lag_s / 2:.3g} s: "
+            f"native frame spacing {native_dt:.3g} s exceeds flow_lag_s / 2 = {lag / 2:.3g} s: "
             "this footage (e.g. one-minute HPWREN/FIgLib imagery) cannot provide short-lag optical flow")
     if start is None:
-        start = float(ts[0]) + flow_lag_s
+        start = float(ts[0]) + lag
     targets = float(start) + interval_s * np.arange(n, dtype=np.float64)
-    if targets[-1] > ts[-1] + max_offset_s or targets[0] - flow_lag_s < ts[0] - max_offset_s:
+    if targets[-1] > ts[-1] + max_offset_s or targets[0] - lag < ts[0] - max_offset_s:
         raise IncompatibleFrameTiming(
             f"clip [{ts[0]:.3f}, {ts[-1]:.3f}] s is too short for {n} observations {interval_s} s apart "
-            f"starting at {targets[0]:.3f} s with a {flow_lag_s} s flow lag")
+            f"starting at {targets[0]:.3f} s" + ("" if consecutive else f" with a {lag} s flow lag"))
     obs_idx = _nearest_index(ts, targets)
     offsets = ts[obs_idx] - targets
     if np.any(np.abs(offsets) > max_offset_s + 1e-9):
@@ -401,7 +452,19 @@ def select_window(timestamps, n: int = 12, interval_s: float = 5.0, start: Optio
         raise IncompatibleFrameTiming(f"no frame within {max_offset_s} s of target {targets[k]:.3f} s")
     if np.any(np.diff(obs_idx) <= 0):
         raise IncompatibleFrameTiming("observation indices repeat: interval_s is shorter than the frame spacing")
-    lag_targets = ts[obs_idx] - flow_lag_s
+    if consecutive:
+        return {
+            "obs_idx": obs_idx,
+            "lag_idx": None,
+            "offsets": offsets,
+            "lag_offsets": None,
+            "targets": targets,
+            "obs_times": ts[obs_idx],
+            "lag_times": None,
+            "native_dt": native_dt,
+            "flow_mode": "consecutive",
+        }
+    lag_targets = ts[obs_idx] - lag
     lag_idx = _nearest_index(ts, lag_targets)
     lag_offsets = ts[lag_idx] - lag_targets
     if np.any(np.abs(lag_offsets) > max_offset_s + 1e-9):
@@ -418,6 +481,7 @@ def select_window(timestamps, n: int = 12, interval_s: float = 5.0, start: Optio
         "obs_times": ts[obs_idx],
         "lag_times": ts[lag_idx],
         "native_dt": native_dt,
+        "flow_mode": "lag",
     }
 
 
@@ -520,6 +584,11 @@ def _check_config(cfg: FeatureConfig) -> None:
         raise ValueError(f"FeatureConfig.flow_method must be 'dis' or 'farneback', got {cfg.flow_method!r}")
     if cfg.work_size < 16:
         raise ValueError("FeatureConfig.work_size must be >= 16")
+    if not (float(cfg.expected_interval_s) > 0) or not (float(cfg.max_offset_s) >= 0):
+        raise ValueError("FeatureConfig needs expected_interval_s > 0 and max_offset_s >= 0")
+    if cfg.flow_lag_s is not None and not (float(cfg.flow_lag_s) >= 0):
+        raise ValueError(f"FeatureConfig.flow_lag_s must be > 0, or None / 0 for consecutive flow, "
+                         f"got {cfg.flow_lag_s!r}")
 
 
 # =============================================================================
@@ -956,12 +1025,23 @@ class _FlowEngine:
     def __init__(self, method: str):
         self.method = method
         self._dis = cv2.DISOpticalFlow_create(cv2.DISOPTICAL_FLOW_PRESET_MEDIUM) if method == "dis" else None
+        self._dis_init = None                    # DIS that refines a given start (created on first use)
 
-    def __call__(self, a: np.ndarray, b: np.ndarray) -> np.ndarray:
-        """Flow (h, w, 2) float32 in px: a(p) ~ b(p + flow(p))."""
-        if self._dis is not None:
-            return self._dis.calc(a, b, None)
-        return cv2.calcOpticalFlowFarneback(a, b, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+    def __call__(self, a: np.ndarray, b: np.ndarray, start: Optional[Tuple[float, float]] = None) -> np.ndarray:
+        """Flow (h, w, 2) float32 in px: a(p) ~ b(p + flow(p)); `start` a uniform initial flow (dx, dy)."""
+        if start is None:
+            if self._dis is not None:
+                return self._dis.calc(a, b, None)
+            return cv2.calcOpticalFlowFarneback(a, b, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+        flow = np.empty(a.shape + (2,), dtype=np.float32)
+        flow[..., 0], flow[..., 1] = start
+        if self._dis is None:
+            return cv2.calcOpticalFlowFarneback(a, b, flow, 0.5, 3, 15, 3, 5, 1.2, cv2.OPTFLOW_USE_INITIAL_FLOW)
+        if self._dis_init is None:
+            self._dis_init = cv2.DISOpticalFlow_create(cv2.DISOPTICAL_FLOW_PRESET_MEDIUM)
+            if hasattr(self._dis_init, "setUseInitialFlow"):   # OpenCV 4.x; 5.x uses a given flow as the start
+                self._dis_init.setUseInitialFlow(True)
+        return self._dis_init.calc(a, b, flow)
 
 
 def _flow_crop(masks: Sequence[np.ndarray], margin: int, shape) -> Tuple[int, int, int, int]:
@@ -1020,15 +1100,24 @@ def _affine_divergence(vel: np.ndarray, region: np.ndarray) -> float:
 
 
 def _flow_stats(prev: np.ndarray, cur: np.ndarray, mask: np.ndarray, crop_masks, margin: int,
-                cfg: FeatureConfig, engine: _FlowEngine) -> Dict[str, Any]:
+                cfg: FeatureConfig, engine: _FlowEngine,
+                guesses: Sequence[Tuple[float, float]] = ()) -> Dict[str, Any]:
     """Flow statistics of one pair (prev -> cur) on the eroded mask of `cur`, in working px.
 
     The forward flow prev -> cur (lag -> observation) is sampled where each
     observation pixel came from and averaged with the negated backward flow,
     so the velocity field lives on the observation grid, where the mask is
     defined; their disagreement is the forward-backward error.
-    Returns {"status", "region_px", "fb_px", "stats": (u, v, std_u, std_v, div, |curl|)}
-    with displacements per pair (the caller divides by the elapsed time).
+
+    `guesses` are extra uniform starts (dx, dy) in working px (consecutive
+    mode: the centroid displacement). Each start gives a candidate flow; one
+    that passes the forward-backward check replaces the zero start only if it
+    reconstructs `cur` from `prev` with a photometric residual at least
+    `_GUESS_MIN_GAIN` lower (a consistent zero flow is not proof of no motion:
+    DIS also returns one when the true displacement is beyond its reach).
+    Returns {"status", "region_px", "fb_px", "start" ("zero" | "centroid"),
+    "stats": (u, v, std_u, std_v, div, |curl|)} with displacements per pair
+    (the caller divides by the elapsed time).
     """
     x0, y0, x1, y1 = _flow_crop(crop_masks, margin, mask.shape)
     region = mask[y0:y1, x0:x1].astype(np.uint8)
@@ -1037,34 +1126,52 @@ def _flow_stats(prev: np.ndarray, cur: np.ndarray, mask: np.ndarray, crop_masks,
         region = cv2.erode(region, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * e + 1, 2 * e + 1)))
     region = region > 0
     n_px = int(region.sum())
-    out: Dict[str, Any] = {"status": "ok", "region_px": n_px, "fb_px": None, "stats": None}
+    out: Dict[str, Any] = {"status": "ok", "region_px": n_px, "fb_px": None, "start": None, "stats": None}
     if n_px < _MIN_FLOW_REGION_PX:
         out["status"] = "region_too_small"
         return out
     a = np.ascontiguousarray(prev[y0:y1, x0:x1])
     b = np.ascontiguousarray(cur[y0:y1, x0:x1])
-    try:
-        fwd = engine(a, b)
-        bwd = engine(b, a)
-    except cv2.error:
-        out["status"] = "flow_failed"
-        return out
     gx, gy = _pixel_grid(*b.shape)
-    fwd_at_src = cv2.remap(fwd, gx + bwd[..., 0], gy + bwd[..., 1], cv2.INTER_LINEAR,
-                           borderMode=cv2.BORDER_REPLICATE)
     # Large regions: the robust statistics use every other pixel in each direction
     # (same estimates, a quarter of the cost); |curl| still averages every pixel.
     sample = region
     if n_px > _STATS_SUBSAMPLE_ABOVE_PX:
         sample = np.zeros_like(region)
         sample[::2, ::2] = region[::2, ::2]
-    fb = np.hypot(*(bwd + fwd_at_src)[sample].T)
-    fb_med = float(np.median(fb))
+    candidates = []
+    for start in (None,) + tuple(guesses):
+        try:
+            fwd = engine(a, b, start)
+            bwd = engine(b, a, None if start is None else (-start[0], -start[1]))
+        except cv2.error:
+            continue
+        fwd_at_src = cv2.remap(fwd, gx + bwd[..., 0], gy + bwd[..., 1], cv2.INTER_LINEAR,
+                               borderMode=cv2.BORDER_REPLICATE)
+        fb = np.hypot(*(bwd + fwd_at_src)[sample].T)
+        cand = {"start": "zero" if start is None else "centroid", "fb": float(np.median(fb)),
+                "vel": 0.5 * (fwd_at_src - bwd)}          # displacement prev -> cur at cur's pixels
+        if guesses:
+            cand["resid"] = _photometric_residual(a, b, cand["vel"], sample, gx, gy)
+        candidates.append(cand)
+    if not candidates:
+        out["status"] = "flow_failed"
+        return out
+    passing = [c for c in candidates if c["fb"] <= cfg.fb_max_px]
+    if passing:
+        best = passing[0]
+        for c in passing[1:]:
+            if c["resid"] < (1.0 - _GUESS_MIN_GAIN) * best["resid"]:
+                best = c
+    else:
+        best = min(candidates, key=lambda c: c["fb"] if math.isfinite(c["fb"]) else math.inf)
+    fb_med = best["fb"]
     out["fb_px"] = fb_med if math.isfinite(fb_med) else None
+    out["start"] = best["start"]
     if not (fb_med <= cfg.fb_max_px):
         out["status"] = "fb_inconsistent"
         return out
-    vel = 0.5 * (fwd_at_src - bwd)                      # displacement prev -> cur at cur's pixels
+    vel = best["vel"]
     u, v = vel[..., 0], vel[..., 1]
     mu, su = _winsorized(u[sample])
     mv, sv = _winsorized(v[sample])
@@ -1073,6 +1180,13 @@ def _flow_stats(prev: np.ndarray, cur: np.ndarray, mask: np.ndarray, crop_masks,
     curl = np.gradient(v, axis=1) - np.gradient(u, axis=0)
     out["stats"] = (mu, mv, su, sv, div, float(np.mean(np.abs(curl[region]))))
     return out
+
+
+def _photometric_residual(prev: np.ndarray, cur: np.ndarray, vel: np.ndarray, sample: np.ndarray,
+                          gx: np.ndarray, gy: np.ndarray) -> float:
+    """Mean |cur(p) - prev(p - vel(p))| over the sample (gray levels): how well a flow explains the pair."""
+    warped = cv2.remap(prev, gx - vel[..., 0], gy - vel[..., 1], cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)
+    return float(np.mean(np.abs(warped.astype(np.float32) - cur.astype(np.float32))[sample]))
 
 
 # =============================================================================
@@ -1086,12 +1200,22 @@ def _opt_float(v) -> Optional[float]:
 
 
 def _timing_meta(ts: np.ndarray, lag_ts: Optional[np.ndarray], cfg: FeatureConfig, flow_mode: str) -> Dict[str, Any]:
-    """Achieved intervals and whether they match what the model was trained on."""
+    """Achieved intervals and whether they match what the model was trained on.
+
+    Each observation may sit `max_offset_s` from its target, so an interval is
+    compatible within 2 x max_offset_s of `expected_interval_s` (far-field
+    profile: 60 +- 20 s), a lag within max_offset_s of `flow_lag_s`. The flow
+    mode must be the configuration's: consecutive flow under a lag
+    configuration is flagged "consecutive_flow"; under a consecutive
+    configuration it is the expected mode and `lag_compatible` is None (not
+    applicable). `expected_flow_lag_s` is 0.0 for a consecutive configuration.
+    """
     intervals = np.diff(ts)
     reasons = []
     interval_ok = bool(np.all(np.abs(intervals - cfg.expected_interval_s) <= 2 * cfg.max_offset_s + 1e-9))
     if not interval_ok:
         reasons.append("observation_interval")
+    expected_mode = cfg.flow_mode
     lag_ok = None
     lags = None
     if lag_ts is not None:
@@ -1099,16 +1223,20 @@ def _timing_meta(ts: np.ndarray, lag_ts: Optional[np.ndarray], cfg: FeatureConfi
         lag_ok = bool(np.all(np.abs(lags - cfg.flow_lag_s) <= cfg.max_offset_s + 1e-9))
         if not lag_ok:
             reasons.append("flow_lag")
-    if flow_mode == "consecutive":
+    mode_ok = flow_mode == expected_mode
+    if flow_mode == "consecutive" and not mode_ok:
         reasons.append("consecutive_flow")
     return {
         "intervals_s": [_opt_float(v) for v in intervals],
         "flow_lags_s": None if lags is None else [_opt_float(v) for v in lags],
         "expected_interval_s": float(cfg.expected_interval_s),
-        "expected_flow_lag_s": float(cfg.flow_lag_s),
+        "expected_flow_lag_s": float(cfg.flow_lag_s) if expected_mode == "lag" else 0.0,
+        "expected_flow_mode": expected_mode,
+        "max_offset_s": float(cfg.max_offset_s),
         "interval_compatible": interval_ok,
         "lag_compatible": lag_ok,
-        "compatible": interval_ok and bool(lag_ok),
+        "flow_mode_compatible": mode_ok,
+        "compatible": interval_ok and mode_ok and lag_ok is not False,
         "reasons": reasons,
     }
 

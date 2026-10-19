@@ -9,6 +9,9 @@ correction (see scalars.py); temperature anomalies small enough for the
 Boussinesq approximation. Total water is conserved by construction: q_t is
 transported and phase change happens only in the diagnosis.
 
+Only observation snapshots are checked: lag snapshots (absent in profiles
+without lag frames) are never needed here.
+
 Label checks (per run): a sequence labelled smoke (fog) must show smoke
 (fog) with a non-trivial optical depth inside the camera view in several
 frames, and a sequence labelled "no fog" must not contain fog-like liquid
@@ -43,8 +46,8 @@ _DEFAULTS = {
     "label_min_frames": 6,
     "absent_tau_max": 0.05,
 }
-CONCENTRATIONS = ("qv", "ql", "smoke", "tracer")
-COMPRESSIBILITY_CHECKED = ("smoke", "tracer")
+CONCENTRATIONS = ("qv", "ql", "smoke", "tracer", "precip")     # "precip" only in rain-shaft runs
+COMPRESSIBILITY_CHECKED = ("smoke", "tracer", "precip")
 
 
 def validation_settings(cfg: Mapping[str, Any]) -> Dict[str, float]:
@@ -100,7 +103,8 @@ def summarize_validity(*, fields, transport, solid, max_lattice_speed, max_densi
     finite = all(np.isfinite(f).all() for f in fields.values())
     if not finite:
         reasons.append("non-finite fields")
-    mins = {name: float(fields[name][fluid].min()) if fluid.any() else 0.0 for name in CONCENTRATIONS}
+    mins = {name: float(fields[name][fluid].min()) if fluid.any() else 0.0
+            for name in CONCENTRATIONS if name in fields}
     nonnegative = all(v >= 0.0 for v in mins.values())
     if not nonnegative:
         reasons.append("negative concentration")
