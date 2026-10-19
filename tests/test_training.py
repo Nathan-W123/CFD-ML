@@ -395,6 +395,33 @@ def test_featureset_roundtrip_subset_and_torch_dataset(tmp_path, fs):
     assert torch.allclose(x, torch.from_numpy(norm.transform(tr.X[0])))
 
 
+def test_featureset_concat_and_merge_script(tmp_path):
+    from src.data.dataset import assert_no_group_leakage
+
+    a = _real_set(seed=1)                                      # smoke known, fog unknown
+    b = _real_set(seed=2, fog_unknown=False)
+    b.seq_ids = np.array([f"b-{s}" for s in b.seq_ids])
+    both = FeatureSet.concat([a, b])
+    assert len(both) == len(a) + len(b) and both.source == "real"
+    np.testing.assert_array_equal(both.X[len(a):], b.X)
+    assert np.isnan(both.y[:len(a), 1]).all() and not np.isnan(both.y[len(a):, 1]).any()
+    assert both.meta == a.meta + b.meta
+    assert_no_group_leakage(both)                              # same camera -> split rule in both inputs
+    with pytest.raises(ValueError, match="duplicate"):
+        FeatureSet.concat([a, a])
+    with pytest.raises(ValueError, match="sources"):
+        FeatureSet.concat([a, make_feature_set(sims={"train": 2}, seed=0)])
+    pa, pb = a.save(tmp_path / "a.npz"), b.save(tmp_path / "b.npz")
+    assert _script("merge_features").main(["--out", str(tmp_path / "ab.npz"), str(pa), str(pb)]) == 0
+    assert len(FeatureSet.load(tmp_path / "ab.npz")) == len(both)
+    c = _real_set(seed=3)                                      # same camera ids in other splits: refused
+    c.seq_ids = np.array([f"c-{s}" for s in c.seq_ids])
+    c.splits = np.where(c.splits == "train", "test_iid", "train")
+    pc = c.save(tmp_path / "c.npz")
+    with pytest.raises(Exception):
+        _script("merge_features").main(["--out", str(tmp_path / "ac.npz"), str(pa), str(pc)])
+
+
 def test_sequence_roundtrip(tmp_path):
     rng = np.random.default_rng(0)
     T, H, W = 12, 24, 30

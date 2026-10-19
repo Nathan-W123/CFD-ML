@@ -170,6 +170,23 @@ class FeatureSet:
             X=self.X[idx], y=self.y[idx], meta=[self.meta[i] for i in idx], source=self.source,
             **{name: getattr(self, name)[idx] for name in _STR_FIELDS})
 
+    @classmethod
+    def concat(cls, sets: Iterable["FeatureSet"]) -> "FeatureSet":
+        """One FeatureSet with the rows of several of the same source, in order; sequence ids must stay unique."""
+        sets = list(sets)
+        if not sets:
+            raise ValueError("concat needs at least one FeatureSet")
+        sources = {fs.source for fs in sets}
+        if len(sources) != 1:
+            raise ValueError(f"cannot concatenate FeatureSets of different sources {sorted(sources)}")
+        out = cls(X=np.concatenate([fs.X for fs in sets]), y=np.concatenate([fs.y for fs in sets]),
+                  meta=[m for fs in sets for m in fs.meta], source=sets[0].source,
+                  **{name: np.concatenate([getattr(fs, name) for fs in sets]) for name in _STR_FIELDS})
+        ids, counts = np.unique(out.seq_ids, return_counts=True)
+        if np.any(counts > 1):
+            raise ValueError(f"duplicate sequence ids after concatenation, e.g. {ids[counts > 1][:3].tolist()}")
+        return out
+
     def split(self, name: Union[str, Iterable[str]]) -> "FeatureSet":
         """Rows of one split (or of several, given an iterable of names)."""
         names = [name] if isinstance(name, str) else list(name)
