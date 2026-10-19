@@ -1,0 +1,85 @@
+{
+ "format_version": 2,
+ "heads": {
+  "smoke": {
+   "intercept": -1.37201874551861,
+   "groups": [
+    "full",
+    "tiles",
+    "sims",
+    "fine"
+   ],
+   "C": 0.003,
+   "n_features": 4196
+  },
+  "fog": {
+   "intercept": -2.5089045405817667,
+   "groups": [
+    "full",
+    "sims"
+   ],
+   "C": 0.01,
+   "n_features": 584
+  }
+ },
+ "thresholds": {
+  "smoke": {
+   "balanced": 0.29773044879963506,
+   "deploy": 0.27796626973171124,
+   "strict": 0.5683088159243698
+  },
+  "fog": {
+   "balanced": 0.24273344406359304
+  }
+ },
+ "info": {
+  "model_id": "openai/clip-vit-base-patch32",
+  "sets": [
+   "figlib:data/real/figlib/real.csv:data/real/figlib/clip.npz:data/real/figlib/features.npz:data/real/figlib/clip_fine.npz",
+   "hpwren_fog:data/real/hpwren_fog/real.csv:data/real/hpwren_fog/clip.npz:data/real/hpwren_fog/features.npz:data/real/hpwren_fog/clip_fine.npz",
+   "hpwren_fog2:data/real/hpwren_fog2/real.csv:data/real/hpwren_fog2/clip.npz:data/real/hpwren_fog2/features.npz:data/real/hpwren_fog2/clip_fine.npz",
+   "hpwren_smoke:data/real/hpwren_smoke/real.csv:data/real/hpwren_smoke/clip.npz:data/real/hpwren_smoke/features.npz:data/real/hpwren_smoke/clip_fine.npz",
+   "hpwren_smoke2:data/real/hpwren_smoke2/real.csv:data/real/hpwren_smoke2/clip.npz:data/real/hpwren_smoke2/features.npz:data/real/hpwren_smoke2/clip_fine.npz"
+  ],
+  "deploy_false_smoke": 0.025,
+  "selection": {
+   "smoke": {
+    "groups": [
+     "full",
+     "tiles",
+     "sims",
+     "fine"
+    ],
+    "C": 0.003,
+    "cv_auroc": 0.8883342425298009,
+    "cv_auroc_within_sets": 0.8041052785760825
+   },
+   "fog": {
+    "groups": [
+     "full",
+     "sims"
+    ],
+    "C": 0.01,
+    "cv_auroc": 0.9772050515121303,
+    "cv_auroc_within_sets": 0.945389246857505
+   }
+  },
+  "tile_heads": {
+   "smoke": 0.0003
+  }
+ },
+ "tile_heads": {
+  "smoke": {
+   "intercept": -0.8586314043271742,
+   "C": 0.0003,
+   "n_features": 1040,
+   "stack": {
+    "coef": [
+     0.6814375325565625,
+     0.9757628213858912
+    ],
+    "intercept": -0.5765862744231807
+   }
+  }
+ }
+}

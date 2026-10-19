@@ -1,0 +1,1339 @@
+{
+  "dev_cv": {
+    "ci95": {
+      "false_alarm_no_smoke": {
+        "hi": 0.24732195061759646,
+        "lo": 0.16183519853905226,
+        "n_valid": 1000
+      },
+      "false_alarm_no_smoke_strict": {
+        "hi": 0.06638590801028205,
+        "lo": 0.03335795607932575,
+        "n_valid": 1000
+      },
+      "false_smoke_on_fog": {
+        "hi": 0.04451286774844738,
+        "lo": 0.006577872377020983,
+        "n_valid": 1000
+      },
+      "false_smoke_on_fog_strict": {
+        "hi": 0.011430213464696222,
+        "lo": 0.0,
+        "n_valid": 1000
+      },
+      "fog_auroc": {
+        "hi": 0.9879381968918818,
+        "lo": 0.9647100693140674,
+        "n_valid": 1000
+      },
+      "smoke_auroc": {
+        "hi": 0.9172246151423364,
+        "lo": 0.8733083352625626,
+        "n_valid": 1000
+      },
+      "smoke_auroc_within_sets": {
+        "hi": 0.8433710699761959,
+        "lo": 0.7737534598804148,
+        "n_valid": 1000
+      },
+      "smoke_recall": {
+        "hi": 0.8453972074768467,
+        "lo": 0.7553032911667694,
+        "n_valid": 1000
+      },
+      "smoke_recall_strict": {
+        "hi": 0.6643399145425077,
+        "lo": 0.5362055682482333,
+        "n_valid": 1000
+      }
+    },
+    "false_alarm_no_smoke": 0.20457796852646637,
+    "false_alarm_no_smoke_strict": 0.04935622317596566,
+    "false_smoke_on_fog": 0.024054982817869417,
+    "false_smoke_on_fog_strict": 0.003436426116838488,
+    "fog_auroc": 0.9772050515121303,
+    "goal_met": {
+      "deploy_point": true,
+      "fog_auroc": true,
+      "smoke_auroc": true
+    },
+    "n": {
+      "cameras": 143,
+      "fog_known": 1303,
+      "fog_pos": 300,
+      "fog_windows_smoke0": 291,
+      "smoke_known": 2051,
+      "smoke_pos": 653,
+      "windows": 2064
+    },
+    "per_set": {
+      "figlib": {
+        "false_alarm_no_smoke": 0.5480225988700564,
+        "false_alarm_no_smoke_strict": 0.16666666666666666,
+        "false_smoke_on_fog": null,
+        "false_smoke_on_fog_strict": null,
+        "fog_auroc": null,
+        "smoke_auroc": 0.7595050529163683,
+        "smoke_auroc_within_sets": 0.7595050529163683,
+        "smoke_recall": 0.8028169014084507,
+        "smoke_recall_strict": 0.5971830985915493
+      },
+      "hpwren_fog": {
+        "false_alarm_no_smoke": 0.018518518518518517,
+        "false_alarm_no_smoke_strict": 0.004629629629629629,
+        "false_smoke_on_fog": 0.02830188679245283,
+        "false_smoke_on_fog_strict": 0.009433962264150943,
+        "fog_auroc": 0.9346280991735537,
+        "smoke_auroc": null,
+        "smoke_auroc_within_sets": null,
+        "smoke_recall": null,
+        "smoke_recall_strict": null
+      },
+      "hpwren_fog2": {
+        "false_alarm_no_smoke": 0.030136986301369864,
+        "false_alarm_no_smoke_strict": 0.005479452054794521,
+        "false_smoke_on_fog": 0.021739130434782608,
+        "false_smoke_on_fog_strict": 0.0,
+        "fog_auroc": 0.9488631488631488,
+        "smoke_auroc": null,
+        "smoke_auroc_within_sets": null,
+        "smoke_recall": null,
+        "smoke_recall_strict": null
+      },
+      "hpwren_smoke": {
+        "false_alarm_no_smoke": 0.12790697674418605,
+        "false_alarm_no_smoke_strict": 0.011627906976744186,
+        "false_smoke_on_fog": 0.0,
+        "false_smoke_on_fog_strict": 0.0,
+        "fog_auroc": 0.9777777777777777,
+        "smoke_auroc": 0.9012108399000577,
+        "smoke_auroc_within_sets": 0.9012108399000577,
+        "smoke_recall": 0.7851239669421488,
+        "smoke_recall_strict": 0.5867768595041323
+      },
+      "hpwren_smoke2": {
+        "false_alarm_no_smoke": 0.18900343642611683,
+        "false_alarm_no_smoke_strict": 0.01718213058419244,
+        "false_smoke_on_fog": null,
+        "false_smoke_on_fog_strict": null,
+        "fog_auroc": null,
+        "smoke_auroc": 0.8919176034325431,
+        "smoke_auroc_within_sets": 0.8919176034325431,
+        "smoke_recall": 0.8022598870056498,
+        "smoke_recall_strict": 0.6101694915254238
+      }
+    },
+    "smoke_auroc": 0.8959703974393523,
+    "smoke_auroc_within_sets": 0.8088479663011582,
+    "smoke_recall": 0.7993874425727412,
+    "smoke_recall_strict": 0.5987748851454824
+  },
+  "goals": {
+    "fog_auroc": 0.9,
+    "max_false_smoke_on_fog": 0.05,
+    "min_smoke_recall": 0.5,
+    "smoke_auroc": 0.85
+  },
+  "selection": {
+    "fog": {
+      "best": {
+        "C": 0.01,
+        "cv_auroc": 0.9772050515121303,
+        "cv_auroc_within_sets": 0.945389246857505,
+        "groups": [
+          "full",
+          "sims"
+        ]
+      },
+      "n_dev": 1303,
+      "scores": [
+        {
+          "C": 0.0003,
+          "cv_auroc": 0.9658158856763044,
+          "cv_auroc_within_sets": 0.9113763599873244,
+          "groups": [
+            "full"
+          ]
+        },
+        {
+          "C": 0.001,
+          "cv_auroc": 0.9691990694582918,
+          "cv_auroc_within_sets": 0.9203549170803845,
+          "groups": [
+            "full"
+          ]
+        },
+        {
+          "C": 0.003,
+          "cv_auroc": 0.971345962113659,
+          "cv_auroc_within_sets": 0.9269462342875251,
+          "groups": [
+            "full"
+          ]
+        },
+        {
+          "C": 0.01,
+          "cv_auroc": 0.9715520106347624,
+          "cv_auroc_within_sets": 0.9305799091581283,
+          "groups": [
+            "full"
+          ]
+        },
+        {
+          "C": 0.03,
+          "cv_auroc": 0.9698338318378199,
+          "cv_auroc_within_sets": 0.9299883806908208,
+          "groups": [
+            "full"
+          ]
+        },
+        {
+          "C": 0.1,
+          "cv_auroc": 0.9668295114656031,
+          "cv_auroc_within_sets": 0.9277701489384177,
+          "groups": [
+            "full"
+          ]
+        },
+        {
+          "C": 0.3,
+          "cv_auroc": 0.9638883349950149,
+          "cv_auroc_within_sets": 0.9236505756839548,
+          "groups": [
+            "full"
+          ]
+        },
+        {
+          "C": 1.0,
+          "cv_auroc": 0.9613891658358259,
+          "cv_auroc_within_sets": 0.9204182951304531,
+          "groups": [
+            "full"
+          ]
+        },
+        {
+          "C": 0.0003,
+          "cv_auroc": 0.9451578597540711,
+          "cv_auroc_within_sets": 0.9145452624907574,
+          "groups": [
+            "sims"
+          ]
+        },
+        {
+          "C": 0.001,
+          "cv_auroc": 0.950242605516783,
+          "cv_auroc_within_sets": 0.920756311397486,
+          "groups": [
+            "sims"
+          ]
+        },
+        {
+          "C": 0.003,
+          "cv_auroc": 0.954848786972416,
+          "cv_auroc_within_sets": 0.9267983521706982,
+          "groups": [
+            "sims"
+          ]
+        },
+        {
+          "C": 0.01,
+          "cv_auroc": 0.9608341641741442,
+          "cv_auroc_within_sets": 0.9332629132777015,
+          "groups": [
+            "sims"
+          ]
+        },
+        {
+          "C": 0.03,
+          "cv_auroc": 0.9654835493519441,
+          "cv_auroc_within_sets": 0.9392838280342242,
+          "groups": [
+            "sims"
+          ]
+        },
+        {
+          "C": 0.1,
+          "cv_auroc": 0.9691990694582918,
+          "cv_auroc_within_sets": 0.9434667793387557,
+          "groups": [
+            "sims"
+          ]
+        },
+        {
+          "C": 0.3,
+          "cv_auroc": 0.9702824858757062,
+          "cv_auroc_within_sets": 0.9436146614555826,
+          "groups": [
+            "sims"
+          ]
+        },
+        {
+          "C": 1.0,
+          "cv_auroc": 0.9689498172150216,
+          "cv_auroc_within_sets": 0.9403823809020809,
+          "groups": [
+            "sims"
+          ]
+        },
+        {
+          "C": 0.0003,
+          "cv_auroc": 0.9716782984380192,
+          "cv_auroc_within_sets": 0.930875673391782,
+          "groups": [
+            "full",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.001,
+          "cv_auroc": 0.9752409438351611,
+          "cv_auroc_within_sets": 0.9385655434667793,
+          "groups": [
+            "full",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.003,
+          "cv_auroc": 0.9769956796277833,
+          "cv_auroc_within_sets": 0.9431498890884124,
+          "groups": [
+            "full",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.01,
+          "cv_auroc": 0.9772050515121303,
+          "cv_auroc_within_sets": 0.945389246857505,
+          "groups": [
+            "full",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.03,
+          "cv_auroc": 0.975559986706547,
+          "cv_auroc_within_sets": 0.9448399704235766,
+          "groups": [
+            "full",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.1,
+          "cv_auroc": 0.9731804586241276,
+          "cv_auroc_within_sets": 0.9426217386711736,
+          "groups": [
+            "full",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.3,
+          "cv_auroc": 0.9714689265536723,
+          "cv_auroc_within_sets": 0.9411217914862154,
+          "groups": [
+            "full",
+            "sims"
+          ]
+        },
+        {
+          "C": 1.0,
+          "cv_auroc": 0.9698836822864739,
+          "cv_auroc_within_sets": 0.939431710151051,
+          "groups": [
+            "full",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.0003,
+          "cv_auroc": 0.9731073446327684,
+          "cv_auroc_within_sets": 0.9260800676032535,
+          "groups": [
+            "full",
+            "tiles",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.001,
+          "cv_auroc": 0.9767497507477567,
+          "cv_auroc_within_sets": 0.9357980352804479,
+          "groups": [
+            "full",
+            "tiles",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.003,
+          "cv_auroc": 0.9773546028580924,
+          "cv_auroc_within_sets": 0.9391781979507764,
+          "groups": [
+            "full",
+            "tiles",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.01,
+          "cv_auroc": 0.9765403788634097,
+          "cv_auroc_within_sets": 0.9398964825182212,
+          "groups": [
+            "full",
+            "tiles",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.03,
+          "cv_auroc": 0.9753140578265205,
+          "cv_auroc_within_sets": 0.9395795922678777,
+          "groups": [
+            "full",
+            "tiles",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.1,
+          "cv_auroc": 0.9740445330674643,
+          "cv_auroc_within_sets": 0.9387345516002957,
+          "groups": [
+            "full",
+            "tiles",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.3,
+          "cv_auroc": 0.9733898305084746,
+          "cv_auroc_within_sets": 0.9391359459173972,
+          "groups": [
+            "full",
+            "tiles",
+            "sims"
+          ]
+        },
+        {
+          "C": 1.0,
+          "cv_auroc": 0.9733167165171153,
+          "cv_auroc_within_sets": 0.94184007605366,
+          "groups": [
+            "full",
+            "tiles",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.0003,
+          "cv_auroc": 0.9720338983050848,
+          "cv_auroc_within_sets": 0.9312981937255731,
+          "groups": [
+            "full",
+            "sims",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.001,
+          "cv_auroc": 0.9753605849119309,
+          "cv_auroc_within_sets": 0.9385655434667793,
+          "groups": [
+            "full",
+            "sims",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.003,
+          "cv_auroc": 0.9769857095380525,
+          "cv_auroc_within_sets": 0.9432343931551705,
+          "groups": [
+            "full",
+            "sims",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.01,
+          "cv_auroc": 0.9768594217347956,
+          "cv_auroc_within_sets": 0.9451568606739199,
+          "groups": [
+            "full",
+            "sims",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.03,
+          "cv_auroc": 0.9748886673313393,
+          "cv_auroc_within_sets": 0.9444808281398542,
+          "groups": [
+            "full",
+            "sims",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.1,
+          "cv_auroc": 0.972382851445663,
+          "cv_auroc_within_sets": 0.9420090841871765,
+          "groups": [
+            "full",
+            "sims",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.3,
+          "cv_auroc": 0.9708673978065803,
+          "cv_auroc_within_sets": 0.9407837752191824,
+          "groups": [
+            "full",
+            "sims",
+            "motion"
+          ]
+        },
+        {
+          "C": 1.0,
+          "cv_auroc": 0.9694516450648056,
+          "cv_auroc_within_sets": 0.9394950882011197,
+          "groups": [
+            "full",
+            "sims",
+            "motion"
+          ]
+        }
+      ]
+    },
+    "smoke": {
+      "best": {
+        "C": 0.003,
+        "cv_auroc": 0.8883342425298009,
+        "cv_auroc_within_sets": 0.8041052785760825,
+        "groups": [
+          "full",
+          "tiles",
+          "sims",
+          "fine"
+        ]
+      },
+      "n_dev": 2051,
+      "scores": [
+        {
+          "C": 0.0003,
+          "cv_auroc": 0.8402804706789616,
+          "cv_auroc_within_sets": 0.7255251554379284,
+          "groups": [
+            "tiles"
+          ]
+        },
+        {
+          "C": 0.001,
+          "cv_auroc": 0.8468091585660548,
+          "cv_auroc_within_sets": 0.7404552778184647,
+          "groups": [
+            "tiles"
+          ]
+        },
+        {
+          "C": 0.003,
+          "cv_auroc": 0.8399288416837004,
+          "cv_auroc_within_sets": 0.7413593684497624,
+          "groups": [
+            "tiles"
+          ]
+        },
+        {
+          "C": 0.01,
+          "cv_auroc": 0.8255701100018183,
+          "cv_auroc_within_sets": 0.7352933748844632,
+          "groups": [
+            "tiles"
+          ]
+        },
+        {
+          "C": 0.03,
+          "cv_auroc": 0.8129311836861672,
+          "cv_auroc_within_sets": 0.7284596619004086,
+          "groups": [
+            "tiles"
+          ]
+        },
+        {
+          "C": 0.1,
+          "cv_auroc": 0.8032805561215213,
+          "cv_auroc_within_sets": 0.7232422003242605,
+          "groups": [
+            "tiles"
+          ]
+        },
+        {
+          "C": 0.3,
+          "cv_auroc": 0.797778274367013,
+          "cv_auroc_within_sets": 0.7199894943658486,
+          "groups": [
+            "tiles"
+          ]
+        },
+        {
+          "C": 1.0,
+          "cv_auroc": 0.7940439963456875,
+          "cv_auroc_within_sets": 0.7193682477309346,
+          "groups": [
+            "tiles"
+          ]
+        },
+        {
+          "C": 0.0003,
+          "cv_auroc": 0.780356755548837,
+          "cv_auroc_within_sets": 0.7192672320179404,
+          "groups": [
+            "sims"
+          ]
+        },
+        {
+          "C": 0.001,
+          "cv_auroc": 0.7982580672016686,
+          "cv_auroc_within_sets": 0.7292172797478648,
+          "groups": [
+            "sims"
+          ]
+        },
+        {
+          "C": 0.003,
+          "cv_auroc": 0.810115960889216,
+          "cv_auroc_within_sets": 0.7356822853794908,
+          "groups": [
+            "sims"
+          ]
+        },
+        {
+          "C": 0.01,
+          "cv_auroc": 0.8182384811380072,
+          "cv_auroc_within_sets": 0.7416624155887448,
+          "groups": [
+            "sims"
+          ]
+        },
+        {
+          "C": 0.03,
+          "cv_auroc": 0.8212443065679038,
+          "cv_auroc_within_sets": 0.7437988979185712,
+          "groups": [
+            "sims"
+          ]
+        },
+        {
+          "C": 0.1,
+          "cv_auroc": 0.8211161427285095,
+          "cv_auroc_within_sets": 0.7418947517286314,
+          "groups": [
+            "sims"
+          ]
+        },
+        {
+          "C": 0.3,
+          "cv_auroc": 0.8196121345961306,
+          "cv_auroc_within_sets": 0.738823874053609,
+          "groups": [
+            "sims"
+          ]
+        },
+        {
+          "C": 1.0,
+          "cv_auroc": 0.817491406450256,
+          "cv_auroc_within_sets": 0.7356822853794908,
+          "groups": [
+            "sims"
+          ]
+        },
+        {
+          "C": 0.0003,
+          "cv_auroc": 0.8545888131590305,
+          "cv_auroc_within_sets": 0.7454353524690766,
+          "groups": [
+            "tiles",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.001,
+          "cv_auroc": 0.8597526109274461,
+          "cv_auroc_within_sets": 0.7585067857305203,
+          "groups": [
+            "tiles",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.003,
+          "cv_auroc": 0.8531757246734013,
+          "cv_auroc_within_sets": 0.760294763850517,
+          "groups": [
+            "tiles",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.01,
+          "cv_auroc": 0.8397459069727701,
+          "cv_auroc_within_sets": 0.7549712357757249,
+          "groups": [
+            "tiles",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.03,
+          "cv_auroc": 0.8273326366478474,
+          "cv_auroc_within_sets": 0.7470263499487345,
+          "groups": [
+            "tiles",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.1,
+          "cv_auroc": 0.8175297460603312,
+          "cv_auroc_within_sets": 0.7404704301754138,
+          "groups": [
+            "tiles",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.3,
+          "cv_auroc": 0.8119639300948412,
+          "cv_auroc_within_sets": 0.7369702357201663,
+          "groups": [
+            "tiles",
+            "sims"
+          ]
+        },
+        {
+          "C": 1.0,
+          "cv_auroc": 0.8078506376424864,
+          "cv_auroc_within_sets": 0.735833808948982,
+          "groups": [
+            "tiles",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.0003,
+          "cv_auroc": 0.8674314871167956,
+          "cv_auroc_within_sets": 0.7579006914525555,
+          "groups": [
+            "full",
+            "tiles",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.001,
+          "cv_auroc": 0.8716192679544394,
+          "cv_auroc_within_sets": 0.7700478309401028,
+          "groups": [
+            "full",
+            "tiles",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.003,
+          "cv_auroc": 0.8652877552048759,
+          "cv_auroc_within_sets": 0.7707094838602144,
+          "groups": [
+            "full",
+            "tiles",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.01,
+          "cv_auroc": 0.8525020429535083,
+          "cv_auroc_within_sets": 0.7638353645909621,
+          "groups": [
+            "full",
+            "tiles",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.03,
+          "cv_auroc": 0.841152422953815,
+          "cv_auroc_within_sets": 0.7560116976195648,
+          "groups": [
+            "full",
+            "tiles",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.1,
+          "cv_auroc": 0.8327582391822052,
+          "cv_auroc_within_sets": 0.7497032663430797,
+          "groups": [
+            "full",
+            "tiles",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.3,
+          "cv_auroc": 0.8279668833402345,
+          "cv_auroc_within_sets": 0.7470263499487345,
+          "groups": [
+            "full",
+            "tiles",
+            "sims"
+          ]
+        },
+        {
+          "C": 1.0,
+          "cv_auroc": 0.8249928250158288,
+          "cv_auroc_within_sets": 0.7473597018016153,
+          "groups": [
+            "full",
+            "tiles",
+            "sims"
+          ]
+        },
+        {
+          "C": 0.0003,
+          "cv_auroc": 0.8543500121591335,
+          "cv_auroc_within_sets": 0.7449050199758572,
+          "groups": [
+            "tiles",
+            "sims",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.001,
+          "cv_auroc": 0.8593494973129411,
+          "cv_auroc_within_sets": 0.757597644313573,
+          "groups": [
+            "tiles",
+            "sims",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.003,
+          "cv_auroc": 0.8518940862794585,
+          "cv_auroc_within_sets": 0.7582845511619333,
+          "groups": [
+            "tiles",
+            "sims",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.01,
+          "cv_auroc": 0.8376854267855852,
+          "cv_auroc_within_sets": 0.7522589638818318,
+          "groups": [
+            "tiles",
+            "sims",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.03,
+          "cv_auroc": 0.8248460390801122,
+          "cv_auroc_within_sets": 0.7445918712655754,
+          "groups": [
+            "tiles",
+            "sims",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.1,
+          "cv_auroc": 0.8147254774376872,
+          "cv_auroc_within_sets": 0.7377834122097693,
+          "groups": [
+            "tiles",
+            "sims",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.3,
+          "cv_auroc": 0.8089865855181434,
+          "cv_auroc_within_sets": 0.7336518695483084,
+          "groups": [
+            "tiles",
+            "sims",
+            "motion"
+          ]
+        },
+        {
+          "C": 1.0,
+          "cv_auroc": 0.8051438611711765,
+          "cv_auroc_within_sets": 0.733172044911586,
+          "groups": [
+            "tiles",
+            "sims",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.0003,
+          "cv_auroc": 0.8674851625709009,
+          "cv_auroc_within_sets": 0.7574612731010308,
+          "groups": [
+            "full",
+            "tiles",
+            "sims",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.001,
+          "cv_auroc": 0.8710748454913714,
+          "cv_auroc_within_sets": 0.7688760486693705,
+          "groups": [
+            "full",
+            "tiles",
+            "sims",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.003,
+          "cv_auroc": 0.8643741770676552,
+          "cv_auroc_within_sets": 0.7687144235285799,
+          "groups": [
+            "full",
+            "tiles",
+            "sims",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.01,
+          "cv_auroc": 0.8511820649494903,
+          "cv_auroc_within_sets": 0.761693831475486,
+          "groups": [
+            "full",
+            "tiles",
+            "sims",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.03,
+          "cv_auroc": 0.839871879977303,
+          "cv_auroc_within_sets": 0.7541883640000202,
+          "groups": [
+            "full",
+            "tiles",
+            "sims",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.1,
+          "cv_auroc": 0.8315412304166749,
+          "cv_auroc_within_sets": 0.7480516594356252,
+          "groups": [
+            "full",
+            "tiles",
+            "sims",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.3,
+          "cv_auroc": 0.8268112179508246,
+          "cv_auroc_within_sets": 0.7453898953982292,
+          "groups": [
+            "full",
+            "tiles",
+            "sims",
+            "motion"
+          ]
+        },
+        {
+          "C": 1.0,
+          "cv_auroc": 0.8231952450120167,
+          "cv_auroc_within_sets": 0.7445161094808297,
+          "groups": [
+            "full",
+            "tiles",
+            "sims",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.0003,
+          "cv_auroc": 0.8837849739400193,
+          "cv_auroc_within_sets": 0.7858668915949876,
+          "groups": [
+            "full",
+            "tiles",
+            "sims",
+            "fine"
+          ]
+        },
+        {
+          "C": 0.001,
+          "cv_auroc": 0.8900222807905408,
+          "cv_auroc_within_sets": 0.7994383526357525,
+          "groups": [
+            "full",
+            "tiles",
+            "sims",
+            "fine"
+          ]
+        },
+        {
+          "C": 0.003,
+          "cv_auroc": 0.8883342425298009,
+          "cv_auroc_within_sets": 0.8041052785760825,
+          "groups": [
+            "full",
+            "tiles",
+            "sims",
+            "fine"
+          ]
+        },
+        {
+          "C": 0.01,
+          "cv_auroc": 0.8828100524266782,
+          "cv_auroc_within_sets": 0.8029941057331468,
+          "groups": [
+            "full",
+            "tiles",
+            "sims",
+            "fine"
+          ]
+        },
+        {
+          "C": 0.03,
+          "cv_auroc": 0.8777875635068255,
+          "cv_auroc_within_sets": 0.8006151856921344,
+          "groups": [
+            "full",
+            "tiles",
+            "sims",
+            "fine"
+          ]
+        },
+        {
+          "C": 0.1,
+          "cv_auroc": 0.8740083733708405,
+          "cv_auroc_within_sets": 0.7989383248564315,
+          "groups": [
+            "full",
+            "tiles",
+            "sims",
+            "fine"
+          ]
+        },
+        {
+          "C": 0.3,
+          "cv_auroc": 0.8709554449914229,
+          "cv_auroc_within_sets": 0.7978625075130437,
+          "groups": [
+            "full",
+            "tiles",
+            "sims",
+            "fine"
+          ]
+        },
+        {
+          "C": 1.0,
+          "cv_auroc": 0.8671959723691908,
+          "cv_auroc_within_sets": 0.7985494143614039,
+          "groups": [
+            "full",
+            "tiles",
+            "sims",
+            "fine"
+          ]
+        },
+        {
+          "C": 0.0003,
+          "cv_auroc": 0.8836831001189623,
+          "cv_auroc_within_sets": 0.7856194030981519,
+          "groups": [
+            "full",
+            "tiles",
+            "sims",
+            "fine",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.001,
+          "cv_auroc": 0.8897571897723066,
+          "cv_auroc_within_sets": 0.7987312426447934,
+          "groups": [
+            "full",
+            "tiles",
+            "sims",
+            "fine",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.003,
+          "cv_auroc": 0.8877350491951969,
+          "cv_auroc_within_sets": 0.8027011601654638,
+          "groups": [
+            "full",
+            "tiles",
+            "sims",
+            "fine",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.01,
+          "cv_auroc": 0.8821593744728303,
+          "cv_auroc_within_sets": 0.8017970695341661,
+          "groups": [
+            "full",
+            "tiles",
+            "sims",
+            "fine",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.03,
+          "cv_auroc": 0.8770843055163031,
+          "cv_auroc_within_sets": 0.7991757117819677,
+          "groups": [
+            "full",
+            "tiles",
+            "sims",
+            "fine",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.1,
+          "cv_auroc": 0.8730356426923608,
+          "cv_auroc_within_sets": 0.7969331629534974,
+          "groups": [
+            "full",
+            "tiles",
+            "sims",
+            "fine",
+            "motion"
+          ]
+        },
+        {
+          "C": 0.3,
+          "cv_auroc": 0.8703617287439724,
+          "cv_auroc_within_sets": 0.7961300880351939,
+          "groups": [
+            "full",
+            "tiles",
+            "sims",
+            "fine",
+            "motion"
+          ]
+        },
+        {
+          "C": 1.0,
+          "cv_auroc": 0.8671806365251606,
+          "cv_auroc_within_sets": 0.7966856744566617,
+          "groups": [
+            "full",
+            "tiles",
+            "sims",
+            "fine",
+            "motion"
+          ]
+        }
+      ],
+      "stacked": {
+        "cv_auroc": 0.8959703974393523,
+        "cv_auroc_within_sets": 0.8088479663011582,
+        "stack": {
+          "coef": [
+            0.6814375325565625,
+            0.9757628213858912
+          ],
+          "intercept": -0.5765862744231807
+        }
+      },
+      "tile": {
+        "C": 0.0003,
+        "cv_auroc": 0.866764377901487,
+        "cv_auroc_within_sets": 0.7694821429473354,
+        "scores": [
+          {
+            "C": 0.0001,
+            "cv_auroc": 0.859749324675154,
+            "cv_auroc_within_sets": 0.7610574324836228
+          },
+          {
+            "C": 0.0003,
+            "cv_auroc": 0.866764377901487,
+            "cv_auroc_within_sets": 0.7694821429473354
+          },
+          {
+            "C": 0.001,
+            "cv_auroc": 0.8642186277924929,
+            "cv_auroc_within_sets": 0.764769759936158
+          },
+          {
+            "C": 0.003,
+            "cv_auroc": 0.8585323159096236,
+            "cv_auroc_within_sets": 0.7559409866204689
+          }
+        ]
+      }
+    }
+  },
+  "status": "detector",
+  "test": {
+    "ci95": {
+      "false_alarm_no_smoke": {
+        "hi": 0.3545661157024793,
+        "lo": 0.19130230339375767,
+        "n_valid": 1000
+      },
+      "false_alarm_no_smoke_strict": {
+        "hi": 0.10844466575981344,
+        "lo": 0.026310068649885582,
+        "n_valid": 1000
+      },
+      "false_smoke_on_fog": {
+        "hi": 0.0967741935483871,
+        "lo": 0.0,
+        "n_valid": 1000
+      },
+      "false_smoke_on_fog_strict": {
+        "hi": 0.0,
+        "lo": 0.0,
+        "n_valid": 1000
+      },
+      "fog_auroc": {
+        "hi": 0.9936994049420288,
+        "lo": 0.9062736486486486,
+        "n_valid": 1000
+      },
+      "smoke_auroc": {
+        "hi": 0.9278485720360113,
+        "lo": 0.8231545051960351,
+        "n_valid": 1000
+      },
+      "smoke_auroc_within_sets": {
+        "hi": 0.8523618013545183,
+        "lo": 0.6647742663138463,
+        "n_valid": 1000
+      },
+      "smoke_recall": {
+        "hi": 0.9140680803571428,
+        "lo": 0.7272727272727273,
+        "n_valid": 1000
+      },
+      "smoke_recall_strict": {
+        "hi": 0.6666666666666666,
+        "lo": 0.4213970588235294,
+        "n_valid": 1000
+      }
+    },
+    "false_alarm_no_smoke": 0.26557377049180325,
+    "false_alarm_no_smoke_strict": 0.05901639344262295,
+    "false_smoke_on_fog": 0.037037037037037035,
+    "false_smoke_on_fog_strict": 0.0,
+    "fog_auroc": 0.9634146341463414,
+    "goal_met": {
+      "deploy_point": true,
+      "fog_auroc": true,
+      "smoke_auroc": true
+    },
+    "n": {
+      "cameras": 35,
+      "fog_known": 261,
+      "fog_pos": 56,
+      "fog_windows_smoke0": 54,
+      "smoke_known": 436,
+      "smoke_pos": 131,
+      "windows": 440
+    },
+    "per_set": {
+      "figlib": {
+        "false_alarm_no_smoke": 0.6506024096385542,
+        "false_alarm_no_smoke_strict": 0.20481927710843373,
+        "false_smoke_on_fog": null,
+        "false_smoke_on_fog_strict": null,
+        "fog_auroc": null,
+        "smoke_auroc": 0.7128970427163198,
+        "smoke_auroc_within_sets": 0.7128970427163198,
+        "smoke_recall": 0.8295454545454546,
+        "smoke_recall_strict": 0.5340909090909091
+      },
+      "hpwren_fog": {
+        "false_alarm_no_smoke": 0.024390243902439025,
+        "false_alarm_no_smoke_strict": 0.0,
+        "false_smoke_on_fog": 0.047619047619047616,
+        "false_smoke_on_fog_strict": 0.0,
+        "fog_auroc": 0.8775510204081632,
+        "smoke_auroc": null,
+        "smoke_auroc_within_sets": null,
+        "smoke_recall": null,
+        "smoke_recall_strict": null
+      },
+      "hpwren_fog2": {
+        "false_alarm_no_smoke": 0.014084507042253521,
+        "false_alarm_no_smoke_strict": 0.0,
+        "false_smoke_on_fog": 0.03225806451612903,
+        "false_smoke_on_fog_strict": 0.0,
+        "fog_auroc": 0.9408721359940873,
+        "smoke_auroc": null,
+        "smoke_auroc_within_sets": null,
+        "smoke_recall": null,
+        "smoke_recall_strict": null
+      },
+      "hpwren_smoke": {
+        "false_alarm_no_smoke": 0.2903225806451613,
+        "false_alarm_no_smoke_strict": 0.0,
+        "false_smoke_on_fog": null,
+        "false_smoke_on_fog_strict": null,
+        "fog_auroc": null,
+        "smoke_auroc": 0.8435483870967742,
+        "smoke_auroc_within_sets": 0.8435483870967742,
+        "smoke_recall": 0.75,
+        "smoke_recall_strict": 0.5
+      },
+      "hpwren_smoke2": {
+        "false_alarm_no_smoke": 0.20253164556962025,
+        "false_alarm_no_smoke_strict": 0.012658227848101266,
+        "false_smoke_on_fog": 0.0,
+        "false_smoke_on_fog_strict": 0.0,
+        "fog_auroc": 1.0,
+        "smoke_auroc": 0.9279031370390755,
+        "smoke_auroc_within_sets": 0.9279031370390755,
+        "smoke_recall": 0.8695652173913043,
+        "smoke_recall_strict": 0.5652173913043478
+      }
+    },
+    "smoke_auroc": 0.879939932423977,
+    "smoke_auroc_within_sets": 0.7613181398213735,
+    "smoke_recall": 0.8244274809160306,
+    "smoke_recall_strict": 0.5343511450381679
+  },
+  "thresholds": {
+    "fog": {
+      "balanced": 0.24273344406359304
+    },
+    "smoke": {
+      "balanced": 0.29773044879963506,
+      "deploy": 0.27796626973171124,
+      "strict": 0.5683088159243698
+    }
+  }
+}

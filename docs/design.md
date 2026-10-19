@@ -914,9 +914,12 @@ them.
   stack on the out-of-fold logits, scored by a second grouped
   cross-validation. Thresholds from out-of-fold probabilities: smoke
   `deploy` lets at most 2.5 % of the dev fog windows (fog 1, smoke 0) raise
-  a smoke alarm (half the 5 % goal, as a margin for new cameras); `balanced`
-  is the maximum-Youden point. The `test_iid` cameras are evaluated once,
-  with `--final`.
+  a smoke alarm (half the 5 % goal, as a margin for new cameras); smoke
+  `strict` lets at most 5 % of all dev smoke-free windows raise one (the
+  deploy point budgets fog only, and clear scenes minutes before a fire
+  alarm far more often); `balanced` is the maximum-Youden point. Model
+  selection maximises the within-set AUROC (below). The `test_iid` cameras
+  are evaluated once, with `--final`.
 * **Reporting.** Pooled smoke AUROC mixes sets: a no-smoke window from a set
   without smoke (the fog sets) is an easy negative, so the report also gives
   the AUROC over smoke / no-smoke pairs from the same set ("within sets")

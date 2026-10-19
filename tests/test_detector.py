@@ -119,6 +119,9 @@ def test_train_detector_end_to_end(tmp_path, monkeypatch):
     assert set(doc["test"]["goal_met"]) == {"fog_auroc", "smoke_auroc", "deploy_point"}
     thr = doc["thresholds"]["smoke"]["deploy"]
     assert 0.0 <= thr <= 1.0
+    assert 0.0 <= doc["thresholds"]["smoke"]["strict"] <= 1.0
+    assert doc["dev_cv"]["false_alarm_no_smoke_strict"] <= 0.05 + 1e-9
+    assert doc["test"]["smoke_recall_strict"] is not None and "strict point" in rep.with_suffix(".md").read_text()
     det = Detector.load(out)
     assert det.thresholds["smoke"]["deploy"] == pytest.approx(thr)
     assert "Held-out test cameras" in rep.with_suffix(".md").read_text()

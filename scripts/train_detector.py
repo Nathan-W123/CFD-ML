@@ -34,7 +34,10 @@ Per head (smoke, fog), on the dev rows with a known label:
    threshold at which at most --deploy-false-smoke (2.5 %) of the dev fog
    windows (fog 1, smoke 0) raise a smoke alarm: half the goal's 5 %, a
    margin for new cameras (the dev estimate is out-of-fold, but a test set of
-   about 50 fog windows moves the rate by 2 % per window).
+   about 50 fog windows moves the rate by 2 % per window); for smoke also
+   "strict", at which at most --strict-false-alarm (5 %) of all dev no-smoke
+   windows raise an alarm (the deploy point budgets fog windows only, and
+   clear scenes minutes before a fire are harder).
 
 Reported: the cross-validated dev results, and with --final the held-out
 test cameras (evaluated once): fog AUROC, smoke AUROC (all smoke-labelled
@@ -220,8 +223,9 @@ def within_sets_auroc(p, y, sets):
     return num / den if den else None
 
 
-def metrics_block(p_smoke, p_fog, rows, thr, n_boot=1000):
-    """AUROCs, deploy-point false smoke on fog and smoke recall, with camera-bootstrap intervals."""
+def metrics_block(p_smoke, p_fog, rows, thr, n_boot=1000, thr_strict=None):
+    """AUROCs; at the deploy point (thr) false smoke on fog, false alarms on every no-smoke window and smoke
+    recall, and the same at the strict point (thr_strict) if given; camera-bootstrap intervals."""
     ys = np.array([r["smoke"] for r in rows])
     yf = np.array([r["fog"] for r in rows])
     sets = np.array([r["set"] for r in rows])
@@ -235,11 +239,17 @@ def metrics_block(p_smoke, p_fog, rows, thr, n_boot=1000):
         s, f, fw, ys_, yf_ = smk[idx], fgk[idx], fog_win[idx], ys[idx], yf[idx]
         ps, pf = p_smoke[idx], p_fog[idx]
         pos = s & (ys_ == 1)
-        return {"smoke_auroc": M.auroc(ps[s], ys_[s]) if s.any() else None,
-                "smoke_auroc_within_sets": within_sets_auroc(ps[s], ys_[s], sets[idx][s]),
-                "fog_auroc": M.auroc(pf[f], yf_[f]) if f.any() else None,
-                "false_smoke_on_fog": float(np.mean(ps[fw] >= thr)) if fw.any() else None,
-                "smoke_recall": float(np.mean(ps[pos] >= thr)) if pos.any() else None}
+        neg = s & (ys_ == 0)
+        out = {"smoke_auroc": M.auroc(ps[s], ys_[s]) if s.any() else None,
+               "smoke_auroc_within_sets": within_sets_auroc(ps[s], ys_[s], sets[idx][s]),
+               "fog_auroc": M.auroc(pf[f], yf_[f]) if f.any() else None}
+        for suffix, t in (("", thr), ("_strict", thr_strict)):
+            if t is None:
+                continue
+            out[f"false_smoke_on_fog{suffix}"] = float(np.mean(ps[fw] >= t)) if fw.any() else None
+            out[f"false_alarm_no_smoke{suffix}"] = float(np.mean(ps[neg] >= t)) if neg.any() else None
+            out[f"smoke_recall{suffix}"] = float(np.mean(ps[pos] >= t)) if pos.any() else None
+        return out
 
     out = stats(np.arange(len(rows)))
     out["ci95"] = M.grouped_bootstrap(stats, cams, n_boot=n_boot)
@@ -269,6 +279,8 @@ def main(argv=None) -> int:
     ap.add_argument("--report", required=True)
     ap.add_argument("--deploy-false-smoke", type=float, default=0.025,
                     help="share of the dev fog windows allowed to raise a smoke alarm at the deploy threshold")
+    ap.add_argument("--strict-false-alarm", type=float, default=0.05,
+                    help="share of all dev no-smoke windows allowed to raise a smoke alarm at the strict threshold")
     ap.add_argument("--n-boot", type=int, default=1000)
     ap.add_argument("--select-on", choices=("within", "pooled"), default="within",
                     help="out-of-fold AUROC that model selection maximises: within sets (default) or pooled")
@@ -319,6 +331,7 @@ def main(argv=None) -> int:
         if head == "smoke":
             fog_win = np.array([(r["fog"] == 1) and (r["smoke"] == 0) for r in hr])
             thresholds[head]["deploy"] = deploy_threshold(oof_p[fog_win], args.deploy_false_smoke)
+            thresholds[head]["strict"] = deploy_threshold(oof_p[y == 0], args.strict_false_alarm)
         oof[head] = {r["window_id"]: p for r, p in zip(hr, oof_p)}
         print(f"{head}: best {best} on {len(hr)} dev windows", file=sys.stderr)
     det = Detector(heads=heads, text=T, thresholds=thresholds,
@@ -333,7 +346,7 @@ def main(argv=None) -> int:
     dev_f = np.array([oof["fog"].get(r["window_id"], np.nan) for r in dev])
     report = {"status": "detector", "goals": GOALS, "selection": selection, "thresholds": thresholds,
               "dev_cv": metrics_block(np.nan_to_num(dev_s, nan=0.0), np.nan_to_num(dev_f, nan=0.0), dev,
-                                      thresholds["smoke"]["deploy"], args.n_boot)}
+                                      thresholds["smoke"]["deploy"], args.n_boot, thresholds["smoke"]["strict"])}
     report["dev_cv"]["goal_met"] = goal_checks(report["dev_cv"])
     if args.final:
         E = np.stack([r["emb"] for r in test])
@@ -343,7 +356,8 @@ def main(argv=None) -> int:
         if tile_heads or any("fine" in heads[h].groups for h in heads):
             fine = np.stack([r["fine"] for r in test])
         p = det.proba(E, mot, fine)
-        report["test"] = metrics_block(p["smoke"], p["fog"], test, thresholds["smoke"]["deploy"], args.n_boot)
+        report["test"] = metrics_block(p["smoke"], p["fog"], test, thresholds["smoke"]["deploy"], args.n_boot,
+                                       thresholds["smoke"]["strict"])
         report["test"]["goal_met"] = goal_checks(report["test"])
     write_json(Path(args.report), report)
     Path(args.report).with_suffix(".md").write_text(render(report), encoding="utf-8")
@@ -384,7 +398,8 @@ def render(rep) -> str:
                      f"| {_f(t.get('cv_auroc_within_sets'))} | {s['n_dev']} |")
             L.append(f"| {h}: stacked (deployed) | head + tile head | | {_f(st['cv_auroc'])} "
                      f"| {_f(st.get('cv_auroc_within_sets'))} | {s['n_dev']} |")
-    L += ["", f"Thresholds: smoke deploy {rep['thresholds']['smoke']['deploy']:.3f}, smoke balanced "
+    L += ["", f"Thresholds: smoke deploy {rep['thresholds']['smoke']['deploy']:.3f}, smoke strict "
+          f"{rep['thresholds']['smoke'].get('strict', float('nan')):.3f}, smoke balanced "
           f"{rep['thresholds']['smoke']['balanced']:.3f}, fog balanced {rep['thresholds']['fog']['balanced']:.3f}.", ""]
     for key, title in (("dev_cv", "Dev cameras, out-of-fold (cross-validated)"), ("test", "Held-out test cameras")):
         if key not in rep:
@@ -403,11 +418,23 @@ def render(rep) -> str:
               f"| false smoke on fog windows (deploy) | {_f(r['false_smoke_on_fog'], '{:.1%}')}"
               f"{_ci(r['ci95'], 'false_smoke_on_fog', True)} | <= 5 % | {r['goal_met']['deploy_point']} |",
               f"| smoke recall (deploy) | {_f(r['smoke_recall'], '{:.1%}')}{_ci(r['ci95'], 'smoke_recall', True)} "
-              f"| >= 50 % | |", "",
-              "| set | smoke AUROC | fog AUROC | false smoke on fog | smoke recall |", "|---|---|---|---|---|"]
+              f"| >= 50 % | |",
+              f"| false alarms on all no-smoke windows (deploy) | {_f(r.get('false_alarm_no_smoke'), '{:.1%}')}"
+              f"{_ci(r['ci95'], 'false_alarm_no_smoke', True)} | | |"]
+        if r.get("smoke_recall_strict") is not None:
+            L += [f"| strict point: false alarms on all no-smoke windows | "
+                  f"{_f(r.get('false_alarm_no_smoke_strict'), '{:.1%}')}{_ci(r['ci95'], 'false_alarm_no_smoke_strict', True)} | | |",
+                  f"| strict point: false smoke on fog windows | {_f(r.get('false_smoke_on_fog_strict'), '{:.1%}')}"
+                  f"{_ci(r['ci95'], 'false_smoke_on_fog_strict', True)} | | |",
+                  f"| strict point: smoke recall | {_f(r.get('smoke_recall_strict'), '{:.1%}')}"
+                  f"{_ci(r['ci95'], 'smoke_recall_strict', True)} | | |"]
+        L += ["",
+              "| set | smoke AUROC | fog AUROC | false smoke on fog | false alarms, no-smoke | smoke recall "
+              "| strict: false alarms, no-smoke | strict: smoke recall |", "|---|---|---|---|---|---|---|---|"]
         for s, v in r["per_set"].items():
             L.append(f"| {s} | {_f(v['smoke_auroc'])} | {_f(v['fog_auroc'])} | {_f(v['false_smoke_on_fog'], '{:.1%}')} "
-                     f"| {_f(v['smoke_recall'], '{:.1%}')} |")
+                     f"| {_f(v.get('false_alarm_no_smoke'), '{:.1%}')} | {_f(v['smoke_recall'], '{:.1%}')} "
+                     f"| {_f(v.get('false_alarm_no_smoke_strict'), '{:.1%}')} | {_f(v.get('smoke_recall_strict'), '{:.1%}')} |")
         L.append("")
     return "\n".join(L)
 
