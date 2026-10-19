@@ -1,10 +1,9 @@
 """Train and evaluate the real-footage smoke / fog detector (far field), camera-disjoint.
 
-    python scripts/train_detector.py \\
-        --set figlib:data/real/figlib/real.csv:data/real/figlib/clip.npz:data/real/figlib/features.npz \\
-        --set hpwren_fog:data/real/hpwren_fog/real.csv:data/real/hpwren_fog/clip.npz:data/real/hpwren_fog/features.npz \\
-        --set hpwren_smoke:data/real/hpwren_smoke/real.csv:data/real/hpwren_smoke/clip.npz:data/real/hpwren_smoke/features.npz \\
-        --out artifacts_detector --report reports/far/detector.json [--final]
+    D=data/real; SETS=""
+    for n in figlib hpwren_fog hpwren_fog2 hpwren_smoke hpwren_smoke2; do
+        SETS="$SETS --set $n:$D/$n/real.csv:$D/$n/clip.npz:$D/$n/features.npz:$D/$n/clip_fine.npz"; done
+    python scripts/train_detector.py $SETS --out artifacts_detector --report reports/far/detector.json [--final]
 
 Data: every --set is name:manifest:clip_npz[:features_npz[:fine_npz]]. A
 row's labels come from its manifest (smoke / fog: 0, 1 or empty = unknown),
@@ -40,7 +39,8 @@ Per head (smoke, fog), on the dev rows with a known label:
    clear scenes minutes before a fire are harder).
 
 Reported: the cross-validated dev results, and with --final the held-out
-test cameras (evaluated once): fog AUROC, smoke AUROC (all smoke-labelled
+test cameras (scored with the one refitted model; nothing is fitted or
+chosen on them): fog AUROC, smoke AUROC (all smoke-labelled
 windows, and per set; "within sets" counts only smoke / no-smoke pairs from
 the same set, so a set-level difference cannot help), and at the deploy point the false-smoke rate on the
 test fog windows and the smoke recall on the test smoke windows, each with a
@@ -173,10 +173,13 @@ def fit_stack(Z, y):
 
 
 def cv_scores(z, y, sets):
-    """Pooled and within-set out-of-fold AUROC, and the one model selection maximises (SELECT_ON)."""
-    pooled, within = M.auroc(z, y), within_sets_auroc(np.asarray(z), np.asarray(y), np.asarray(sets))
+    """Pooled, within-set and per-set out-of-fold AUROC, and the one model selection maximises (SELECT_ON)."""
+    z, y, sets = np.asarray(z), np.asarray(y), np.asarray(sets)
+    pooled, within = M.auroc(z, y), within_sets_auroc(z, y, sets)
+    per_set = {str(s): M.auroc(z[sets == s], y[sets == s]) for s in sorted(set(sets.tolist()))
+               if len(set(y[sets == s].tolist())) == 2}
     crit = within if (SELECT_ON == "within" and within is not None) else pooled
-    return {"cv_auroc": pooled, "cv_auroc_within_sets": within}, crit
+    return {"cv_auroc": pooled, "cv_auroc_within_sets": within, "cv_auroc_per_set": per_set}, crit
 
 
 def select(rows, head, T):
@@ -242,7 +245,8 @@ def metrics_block(p_smoke, p_fog, rows, thr, n_boot=1000, thr_strict=None):
         neg = s & (ys_ == 0)
         out = {"smoke_auroc": M.auroc(ps[s], ys_[s]) if s.any() else None,
                "smoke_auroc_within_sets": within_sets_auroc(ps[s], ys_[s], sets[idx][s]),
-               "fog_auroc": M.auroc(pf[f], yf_[f]) if f.any() else None}
+               "fog_auroc": M.auroc(pf[f], yf_[f]) if f.any() else None,
+               "fog_auroc_within_sets": within_sets_auroc(pf[f], yf_[f], sets[idx][f])}
         for suffix, t in (("", thr), ("_strict", thr_strict)):
             if t is None:
                 continue
@@ -412,6 +416,7 @@ def render(rep) -> str:
               f"{n['fog_windows_smoke0']} fog windows without smoke.", "",
               "| metric | value | goal | met |", "|---|---|---|---|",
               f"| fog AUROC | {_f(r['fog_auroc'])}{_ci(r['ci95'], 'fog_auroc')} | >= 0.90 | {r['goal_met']['fog_auroc']} |",
+              f"| fog AUROC within sets | {_f(r.get('fog_auroc_within_sets'))}{_ci(r['ci95'], 'fog_auroc_within_sets')} | | |",
               f"| smoke AUROC | {_f(r['smoke_auroc'])}{_ci(r['ci95'], 'smoke_auroc')} | >= 0.85 | {r['goal_met']['smoke_auroc']} |",
               f"| smoke AUROC within sets | {_f(r.get('smoke_auroc_within_sets'))}"
               f"{_ci(r['ci95'], 'smoke_auroc_within_sets')} | | |",

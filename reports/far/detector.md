@@ -20,6 +20,7 @@ Thresholds: smoke deploy 0.278, smoke strict 0.568, smoke balanced 0.298, fog ba
 | metric | value | goal | met |
 |---|---|---|---|
 | fog AUROC | 0.977 [0.96, 0.99] | >= 0.90 | True |
+| fog AUROC within sets | 0.945 [0.92, 0.97] | | |
 | smoke AUROC | 0.896 [0.87, 0.92] | >= 0.85 | True |
 | smoke AUROC within sets | 0.809 [0.77, 0.84] | | |
 | false smoke on fog windows (deploy) | 2.4% [1, 4] | <= 5 % | True |
@@ -44,6 +45,7 @@ Thresholds: smoke deploy 0.278, smoke strict 0.568, smoke balanced 0.298, fog ba
 | metric | value | goal | met |
 |---|---|---|---|
 | fog AUROC | 0.963 [0.91, 0.99] | >= 0.90 | True |
+| fog AUROC within sets | 0.932 [0.85, 0.99] | | |
 | smoke AUROC | 0.880 [0.82, 0.93] | >= 0.85 | True |
 | smoke AUROC within sets | 0.761 [0.66, 0.85] | | |
 | false smoke on fog windows (deploy) | 3.7% [0, 10] | <= 5 % | True |

@@ -12,7 +12,11 @@ intercept). Thresholds are probabilities on the head's (stacked) output:
 * smoke "deploy": fitted on the training cameras' out-of-fold scores so that
   at most a target share (2.5 %, half the 5 % goal) of the real fog windows
   raise a smoke alarm;
+* smoke "strict": the same, but at most 5 % of all the smoke-free windows;
 * smoke / fog "balanced": the maximum-Youden threshold on training cameras.
+
+predict() falls back to "balanced" for a head without the requested
+operating point, so fog decisions always use the fog balanced threshold.
 """
 
 import json

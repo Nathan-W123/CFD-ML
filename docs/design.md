@@ -901,7 +901,7 @@ them.
 * **Fusion.** Each head (smoke, fog) is a standardiser plus an L2 logistic
   regression on concatenated feature groups (`full`, `tiles`, `sims`,
   `fine`, `motion`; `src/detector/features.py`). Smoke also has a tile head:
-  the same kind of model applied to every fine tile (`tile_instances`:
+  the same kind of model, fitted separately, applied to every fine tile (`tile_instances`:
   last-frame embedding, its change since frame 0, prompt similarities and
   their change), every tile of a smoke window labelled smoke at fit time,
   and the window scored by its best tile. A two-weight logistic stack
@@ -919,12 +919,12 @@ them.
   deploy point budgets fog only, and clear scenes minutes before a fire
   alarm far more often); `balanced` is the maximum-Youden point. Model
   selection maximises the within-set AUROC (below). The `test_iid` cameras
-  are evaluated once, with `--final`.
+  are only scored (`--final`), never used to fit or choose anything.
 * **Reporting.** Pooled smoke AUROC mixes sets: a no-smoke window from a set
   without smoke (the fog sets) is an easy negative, so the report also gives
   the AUROC over smoke / no-smoke pairs from the same set ("within sets")
   and each set's own AUROC. Intervals resample camera mounts.
 * **Labels.** FIgLib smoke labels come from the library (ignition time);
   the HPWREN 2026 fog and smoke labels come from blind AI vision labelling
-  of contact sheets (two votes per sheet, a third where they disagree), not
-  from people.
+  of contact sheets (two votes per sheet, a third where either was unsure or
+  they disagree), not from people.

@@ -52,7 +52,12 @@
     ],
     "C": 0.003,
     "cv_auroc": 0.8883342425298009,
-    "cv_auroc_within_sets": 0.8041052785760825
+    "cv_auroc_within_sets": 0.8041052785760825,
+    "cv_auroc_per_set": {
+     "figlib": 0.7560913503620593,
+     "hpwren_smoke": 0.8930424754949068,
+     "hpwren_smoke2": 0.8853165589143224
+    }
    },
    "fog": {
     "groups": [
@@ -61,7 +66,12 @@
     ],
     "C": 0.01,
     "cv_auroc": 0.9772050515121303,
-    "cv_auroc_within_sets": 0.945389246857505
+    "cv_auroc_within_sets": 0.945389246857505,
+    "cv_auroc_per_set": {
+     "hpwren_fog": 0.9346280991735537,
+     "hpwren_fog2": 0.9488631488631488,
+     "hpwren_smoke": 0.9777777777777777
+    }
    }
   },
   "tile_heads": {
