@@ -179,35 +179,55 @@ class PooledLogisticBaseline(_PooledBaseline):
 
 
 def _flag_inputs(X) -> np.ndarray:
+    """Summaries of the validity-flag pattern: valid fractions, first-frame flags, mask on/off switches."""
     X = np.asarray(X, dtype=np.float64)
-    flags = X[:, :, [MASK_VALID_INDEX, FLOW_VALID_INDEX]]
-    return np.concatenate([flags.reshape(len(X), -1), flags.mean(axis=1)], axis=1)
+    m, f = X[:, :, MASK_VALID_INDEX], X[:, :, FLOW_VALID_INDEX]
+    switches = np.abs(np.diff(m, axis=1)).sum(axis=1)
+    return np.stack([m.mean(axis=1), f.mean(axis=1), m[:, 0], f[:, 0], switches], axis=1)
 
 
 def flags_only_probe(fs: FeatureSet, threshold: float = 0.6, train_split: str = "train",
-                     eval_splits: Sequence[str] = ("val_select", "val_calib", "test_iid", "test_ood")) -> Dict[str, Any]:
-    """Can the validity flags alone predict a label? Folded AUROC per held-out split; flag above threshold."""
+                     eval_splits: Sequence[str] = ("val_select", "val_calib", "test_iid", "test_ood"),
+                     ) -> Dict[str, Any]:
+    """Can the validity flags alone predict a label?
+
+    A logistic regression on flag summaries (fraction of valid mask / flow
+    frames, first-frame flags, number of mask on/off switches) is fitted on
+    the train split and scored by AUROC on the held-out splits pooled (the
+    decision) and per split (for reference; small splits are noisy). The
+    AUROC is not folded: a trained probe below 0.5 has learned nothing that
+    generalises. Flagged when the pooled AUROC exceeds `threshold`.
+    """
     train = fs.split(train_split)
-    out: Dict[str, Any] = {"threshold": threshold, "inputs": "mask_valid / flow_valid per timestep + their means",
-                           "per_split": {}, "flagged": []}
-    if len(train) == 0:
-        out["status"] = "no train split"
+    out: Dict[str, Any] = {"threshold": threshold, "train_split": train_split,
+                           "inputs": ["mask_valid_fraction", "flow_valid_fraction", "mask_valid_t0",
+                                      "flow_valid_t0", "mask_switches"],
+                           "pooled": {}, "per_split": {}, "flagged": []}
+    held = fs.split(list(eval_splits))
+    if len(train) == 0 or len(held) == 0:
+        out.update(status="skipped", flag=False)
         return out
     w = M.per_group_weights(train.groups)
     F = _flag_inputs(train.X)
     models = [_LogisticRegression(1.0).fit(F, train.y[:, j], w) for j in range(len(LABEL_NAMES))]
-    for split in eval_splits:
-        ev = fs.split(split)
-        if len(ev) == 0:
-            continue
-        Fe = _flag_inputs(ev.X)
+
+    def score(part: FeatureSet) -> Dict[str, Optional[float]]:
+        Fe = _flag_inputs(part.X)
         res = {}
         for j, name in enumerate(LABEL_NAMES):
-            auc = M.auroc(models[j].decision_function(Fe), ev.y[:, j])
-            res[name] = None if auc is None else round(max(auc, 1 - auc), 4)
-            if res[name] is not None and res[name] > threshold:
-                out["flagged"].append({"label": name, "split": split, "folded_auc": res[name]})
-        out["per_split"][split] = {"folded_auroc": res, "n": len(ev)}
+            auc = M.auroc(models[j].decision_function(Fe), part.y[:, j])
+            res[name] = None if auc is None else round(auc, 4)
+        return res
+
+    out["pooled"] = {"splits": [s for s in eval_splits if np.any(held.splits == s)], "n": len(held),
+                     "auroc": score(held)}
+    for name, auc in out["pooled"]["auroc"].items():
+        if auc is not None and auc > threshold:
+            out["flagged"].append({"label": name, "split": "pooled_held_out", "auc": auc})
+    for split in eval_splits:
+        ev = fs.split(split)
+        if len(ev):
+            out["per_split"][split] = {"auroc": score(ev), "n": len(ev)}
     out["flag"] = bool(out["flagged"])
     return out
 

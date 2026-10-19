@@ -133,7 +133,7 @@ def test_pos_weight_only_when_imbalanced(fs):
 
     pw, mode = _label_balance(fs.split("train").y, "auto")
     assert pw is None and mode == "none"
-    y = np.array([[1, 0]] * 10 + [[0, 0]] * 40 + [[0, 1]] * 25, dtype=np.float32)
+    y = np.array([[1, 0]] * 10 + [[0, 0]] * 30 + [[0, 1]] * 35, dtype=np.float32)   # fog 35:40 is balanced
     pw, mode = _label_balance(y, "auto")
     assert mode == "pos_weight" and pw[0] == pytest.approx(65 / 10) and pw[1] == 1.0
 
@@ -228,7 +228,7 @@ def test_decision_metrics_by_hand():
     ab = M.abstain_rate(d)
     assert ab["smoke"] == pytest.approx(1 / 6) and ab["fog"] == 0.0 and ab["any"] == pytest.approx(1 / 6)
     sel = M.selective_accuracy(y, d)
-    assert sel["smoke"] == pytest.approx(3 / 5) and sel["fog"] == pytest.approx(4 / 6)
+    assert sel["smoke"] == pytest.approx(3 / 5) and sel["fog"] == pytest.approx(5 / 6)
     assert sel["joint"] == pytest.approx(3 / 5)
 
 
@@ -239,7 +239,10 @@ def test_decision_rule_fitting():
     T, info = M.fit_temperature(z, y)
     assert T == pytest.approx(2.0, rel=0.08) and not info["fallback"]
     T, info = M.fit_temperature([-3, -2, 2, 3], [0, 0, 1, 1])  # separable: optimum at the bound
-    assert T == 1.0 and info["fallback"] and info["at_bound"] == "lower"
+    assert T == 1.0 and info["fallback"] and info["at_bound"] == "lower" and info["reason"] == "separable"
+    z = rng.normal(size=2000) * 20                              # confident logits, labels unrelated to them
+    T, info = M.fit_temperature(z, rng.random(2000) < 0.5)
+    assert T == 1.0 and info["at_bound"] == "upper" and info["reason"] == "optimum_at_upper_bound"
     thr, info = M.threshold_max_f1([0.1, 0.2, 0.6, 0.7, 0.9], [0, 0, 1, 1, 1])
     assert 0.2 < thr < 0.6 and info["f1"] == pytest.approx(1.0)
     neg = np.array([1, 1, 1, 1, 0, 0], bool)
@@ -373,7 +376,7 @@ def test_evaluation_json_schema(tmp_path, fs):
     cfg = _cfg("training.seeds=[0,1]", "training.max_epochs=4")
     run_pretraining(fs, cfg, tmp_path / "art", log=None)
     rob = fs.split("test_iid")
-    rob.splits[:] = "robust:nominal"
+    rob.splits = np.full(len(rob), "robust:nominal")
     doc = run_evaluation(fs, cfg, tmp_path / "art", tmp_path / "reports", robustness_fs=rob, log=None)
     assert set(doc) >= {"synthetic", "real", "ablations", "synthetic_proxy", "shortcut_audit", "robustness",
                         "loro", "data"}
@@ -385,9 +388,12 @@ def test_evaluation_json_schema(tmp_path, fs):
     syn = doc["synthetic"]
     assert syn["calibration_source"] == "synthetic_val_calib"
     ov = syn["test"]["test_iid"]["balanced"]["overall"]
-    assert "ci95" in ov and ov["ci95"]["smoke.f1"]["lo"] <= ov["per_label"]["smoke"]["f1"] <= ov["ci95"]["smoke.f1"]["hi"]
+    ci = ov["ci95"]["smoke.f1"]
+    assert ci["lo"] <= ov["per_label"]["smoke"]["f1"] <= ci["hi"]
     assert set(syn["test"]["test_iid"]["balanced"]["slices"]) == {"category", "regime", "holdout_tag", "wind_bin",
                                                                    "mask_source"}
+    roc = syn["curves"]["test_iid"]["smoke"]["roc"]
+    assert roc["fpr"][0] == 0.0 and roc["tpr"][-1] == 1.0 and roc["thresholds"][0] is None
     ms = syn["seeds"]["mean_sd"]["test_iid.balanced.smoke.f1"]
     assert ms["n_seeds"] == 2 and ms["sd"] >= 0
     assert "flags_only" in doc["shortcut_audit"] and "parameters" in doc["shortcut_audit"]
@@ -397,3 +403,27 @@ def test_evaluation_json_schema(tmp_path, fs):
     assert on_disk["real"]["status"] == "pending"
     assert all((tmp_path / "reports" / f).exists() for f in ("confusion_test_iid.png", "reliability_test_ood.png",
                                                              "roc_pr_test_iid.png"))
+
+
+def test_loro_and_synthetic_proxy(tmp_path, fs):
+    from src.training.evaluate import resplit_by_group, run_synthetic_proxy
+    from src.training.train import run_loro
+
+    cfg = _cfg("training.max_epochs=4", "finetune.max_epochs=3")
+    loro = run_loro(fs, cfg, regimes=["smoke_only_a", "neither_b"], log=None)
+    smoke = loro["regimes"]["smoke_only_a"]
+    assert smoke["labels"]["smoke"]["role"] == "positive" and 0 <= smoke["labels"]["smoke"]["recall"] <= 1
+    assert smoke["labels"]["fog"]["role"] == "negative"
+    assert smoke["n_train"] < int(np.sum(fs.splits == "train"))
+    assert loro["regimes"]["neither_b"]["labels"]["smoke"]["role"] == "negative"
+
+    run_pretraining(fs, cfg, tmp_path / "pre", log=None)
+    shifted = fs.split("test_ood")
+    re = resplit_by_group(shifted, seed=0)
+    assert_no_group_leakage(re)
+    assert set(re.splits) == {"train", "val_select", "val_calib", "test_iid"}
+    proxy = run_synthetic_proxy(shifted, cfg, tmp_path / "pre", tmp_path / "proxy", n_boot=20,
+                                description="test_ood recipes", log=None)
+    assert proxy["not_real_world_evidence"] is True
+    assert {"C_zero_shot", "D_finetuned", "B_scratch"} <= set(proxy)
+    assert proxy["D_finetuned"]["lr"] == pytest.approx(1e-4) and proxy["B_scratch"]["lr"] == pytest.approx(1e-3)

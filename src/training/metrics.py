@@ -123,6 +123,8 @@ def _descending_counts(score, y) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Distinct thresholds (descending) and cumulative TP / FP when predicting score >= threshold."""
     s = np.asarray(score, dtype=np.float64).ravel()
     t = _bool(y)
+    if s.size == 0:
+        return np.zeros(0), np.zeros(0), np.zeros(0)
     order = np.argsort(-s, kind="mergesort")
     s, t = s[order], t[order]
     last = np.r_[np.flatnonzero(np.diff(s)), len(s) - 1]        # last index of each distinct value
@@ -401,15 +403,19 @@ def fit_temperature(logits, y, bounds: Tuple[float, float] = (0.5, 5.0), weights
                     tol: float = 1e-6) -> Tuple[float, Dict[str, Any]]:
     """Temperature T minimising the (weighted) NLL of sigmoid(logit / T), searched within `bounds`.
 
-    The NLL is convex in 1 / T, so a golden-section search is exact. When
-    the optimum lies at a bound (val_calib is separable, or the scores carry
-    no information) the fit is not trusted: T = 1 and `at_bound` names it.
+    The NLL is convex in 1 / T, so a golden-section search finds the
+    constrained optimum exactly. When it lies at a bound the fit is not
+    trusted (docs/design.md section 11): T = 1, `fallback` is set and
+    `reason` says why: "separable" (every positive logit above every negative
+    one, so the NLL keeps falling as T -> 0) or "optimum_at_upper_bound" /
+    "optimum_at_lower_bound" (logits far too confident / timid, or
+    uninformative); the constrained optimum is kept in `bound_T` for reference.
     """
     z = np.asarray(logits, dtype=np.float64).ravel()
     t = _bool(y)
     w = _weights(weights, len(z))
     info: Dict[str, Any] = {"bounds": list(bounds), "fitted_T": None, "at_bound": None, "fallback": False,
-                            "nll_T1": _weighted_bce(z, t, w) if len(z) else None}
+                            "reason": None, "nll_T1": _weighted_bce(z, t, w) if len(z) else None}
     if len(z) == 0 or t.all() or (~t).all():
         info.update(fallback=True, reason="single_class")
         return 1.0, info
@@ -428,15 +434,16 @@ def fit_temperature(logits, y, bounds: Tuple[float, float] = (0.5, 5.0), weights
             d = a + gr * (b - a)
             fd = _weighted_bce(d * z, t, w)
     a_opt = 0.5 * (a + b)
-    T = 1.0 / a_opt
-    info["fitted_T"] = float(T)
+    info["fitted_T"] = float(1.0 / a_opt)
     edge = 1e-3 * (hi - lo)
     if a_opt - lo < edge or hi - a_opt < edge:
-        info.update(at_bound="upper" if a_opt - lo < edge else "lower", fallback=True,
-                    reason="separable_or_uninformative")
+        side = "upper" if a_opt - lo < edge else "lower"              # upper / lower bound of T
+        separable = bool(z[t].min() > z[~t].max())
+        info.update(at_bound=side, fallback=True, bound_T=float(bounds[1] if side == "upper" else bounds[0]),
+                    reason="separable" if separable else f"optimum_at_{side}_bound", nll=info["nll_T1"])
         return 1.0, info
     info["nll"] = _weighted_bce(a_opt * z, t, w)
-    return float(T), info
+    return float(1.0 / a_opt), info
 
 
 def _candidate_thresholds(score: np.ndarray) -> np.ndarray:

@@ -7,8 +7,8 @@ Stage A (`run_pretraining`, experiment C), on a synthetic FeatureSet:
    (BCEWithLogits, + pos_weight when a label is imbalanced, AdamW, batch 64,
    gradient clipping, early stopping on val_select loss with patience,
    best-epoch weights restored), then fit the decision rules on val_calib
-   with `fit_calibration`: per-label temperature (bounded; T = 1 and a flag
-   when val_calib is separable), thresholds for the `balanced` and
+   with `fit_calibration`: per-label temperature (bounded to [0.5, 5]; T = 1
+   and a flag when val_calib is separable), thresholds for the `balanced` and
    `low_false_alarm` operating points, and the logit-space abstain band;
 3. export the seed with the lowest val_select loss as the model artifacts
    (and every seed under seeds/seed_<k>/ for the mean +- sd evaluation),
@@ -174,6 +174,9 @@ def train_model(model: PhysicsGRU, train: Tuple[np.ndarray, np.ndarray], val: Tu
         train_loss = total / len(order)
         val_logits = _logits(model, Xva)
         val_loss = float(loss_fn(val_logits, yva))
+        if not (np.isfinite(train_loss) and np.isfinite(val_loss)):
+            raise FloatingPointError(f"training diverged at epoch {epoch} (seed {seed}): "
+                                     f"train {train_loss}, val {val_loss}")
         probs = torch.sigmoid(val_logits).numpy()
         rec = {"epoch": epoch, "train_loss": train_loss, "val_loss": val_loss, "lr": lr,
                "grad_norm_mean": float(np.mean(grad_norms)), "encoder_frozen": frozen,
@@ -285,8 +288,9 @@ def fit_calibration(logits: np.ndarray, fs_calib: FeatureSet, cfg: Mapping[str, 
             "insufficient_categories": insufficient,
             "prevalence": prevalence,
             "temperature_fit": temp_fit,
-            "separable_fallback": {n: bool(temp_fit[n].get("fallback")) and temp_fit[n].get("at_bound") is not None
-                                   for n in LABEL_NAMES},
+            # T = 1 because the fit hit a bound: "separable", "optimum_at_upper_bound", ... or None
+            "temperature_fallback": {n: temp_fit[n].get("reason") if temp_fit[n].get("fallback") else None
+                                     for n in LABEL_NAMES},
             "threshold_fit": ops["fit"],
             "abstain_fit": margin_fit,
         },

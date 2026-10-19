@@ -155,8 +155,7 @@ def evaluate_model(expert: PhysicsExpert, fs: FeatureSet, splits: Sequence[str] 
                 for v in sorted(set(vals)):
                     rows = vals == v
                     part = sub.subset(rows)
-                    p = {k: (np.asarray(pred[k])[rows] if k != "abstain_reasons" else None)
-                         for k in ("probs", "hard_decisions", "decisions")}
+                    p = {k: np.asarray(pred[k])[rows] for k in ("probs", "hard_decisions", "decisions")}
                     sl[name][str(v)] = compact(_metrics_for(part, p, n_bins))
             out[split][op] = {"overall": overall, "slices": sl}
     return out
@@ -248,7 +247,7 @@ def shortcut_audit(fs: FeatureSet, cfg: Mapping[str, Any]) -> Dict[str, Any]:
     reasons = []
     if flags.get("flag"):
         reasons.append("flags-only probe above threshold: " + ", ".join(
-            f"{f['label']}@{f['split']}={f['folded_auc']}" for f in flags["flagged"]))
+            f"{f['label']}@{f['split']}={f['auc']}" for f in flags["flagged"]))
     if params.get("flagged"):
         reasons.append("parameters predicting a label: " + ", ".join(
             f"{f['label']}:{f['parameter']}={f['folded_auc']}" for f in params["flagged"][:10]))
@@ -372,6 +371,21 @@ def plot_roc_pr(probs: np.ndarray, y: np.ndarray, path: PathLike, title: str) ->
     return path
 
 
+def curves(probs: np.ndarray, y: np.ndarray, max_points: int = 200) -> Dict[str, Any]:
+    """ROC and PR curves per label (thresholds are calibrated probabilities), thinned to <= max_points."""
+    out: Dict[str, Any] = {}
+    for j, name in enumerate(LABEL_NAMES):
+        roc, pr = M.roc_curve(probs[:, j], y[:, j]), M.pr_curve(probs[:, j], y[:, j])
+
+        def thin(d: Mapping[str, np.ndarray]) -> Dict[str, List[Optional[float]]]:
+            n = len(next(iter(d.values())))
+            idx = np.unique(np.linspace(0, n - 1, min(n, max_points)).round().astype(int)) if n else []
+            return {k: [None if not np.isfinite(v[i]) else round(float(v[i]), 5) for i in idx] for k, v in d.items()}
+
+        out[name] = {"roc": thin(roc), "pr": thin(pr)}
+    return out
+
+
 def write_report_plots(expert: PhysicsExpert, fs: FeatureSet, reports_dir: PathLike,
                        splits: Sequence[str] = EVAL_SPLITS, operating_point: str = "balanced",
                        n_bins: int = 10, tag: str = "") -> List[Path]:
@@ -473,6 +487,62 @@ def evaluate_real(fs_real: FeatureSet, cfg: Mapping[str, Any], artifacts: Mappin
     return out
 
 
+def resplit_by_group(fs: FeatureSet, fractions: Sequence = (("train", 0.5), ("val_select", 0.15),
+                                                             ("val_calib", 0.15), ("test_iid", 0.2)),
+                     seed: int = 0) -> FeatureSet:
+    """A copy of `fs` with new group-disjoint splits, stratified by category (for the synthetic proxy)."""
+    out = fs.subset(np.arange(len(fs)))
+    new = np.empty(len(fs), dtype=object)
+    rng = np.random.default_rng(seed)
+    first_cat = {}
+    for g, c in zip(fs.groups, fs.categories):
+        first_cat.setdefault(g, c)
+    names = [n for n, _ in fractions]
+    cum = np.cumsum([f for _, f in fractions]) / sum(f for _, f in fractions)
+    for c in sorted(set(first_cat.values())):
+        groups = sorted(g for g, gc in first_cat.items() if gc == c)
+        order = rng.permutation(len(groups))
+        for rank, k in enumerate(order):
+            split = names[int(np.searchsorted(cum, (rank + 0.5) / len(groups)))]
+            new[fs.groups == groups[k]] = split
+    out.splits = new.astype(str)
+    return out
+
+
+def run_synthetic_proxy(fs_shifted: FeatureSet, cfg: Mapping[str, Any], init_artifacts: PathLike,
+                        out_dir: PathLike, seed: int = 0, n_boot: Optional[int] = None,
+                        description: str = "", log: Optional[Callable[[str], None]] = print) -> Dict[str, Any]:
+    """Pretrained-vs-scratch on a small SHIFTED synthetic domain, with the Stage B procedure.
+
+    `fs_shifted` (e.g. detector-mask re-renders, or the held-out recipes) is
+    re-split by group; D-like = fine-tune the pretrained artifacts, B-like =
+    same data from scratch, C = pretrained zero-shot; all evaluated on the
+    proxy's test split. Stored under "synthetic_proxy" with
+    not_real_world_evidence = true: it is not a substitute for real footage.
+    """
+    from src.training.train import run_finetune
+
+    n_bins = int(cfg.get("evaluation", {}).get("calibration_bins", 10))
+    n_boot = int(cfg.get("evaluation", {}).get("bootstrap_resamples", 1000) if n_boot is None else n_boot)
+    proxy = resplit_by_group(fs_shifted, seed=seed)
+    out = Path(out_dir)
+    res: Dict[str, Any] = {"not_real_world_evidence": True, "description": description,
+                           "counts": data_counts(proxy)}
+    runs = {"D_finetuned": run_finetune(proxy, cfg, init_artifacts, out / "D", from_scratch=False, log=log),
+            "B_scratch": run_finetune(proxy, cfg, init_artifacts, out / "B", from_scratch=True, log=log)}
+    dirs = {"C_zero_shot": Path(init_artifacts), "D_finetuned": out / "D", "B_scratch": out / "B"}
+    for name, d in dirs.items():
+        ev = evaluate_model(PhysicsExpert.load(d), proxy, ("test_iid",), OPERATING_POINTS, (), n_bins, n_boot, seed)
+        res[name] = {"artifacts": str(d),
+                     "test": {s: {op: {**compact(r["overall"]), "ci95": r["overall"].get("ci95")}
+                                  for op, r in v.items()} for s, v in ev.items()}}
+        if name in runs:
+            seeds = evaluate_seeds(d, proxy, ("test_iid",), OPERATING_POINTS, n_bins)
+            res[name]["mean_sd_over_seeds"] = seeds["mean_sd"]
+            res[name]["lr"] = runs[name]["seeds"][str(runs[name]["exported_seed"])]["settings"]["lr"]
+    return res
+
+
 def run_evaluation(fs: FeatureSet, cfg: Mapping[str, Any], artifact_dir: PathLike, reports_dir: PathLike,
                    robustness_fs: Optional[FeatureSet] = None, loro: Optional[Mapping[str, Any]] = None,
                    data_summary: Optional[Mapping[str, Any]] = None, real: Optional[Mapping[str, Any]] = None,
@@ -497,6 +567,11 @@ def run_evaluation(fs: FeatureSet, cfg: Mapping[str, Any], artifact_dir: PathLik
 
     say("evaluating the exported model on the test splits")
     test = evaluate_model(expert, fs, EVAL_SPLITS, OPERATING_POINTS, SLICES, n_bins, n_boot, seed)
+    test_curves = {}
+    for split in EVAL_SPLITS:
+        sub = fs.split(split)
+        if len(sub):
+            test_curves[split] = curves(np.asarray(predict_featureset(expert, sub, "balanced")["probs"]), sub.y)
     say("validation splits (reference only: used for selection / calibration)")
     val = evaluate_model(expert, fs, VALIDATION_SPLITS, OPERATING_POINTS, (), n_bins, 0, seed)
     say("per-seed evaluation")
@@ -511,8 +586,9 @@ def run_evaluation(fs: FeatureSet, cfg: Mapping[str, Any], artifact_dir: PathLik
         "abstain_margins": (expert.config.get("abstain") or {}).get("margins"),
         "calibration": {k: v for k, v in (expert.config.get("calibration") or {}).items()
                         if k in ("fit_source", "n_sequences", "n_groups", "insufficient_calibration_data",
-                                 "insufficient_categories", "separable_fallback", "prevalence")},
+                                 "insufficient_categories", "temperature_fallback", "prevalence")},
         "test": test,
+        "curves": test_curves,
         "validation_reference": {s: {op: compact(r["overall"]) for op, r in v.items()} for s, v in val.items()},
         "seeds": seeds,
         "bootstrap": {"resamples": n_boot, "groups": "sim_id", "interval": 0.95},
