@@ -1,0 +1,1429 @@
+sheet_id,window_id,tile,target,what,labeler,x0,y0,x1,y1
+0135f1f2cdb6,hpwren-69bravo-e-mobo-c-20260925-0730,0,fog,fog sea along horizon below camera,box-b0,0.250,0.530,1.000,0.600
+0135f1f2cdb6,hpwren-69bravo-e-mobo-c-20260925-0730,1,fog,fog sea along horizon below camera,box-b0,0.250,0.530,1.000,0.600
+0135f1f2cdb6,hpwren-69bravo-e-mobo-c-20260925-0730,2,fog,fog sea along horizon below camera,box-b0,0.250,0.540,1.000,0.610
+0135f1f2cdb6,hpwren-69bravo-e-mobo-c-20260925-0730,3,fog,fog sea along horizon below camera,box-b0,0.250,0.540,1.000,0.610
+f2061aeed228,hpwren-69bravo-e-mobo-c-20261002-0730,0,fog,fog sea on right horizon,box-b0,0.600,0.540,1.000,0.610
+f2061aeed228,hpwren-69bravo-e-mobo-c-20261002-0730,1,fog,fog sea on right horizon,box-b0,0.600,0.540,1.000,0.610
+f2061aeed228,hpwren-69bravo-e-mobo-c-20261002-0730,2,fog,fog sea on right horizon,box-b0,0.600,0.550,1.000,0.610
+f2061aeed228,hpwren-69bravo-e-mobo-c-20261002-0730,3,fog,fog sea on right horizon,box-b0,0.600,0.550,1.000,0.610
+cd1eede7719a,hpwren-69bravo-e-mobo-c-20261016-0800,0,lookalike,bright hazy glare band at horizon under sun,box-b0,0.350,0.500,0.780,0.580
+cd1eede7719a,hpwren-69bravo-e-mobo-c-20261016-0800,1,lookalike,bright hazy glare band at horizon under sun,box-b0,0.380,0.500,0.800,0.580
+cd1eede7719a,hpwren-69bravo-e-mobo-c-20261016-0800,2,lookalike,bright hazy glare band at horizon under sun,box-b0,0.380,0.500,0.800,0.580
+cd1eede7719a,hpwren-69bravo-e-mobo-c-20261016-0800,3,lookalike,bright hazy glare band at horizon under sun,box-b0,0.380,0.500,0.800,0.580
+292deea76576,hpwren-69bravo-n-mobo-c-20260726-0730,0,fog,distant marine layer strip at horizon,box-b0,0.420,0.500,0.880,0.550
+292deea76576,hpwren-69bravo-n-mobo-c-20260726-0730,1,fog,distant marine layer strip at horizon,box-b0,0.420,0.500,0.880,0.550
+292deea76576,hpwren-69bravo-n-mobo-c-20260726-0730,2,fog,distant marine layer strip at horizon,box-b0,0.420,0.500,0.900,0.560
+292deea76576,hpwren-69bravo-n-mobo-c-20260726-0730,3,fog,distant marine layer strip at horizon,box-b0,0.420,0.500,0.900,0.560
+7cb91e973b8c,hpwren-69bravo-n-mobo-c-20260807-0730,0,fog,distant marine layer strip at horizon,box-b0,0.450,0.500,0.900,0.550
+7cb91e973b8c,hpwren-69bravo-n-mobo-c-20260807-0730,1,fog,distant marine layer strip at horizon,box-b0,0.450,0.500,0.900,0.550
+7cb91e973b8c,hpwren-69bravo-n-mobo-c-20260807-0730,2,fog,distant marine layer strip at horizon,box-b0,0.450,0.500,0.900,0.550
+7cb91e973b8c,hpwren-69bravo-n-mobo-c-20260807-0730,3,fog,distant marine layer strip at horizon,box-b0,0.450,0.500,0.900,0.550
+fac70e297ec1,hpwren-69bravo-n-mobo-c-20260906-0730,0,lookalike,rain haze and low cloud over distant terrain,box-b0,0.420,0.480,0.970,0.570
+fac70e297ec1,hpwren-69bravo-n-mobo-c-20260906-0730,1,lookalike,rain haze and low cloud over distant terrain,box-b0,0.420,0.480,0.970,0.570
+fac70e297ec1,hpwren-69bravo-n-mobo-c-20260906-0730,2,lookalike,rain haze and low cloud over distant terrain,box-b0,0.400,0.480,0.970,0.560
+fac70e297ec1,hpwren-69bravo-n-mobo-c-20260906-0730,3,lookalike,rain haze and low cloud over distant terrain,box-b0,0.400,0.480,0.970,0.560
+f52e05c9a7cc,hpwren-69bravo-n-mobo-c-20260919-0730,0,fog,"camera inside fog, whole view washed out",box-b0,0.000,0.000,1.000,1.000
+f52e05c9a7cc,hpwren-69bravo-n-mobo-c-20260919-0730,1,fog,"camera inside fog, whole view washed out",box-b0,0.000,0.000,1.000,1.000
+f52e05c9a7cc,hpwren-69bravo-n-mobo-c-20260919-0730,2,fog,"camera inside fog, whole view washed out",box-b0,0.000,0.000,1.000,1.000
+f52e05c9a7cc,hpwren-69bravo-n-mobo-c-20260919-0730,3,fog,"camera inside fog, whole view washed out",box-b0,0.000,0.000,1.000,1.000
+bfba37273e1f,hpwren-69bravo-n-mobo-c-20261017-0800,0,lookalike,haze band over distant valley at horizon,box-b0,0.420,0.490,0.900,0.550
+bfba37273e1f,hpwren-69bravo-n-mobo-c-20261017-0800,1,lookalike,haze band over distant valley at horizon,box-b0,0.420,0.490,0.900,0.550
+bfba37273e1f,hpwren-69bravo-n-mobo-c-20261017-0800,2,lookalike,haze band over distant valley at horizon,box-b0,0.420,0.490,0.900,0.540
+bfba37273e1f,hpwren-69bravo-n-mobo-c-20261017-0800,3,lookalike,haze band over distant valley at horizon,box-b0,0.420,0.490,0.900,0.540
+2cd34e819d63,hpwren-bh-n-mobo-c-20260729-0700,0,fog,fog layer below distant mountains,box-b0,0.450,0.490,1.000,0.530
+2cd34e819d63,hpwren-bh-n-mobo-c-20260729-0700,1,fog,fog layer below distant mountains,box-b0,0.450,0.490,1.000,0.530
+2cd34e819d63,hpwren-bh-n-mobo-c-20260729-0700,2,fog,fog layer below distant mountains,box-b0,0.450,0.490,1.000,0.520
+2cd34e819d63,hpwren-bh-n-mobo-c-20260729-0700,3,fog,fog layer below distant mountains,box-b0,0.450,0.490,1.000,0.520
+ccadcac00b97,hpwren-bh-n-mobo-c-20260803-0730,0,lookalike,haze band at horizon under distant peaks,box-b0,0.500,0.490,1.000,0.520
+ccadcac00b97,hpwren-bh-n-mobo-c-20260803-0730,1,lookalike,haze band at horizon under distant peaks,box-b0,0.500,0.490,1.000,0.520
+ccadcac00b97,hpwren-bh-n-mobo-c-20260803-0730,2,lookalike,haze band at horizon under distant peaks,box-b0,0.500,0.490,1.000,0.510
+ccadcac00b97,hpwren-bh-n-mobo-c-20260803-0730,3,lookalike,haze band at horizon under distant peaks,box-b0,0.500,0.490,1.000,0.510
+2c18e15158d3,hpwren-bh-n-mobo-c-20260808-0730,0,lookalike,haze band at horizon under distant peaks,box-b0,0.500,0.480,1.000,0.520
+2c18e15158d3,hpwren-bh-n-mobo-c-20260808-0730,1,lookalike,haze band at horizon under distant peaks,box-b0,0.500,0.480,1.000,0.520
+2c18e15158d3,hpwren-bh-n-mobo-c-20260808-0730,2,lookalike,haze band at horizon under distant peaks,box-b0,0.500,0.480,1.000,0.520
+2c18e15158d3,hpwren-bh-n-mobo-c-20260808-0730,3,lookalike,haze band at horizon under distant peaks,box-b0,0.500,0.480,1.000,0.520
+1ffb09974df6,hpwren-bh-n-mobo-c-20260920-0800,0,fog,valley fog at left edge,box-b0,0.000,0.510,0.100,0.600
+1ffb09974df6,hpwren-bh-n-mobo-c-20260920-0800,1,fog,valley fog at left edge,box-b0,0.000,0.510,0.100,0.600
+1ffb09974df6,hpwren-bh-n-mobo-c-20260920-0800,2,fog,valley fog at left edge,box-b0,0.000,0.520,0.120,0.600
+1ffb09974df6,hpwren-bh-n-mobo-c-20260920-0800,3,fog,valley fog at left edge,box-b0,0.000,0.520,0.100,0.580
+baf57714425d,hpwren-bh-s-mobo-c-20260729-0700,0,fog,fog sea filling valley on right,box-b0,0.470,0.510,1.000,0.730
+baf57714425d,hpwren-bh-s-mobo-c-20260729-0700,1,fog,fog sea filling valley on right,box-b0,0.450,0.510,1.000,0.720
+baf57714425d,hpwren-bh-s-mobo-c-20260729-0700,2,fog,fog sea filling valley on right,box-b0,0.450,0.510,1.000,0.700
+baf57714425d,hpwren-bh-s-mobo-c-20260729-0700,3,fog,fog sea filling valley on right,box-b0,0.470,0.510,1.000,0.690
+8a7352d775e0,hpwren-bh-s-mobo-c-20260802-0700,0,fog,distant fog patches at horizon,box-b0,0.520,0.510,0.660,0.540
+8a7352d775e0,hpwren-bh-s-mobo-c-20260802-0700,1,fog,distant fog patches at horizon,box-b0,0.520,0.510,0.660,0.540
+8a7352d775e0,hpwren-bh-s-mobo-c-20260802-0700,2,fog,distant fog patches at horizon,box-b0,0.500,0.510,0.660,0.540
+8a7352d775e0,hpwren-bh-s-mobo-c-20260802-0700,3,fog,distant fog patches at horizon,box-b0,0.500,0.510,0.660,0.540
+ce712d96789b,hpwren-bh-s-mobo-c-20260808-0700,0,fog,distant fog patches at right horizon,box-b0,0.850,0.500,1.000,0.530
+ce712d96789b,hpwren-bh-s-mobo-c-20260808-0700,1,fog,distant fog patches at right horizon,box-b0,0.850,0.500,1.000,0.530
+ce712d96789b,hpwren-bh-s-mobo-c-20260808-0700,2,fog,distant fog patches at right horizon,box-b0,0.850,0.500,1.000,0.530
+ce712d96789b,hpwren-bh-s-mobo-c-20260808-0700,3,fog,distant fog patches at right horizon,box-b0,0.850,0.500,1.000,0.530
+05f0487c9200,hpwren-bh-s-mobo-c-20260924-0730,0,fog,valley fog bank on right,box-b0,0.780,0.610,1.000,0.680
+05f0487c9200,hpwren-bh-s-mobo-c-20260924-0730,1,fog,valley fog bank on right,box-b0,0.770,0.610,1.000,0.680
+05f0487c9200,hpwren-bh-s-mobo-c-20260924-0730,2,fog,valley fog bank on right,box-b0,0.720,0.620,1.000,0.690
+05f0487c9200,hpwren-bh-s-mobo-c-20260924-0730,3,fog,valley fog bank on right,box-b0,0.720,0.620,1.000,0.690
+31182ad503de,hpwren-bh-w-mobo-c-20260819-0700,0,fog,stratus fog sea and valley fog tongue,box-b0,0.020,0.510,0.720,0.670
+31182ad503de,hpwren-bh-w-mobo-c-20260819-0700,1,fog,stratus fog sea and valley fog tongue,box-b0,0.020,0.510,0.720,0.670
+31182ad503de,hpwren-bh-w-mobo-c-20260819-0700,2,fog,stratus fog sea and valley fog tongue,box-b0,0.020,0.510,0.720,0.680
+31182ad503de,hpwren-bh-w-mobo-c-20260819-0700,3,fog,stratus fog sea and valley fog tongue,box-b0,0.020,0.510,0.720,0.680
+e924083cbdd6,hpwren-bh-w-mobo-c-20260824-0700,0,lookalike,bright haze band along horizon,box-b0,0.020,0.500,0.850,0.550
+e924083cbdd6,hpwren-bh-w-mobo-c-20260824-0700,1,lookalike,bright haze band along horizon,box-b0,0.020,0.500,0.850,0.550
+e924083cbdd6,hpwren-bh-w-mobo-c-20260824-0700,2,lookalike,bright haze band along horizon,box-b0,0.020,0.500,0.850,0.550
+e924083cbdd6,hpwren-bh-w-mobo-c-20260824-0700,3,lookalike,bright haze band along horizon,box-b0,0.020,0.500,0.850,0.550
+0760861b155a,hpwren-bh-w-mobo-c-20260907-0730,0,lookalike,hazy sunbeam patch over terrain at left,box-b0,0.000,0.450,0.420,0.580
+0760861b155a,hpwren-bh-w-mobo-c-20260907-0730,1,lookalike,hazy sunbeam patch over terrain at left,box-b0,0.000,0.430,0.350,0.560
+0760861b155a,hpwren-bh-w-mobo-c-20260907-0730,2,lookalike,hazy sunbeam patch over terrain at left,box-b0,0.000,0.460,0.450,0.600
+0760861b155a,hpwren-bh-w-mobo-c-20260907-0730,3,lookalike,hazy sunbeam patch over terrain at left,box-b0,0.000,0.460,0.400,0.580
+5fc4155a4afa,hpwren-bh-w-mobo-c-20260925-0730,0,fog,distant stratus layer along horizon,box-b0,0.020,0.510,0.800,0.590
+5fc4155a4afa,hpwren-bh-w-mobo-c-20260925-0730,1,fog,distant stratus layer along horizon,box-b0,0.020,0.510,0.800,0.590
+5fc4155a4afa,hpwren-bh-w-mobo-c-20260925-0730,2,fog,distant stratus layer along horizon,box-b0,0.020,0.510,0.800,0.590
+5fc4155a4afa,hpwren-bh-w-mobo-c-20260925-0730,3,fog,distant stratus layer along horizon,box-b0,0.020,0.510,0.800,0.590
+8fe414b55b9f,hpwren-bh-w-mobo-c-20261007-0730,0,lookalike,pale haze band along distant horizon,box-b1,0.030,0.500,0.990,0.570
+8fe414b55b9f,hpwren-bh-w-mobo-c-20261007-0730,1,lookalike,pale haze band along distant horizon,box-b1,0.030,0.500,0.990,0.570
+8fe414b55b9f,hpwren-bh-w-mobo-c-20261007-0730,2,lookalike,pale haze band along distant horizon,box-b1,0.030,0.500,0.990,0.570
+8fe414b55b9f,hpwren-bh-w-mobo-c-20261007-0730,3,lookalike,pale haze band along distant horizon,box-b1,0.030,0.500,0.990,0.570
+9003519f0f0a,hpwren-bi-n-mobo-c-20260729-0700,0,lookalike,sun-glare haze veil over trees at right,box-b1,0.800,0.420,0.990,0.900
+9003519f0f0a,hpwren-bi-n-mobo-c-20260729-0700,1,lookalike,sun-glare haze veil over trees at right,box-b1,0.800,0.420,0.990,0.900
+9003519f0f0a,hpwren-bi-n-mobo-c-20260729-0700,2,lookalike,sun-glare haze veil over trees at right,box-b1,0.800,0.420,0.990,0.900
+9003519f0f0a,hpwren-bi-n-mobo-c-20260729-0700,3,lookalike,sun-glare haze veil over trees at right,box-b1,0.800,0.420,0.990,0.900
+528dcdca51ae,hpwren-bi-n-mobo-c-20260731-0630,0,lookalike,sun-glare haze veil over trees at right,box-b1,0.720,0.400,0.990,0.900
+528dcdca51ae,hpwren-bi-n-mobo-c-20260731-0630,1,lookalike,sun-glare haze veil over trees at right,box-b1,0.720,0.400,0.990,0.900
+528dcdca51ae,hpwren-bi-n-mobo-c-20260731-0630,2,lookalike,sun-glare haze veil over trees at right,box-b1,0.720,0.400,0.990,0.900
+528dcdca51ae,hpwren-bi-n-mobo-c-20260731-0630,3,lookalike,sun-glare haze veil over trees at right,box-b1,0.720,0.400,0.990,0.900
+bb3ab73acd6d,hpwren-bi-n-mobo-c-20260806-0700,0,lookalike,white overcast sky touching tree line,box-b1,0.550,0.300,0.970,0.480
+bb3ab73acd6d,hpwren-bi-n-mobo-c-20260806-0700,1,lookalike,white overcast sky touching tree line,box-b1,0.550,0.300,0.970,0.480
+bb3ab73acd6d,hpwren-bi-n-mobo-c-20260806-0700,2,lookalike,white overcast sky touching tree line,box-b1,0.550,0.300,0.970,0.480
+bb3ab73acd6d,hpwren-bi-n-mobo-c-20260806-0700,3,lookalike,white overcast sky touching tree line,box-b1,0.550,0.300,0.970,0.480
+d8dc2770d4f9,hpwren-bi-n-mobo-c-20260807-0700,0,lookalike,white cloud bank touching tree line,box-b1,0.550,0.280,0.970,0.480
+d8dc2770d4f9,hpwren-bi-n-mobo-c-20260807-0700,1,lookalike,white cloud bank touching tree line,box-b1,0.550,0.280,0.970,0.480
+d8dc2770d4f9,hpwren-bi-n-mobo-c-20260807-0700,2,lookalike,white cloud bank touching tree line,box-b1,0.550,0.280,0.970,0.480
+d8dc2770d4f9,hpwren-bi-n-mobo-c-20260807-0700,3,lookalike,white cloud bank touching tree line,box-b1,0.550,0.280,0.970,0.480
+3f2d3fe3b91a,hpwren-bi-n-mobo-c-20260920-0800,0,lookalike,whitish cloud band just above tree line,box-b1,0.600,0.360,0.960,0.480
+3f2d3fe3b91a,hpwren-bi-n-mobo-c-20260920-0800,1,lookalike,whitish cloud band just above tree line,box-b1,0.550,0.300,0.980,0.480
+3f2d3fe3b91a,hpwren-bi-n-mobo-c-20260920-0800,2,lookalike,whitish cloud band just above tree line,box-b1,0.550,0.300,0.980,0.480
+3f2d3fe3b91a,hpwren-bi-n-mobo-c-20260920-0800,3,lookalike,whitish cloud band just above tree line,box-b1,0.550,0.300,0.980,0.480
+f679ff2a7c37,hpwren-bi-s-mobo-c-20260722-0630,0,fog,faint distant fog patches in low terrain at right horizon,box-b1,0.720,0.510,0.990,0.560
+f679ff2a7c37,hpwren-bi-s-mobo-c-20260722-0630,1,fog,faint distant fog patches in low terrain at right horizon,box-b1,0.760,0.510,0.990,0.560
+f679ff2a7c37,hpwren-bi-s-mobo-c-20260722-0630,2,fog,faint distant fog patches in low terrain at right horizon,box-b1,0.750,0.510,0.990,0.560
+f679ff2a7c37,hpwren-bi-s-mobo-c-20260722-0630,3,fog,faint distant fog patches in low terrain at right horizon,box-b1,0.750,0.510,0.990,0.560
+db6587f35fe7,hpwren-bi-s-mobo-c-20260729-0630,0,fog,distant fog sea in valleys at right,box-b1,0.470,0.510,0.990,0.590
+db6587f35fe7,hpwren-bi-s-mobo-c-20260729-0630,1,fog,distant fog sea in valleys at right,box-b1,0.480,0.510,0.990,0.590
+db6587f35fe7,hpwren-bi-s-mobo-c-20260729-0630,2,fog,distant fog sea in valleys at right,box-b1,0.620,0.510,0.990,0.580
+db6587f35fe7,hpwren-bi-s-mobo-c-20260729-0630,3,fog,distant fog sea in valleys at right,box-b1,0.550,0.510,0.990,0.580
+5771c6298b30,hpwren-bi-s-mobo-c-20260807-0700,0,lookalike,bright cloud bank touching horizon at right,box-b1,0.630,0.400,0.980,0.500
+5771c6298b30,hpwren-bi-s-mobo-c-20260807-0700,1,lookalike,bright cloud bank touching horizon at right,box-b1,0.630,0.400,0.980,0.500
+5771c6298b30,hpwren-bi-s-mobo-c-20260807-0700,2,lookalike,bright cloud bank touching horizon at right,box-b1,0.680,0.390,0.980,0.490
+5771c6298b30,hpwren-bi-s-mobo-c-20260807-0700,3,lookalike,bright cloud bank touching horizon at right,box-b1,0.550,0.390,0.980,0.490
+7c35b2522caf,hpwren-bi-s-mobo-c-20260924-0800,0,fog,distant fog sea in valleys near horizon,box-b1,0.480,0.500,0.760,0.540
+7c35b2522caf,hpwren-bi-s-mobo-c-20260924-0800,1,fog,distant fog sea in valleys near horizon,box-b1,0.500,0.500,0.760,0.540
+7c35b2522caf,hpwren-bi-s-mobo-c-20260924-0800,2,fog,distant fog sea in valleys near horizon,box-b1,0.480,0.500,0.750,0.540
+7c35b2522caf,hpwren-bi-s-mobo-c-20260924-0800,3,fog,distant fog sea in valleys near horizon,box-b1,0.520,0.500,0.800,0.540
+c25efb0a7171,hpwren-bi-w-mobo-c-20260722-0700,0,fog,white marine stratus layer at horizon,box-b1,0.000,0.510,0.720,0.560
+c25efb0a7171,hpwren-bi-w-mobo-c-20260722-0700,1,fog,white marine stratus layer at horizon,box-b1,0.000,0.510,0.720,0.560
+c25efb0a7171,hpwren-bi-w-mobo-c-20260722-0700,2,fog,white marine stratus layer at horizon,box-b1,0.000,0.510,0.720,0.560
+c25efb0a7171,hpwren-bi-w-mobo-c-20260722-0700,3,fog,white marine stratus layer at horizon,box-b1,0.000,0.510,0.720,0.560
+445437ddd487,hpwren-bi-w-mobo-c-20260723-0700,0,fog,white marine fog/stratus sea at horizon,box-b1,0.000,0.510,0.720,0.570
+445437ddd487,hpwren-bi-w-mobo-c-20260723-0700,1,fog,white marine fog/stratus sea at horizon,box-b1,0.000,0.510,0.720,0.570
+445437ddd487,hpwren-bi-w-mobo-c-20260723-0700,2,fog,white marine fog/stratus sea at horizon,box-b1,0.000,0.510,0.720,0.560
+445437ddd487,hpwren-bi-w-mobo-c-20260723-0700,3,fog,white marine fog/stratus sea at horizon,box-b1,0.000,0.510,0.720,0.560
+8e881e3b5578,hpwren-bi-w-mobo-c-20260819-0730,0,fog,white marine stratus band at horizon,box-b1,0.000,0.510,0.700,0.560
+8e881e3b5578,hpwren-bi-w-mobo-c-20260819-0730,1,fog,white marine stratus band at horizon,box-b1,0.000,0.510,0.700,0.560
+8e881e3b5578,hpwren-bi-w-mobo-c-20260819-0730,2,fog,white marine stratus band at horizon,box-b1,0.000,0.510,0.700,0.560
+8e881e3b5578,hpwren-bi-w-mobo-c-20260819-0730,3,fog,white marine stratus band at horizon,box-b1,0.000,0.510,0.700,0.560
+d26c57c5758c,hpwren-bi-w-mobo-c-20260925-0800,0,fog,grey marine stratus layer at horizon,box-b1,0.000,0.510,0.700,0.570
+d26c57c5758c,hpwren-bi-w-mobo-c-20260925-0800,1,fog,grey marine stratus layer at horizon,box-b1,0.000,0.510,0.700,0.570
+d26c57c5758c,hpwren-bi-w-mobo-c-20260925-0800,2,fog,grey marine stratus layer at horizon,box-b1,0.000,0.510,0.700,0.570
+d26c57c5758c,hpwren-bi-w-mobo-c-20260925-0800,3,fog,grey marine stratus layer at horizon,box-b1,0.000,0.510,0.700,0.570
+d88ef26f1dbd,hpwren-bi-w-mobo-c-20261008-0730,0,fog,whitish marine stratus band at horizon,box-b1,0.000,0.520,0.780,0.560
+d88ef26f1dbd,hpwren-bi-w-mobo-c-20261008-0730,1,fog,whitish marine stratus band at horizon,box-b1,0.000,0.520,0.780,0.560
+d88ef26f1dbd,hpwren-bi-w-mobo-c-20261008-0730,2,fog,whitish marine stratus band at horizon,box-b1,0.000,0.510,0.780,0.560
+d88ef26f1dbd,hpwren-bi-w-mobo-c-20261008-0730,3,fog,whitish marine stratus band at horizon,box-b1,0.000,0.510,0.780,0.560
+5f1bd3736ef1,hpwren-bi-w-mobo-c-20261017-0800,0,lookalike,storm cloud bank and rain haze obscuring distant terrain,box-b1,0.000,0.460,0.620,0.620
+5f1bd3736ef1,hpwren-bi-w-mobo-c-20261017-0800,1,lookalike,storm cloud bank and rain haze obscuring distant terrain,box-b1,0.000,0.460,0.620,0.620
+5f1bd3736ef1,hpwren-bi-w-mobo-c-20261017-0800,2,lookalike,storm cloud bank and rain haze obscuring distant terrain,box-b1,0.000,0.470,0.620,0.620
+5f1bd3736ef1,hpwren-bi-w-mobo-c-20261017-0800,3,lookalike,storm cloud bank and rain haze obscuring distant terrain,box-b1,0.000,0.470,0.620,0.620
+0cc4b5d1589a,hpwren-bl-e-mobo-c-20260729-0700,0,none,"no-images placeholder, no camera frame",box-b1,,,,
+0cc4b5d1589a,hpwren-bl-e-mobo-c-20260729-0700,1,none,"no-images placeholder, no camera frame",box-b1,,,,
+0cc4b5d1589a,hpwren-bl-e-mobo-c-20260729-0700,2,none,"no-images placeholder, no camera frame",box-b1,,,,
+0cc4b5d1589a,hpwren-bl-e-mobo-c-20260729-0700,3,none,"no-images placeholder, no camera frame",box-b1,,,,
+5515f5c6fa6f,hpwren-bl-e-mobo-c-20260810-0700,0,none,"no-images placeholder, no camera frame",box-b1,,,,
+5515f5c6fa6f,hpwren-bl-e-mobo-c-20260810-0700,1,none,"no-images placeholder, no camera frame",box-b1,,,,
+5515f5c6fa6f,hpwren-bl-e-mobo-c-20260810-0700,2,none,"no-images placeholder, no camera frame",box-b1,,,,
+5515f5c6fa6f,hpwren-bl-e-mobo-c-20260810-0700,3,none,"no-images placeholder, no camera frame",box-b1,,,,
+a9120fec116a,hpwren-bl-e-mobo-c-20260818-0730,0,none,"no-images placeholder, no camera frame",box-b1,,,,
+a9120fec116a,hpwren-bl-e-mobo-c-20260818-0730,1,none,"no-images placeholder, no camera frame",box-b1,,,,
+a9120fec116a,hpwren-bl-e-mobo-c-20260818-0730,2,none,"no-images placeholder, no camera frame",box-b1,,,,
+a9120fec116a,hpwren-bl-e-mobo-c-20260818-0730,3,none,"no-images placeholder, no camera frame",box-b1,,,,
+1581982e872e,hpwren-bl-e-mobo-c-20260827-0730,0,none,"no-images placeholder, no camera frame",box-b1,,,,
+1581982e872e,hpwren-bl-e-mobo-c-20260827-0730,1,none,"no-images placeholder, no camera frame",box-b1,,,,
+1581982e872e,hpwren-bl-e-mobo-c-20260827-0730,2,none,"no-images placeholder, no camera frame",box-b1,,,,
+1581982e872e,hpwren-bl-e-mobo-c-20260827-0730,3,none,"no-images placeholder, no camera frame",box-b1,,,,
+bc8da7dbaa44,hpwren-bl-e-mobo-c-20260924-0730,0,none,"no-image placeholder, no scene",box-b2,,,,
+bc8da7dbaa44,hpwren-bl-e-mobo-c-20260924-0730,1,none,"no-image placeholder, no scene",box-b2,,,,
+bc8da7dbaa44,hpwren-bl-e-mobo-c-20260924-0730,2,none,"no-image placeholder, no scene",box-b2,,,,
+bc8da7dbaa44,hpwren-bl-e-mobo-c-20260924-0730,3,none,"no-image placeholder, no scene",box-b2,,,,
+04ec26db117c,hpwren-bl-n-mobo-c-20260822-0700,0,fog,"low cloud resting on distant ridges, upper right",box-b2,0.800,0.210,1.000,0.280
+04ec26db117c,hpwren-bl-n-mobo-c-20260822-0700,1,fog,"low cloud resting on distant ridges, upper right",box-b2,0.820,0.210,1.000,0.280
+04ec26db117c,hpwren-bl-n-mobo-c-20260822-0700,2,fog,"low cloud resting on distant ridges, upper right",box-b2,0.640,0.190,1.000,0.290
+04ec26db117c,hpwren-bl-n-mobo-c-20260822-0700,3,fog,"low cloud resting on distant ridges, upper right",box-b2,0.640,0.170,1.000,0.290
+c0a43b0e6129,hpwren-bl-n-mobo-c-20261009-0800,0,fog,"stratus/fog sea beyond ridges, upper right",box-b2,0.630,0.060,1.000,0.280
+c0a43b0e6129,hpwren-bl-n-mobo-c-20261009-0800,1,fog,"stratus/fog sea beyond ridges, upper right",box-b2,0.630,0.060,1.000,0.280
+c0a43b0e6129,hpwren-bl-n-mobo-c-20261009-0800,2,fog,"stratus/fog sea beyond ridges, upper right",box-b2,0.630,0.060,1.000,0.290
+c0a43b0e6129,hpwren-bl-n-mobo-c-20261009-0800,3,fog,"stratus/fog sea beyond ridges, upper right",box-b2,0.630,0.060,1.000,0.290
+71ded6697269,hpwren-bl-n-mobo-c-20261015-0730,0,lookalike,"sun-washed bright hazy terrain, upper left",box-b2,0.000,0.050,0.420,0.330
+71ded6697269,hpwren-bl-n-mobo-c-20261015-0730,1,lookalike,"sun-washed bright hazy terrain, upper left",box-b2,0.000,0.050,0.420,0.330
+71ded6697269,hpwren-bl-n-mobo-c-20261015-0730,2,lookalike,"sun-washed bright hazy terrain, upper left",box-b2,0.000,0.050,0.420,0.350
+71ded6697269,hpwren-bl-n-mobo-c-20261015-0730,3,lookalike,"sun-washed bright hazy terrain, upper left",box-b2,0.000,0.050,0.420,0.350
+8ac7c05247fb,hpwren-bl-n-mobo-c-20261016-0800,0,lookalike,"sun-washed bright hazy terrain, upper left",box-b2,0.000,0.050,0.420,0.380
+8ac7c05247fb,hpwren-bl-n-mobo-c-20261016-0800,1,lookalike,"sun-washed bright hazy terrain, upper left",box-b2,0.000,0.050,0.420,0.380
+8ac7c05247fb,hpwren-bl-n-mobo-c-20261016-0800,2,lookalike,"sun-washed bright hazy terrain, upper left",box-b2,0.000,0.050,0.420,0.380
+8ac7c05247fb,hpwren-bl-n-mobo-c-20261016-0800,3,lookalike,"sun-washed bright hazy terrain, upper left",box-b2,0.000,0.050,0.420,0.380
+ea1361bc9663,hpwren-blkrc-e-mobo-c-20260723-0700,0,lookalike,sun glare haze where it meets the ridge line,box-b2,0.000,0.320,0.550,0.520
+ea1361bc9663,hpwren-blkrc-e-mobo-c-20260723-0700,1,lookalike,sun glare haze where it meets the ridge line,box-b2,0.000,0.320,0.550,0.520
+ea1361bc9663,hpwren-blkrc-e-mobo-c-20260723-0700,2,lookalike,sun glare haze where it meets the ridge line,box-b2,0.000,0.320,0.550,0.520
+ea1361bc9663,hpwren-blkrc-e-mobo-c-20260723-0700,3,lookalike,sun glare haze where it meets the ridge line,box-b2,0.000,0.320,0.550,0.520
+556d4861570e,hpwren-blkrc-e-mobo-c-20260831-0730,0,lookalike,sun glare haze where it meets the ridge line,box-b2,0.020,0.320,0.600,0.500
+556d4861570e,hpwren-blkrc-e-mobo-c-20260831-0730,1,lookalike,sun glare haze where it meets the ridge line,box-b2,0.020,0.320,0.600,0.500
+556d4861570e,hpwren-blkrc-e-mobo-c-20260831-0730,2,lookalike,sun glare haze where it meets the ridge line,box-b2,0.020,0.320,0.600,0.500
+556d4861570e,hpwren-blkrc-e-mobo-c-20260831-0730,3,lookalike,sun glare haze where it meets the ridge line,box-b2,0.020,0.320,0.600,0.500
+e9b80e38de55,hpwren-blkrc-e-mobo-c-20260918-0730,0,lookalike,sun glare haze where it meets the ridge line,box-b2,0.100,0.320,0.750,0.500
+e9b80e38de55,hpwren-blkrc-e-mobo-c-20260918-0730,1,lookalike,sun glare haze where it meets the ridge line,box-b2,0.100,0.320,0.750,0.500
+e9b80e38de55,hpwren-blkrc-e-mobo-c-20260918-0730,2,lookalike,sun glare haze where it meets the ridge line,box-b2,0.100,0.320,0.750,0.500
+e9b80e38de55,hpwren-blkrc-e-mobo-c-20260918-0730,3,lookalike,sun glare haze where it meets the ridge line,box-b2,0.100,0.320,0.750,0.500
+7cb15deb901a,hpwren-blkrc-e-mobo-c-20261011-0800,0,fog,"camera inside fog, washed-out grey view",box-b2,0.000,0.000,1.000,1.000
+7cb15deb901a,hpwren-blkrc-e-mobo-c-20261011-0800,1,fog,"camera inside fog, washed-out grey view",box-b2,0.000,0.000,1.000,1.000
+7cb15deb901a,hpwren-blkrc-e-mobo-c-20261011-0800,2,fog,"camera inside fog, washed-out grey view",box-b2,0.000,0.000,1.000,1.000
+7cb15deb901a,hpwren-blkrc-e-mobo-c-20261011-0800,3,fog,"camera inside fog, washed-out grey view",box-b2,0.000,0.000,1.000,1.000
+bf8d55bf6825,hpwren-blkrc-w-mobo-c-20260720-0700,0,lookalike,bright haze band along horizon under overcast,box-b2,0.000,0.490,1.000,0.600
+bf8d55bf6825,hpwren-blkrc-w-mobo-c-20260720-0700,1,lookalike,bright haze band along horizon under overcast,box-b2,0.000,0.490,1.000,0.600
+bf8d55bf6825,hpwren-blkrc-w-mobo-c-20260720-0700,2,lookalike,bright haze band along horizon under overcast,box-b2,0.000,0.490,1.000,0.600
+bf8d55bf6825,hpwren-blkrc-w-mobo-c-20260720-0700,3,lookalike,bright haze band along horizon under overcast,box-b2,0.000,0.490,1.000,0.600
+298dfd676519,hpwren-blkrc-w-mobo-c-20260721-0630,0,lookalike,bright haze band along horizon,box-b2,0.000,0.490,1.000,0.560
+298dfd676519,hpwren-blkrc-w-mobo-c-20260721-0630,1,lookalike,bright haze band along horizon,box-b2,0.000,0.490,1.000,0.560
+298dfd676519,hpwren-blkrc-w-mobo-c-20260721-0630,2,lookalike,bright haze band along horizon,box-b2,0.000,0.480,1.000,0.550
+298dfd676519,hpwren-blkrc-w-mobo-c-20260721-0630,3,lookalike,bright haze band along horizon,box-b2,0.000,0.480,1.000,0.550
+8f859ccca772,hpwren-blkrc-w-mobo-c-20260724-0700,0,lookalike,whitish haze band along horizon,box-b2,0.020,0.480,0.980,0.560
+8f859ccca772,hpwren-blkrc-w-mobo-c-20260724-0700,1,lookalike,whitish haze band along horizon,box-b2,0.020,0.480,0.980,0.560
+8f859ccca772,hpwren-blkrc-w-mobo-c-20260724-0700,2,lookalike,whitish haze band along horizon,box-b2,0.020,0.490,0.980,0.570
+8f859ccca772,hpwren-blkrc-w-mobo-c-20260724-0700,3,lookalike,whitish haze band along horizon,box-b2,0.020,0.490,0.980,0.570
+2ed296208173,hpwren-blkrc-w-mobo-c-20260915-0730,0,fog,fog/stratus sea in lowlands below horizon,box-b2,0.000,0.510,0.900,0.640
+2ed296208173,hpwren-blkrc-w-mobo-c-20260915-0730,1,fog,fog/stratus sea in lowlands below horizon,box-b2,0.000,0.510,0.900,0.640
+2ed296208173,hpwren-blkrc-w-mobo-c-20260915-0730,2,fog,fog/stratus sea in lowlands below horizon,box-b2,0.000,0.510,0.900,0.640
+2ed296208173,hpwren-blkrc-w-mobo-c-20260915-0730,3,fog,fog/stratus sea in lowlands below horizon,box-b2,0.000,0.510,0.900,0.640
+c2443ed6dfa2,hpwren-blkrc-w-mobo-c-20260919-0730,0,fog,thin dissipating fog layer in lowland valleys,box-b2,0.000,0.520,0.600,0.610
+c2443ed6dfa2,hpwren-blkrc-w-mobo-c-20260919-0730,1,fog,thin dissipating fog layer in lowland valleys,box-b2,0.000,0.520,0.600,0.610
+c2443ed6dfa2,hpwren-blkrc-w-mobo-c-20260919-0730,2,fog,thin dissipating fog layer in lowland valleys,box-b2,0.000,0.540,0.400,0.610
+c2443ed6dfa2,hpwren-blkrc-w-mobo-c-20260919-0730,3,fog,thin dissipating fog layer in lowland valleys,box-b2,0.000,0.540,0.450,0.610
+c19368d9e901,hpwren-bm-s-mobo-c-20260729-0630,0,fog,"fog sea beyond ridge, right side",box-b2,0.600,0.500,1.000,0.650
+c19368d9e901,hpwren-bm-s-mobo-c-20260729-0630,1,fog,"fog sea beyond ridge, right side",box-b2,0.620,0.500,1.000,0.660
+c19368d9e901,hpwren-bm-s-mobo-c-20260729-0630,2,fog,"fog sea beyond ridge, right side",box-b2,0.650,0.500,1.000,0.640
+c19368d9e901,hpwren-bm-s-mobo-c-20260729-0630,3,fog,"fog sea beyond ridge, right side",box-b2,0.650,0.500,1.000,0.620
+c31bfa77c46e,hpwren-bm-s-mobo-c-20260809-0700,0,lookalike,wispy low clouds just above horizon,box-b2,0.550,0.430,0.820,0.490
+c31bfa77c46e,hpwren-bm-s-mobo-c-20260809-0700,1,lookalike,wispy low clouds just above horizon,box-b2,0.550,0.430,0.820,0.490
+c31bfa77c46e,hpwren-bm-s-mobo-c-20260809-0700,2,lookalike,wispy low clouds just above horizon,box-b2,0.580,0.420,0.800,0.480
+c31bfa77c46e,hpwren-bm-s-mobo-c-20260809-0700,3,lookalike,wispy low clouds just above horizon,box-b2,0.580,0.420,0.820,0.480
+b095f69cf808,hpwren-bm-s-mobo-c-20260924-0800,0,fog,"fog patches in distant valleys, right",box-b2,0.750,0.510,1.000,0.560
+b095f69cf808,hpwren-bm-s-mobo-c-20260924-0800,1,fog,"fog patches in distant valleys, right",box-b2,0.620,0.500,1.000,0.560
+b095f69cf808,hpwren-bm-s-mobo-c-20260924-0800,2,fog,"fog patches in distant valleys, right",box-b2,0.720,0.500,1.000,0.560
+b095f69cf808,hpwren-bm-s-mobo-c-20260924-0800,3,fog,"fog patches in distant valleys, right",box-b2,0.750,0.500,1.000,0.550
+ccdc74c2ced8,hpwren-bm-s-mobo-c-20261004-0730,0,lookalike,sun-glare haze over terrain at left horizon,box-b2,0.000,0.470,0.450,0.600
+ccdc74c2ced8,hpwren-bm-s-mobo-c-20261004-0730,1,lookalike,sun-glare haze over terrain at left horizon,box-b2,0.000,0.470,0.450,0.600
+ccdc74c2ced8,hpwren-bm-s-mobo-c-20261004-0730,2,lookalike,sun-glare haze over terrain at left horizon,box-b2,0.000,0.470,0.450,0.600
+ccdc74c2ced8,hpwren-bm-s-mobo-c-20261004-0730,3,lookalike,sun-glare haze over terrain at left horizon,box-b2,0.000,0.470,0.450,0.600
+429c1f03bdbd,hpwren-buff-e-mobo-c-20260722-0700,0,fog,fog sea below horizon,box-b2,0.200,0.500,1.000,0.590
+429c1f03bdbd,hpwren-buff-e-mobo-c-20260722-0700,1,fog,fog sea below horizon,box-b2,0.200,0.500,1.000,0.590
+429c1f03bdbd,hpwren-buff-e-mobo-c-20260722-0700,2,fog,fog sea below horizon,box-b2,0.250,0.500,1.000,0.590
+429c1f03bdbd,hpwren-buff-e-mobo-c-20260722-0700,3,fog,fog sea below horizon,box-b2,0.250,0.500,1.000,0.600
+a2d29f646626,hpwren-buff-e-mobo-c-20260729-0730,0,fog,stratus fog sea filling valley below camera,box-b2,0.150,0.490,1.000,0.910
+a2d29f646626,hpwren-buff-e-mobo-c-20260729-0730,1,fog,stratus fog sea filling valley below camera,box-b2,0.050,0.490,1.000,0.910
+a2d29f646626,hpwren-buff-e-mobo-c-20260729-0730,2,fog,stratus fog sea filling valley below camera,box-b2,0.000,0.490,1.000,0.900
+a2d29f646626,hpwren-buff-e-mobo-c-20260729-0730,3,fog,stratus fog sea filling valley below camera,box-b2,0.050,0.490,1.000,0.920
+422a2363e01d,hpwren-buff-e-mobo-c-20260903-0700,0,fog,stratus/fog sea along horizon below sun,box-b3,0.030,0.460,0.980,0.560
+422a2363e01d,hpwren-buff-e-mobo-c-20260903-0700,1,fog,stratus/fog sea along horizon below sun,box-b3,0.030,0.460,0.980,0.560
+422a2363e01d,hpwren-buff-e-mobo-c-20260903-0700,2,fog,stratus/fog sea along horizon below sun,box-b3,0.030,0.460,0.980,0.570
+422a2363e01d,hpwren-buff-e-mobo-c-20260903-0700,3,fog,stratus/fog sea along horizon below sun,box-b3,0.030,0.460,0.980,0.570
+26e315aad35c,hpwren-buff-e-mobo-c-20260914-0730,0,fog,fog sea filling valley below camera,box-b3,0.050,0.490,1.000,0.900
+26e315aad35c,hpwren-buff-e-mobo-c-20260914-0730,1,fog,fog sea filling valley below camera,box-b3,0.000,0.490,1.000,0.910
+26e315aad35c,hpwren-buff-e-mobo-c-20260914-0730,2,fog,fog sea filling valley below camera,box-b3,0.000,0.490,1.000,0.950
+26e315aad35c,hpwren-buff-e-mobo-c-20260914-0730,3,fog,fog sea filling valley below camera,box-b3,0.000,0.490,1.000,0.950
+d0d53e26010f,hpwren-buff-s-mobo-c-20260822-0730,0,fog,marine fog layer at horizon,box-b3,0.020,0.490,1.000,0.590
+d0d53e26010f,hpwren-buff-s-mobo-c-20260822-0730,1,fog,marine fog layer at horizon,box-b3,0.020,0.490,1.000,0.590
+d0d53e26010f,hpwren-buff-s-mobo-c-20260822-0730,2,fog,marine fog layer at horizon,box-b3,0.020,0.490,1.000,0.580
+d0d53e26010f,hpwren-buff-s-mobo-c-20260822-0730,3,fog,marine fog layer at horizon,box-b3,0.020,0.490,1.000,0.580
+154cca51d5d8,hpwren-buff-s-mobo-c-20261001-0730,0,fog,thin fog layer patches at horizon,box-b3,0.020,0.510,0.980,0.590
+154cca51d5d8,hpwren-buff-s-mobo-c-20261001-0730,1,fog,thin fog layer patches at horizon,box-b3,0.020,0.510,0.980,0.590
+154cca51d5d8,hpwren-buff-s-mobo-c-20261001-0730,2,fog,thin fog layer patches at horizon,box-b3,0.020,0.500,0.980,0.590
+154cca51d5d8,hpwren-buff-s-mobo-c-20261001-0730,3,fog,thin fog layer patches at horizon,box-b3,0.020,0.500,0.980,0.590
+71eeb61a60b2,hpwren-ch-e-mobo-c-20260721-0630,0,fog,low fog layer across basin at horizon,box-b3,0.020,0.500,0.980,0.580
+71eeb61a60b2,hpwren-ch-e-mobo-c-20260721-0630,1,fog,low fog layer across basin at horizon,box-b3,0.020,0.500,0.980,0.580
+71eeb61a60b2,hpwren-ch-e-mobo-c-20260721-0630,2,fog,low fog layer across basin at horizon,box-b3,0.020,0.500,0.980,0.580
+71eeb61a60b2,hpwren-ch-e-mobo-c-20260721-0630,3,fog,low fog layer across basin at horizon,box-b3,0.020,0.500,0.980,0.580
+4ae748c1f55d,hpwren-ch-e-mobo-c-20260729-0700,0,fog,"camera inside fog, washed-out view",box-b3,0.000,0.000,1.000,1.000
+4ae748c1f55d,hpwren-ch-e-mobo-c-20260729-0700,1,fog,"camera inside fog, washed-out view",box-b3,0.000,0.000,1.000,1.000
+4ae748c1f55d,hpwren-ch-e-mobo-c-20260729-0700,2,fog,"camera inside fog, washed-out view",box-b3,0.000,0.000,1.000,1.000
+4ae748c1f55d,hpwren-ch-e-mobo-c-20260729-0700,3,fog,"camera inside fog, washed-out view",box-b3,0.000,0.000,1.000,1.000
+3f41975f4311,hpwren-ch-e-mobo-c-20260924-0730,0,fog,"camera inside fog, grey view",box-b3,0.000,0.000,1.000,1.000
+3f41975f4311,hpwren-ch-e-mobo-c-20260924-0730,1,fog,"camera inside fog, grey view",box-b3,0.000,0.000,1.000,1.000
+3f41975f4311,hpwren-ch-e-mobo-c-20260924-0730,2,fog,"camera inside fog, grey view",box-b3,0.000,0.000,1.000,1.000
+3f41975f4311,hpwren-ch-e-mobo-c-20260924-0730,3,fog,"camera inside fog, grey view",box-b3,0.000,0.000,1.000,1.000
+fa96422524f6,hpwren-ch-e-mobo-c-20261006-0800,0,lookalike,low cloud bank touching horizon,box-b3,0.020,0.400,0.700,0.500
+fa96422524f6,hpwren-ch-e-mobo-c-20261006-0800,1,lookalike,low cloud bank touching horizon,box-b3,0.020,0.400,0.700,0.500
+fa96422524f6,hpwren-ch-e-mobo-c-20261006-0800,2,lookalike,low cloud bank touching horizon,box-b3,0.020,0.400,0.700,0.500
+fa96422524f6,hpwren-ch-e-mobo-c-20261006-0800,3,lookalike,low cloud bank touching horizon,box-b3,0.020,0.400,0.700,0.500
+6ae33272f805,hpwren-ch-n-mobo-c-20260924-0800,0,fog,"camera inside fog, washed-out view",box-b3,0.000,0.000,1.000,1.000
+6ae33272f805,hpwren-ch-n-mobo-c-20260924-0800,1,fog,"camera inside fog, washed-out view",box-b3,0.000,0.000,1.000,1.000
+6ae33272f805,hpwren-ch-n-mobo-c-20260924-0800,2,fog,"camera inside fog, washed-out view",box-b3,0.000,0.000,1.000,1.000
+6ae33272f805,hpwren-ch-n-mobo-c-20260924-0800,3,fog,"camera inside fog, washed-out view",box-b3,0.000,0.000,1.000,1.000
+747138917ae8,hpwren-ch-n-mobo-c-20260925-0800,0,fog,fog sea below ridge,box-b3,0.000,0.510,1.000,0.740
+747138917ae8,hpwren-ch-n-mobo-c-20260925-0800,1,fog,fog sea below ridge,box-b3,0.000,0.510,1.000,0.740
+747138917ae8,hpwren-ch-n-mobo-c-20260925-0800,2,fog,fog sea below ridge,box-b3,0.000,0.510,1.000,0.720
+747138917ae8,hpwren-ch-n-mobo-c-20260925-0800,3,fog,fog sea below ridge,box-b3,0.000,0.510,1.000,0.720
+e49ca968839e,hpwren-ch-n-mobo-c-20261015-0800,0,lookalike,bright haze band at horizon,box-b3,0.000,0.470,0.700,0.530
+e49ca968839e,hpwren-ch-n-mobo-c-20261015-0800,1,lookalike,bright haze band at horizon,box-b3,0.000,0.470,0.700,0.530
+e49ca968839e,hpwren-ch-n-mobo-c-20261015-0800,2,lookalike,bright haze band at horizon,box-b3,0.000,0.470,0.700,0.530
+e49ca968839e,hpwren-ch-n-mobo-c-20261015-0800,3,lookalike,bright haze band at horizon,box-b3,0.000,0.470,0.700,0.530
+81095737454e,hpwren-ch-n-mobo-c-20261016-0800,0,lookalike,small clouds just above mountain horizon,box-b3,0.640,0.400,0.980,0.490
+81095737454e,hpwren-ch-n-mobo-c-20261016-0800,1,lookalike,small clouds just above mountain horizon,box-b3,0.620,0.400,0.980,0.490
+81095737454e,hpwren-ch-n-mobo-c-20261016-0800,2,lookalike,small clouds just above mountain horizon,box-b3,0.580,0.400,1.000,0.490
+81095737454e,hpwren-ch-n-mobo-c-20261016-0800,3,lookalike,small clouds just above mountain horizon,box-b3,0.580,0.400,1.000,0.490
+b88ca076f7b9,hpwren-ch-s-mobo-c-20260822-0730,0,fog,fog in valley at left horizon,box-b3,0.000,0.500,0.180,0.590
+b88ca076f7b9,hpwren-ch-s-mobo-c-20260822-0730,1,fog,fog in valley at left horizon,box-b3,0.000,0.500,0.180,0.590
+b88ca076f7b9,hpwren-ch-s-mobo-c-20260822-0730,2,fog,fog in valley at left horizon,box-b3,0.000,0.500,0.180,0.600
+b88ca076f7b9,hpwren-ch-s-mobo-c-20260822-0730,3,fog,fog in valley at left horizon,box-b3,0.000,0.500,0.180,0.600
+14834ef27507,hpwren-ch-s-mobo-c-20260826-0700,0,lookalike,haze band along horizon,box-b3,0.000,0.480,0.720,0.540
+14834ef27507,hpwren-ch-s-mobo-c-20260826-0700,1,lookalike,haze band along horizon,box-b3,0.000,0.480,0.720,0.540
+14834ef27507,hpwren-ch-s-mobo-c-20260826-0700,2,lookalike,haze band along horizon,box-b3,0.000,0.480,0.720,0.540
+14834ef27507,hpwren-ch-s-mobo-c-20260826-0700,3,lookalike,haze band along horizon,box-b3,0.000,0.480,0.720,0.540
+9f07655f9d6d,hpwren-ch-s-mobo-c-20260908-0700,0,lookalike,bright haze band at horizon,box-b3,0.000,0.440,0.720,0.520
+9f07655f9d6d,hpwren-ch-s-mobo-c-20260908-0700,1,lookalike,bright haze band at horizon,box-b3,0.000,0.440,0.720,0.520
+9f07655f9d6d,hpwren-ch-s-mobo-c-20260908-0700,2,lookalike,bright haze band at horizon,box-b3,0.000,0.440,0.720,0.520
+9f07655f9d6d,hpwren-ch-s-mobo-c-20260908-0700,3,lookalike,bright haze band at horizon,box-b3,0.000,0.440,0.720,0.520
+0c5f4034873f,hpwren-ch-s-mobo-c-20261001-0730,0,fog,low cloud on ridges at left horizon,box-b3,0.000,0.520,0.150,0.580
+0c5f4034873f,hpwren-ch-s-mobo-c-20261001-0730,1,fog,low cloud on ridges at left horizon,box-b3,0.000,0.520,0.150,0.580
+0c5f4034873f,hpwren-ch-s-mobo-c-20261001-0730,2,fog,low cloud on ridges at left horizon,box-b3,0.000,0.510,0.140,0.580
+0c5f4034873f,hpwren-ch-s-mobo-c-20261001-0730,3,fog,low cloud on ridges at left horizon,box-b3,0.000,0.510,0.140,0.580
+98819c1c3c35,hpwren-chino-e-mobo-c-20260729-0730,0,fog,"camera inside fog, washed-out view",box-b3,0.000,0.000,1.000,1.000
+98819c1c3c35,hpwren-chino-e-mobo-c-20260729-0730,1,fog,"camera inside fog, washed-out view",box-b3,0.000,0.000,1.000,1.000
+98819c1c3c35,hpwren-chino-e-mobo-c-20260729-0730,2,fog,"camera inside fog, washed-out view",box-b3,0.000,0.000,1.000,1.000
+98819c1c3c35,hpwren-chino-e-mobo-c-20260729-0730,3,fog,"camera inside fog, washed-out view",box-b3,0.000,0.000,1.000,1.000
+e122e3715b9d,hpwren-chino-e-mobo-c-20260824-0730,0,lookalike,sunlit haze band over horizon terrain,box-b3,0.000,0.470,0.850,0.550
+e122e3715b9d,hpwren-chino-e-mobo-c-20260824-0730,1,lookalike,sunlit haze band over horizon terrain,box-b3,0.000,0.470,0.850,0.550
+e122e3715b9d,hpwren-chino-e-mobo-c-20260824-0730,2,lookalike,sunlit haze band over horizon terrain,box-b3,0.000,0.470,0.850,0.550
+e122e3715b9d,hpwren-chino-e-mobo-c-20260824-0730,3,lookalike,sunlit haze band over horizon terrain,box-b3,0.000,0.470,0.850,0.550
+3c005901297d,hpwren-chino-e-mobo-c-20260827-0700,0,lookalike,haze band at horizon under cloud deck,box-b3,0.000,0.440,0.850,0.530
+3c005901297d,hpwren-chino-e-mobo-c-20260827-0700,1,lookalike,haze band at horizon under cloud deck,box-b3,0.000,0.440,0.850,0.530
+3c005901297d,hpwren-chino-e-mobo-c-20260827-0700,2,lookalike,haze band at horizon under cloud deck,box-b3,0.000,0.440,0.850,0.530
+3c005901297d,hpwren-chino-e-mobo-c-20260827-0700,3,lookalike,haze band at horizon under cloud deck,box-b3,0.000,0.440,0.850,0.530
+82f850c8386d,hpwren-chino-e-mobo-c-20260924-0800,0,fog,"camera inside fog, washed-out view",box-b3,0.000,0.000,1.000,1.000
+82f850c8386d,hpwren-chino-e-mobo-c-20260924-0800,1,fog,"camera inside fog, washed-out view",box-b3,0.000,0.000,1.000,1.000
+82f850c8386d,hpwren-chino-e-mobo-c-20260924-0800,2,fog,"camera inside fog, washed-out view",box-b3,0.000,0.000,1.000,1.000
+82f850c8386d,hpwren-chino-e-mobo-c-20260924-0800,3,fog,"camera inside fog, washed-out view",box-b3,0.000,0.000,1.000,1.000
+41d992203cb4,hpwren-chino-e-mobo-c-20260928-0730,0,lookalike,haze band at horizon below sun glare,box-b4,0.020,0.440,0.900,0.580
+41d992203cb4,hpwren-chino-e-mobo-c-20260928-0730,1,lookalike,haze band at horizon below sun glare,box-b4,0.020,0.440,0.900,0.580
+41d992203cb4,hpwren-chino-e-mobo-c-20260928-0730,2,lookalike,haze band at horizon below sun glare,box-b4,0.020,0.440,0.900,0.580
+41d992203cb4,hpwren-chino-e-mobo-c-20260928-0730,3,lookalike,haze band at horizon below sun glare,box-b4,0.020,0.440,0.900,0.580
+87f390ee879c,hpwren-chino-n-mobo-c-20260905-0700,0,lookalike,white haze layer at base of distant mountains,box-b4,0.500,0.450,1.000,0.510
+87f390ee879c,hpwren-chino-n-mobo-c-20260905-0700,1,lookalike,white haze layer at base of distant mountains,box-b4,0.500,0.450,1.000,0.510
+87f390ee879c,hpwren-chino-n-mobo-c-20260905-0700,2,lookalike,white haze layer at base of distant mountains,box-b4,0.500,0.450,1.000,0.510
+87f390ee879c,hpwren-chino-n-mobo-c-20260905-0700,3,lookalike,white haze layer at base of distant mountains,box-b4,0.500,0.450,1.000,0.510
+96d39b67909f,hpwren-chino-n-mobo-c-20260913-0800,0,fog,"camera inside fog, washed-out view",box-b4,0.000,0.000,1.000,1.000
+96d39b67909f,hpwren-chino-n-mobo-c-20260913-0800,1,fog,"camera inside fog, washed-out view",box-b4,0.000,0.000,1.000,1.000
+96d39b67909f,hpwren-chino-n-mobo-c-20260913-0800,2,fog,"camera inside fog, washed-out view",box-b4,0.000,0.000,1.000,1.000
+96d39b67909f,hpwren-chino-n-mobo-c-20260913-0800,3,fog,"camera inside fog, washed-out view",box-b4,0.000,0.000,1.000,1.000
+1b7479362158,hpwren-chino-n-mobo-c-20260928-0800,0,lookalike,haze band along horizon at mountain base,box-b4,0.050,0.460,1.000,0.520
+1b7479362158,hpwren-chino-n-mobo-c-20260928-0800,1,lookalike,haze band along horizon at mountain base,box-b4,0.050,0.460,1.000,0.520
+1b7479362158,hpwren-chino-n-mobo-c-20260928-0800,2,lookalike,haze band along horizon at mountain base,box-b4,0.050,0.460,1.000,0.520
+1b7479362158,hpwren-chino-n-mobo-c-20260928-0800,3,lookalike,haze band along horizon at mountain base,box-b4,0.050,0.460,1.000,0.520
+e7935a47cc03,hpwren-chino-n-mobo-c-20261011-0800,0,fog,"camera inside fog, washed-out view",box-b4,0.000,0.000,1.000,1.000
+e7935a47cc03,hpwren-chino-n-mobo-c-20261011-0800,1,fog,"camera inside fog, washed-out view",box-b4,0.000,0.000,1.000,1.000
+e7935a47cc03,hpwren-chino-n-mobo-c-20261011-0800,2,fog,"camera inside fog, washed-out view",box-b4,0.000,0.000,1.000,1.000
+e7935a47cc03,hpwren-chino-n-mobo-c-20261011-0800,3,fog,"camera inside fog, washed-out view",box-b4,0.000,0.000,1.000,1.000
+6c1c6f5f33d4,hpwren-chino-s-mobo-c-20260721-0630,0,lookalike,bright hazy horizon over distant basin,box-b4,0.350,0.430,1.000,0.540
+6c1c6f5f33d4,hpwren-chino-s-mobo-c-20260721-0630,1,lookalike,bright hazy horizon over distant basin,box-b4,0.350,0.430,1.000,0.540
+6c1c6f5f33d4,hpwren-chino-s-mobo-c-20260721-0630,2,lookalike,bright hazy horizon over distant basin,box-b4,0.350,0.430,1.000,0.540
+6c1c6f5f33d4,hpwren-chino-s-mobo-c-20260721-0630,3,lookalike,bright hazy horizon over distant basin,box-b4,0.350,0.430,1.000,0.540
+6dbf02e424b1,hpwren-chino-s-mobo-c-20260722-0630,0,fog,"camera inside fog, washed-out view",box-b4,0.000,0.000,1.000,1.000
+6dbf02e424b1,hpwren-chino-s-mobo-c-20260722-0630,1,fog,"camera inside fog, washed-out view",box-b4,0.000,0.000,1.000,1.000
+6dbf02e424b1,hpwren-chino-s-mobo-c-20260722-0630,2,fog,"camera inside fog, washed-out view",box-b4,0.000,0.000,1.000,1.000
+6dbf02e424b1,hpwren-chino-s-mobo-c-20260722-0630,3,fog,"camera inside fog, washed-out view",box-b4,0.000,0.000,1.000,1.000
+e687f0fe8d3c,hpwren-chino-s-mobo-c-20260801-0730,0,lookalike,haze over distant valley and city,box-b4,0.200,0.490,1.000,0.580
+e687f0fe8d3c,hpwren-chino-s-mobo-c-20260801-0730,1,lookalike,haze over distant valley and city,box-b4,0.200,0.490,1.000,0.580
+e687f0fe8d3c,hpwren-chino-s-mobo-c-20260801-0730,2,lookalike,haze over distant valley and city,box-b4,0.200,0.490,1.000,0.580
+e687f0fe8d3c,hpwren-chino-s-mobo-c-20260801-0730,3,lookalike,haze over distant valley and city,box-b4,0.200,0.490,1.000,0.580
+1186d98a666a,hpwren-chino-s-mobo-c-20261017-0800,0,lookalike,haze over distant valley under overcast,box-b4,0.150,0.460,1.000,0.560
+1186d98a666a,hpwren-chino-s-mobo-c-20261017-0800,1,lookalike,haze over distant valley under overcast,box-b4,0.150,0.460,1.000,0.560
+1186d98a666a,hpwren-chino-s-mobo-c-20261017-0800,2,lookalike,haze over distant valley under overcast,box-b4,0.150,0.460,1.000,0.560
+1186d98a666a,hpwren-chino-s-mobo-c-20261017-0800,3,lookalike,haze over distant valley under overcast,box-b4,0.150,0.460,1.000,0.560
+958eca664fcd,hpwren-chino-w-mobo-c-20260722-0700,0,fog,"camera inside fog, washed-out view",box-b4,0.000,0.000,1.000,1.000
+958eca664fcd,hpwren-chino-w-mobo-c-20260722-0700,1,fog,"camera inside fog, washed-out view",box-b4,0.000,0.000,1.000,1.000
+958eca664fcd,hpwren-chino-w-mobo-c-20260722-0700,2,fog,"camera inside fog, washed-out view",box-b4,0.000,0.000,1.000,1.000
+958eca664fcd,hpwren-chino-w-mobo-c-20260722-0700,3,fog,"camera inside fog, washed-out view",box-b4,0.000,0.000,1.000,1.000
+a371088313f1,hpwren-chino-w-mobo-c-20260909-0700,0,lookalike,haze band at horizon over city,box-b4,0.020,0.460,1.000,0.540
+a371088313f1,hpwren-chino-w-mobo-c-20260909-0700,1,lookalike,haze band at horizon over city,box-b4,0.020,0.460,1.000,0.540
+a371088313f1,hpwren-chino-w-mobo-c-20260909-0700,2,lookalike,haze band at horizon over city,box-b4,0.020,0.460,1.000,0.540
+a371088313f1,hpwren-chino-w-mobo-c-20260909-0700,3,lookalike,haze band at horizon over city,box-b4,0.020,0.460,1.000,0.540
+1340debccfc2,hpwren-chino-w-mobo-c-20261002-0730,0,lookalike,haze band at horizon over city,box-b4,0.000,0.490,1.000,0.540
+1340debccfc2,hpwren-chino-w-mobo-c-20261002-0730,1,lookalike,haze band at horizon over city,box-b4,0.000,0.490,1.000,0.540
+1340debccfc2,hpwren-chino-w-mobo-c-20261002-0730,2,lookalike,haze band at horizon over city,box-b4,0.000,0.490,1.000,0.540
+1340debccfc2,hpwren-chino-w-mobo-c-20261002-0730,3,lookalike,haze band at horizon over city,box-b4,0.000,0.490,1.000,0.540
+b4bbd14dd0bd,hpwren-chino-w-mobo-c-20261006-0800,0,lookalike,haze band at horizon over city,box-b4,0.000,0.490,1.000,0.540
+b4bbd14dd0bd,hpwren-chino-w-mobo-c-20261006-0800,1,lookalike,haze band at horizon over city,box-b4,0.000,0.490,1.000,0.540
+b4bbd14dd0bd,hpwren-chino-w-mobo-c-20261006-0800,2,lookalike,haze band at horizon over city,box-b4,0.000,0.490,1.000,0.540
+b4bbd14dd0bd,hpwren-chino-w-mobo-c-20261006-0800,3,lookalike,haze band at horizon over city,box-b4,0.000,0.490,1.000,0.540
+dababf23434c,hpwren-cp-w-mobo-c-20260729-0630,0,fog,fog sea filling valleys below camera,box-b4,0.020,0.500,1.000,0.610
+dababf23434c,hpwren-cp-w-mobo-c-20260729-0630,1,fog,fog sea filling valleys below camera,box-b4,0.020,0.500,1.000,0.610
+dababf23434c,hpwren-cp-w-mobo-c-20260729-0630,2,fog,fog sea filling valleys below camera,box-b4,0.020,0.500,1.000,0.620
+dababf23434c,hpwren-cp-w-mobo-c-20260729-0630,3,fog,fog sea filling valleys below camera,box-b4,0.020,0.500,1.000,0.620
+0b57e73449cf,hpwren-cp-w-mobo-c-20260903-0730,0,lookalike,haze band along distant horizon,box-b4,0.020,0.480,0.980,0.530
+0b57e73449cf,hpwren-cp-w-mobo-c-20260903-0730,1,lookalike,haze band along distant horizon,box-b4,0.020,0.480,0.980,0.530
+0b57e73449cf,hpwren-cp-w-mobo-c-20260903-0730,2,lookalike,haze band along distant horizon,box-b4,0.020,0.480,0.980,0.530
+0b57e73449cf,hpwren-cp-w-mobo-c-20260903-0730,3,lookalike,haze band along distant horizon,box-b4,0.020,0.480,0.980,0.530
+3d029b0d47c9,hpwren-cp-w-mobo-c-20260907-0700,0,lookalike,bright sunlit cloud gap touching horizon,box-b4,0.330,0.380,1.000,0.500
+3d029b0d47c9,hpwren-cp-w-mobo-c-20260907-0700,1,lookalike,bright sunlit cloud gap touching horizon,box-b4,0.300,0.360,1.000,0.500
+3d029b0d47c9,hpwren-cp-w-mobo-c-20260907-0700,2,lookalike,bright sunlit cloud gap touching horizon,box-b4,0.350,0.330,1.000,0.500
+3d029b0d47c9,hpwren-cp-w-mobo-c-20260907-0700,3,lookalike,bright sunlit cloud gap touching horizon,box-b4,0.350,0.320,1.000,0.500
+52a203a1a058,hpwren-cp-w-mobo-c-20260924-0800,0,fog,distant fog in valleys beyond ridges,box-b4,0.080,0.500,0.700,0.570
+52a203a1a058,hpwren-cp-w-mobo-c-20260924-0800,1,fog,distant fog in valleys beyond ridges,box-b4,0.080,0.500,0.700,0.570
+52a203a1a058,hpwren-cp-w-mobo-c-20260924-0800,2,fog,distant fog in valleys beyond ridges,box-b4,0.080,0.500,0.700,0.570
+52a203a1a058,hpwren-cp-w-mobo-c-20260924-0800,3,fog,distant fog in valleys beyond ridges,box-b4,0.080,0.500,0.700,0.570
+881956a358d9,hpwren-cp-w-mobo-c-20261018-0800,0,lookalike,haze band along distant horizon,box-b4,0.020,0.470,1.000,0.530
+881956a358d9,hpwren-cp-w-mobo-c-20261018-0800,1,lookalike,haze band along distant horizon,box-b4,0.020,0.470,1.000,0.530
+881956a358d9,hpwren-cp-w-mobo-c-20261018-0800,2,lookalike,haze band along distant horizon,box-b4,0.020,0.470,1.000,0.530
+881956a358d9,hpwren-cp-w-mobo-c-20261018-0800,3,lookalike,haze band along distant horizon,box-b4,0.020,0.470,1.000,0.530
+5ac717ced7f9,hpwren-dwpgm-e-mobo-c-20260828-0700,0,lookalike,bright hazy basin beyond ridge under sun,box-b4,0.300,0.500,0.700,0.580
+5ac717ced7f9,hpwren-dwpgm-e-mobo-c-20260828-0700,1,lookalike,bright hazy basin beyond ridge under sun,box-b4,0.300,0.500,0.700,0.580
+5ac717ced7f9,hpwren-dwpgm-e-mobo-c-20260828-0700,2,lookalike,bright hazy basin beyond ridge under sun,box-b4,0.300,0.500,0.700,0.580
+5ac717ced7f9,hpwren-dwpgm-e-mobo-c-20260828-0700,3,lookalike,bright hazy basin beyond ridge under sun,box-b4,0.300,0.500,0.700,0.580
+1ec8ab6aabb6,hpwren-dwpgm-e-mobo-c-20260925-0730,0,fog,fog sea below ridges under sun,box-b4,0.300,0.500,1.000,0.590
+1ec8ab6aabb6,hpwren-dwpgm-e-mobo-c-20260925-0730,1,fog,fog sea below ridges under sun,box-b4,0.300,0.500,1.000,0.590
+1ec8ab6aabb6,hpwren-dwpgm-e-mobo-c-20260925-0730,2,fog,fog sea below ridges under sun,box-b4,0.300,0.500,1.000,0.600
+1ec8ab6aabb6,hpwren-dwpgm-e-mobo-c-20260925-0730,3,fog,fog sea below ridges under sun,box-b4,0.300,0.500,1.000,0.600
+3c028cbeed05,hpwren-dwpgm-e-mobo-c-20261002-0730,0,fog,distant marine fog layer at horizon below sun glare,box-b5,0.330,0.510,0.800,0.560
+3c028cbeed05,hpwren-dwpgm-e-mobo-c-20261002-0730,1,fog,distant marine fog layer at horizon below sun glare,box-b5,0.330,0.510,0.800,0.560
+3c028cbeed05,hpwren-dwpgm-e-mobo-c-20261002-0730,2,fog,distant marine fog layer at horizon below sun glare,box-b5,0.330,0.510,0.800,0.560
+3c028cbeed05,hpwren-dwpgm-e-mobo-c-20261002-0730,3,fog,distant marine fog layer at horizon below sun glare,box-b5,0.330,0.510,0.800,0.560
+a1ba5b8476b7,hpwren-dwpgm-n-mobo-c-20260725-0730,0,lookalike,bright haze over distant ridges at right,box-b5,0.720,0.490,0.980,0.600
+a1ba5b8476b7,hpwren-dwpgm-n-mobo-c-20260725-0730,1,lookalike,bright haze over distant ridges at right,box-b5,0.720,0.490,0.980,0.600
+a1ba5b8476b7,hpwren-dwpgm-n-mobo-c-20260725-0730,2,lookalike,bright haze over distant ridges at right,box-b5,0.720,0.490,0.980,0.600
+a1ba5b8476b7,hpwren-dwpgm-n-mobo-c-20260725-0730,3,lookalike,bright haze over distant ridges at right,box-b5,0.720,0.490,0.980,0.600
+57b418c5f1c0,hpwren-dwpgm-n-mobo-c-20260801-0730,0,lookalike,haze over distant ridges at right,box-b5,0.750,0.500,0.980,0.600
+57b418c5f1c0,hpwren-dwpgm-n-mobo-c-20260801-0730,1,lookalike,haze over distant ridges at right,box-b5,0.750,0.500,0.980,0.600
+57b418c5f1c0,hpwren-dwpgm-n-mobo-c-20260801-0730,2,lookalike,haze over distant ridges at right,box-b5,0.750,0.500,0.980,0.600
+57b418c5f1c0,hpwren-dwpgm-n-mobo-c-20260801-0730,3,lookalike,haze over distant ridges at right,box-b5,0.750,0.500,0.980,0.600
+39d93d7de050,hpwren-dwpgm-n-mobo-c-20260906-0730,0,lookalike,bright cloud bank touching horizon,box-b5,0.000,0.380,0.550,0.500
+39d93d7de050,hpwren-dwpgm-n-mobo-c-20260906-0730,1,lookalike,bright cloud bank touching horizon,box-b5,0.000,0.380,0.600,0.500
+39d93d7de050,hpwren-dwpgm-n-mobo-c-20260906-0730,2,lookalike,bright cloud bank touching horizon,box-b5,0.000,0.360,0.550,0.500
+39d93d7de050,hpwren-dwpgm-n-mobo-c-20260906-0730,3,lookalike,bright cloud bank touching horizon,box-b5,0.000,0.380,0.550,0.500
+349335d8d2f1,hpwren-dwpgm-n-mobo-c-20260919-0730,0,lookalike,grey haze over distant ridges under overcast,box-b5,0.700,0.490,0.980,0.600
+349335d8d2f1,hpwren-dwpgm-n-mobo-c-20260919-0730,1,lookalike,grey haze over distant ridges under overcast,box-b5,0.700,0.490,0.980,0.600
+349335d8d2f1,hpwren-dwpgm-n-mobo-c-20260919-0730,2,lookalike,grey haze over distant ridges under overcast,box-b5,0.700,0.490,0.980,0.600
+349335d8d2f1,hpwren-dwpgm-n-mobo-c-20260919-0730,3,lookalike,grey haze over distant ridges under overcast,box-b5,0.700,0.490,0.980,0.600
+a32900326e8d,hpwren-dwpgm-n-mobo-c-20261009-0800,0,lookalike,haze band over ocean at horizon,box-b5,0.550,0.490,1.000,0.530
+a32900326e8d,hpwren-dwpgm-n-mobo-c-20261009-0800,1,lookalike,haze band over ocean at horizon,box-b5,0.550,0.490,1.000,0.530
+a32900326e8d,hpwren-dwpgm-n-mobo-c-20261009-0800,2,lookalike,haze band over ocean at horizon,box-b5,0.550,0.490,1.000,0.530
+a32900326e8d,hpwren-dwpgm-n-mobo-c-20261009-0800,3,lookalike,haze band over ocean at horizon,box-b5,0.550,0.490,1.000,0.530
+c09205c5d727,hpwren-dwpgm-s-mobo-c-20260722-0630,0,fog,fog sea below camera across valleys,box-b5,0.000,0.510,1.000,0.720
+c09205c5d727,hpwren-dwpgm-s-mobo-c-20260722-0630,1,fog,fog sea below camera across valleys,box-b5,0.000,0.510,1.000,0.710
+c09205c5d727,hpwren-dwpgm-s-mobo-c-20260722-0630,2,fog,fog sea below camera across valleys,box-b5,0.000,0.510,1.000,0.710
+c09205c5d727,hpwren-dwpgm-s-mobo-c-20260722-0630,3,fog,fog sea below camera across valleys,box-b5,0.000,0.510,1.000,0.700
+36f4ee5aa6d3,hpwren-dwpgm-s-mobo-c-20261001-0730,0,fog,fog sea beyond ridge,box-b5,0.080,0.500,0.850,0.630
+36f4ee5aa6d3,hpwren-dwpgm-s-mobo-c-20261001-0730,1,fog,fog sea beyond ridge,box-b5,0.080,0.500,0.850,0.620
+36f4ee5aa6d3,hpwren-dwpgm-s-mobo-c-20261001-0730,2,fog,fog sea beyond ridge,box-b5,0.080,0.500,0.800,0.600
+36f4ee5aa6d3,hpwren-dwpgm-s-mobo-c-20261001-0730,3,fog,fog sea beyond ridge,box-b5,0.080,0.500,0.750,0.620
+05698769c686,hpwren-dwpgm-s-mobo-c-20261006-0800,0,fog,coastal fog bank near shoreline at left,box-b5,0.120,0.510,0.300,0.570
+05698769c686,hpwren-dwpgm-s-mobo-c-20261006-0800,1,fog,coastal fog bank near shoreline at left,box-b5,0.120,0.510,0.300,0.570
+05698769c686,hpwren-dwpgm-s-mobo-c-20261006-0800,2,fog,coastal fog bank near shoreline at left,box-b5,0.120,0.510,0.320,0.570
+05698769c686,hpwren-dwpgm-s-mobo-c-20261006-0800,3,fog,coastal fog bank near shoreline at left,box-b5,0.120,0.510,0.320,0.570
+d245495c3682,hpwren-dwpgm-s-mobo-c-20261007-0800,0,lookalike,grey haze band over ocean at horizon,box-b5,0.050,0.500,0.750,0.580
+d245495c3682,hpwren-dwpgm-s-mobo-c-20261007-0800,1,lookalike,grey haze band over ocean at horizon,box-b5,0.050,0.500,0.750,0.580
+d245495c3682,hpwren-dwpgm-s-mobo-c-20261007-0800,2,lookalike,grey haze band over ocean at horizon,box-b5,0.050,0.500,0.750,0.580
+d245495c3682,hpwren-dwpgm-s-mobo-c-20261007-0800,3,lookalike,grey haze band over ocean at horizon,box-b5,0.050,0.500,0.750,0.580
+f04e6eba945a,hpwren-hp-s-mobo-c-20260722-0700,0,lookalike,hazy distant valley at left,box-b5,0.000,0.500,0.350,0.600
+f04e6eba945a,hpwren-hp-s-mobo-c-20260722-0700,1,lookalike,hazy distant valley at left,box-b5,0.000,0.500,0.350,0.600
+f04e6eba945a,hpwren-hp-s-mobo-c-20260722-0700,2,lookalike,hazy distant valley at left,box-b5,0.000,0.500,0.350,0.600
+f04e6eba945a,hpwren-hp-s-mobo-c-20260722-0700,3,lookalike,hazy distant valley at left,box-b5,0.000,0.500,0.350,0.600
+5e58b30a08e7,hpwren-hp-s-mobo-c-20260729-0700,0,fog,small distant fog patches in valleys at horizon,box-b5,0.360,0.500,0.550,0.540
+5e58b30a08e7,hpwren-hp-s-mobo-c-20260729-0700,1,fog,small distant fog patches in valleys at horizon,box-b5,0.360,0.500,0.550,0.540
+5e58b30a08e7,hpwren-hp-s-mobo-c-20260729-0700,2,fog,small distant fog patches in valleys at horizon,box-b5,0.380,0.500,0.550,0.540
+5e58b30a08e7,hpwren-hp-s-mobo-c-20260729-0700,3,fog,small distant fog patches in valleys at horizon,box-b5,0.380,0.500,0.600,0.540
+bfea32d65b0f,hpwren-hp-s-mobo-c-20260823-0730,0,lookalike,hazy distant valley at left,box-b5,0.000,0.520,0.320,0.600
+bfea32d65b0f,hpwren-hp-s-mobo-c-20260823-0730,1,lookalike,hazy distant valley at left,box-b5,0.000,0.520,0.320,0.600
+bfea32d65b0f,hpwren-hp-s-mobo-c-20260823-0730,2,lookalike,hazy distant valley at left,box-b5,0.000,0.520,0.320,0.600
+bfea32d65b0f,hpwren-hp-s-mobo-c-20260823-0730,3,lookalike,hazy distant valley at left,box-b5,0.000,0.520,0.320,0.600
+51c7b5e4b258,hpwren-hp-s-mobo-c-20260924-0800,0,fog,small distant fog patches at horizon,box-b5,0.460,0.500,0.560,0.540
+51c7b5e4b258,hpwren-hp-s-mobo-c-20260924-0800,1,fog,small distant fog patches at horizon,box-b5,0.460,0.500,0.560,0.540
+51c7b5e4b258,hpwren-hp-s-mobo-c-20260924-0800,2,fog,small distant fog patches at horizon,box-b5,0.460,0.500,0.560,0.540
+51c7b5e4b258,hpwren-hp-s-mobo-c-20260924-0800,3,fog,small distant fog patches at horizon,box-b5,0.460,0.500,0.560,0.540
+e372aa97caf9,hpwren-hp-w-mobo-c-20260722-0630,0,lookalike,grey haze band along horizon,box-b5,0.000,0.480,1.000,0.530
+e372aa97caf9,hpwren-hp-w-mobo-c-20260722-0630,1,lookalike,grey haze band along horizon,box-b5,0.000,0.480,1.000,0.530
+e372aa97caf9,hpwren-hp-w-mobo-c-20260722-0630,2,lookalike,grey haze band along horizon,box-b5,0.000,0.480,1.000,0.530
+e372aa97caf9,hpwren-hp-w-mobo-c-20260722-0630,3,lookalike,grey haze band along horizon,box-b5,0.000,0.480,1.000,0.530
+94c52b3c1f78,hpwren-hp-w-mobo-c-20260729-0630,0,fog,distant fog sea below far mountains at right,box-b5,0.600,0.500,0.980,0.570
+94c52b3c1f78,hpwren-hp-w-mobo-c-20260729-0630,1,fog,distant fog sea below far mountains at right,box-b5,0.600,0.500,0.980,0.570
+94c52b3c1f78,hpwren-hp-w-mobo-c-20260729-0630,2,fog,distant fog sea below far mountains at right,box-b5,0.600,0.500,0.980,0.570
+94c52b3c1f78,hpwren-hp-w-mobo-c-20260729-0630,3,fog,distant fog sea below far mountains at right,box-b5,0.600,0.500,0.980,0.570
+b93d0d0aa8ec,hpwren-hp-w-mobo-c-20260806-0730,0,lookalike,haze over distant terrain at right,box-b5,0.700,0.500,0.980,0.620
+b93d0d0aa8ec,hpwren-hp-w-mobo-c-20260806-0730,1,lookalike,haze over distant terrain at right,box-b5,0.700,0.500,0.980,0.620
+b93d0d0aa8ec,hpwren-hp-w-mobo-c-20260806-0730,2,lookalike,haze over distant terrain at right,box-b5,0.700,0.500,0.980,0.620
+b93d0d0aa8ec,hpwren-hp-w-mobo-c-20260806-0730,3,lookalike,haze over distant terrain at right,box-b5,0.700,0.500,0.980,0.620
+2ce8315bb28c,hpwren-hp-w-mobo-c-20260914-0700,0,fog,distant fog sea below far mountains at right,box-b5,0.600,0.510,0.980,0.570
+2ce8315bb28c,hpwren-hp-w-mobo-c-20260914-0700,1,fog,distant fog sea below far mountains at right,box-b5,0.600,0.510,0.980,0.570
+2ce8315bb28c,hpwren-hp-w-mobo-c-20260914-0700,2,fog,distant fog sea below far mountains at right,box-b5,0.620,0.510,0.980,0.560
+2ce8315bb28c,hpwren-hp-w-mobo-c-20260914-0700,3,fog,distant fog sea below far mountains at right,box-b5,0.620,0.510,0.980,0.560
+5e228d72ed67,hpwren-hp-w-mobo-c-20261003-0800,0,lookalike,haze over distant valleys at right,box-b5,0.650,0.500,0.980,0.600
+5e228d72ed67,hpwren-hp-w-mobo-c-20261003-0800,1,lookalike,haze over distant valleys at right,box-b5,0.650,0.500,0.980,0.600
+5e228d72ed67,hpwren-hp-w-mobo-c-20261003-0800,2,lookalike,haze over distant valleys at right,box-b5,0.650,0.500,0.980,0.600
+5e228d72ed67,hpwren-hp-w-mobo-c-20261003-0800,3,lookalike,haze over distant valleys at right,box-b5,0.650,0.500,0.980,0.600
+04c7129fc49a,hpwren-lp-w-mobo-c-20260822-0700,0,fog,marine stratus layer along distant horizon,box-b5,0.000,0.520,1.000,0.580
+04c7129fc49a,hpwren-lp-w-mobo-c-20260822-0700,1,fog,marine stratus layer along distant horizon,box-b5,0.000,0.520,1.000,0.580
+04c7129fc49a,hpwren-lp-w-mobo-c-20260822-0700,2,fog,marine stratus layer along distant horizon,box-b5,0.000,0.520,1.000,0.580
+04c7129fc49a,hpwren-lp-w-mobo-c-20260822-0700,3,fog,marine stratus layer along distant horizon,box-b5,0.000,0.520,1.000,0.580
+b2eb961d8530,hpwren-lp-w-mobo-c-20261001-0800,0,lookalike,haze band along distant horizon,box-b6,0.000,0.510,1.000,0.590
+b2eb961d8530,hpwren-lp-w-mobo-c-20261001-0800,1,lookalike,haze band along distant horizon,box-b6,0.000,0.510,1.000,0.590
+b2eb961d8530,hpwren-lp-w-mobo-c-20261001-0800,2,lookalike,haze band along distant horizon,box-b6,0.000,0.510,1.000,0.590
+b2eb961d8530,hpwren-lp-w-mobo-c-20261001-0800,3,lookalike,haze band along distant horizon,box-b6,0.000,0.510,1.000,0.590
+3496bb645d06,hpwren-marconi-e-mobo-c-20260722-0630,0,lookalike,sun-glare lit haze at horizon,box-b6,0.100,0.420,0.600,0.540
+3496bb645d06,hpwren-marconi-e-mobo-c-20260722-0630,1,lookalike,sun-glare lit haze at horizon,box-b6,0.100,0.420,0.600,0.540
+3496bb645d06,hpwren-marconi-e-mobo-c-20260722-0630,2,lookalike,sun-glare lit haze at horizon,box-b6,0.100,0.420,0.600,0.540
+3496bb645d06,hpwren-marconi-e-mobo-c-20260722-0630,3,lookalike,sun-glare lit haze at horizon,box-b6,0.100,0.420,0.600,0.540
+1674e43ef01d,hpwren-marconi-e-mobo-c-20260729-0730,0,fog,valley fog below ridges,box-b6,0.190,0.530,0.650,0.610
+1674e43ef01d,hpwren-marconi-e-mobo-c-20260729-0730,1,fog,valley fog below ridges,box-b6,0.340,0.540,0.610,0.610
+1674e43ef01d,hpwren-marconi-e-mobo-c-20260729-0730,2,fog,valley fog below ridges,box-b6,0.390,0.540,0.600,0.610
+1674e43ef01d,hpwren-marconi-e-mobo-c-20260729-0730,3,fog,valley fog below ridges,box-b6,0.420,0.560,0.590,0.610
+c19b60235107,hpwren-marconi-e-mobo-c-20260914-0730,0,fog,small valley fog patch,box-b6,,,,
+c19b60235107,hpwren-marconi-e-mobo-c-20260914-0730,1,fog,small valley fog patch,box-b6,,,,
+c19b60235107,hpwren-marconi-e-mobo-c-20260914-0730,2,fog,small valley fog patch,box-b6,0.430,0.590,0.470,0.610
+c19b60235107,hpwren-marconi-e-mobo-c-20260914-0730,3,fog,small valley fog patch,box-b6,0.420,0.570,0.490,0.610
+c79c03971913,hpwren-marconi-e-mobo-c-20261003-0800,0,lookalike,glare-washed haze below sun,box-b6,0.500,0.480,0.850,0.600
+c79c03971913,hpwren-marconi-e-mobo-c-20261003-0800,1,lookalike,glare-washed haze below sun,box-b6,0.500,0.480,0.850,0.600
+c79c03971913,hpwren-marconi-e-mobo-c-20261003-0800,2,lookalike,glare-washed haze below sun,box-b6,0.500,0.480,0.850,0.600
+c79c03971913,hpwren-marconi-e-mobo-c-20261003-0800,3,lookalike,glare-washed haze below sun,box-b6,0.500,0.480,0.850,0.600
+9999ac87ee5e,hpwren-marconi-s-mobo-c-20260822-0730,0,fog,distant marine stratus layer,box-b6,0.680,0.510,0.980,0.550
+9999ac87ee5e,hpwren-marconi-s-mobo-c-20260822-0730,1,fog,distant marine stratus layer,box-b6,0.680,0.510,0.980,0.550
+9999ac87ee5e,hpwren-marconi-s-mobo-c-20260822-0730,2,fog,distant marine stratus layer,box-b6,0.680,0.510,0.980,0.550
+9999ac87ee5e,hpwren-marconi-s-mobo-c-20260822-0730,3,fog,distant marine stratus layer,box-b6,0.680,0.510,0.980,0.550
+01d594396a14,hpwren-marconi-s-mobo-c-20261009-0730,0,fog,distant marine stratus layer,box-b6,0.400,0.510,0.950,0.540
+01d594396a14,hpwren-marconi-s-mobo-c-20261009-0730,1,fog,distant marine stratus layer,box-b6,0.400,0.510,0.950,0.540
+01d594396a14,hpwren-marconi-s-mobo-c-20261009-0730,2,fog,distant marine stratus layer,box-b6,0.400,0.510,0.750,0.540
+01d594396a14,hpwren-marconi-s-mobo-c-20261009-0730,3,fog,distant marine stratus layer,box-b6,0.400,0.510,0.750,0.540
+4c724dbc8d0c,hpwren-marconi-w-mobo-c-20260722-0700,0,fog,fog bank below camera,box-b6,0.000,0.470,1.000,0.600
+4c724dbc8d0c,hpwren-marconi-w-mobo-c-20260722-0700,1,fog,fog bank below camera,box-b6,0.000,0.470,1.000,0.600
+4c724dbc8d0c,hpwren-marconi-w-mobo-c-20260722-0700,2,fog,fog bank below camera,box-b6,0.000,0.470,1.000,0.590
+4c724dbc8d0c,hpwren-marconi-w-mobo-c-20260722-0700,3,fog,fog bank below camera,box-b6,0.000,0.470,1.000,0.590
+9f189134aa28,hpwren-marconi-w-mobo-c-20260801-0700,0,fog,fog sea and valley fog,box-b6,0.020,0.480,0.960,0.570
+9f189134aa28,hpwren-marconi-w-mobo-c-20260801-0700,1,fog,fog sea and valley fog,box-b6,0.020,0.480,0.960,0.570
+9f189134aa28,hpwren-marconi-w-mobo-c-20260801-0700,2,fog,fog sea and valley fog,box-b6,0.020,0.480,0.960,0.560
+9f189134aa28,hpwren-marconi-w-mobo-c-20260801-0700,3,fog,fog sea and valley fog,box-b6,0.020,0.480,0.960,0.560
+ee1226cd55ea,hpwren-marconi-w-mobo-c-20260829-0730,0,lookalike,haze band at horizon,box-b6,0.000,0.470,1.000,0.530
+ee1226cd55ea,hpwren-marconi-w-mobo-c-20260829-0730,1,lookalike,haze band at horizon,box-b6,0.000,0.470,1.000,0.530
+ee1226cd55ea,hpwren-marconi-w-mobo-c-20260829-0730,2,lookalike,haze band at horizon,box-b6,0.000,0.470,1.000,0.530
+ee1226cd55ea,hpwren-marconi-w-mobo-c-20260829-0730,3,lookalike,haze band at horizon,box-b6,0.000,0.470,1.000,0.530
+52076686b7a4,hpwren-marconi-w-mobo-c-20261003-0800,0,lookalike,thin haze band at horizon,box-b6,0.000,0.470,1.000,0.520
+52076686b7a4,hpwren-marconi-w-mobo-c-20261003-0800,1,lookalike,thin haze band at horizon,box-b6,0.000,0.470,1.000,0.520
+52076686b7a4,hpwren-marconi-w-mobo-c-20261003-0800,2,lookalike,thin haze band at horizon,box-b6,0.000,0.470,1.000,0.520
+52076686b7a4,hpwren-marconi-w-mobo-c-20261003-0800,3,lookalike,thin haze band at horizon,box-b6,0.000,0.470,1.000,0.520
+d758f3480f57,hpwren-marconi-w-mobo-c-20261017-0730,0,lookalike,grey haze band at horizon,box-b6,0.000,0.450,1.000,0.530
+d758f3480f57,hpwren-marconi-w-mobo-c-20261017-0730,1,lookalike,grey haze band at horizon,box-b6,0.000,0.450,1.000,0.530
+d758f3480f57,hpwren-marconi-w-mobo-c-20261017-0730,2,lookalike,grey haze band at horizon,box-b6,0.000,0.450,1.000,0.530
+d758f3480f57,hpwren-marconi-w-mobo-c-20261017-0730,3,lookalike,grey haze band at horizon,box-b6,0.000,0.450,1.000,0.530
+c01aac5071d6,hpwren-marion-e-mobo-c-20260927-0730,0,fog,low cloud resting on peak,box-b6,0.050,0.260,0.350,0.380
+c01aac5071d6,hpwren-marion-e-mobo-c-20260927-0730,1,fog,low cloud resting on peak,box-b6,0.030,0.260,0.350,0.380
+c01aac5071d6,hpwren-marion-e-mobo-c-20260927-0730,2,fog,low cloud resting on peak,box-b6,0.000,0.250,0.680,0.400
+c01aac5071d6,hpwren-marion-e-mobo-c-20260927-0730,3,fog,low cloud resting on peak,box-b6,0.000,0.220,0.700,0.390
+9fee915e2142,hpwren-marion-e-mobo-c-20260928-0730,0,fog,low cloud draped on ridge,box-b6,0.000,0.350,0.920,0.470
+9fee915e2142,hpwren-marion-e-mobo-c-20260928-0730,1,fog,low cloud draped on ridge,box-b6,0.000,0.360,1.000,0.480
+9fee915e2142,hpwren-marion-e-mobo-c-20260928-0730,2,fog,low cloud draped on ridge,box-b6,0.000,0.330,1.000,0.470
+9fee915e2142,hpwren-marion-e-mobo-c-20260928-0730,3,fog,low cloud draped on ridge,box-b6,0.000,0.370,1.000,0.480
+8da90bd05c67,hpwren-marion-e-mobo-c-20261011-0800,0,fog,camera inside fog,box-b6,0.000,0.000,1.000,1.000
+8da90bd05c67,hpwren-marion-e-mobo-c-20261011-0800,1,fog,camera inside fog,box-b6,0.000,0.000,1.000,1.000
+8da90bd05c67,hpwren-marion-e-mobo-c-20261011-0800,2,fog,camera inside fog,box-b6,0.000,0.000,1.000,1.000
+8da90bd05c67,hpwren-marion-e-mobo-c-20261011-0800,3,fog,camera inside fog,box-b6,0.000,0.000,1.000,1.000
+c3d34ce43cbb,hpwren-marion-w-mobo-c-20260727-0630,0,lookalike,haze over distant valley,box-b6,0.120,0.490,0.950,0.580
+c3d34ce43cbb,hpwren-marion-w-mobo-c-20260727-0630,1,lookalike,haze over distant valley,box-b6,0.120,0.490,0.950,0.580
+c3d34ce43cbb,hpwren-marion-w-mobo-c-20260727-0630,2,lookalike,haze over distant valley,box-b6,0.120,0.490,0.950,0.580
+c3d34ce43cbb,hpwren-marion-w-mobo-c-20260727-0630,3,lookalike,haze over distant valley,box-b6,0.120,0.490,0.950,0.580
+51c05c5dc6fa,hpwren-marion-w-mobo-c-20260915-0700,0,fog,stratus sea filling basin,box-b6,0.120,0.500,0.800,0.590
+51c05c5dc6fa,hpwren-marion-w-mobo-c-20260915-0700,1,fog,stratus sea filling basin,box-b6,0.120,0.500,0.750,0.590
+51c05c5dc6fa,hpwren-marion-w-mobo-c-20260915-0700,2,fog,stratus sea filling basin,box-b6,0.120,0.500,0.750,0.590
+51c05c5dc6fa,hpwren-marion-w-mobo-c-20260915-0700,3,fog,stratus sea filling basin,box-b6,0.120,0.500,0.750,0.590
+1d79d205afad,hpwren-marion-w-mobo-c-20260919-0800,0,fog,thin distant fog patches,box-b6,0.120,0.510,0.320,0.550
+1d79d205afad,hpwren-marion-w-mobo-c-20260919-0800,1,fog,thin distant fog patches,box-b6,0.120,0.510,0.320,0.550
+1d79d205afad,hpwren-marion-w-mobo-c-20260919-0800,2,fog,thin distant fog patches,box-b6,0.120,0.510,0.320,0.550
+1d79d205afad,hpwren-marion-w-mobo-c-20260919-0800,3,fog,thin distant fog patches,box-b6,0.120,0.510,0.320,0.550
+da4cf8344a77,hpwren-marion-w-mobo-c-20261009-0730,0,lookalike,haze band at horizon,box-b6,0.120,0.490,1.000,0.560
+da4cf8344a77,hpwren-marion-w-mobo-c-20261009-0730,1,lookalike,haze band at horizon,box-b6,0.120,0.490,1.000,0.560
+da4cf8344a77,hpwren-marion-w-mobo-c-20261009-0730,2,lookalike,haze band at horizon,box-b6,0.120,0.490,1.000,0.560
+da4cf8344a77,hpwren-marion-w-mobo-c-20261009-0730,3,lookalike,haze band at horizon,box-b6,0.120,0.490,1.000,0.560
+b2c3ef6074a6,hpwren-mg-s-mobo-c-20260729-0630,0,fog,distant stratus sea,box-b6,0.550,0.510,0.950,0.570
+b2c3ef6074a6,hpwren-mg-s-mobo-c-20260729-0630,1,fog,distant stratus sea,box-b6,0.550,0.510,0.950,0.570
+b2c3ef6074a6,hpwren-mg-s-mobo-c-20260729-0630,2,fog,distant stratus sea,box-b6,0.550,0.510,0.950,0.560
+b2c3ef6074a6,hpwren-mg-s-mobo-c-20260729-0630,3,fog,distant stratus sea,box-b6,0.550,0.510,0.950,0.560
+f74a4fcac586,hpwren-mg-s-mobo-c-20260819-0700,0,lookalike,haze band along distant horizon,box-b7,0.000,0.490,0.950,0.540
+f74a4fcac586,hpwren-mg-s-mobo-c-20260819-0700,1,lookalike,haze band along distant horizon,box-b7,0.000,0.490,0.950,0.540
+f74a4fcac586,hpwren-mg-s-mobo-c-20260819-0700,2,lookalike,haze band along distant horizon,box-b7,0.000,0.490,0.950,0.540
+f74a4fcac586,hpwren-mg-s-mobo-c-20260819-0700,3,lookalike,haze band along distant horizon,box-b7,0.000,0.490,0.950,0.540
+3c0a9c30b405,hpwren-mg-s-mobo-c-20260909-0700,0,lookalike,cloud bank touching horizon at left,box-b7,0.000,0.380,0.500,0.500
+3c0a9c30b405,hpwren-mg-s-mobo-c-20260909-0700,1,lookalike,cloud bank touching horizon at left,box-b7,0.000,0.380,0.500,0.500
+3c0a9c30b405,hpwren-mg-s-mobo-c-20260909-0700,2,lookalike,cloud bank touching horizon at left,box-b7,0.000,0.380,0.600,0.500
+3c0a9c30b405,hpwren-mg-s-mobo-c-20260909-0700,3,lookalike,cloud bank touching horizon at left,box-b7,0.000,0.380,0.550,0.500
+538292c39357,hpwren-mg-s-mobo-c-20260924-0730,0,fog,distant marine layer between far ridges,box-b7,0.630,0.510,0.950,0.540
+538292c39357,hpwren-mg-s-mobo-c-20260924-0730,1,fog,distant marine layer between far ridges,box-b7,0.640,0.510,0.950,0.540
+538292c39357,hpwren-mg-s-mobo-c-20260924-0730,2,fog,distant marine layer between far ridges,box-b7,0.630,0.510,0.970,0.550
+538292c39357,hpwren-mg-s-mobo-c-20260924-0730,3,fog,distant marine layer between far ridges,box-b7,0.630,0.510,0.970,0.550
+ead6cbaf603f,hpwren-mpo-s-mobo-c-20260729-0700,0,fog,low fog layer in distant lowlands at left,box-b7,0.000,0.520,0.170,0.580
+ead6cbaf603f,hpwren-mpo-s-mobo-c-20260729-0700,1,fog,low fog layer in distant lowlands at left,box-b7,0.000,0.520,0.170,0.580
+ead6cbaf603f,hpwren-mpo-s-mobo-c-20260729-0700,2,fog,low fog layer in distant lowlands at left,box-b7,0.000,0.520,0.180,0.580
+ead6cbaf603f,hpwren-mpo-s-mobo-c-20260729-0700,3,fog,low fog layer in distant lowlands at left,box-b7,0.000,0.520,0.180,0.580
+61024383e3e2,hpwren-mpo-s-mobo-c-20260828-0700,0,lookalike,hazy distant terrain at horizon left,box-b7,0.000,0.490,0.180,0.570
+61024383e3e2,hpwren-mpo-s-mobo-c-20260828-0700,1,lookalike,hazy distant terrain at horizon left,box-b7,0.000,0.490,0.180,0.570
+61024383e3e2,hpwren-mpo-s-mobo-c-20260828-0700,2,lookalike,hazy distant terrain at horizon left,box-b7,0.000,0.490,0.180,0.570
+61024383e3e2,hpwren-mpo-s-mobo-c-20260828-0700,3,lookalike,hazy distant terrain at horizon left,box-b7,0.000,0.490,0.180,0.570
+043c1563f17d,hpwren-mpo-s-mobo-c-20260924-0800,0,lookalike,hazy distant lowlands at horizon left,box-b7,0.000,0.510,0.170,0.570
+043c1563f17d,hpwren-mpo-s-mobo-c-20260924-0800,1,lookalike,hazy distant lowlands at horizon left,box-b7,0.000,0.510,0.170,0.570
+043c1563f17d,hpwren-mpo-s-mobo-c-20260924-0800,2,lookalike,hazy distant lowlands at horizon left,box-b7,0.000,0.510,0.170,0.570
+043c1563f17d,hpwren-mpo-s-mobo-c-20260924-0800,3,lookalike,hazy distant lowlands at horizon left,box-b7,0.000,0.510,0.170,0.570
+91f1836f34f2,hpwren-mpo-s-mobo-c-20260930-0730,0,lookalike,hazy distant lowlands at horizon left,box-b7,0.000,0.510,0.170,0.570
+91f1836f34f2,hpwren-mpo-s-mobo-c-20260930-0730,1,lookalike,hazy distant lowlands at horizon left,box-b7,0.000,0.510,0.170,0.570
+91f1836f34f2,hpwren-mpo-s-mobo-c-20260930-0730,2,lookalike,hazy distant lowlands at horizon left,box-b7,0.000,0.510,0.170,0.570
+91f1836f34f2,hpwren-mpo-s-mobo-c-20260930-0730,3,lookalike,hazy distant lowlands at horizon left,box-b7,0.000,0.510,0.170,0.570
+a0d1f1362868,hpwren-mpo-w-mobo-c-20260722-0700,0,fog,flat stratus/marine layer at far horizon,box-b7,0.150,0.500,1.000,0.560
+a0d1f1362868,hpwren-mpo-w-mobo-c-20260722-0700,1,fog,flat stratus/marine layer at far horizon,box-b7,0.150,0.500,1.000,0.560
+a0d1f1362868,hpwren-mpo-w-mobo-c-20260722-0700,2,fog,flat stratus/marine layer at far horizon,box-b7,0.150,0.500,1.000,0.560
+a0d1f1362868,hpwren-mpo-w-mobo-c-20260722-0700,3,fog,flat stratus/marine layer at far horizon,box-b7,0.150,0.500,1.000,0.560
+1ba19f3cff31,hpwren-mpo-w-mobo-c-20260729-0700,0,lookalike,haze band over distant terrain at horizon,box-b7,0.180,0.500,1.000,0.570
+1ba19f3cff31,hpwren-mpo-w-mobo-c-20260729-0700,1,lookalike,haze band over distant terrain at horizon,box-b7,0.180,0.500,1.000,0.570
+1ba19f3cff31,hpwren-mpo-w-mobo-c-20260729-0700,2,lookalike,haze band over distant terrain at horizon,box-b7,0.180,0.500,1.000,0.570
+1ba19f3cff31,hpwren-mpo-w-mobo-c-20260729-0700,3,lookalike,haze band over distant terrain at horizon,box-b7,0.180,0.500,1.000,0.570
+901e98885be9,hpwren-mpo-w-mobo-c-20260806-0700,0,lookalike,haze band over distant terrain at horizon,box-b7,0.200,0.490,1.000,0.570
+901e98885be9,hpwren-mpo-w-mobo-c-20260806-0700,1,lookalike,haze band over distant terrain at horizon,box-b7,0.200,0.490,1.000,0.570
+901e98885be9,hpwren-mpo-w-mobo-c-20260806-0700,2,lookalike,haze band over distant terrain at horizon,box-b7,0.200,0.490,1.000,0.570
+901e98885be9,hpwren-mpo-w-mobo-c-20260806-0700,3,lookalike,haze band over distant terrain at horizon,box-b7,0.200,0.490,1.000,0.570
+87c7c54830e9,hpwren-mpo-w-mobo-c-20260914-0700,0,lookalike,haze band over distant terrain at horizon,box-b7,0.180,0.500,1.000,0.570
+87c7c54830e9,hpwren-mpo-w-mobo-c-20260914-0700,1,lookalike,haze band over distant terrain at horizon,box-b7,0.180,0.500,1.000,0.570
+87c7c54830e9,hpwren-mpo-w-mobo-c-20260914-0700,2,lookalike,haze band over distant terrain at horizon,box-b7,0.180,0.500,1.000,0.570
+87c7c54830e9,hpwren-mpo-w-mobo-c-20260914-0700,3,lookalike,haze band over distant terrain at horizon,box-b7,0.180,0.500,1.000,0.570
+625ff5b79ad0,hpwren-ms-n-mobo-c-20260822-0730,0,fog,"camera inside fog, washed-out view",box-b7,0.000,0.000,1.000,1.000
+625ff5b79ad0,hpwren-ms-n-mobo-c-20260822-0730,1,fog,"camera inside fog, washed-out view",box-b7,0.000,0.000,1.000,1.000
+625ff5b79ad0,hpwren-ms-n-mobo-c-20260822-0730,2,fog,"camera inside fog, washed-out view",box-b7,0.000,0.000,1.000,1.000
+625ff5b79ad0,hpwren-ms-n-mobo-c-20260822-0730,3,fog,"camera inside fog, washed-out view",box-b7,0.000,0.000,1.000,1.000
+bffa63d299ec,hpwren-ms-n-mobo-c-20260903-0700,0,lookalike,bright haze over distant town and hills,box-b7,0.420,0.300,0.720,0.480
+bffa63d299ec,hpwren-ms-n-mobo-c-20260903-0700,1,lookalike,bright haze over distant town and hills,box-b7,0.420,0.300,0.720,0.480
+bffa63d299ec,hpwren-ms-n-mobo-c-20260903-0700,2,lookalike,bright haze over distant town and hills,box-b7,0.420,0.300,0.720,0.480
+bffa63d299ec,hpwren-ms-n-mobo-c-20260903-0700,3,lookalike,bright haze over distant town and hills,box-b7,0.420,0.300,0.720,0.480
+24158e069068,hpwren-ms-n-mobo-c-20260910-0700,0,lookalike,bright haze over distant town and hills,box-b7,0.420,0.300,0.720,0.480
+24158e069068,hpwren-ms-n-mobo-c-20260910-0700,1,lookalike,bright haze over distant town and hills,box-b7,0.420,0.300,0.720,0.480
+24158e069068,hpwren-ms-n-mobo-c-20260910-0700,2,lookalike,bright haze over distant town and hills,box-b7,0.420,0.300,0.720,0.480
+24158e069068,hpwren-ms-n-mobo-c-20260910-0700,3,lookalike,bright haze over distant town and hills,box-b7,0.420,0.300,0.720,0.480
+433649e55ac1,hpwren-ms-n-mobo-c-20261001-0800,0,fog,"camera inside fog, washed-out view",box-b7,0.000,0.000,1.000,1.000
+433649e55ac1,hpwren-ms-n-mobo-c-20261001-0800,1,fog,"camera inside fog, washed-out view",box-b7,0.000,0.000,1.000,1.000
+433649e55ac1,hpwren-ms-n-mobo-c-20261001-0800,2,fog,"camera inside fog, washed-out view",box-b7,0.000,0.000,1.000,1.000
+433649e55ac1,hpwren-ms-n-mobo-c-20261001-0800,3,fog,"camera inside fog, washed-out view",box-b7,0.000,0.000,1.000,1.000
+4d1a47c4c99a,hpwren-ms-n-mobo-c-20261016-0730,0,lookalike,bright haze over distant town and hills,box-b7,0.420,0.300,0.720,0.460
+4d1a47c4c99a,hpwren-ms-n-mobo-c-20261016-0730,1,lookalike,bright haze over distant town and hills,box-b7,0.420,0.300,0.720,0.460
+4d1a47c4c99a,hpwren-ms-n-mobo-c-20261016-0730,2,lookalike,bright haze over distant town and hills,box-b7,0.420,0.290,0.720,0.460
+4d1a47c4c99a,hpwren-ms-n-mobo-c-20261016-0730,3,lookalike,bright haze over distant town and hills,box-b7,0.420,0.290,0.720,0.460
+0f90173a9c5d,hpwren-om-n-mobo-c-20260730-0700,0,fog,"fog sea filling valleys below camera, left",box-b7,0.000,0.500,0.660,0.660
+0f90173a9c5d,hpwren-om-n-mobo-c-20260730-0700,1,fog,"fog sea filling valleys below camera, left",box-b7,0.000,0.500,0.660,0.660
+0f90173a9c5d,hpwren-om-n-mobo-c-20260730-0700,2,fog,"fog sea filling valleys below camera, left",box-b7,0.000,0.500,0.660,0.670
+0f90173a9c5d,hpwren-om-n-mobo-c-20260730-0700,3,fog,"fog sea filling valleys below camera, left",box-b7,0.000,0.500,0.660,0.670
+a4569d65507d,hpwren-om-n-mobo-c-20260802-0700,0,fog,"fog sea filling valleys below camera, left",box-b7,0.000,0.500,0.660,0.660
+a4569d65507d,hpwren-om-n-mobo-c-20260802-0700,1,fog,"fog sea filling valleys below camera, left",box-b7,0.000,0.500,0.660,0.670
+a4569d65507d,hpwren-om-n-mobo-c-20260802-0700,2,fog,"fog sea filling valleys below camera, left",box-b7,0.000,0.500,0.660,0.680
+a4569d65507d,hpwren-om-n-mobo-c-20260802-0700,3,fog,"fog sea filling valleys below camera, left",box-b7,0.000,0.500,0.660,0.680
+66be37696805,hpwren-om-n-mobo-c-20260808-0730,0,lookalike,"bright haze band at far horizon, right",box-b7,0.700,0.490,1.000,0.560
+66be37696805,hpwren-om-n-mobo-c-20260808-0730,1,lookalike,"bright haze band at far horizon, right",box-b7,0.700,0.490,1.000,0.560
+66be37696805,hpwren-om-n-mobo-c-20260808-0730,2,lookalike,"bright haze band at far horizon, right",box-b7,0.700,0.490,1.000,0.560
+66be37696805,hpwren-om-n-mobo-c-20260808-0730,3,lookalike,"bright haze band at far horizon, right",box-b7,0.700,0.490,1.000,0.560
+2567c518439a,hpwren-om-n-mobo-c-20260927-0800,0,lookalike,low cloud bank touching horizon,box-b7,0.000,0.400,0.950,0.500
+2567c518439a,hpwren-om-n-mobo-c-20260927-0800,1,lookalike,low cloud bank touching horizon,box-b7,0.000,0.400,0.950,0.500
+2567c518439a,hpwren-om-n-mobo-c-20260927-0800,2,lookalike,low cloud bank touching horizon,box-b7,0.000,0.400,0.950,0.500
+2567c518439a,hpwren-om-n-mobo-c-20260927-0800,3,lookalike,low cloud bank touching horizon,box-b7,0.000,0.400,0.950,0.500
+eea6bff81671,hpwren-om-w-mobo-c-20260823-0730,0,lookalike,thin whitish haze band along horizon,box-b8,0.000,0.460,0.980,0.520
+eea6bff81671,hpwren-om-w-mobo-c-20260823-0730,1,lookalike,thin whitish haze band along horizon,box-b8,0.000,0.460,0.980,0.520
+eea6bff81671,hpwren-om-w-mobo-c-20260823-0730,2,lookalike,thin whitish haze band along horizon,box-b8,0.000,0.460,0.980,0.520
+eea6bff81671,hpwren-om-w-mobo-c-20260823-0730,3,lookalike,thin whitish haze band along horizon,box-b8,0.000,0.460,0.980,0.520
+393a35d3f753,hpwren-om-w-mobo-c-20261009-0730,0,lookalike,"haze over valley at horizon, left side",box-b8,0.000,0.490,0.600,0.600
+393a35d3f753,hpwren-om-w-mobo-c-20261009-0730,1,lookalike,"haze over valley at horizon, left side",box-b8,0.000,0.490,0.600,0.600
+393a35d3f753,hpwren-om-w-mobo-c-20261009-0730,2,lookalike,"haze over valley at horizon, left side",box-b8,0.000,0.490,0.600,0.600
+393a35d3f753,hpwren-om-w-mobo-c-20261009-0730,3,lookalike,"haze over valley at horizon, left side",box-b8,0.000,0.490,0.600,0.600
+530a1d361a0d,hpwren-pi-w-mobo-c-20260730-0700,0,lookalike,bright haze band along distant horizon,box-b8,0.000,0.490,0.950,0.540
+530a1d361a0d,hpwren-pi-w-mobo-c-20260730-0700,1,lookalike,bright haze band along distant horizon,box-b8,0.000,0.490,0.950,0.540
+530a1d361a0d,hpwren-pi-w-mobo-c-20260730-0700,2,lookalike,bright haze band along distant horizon,box-b8,0.000,0.490,0.950,0.540
+530a1d361a0d,hpwren-pi-w-mobo-c-20260730-0700,3,lookalike,bright haze band along distant horizon,box-b8,0.000,0.490,0.950,0.540
+f4b3ba09f9f7,hpwren-pi-w-mobo-c-20260802-0730,0,lookalike,bright haze band along distant horizon,box-b8,0.000,0.490,0.970,0.550
+f4b3ba09f9f7,hpwren-pi-w-mobo-c-20260802-0730,1,lookalike,bright haze band along distant horizon,box-b8,0.000,0.490,0.970,0.550
+f4b3ba09f9f7,hpwren-pi-w-mobo-c-20260802-0730,2,lookalike,bright haze band along distant horizon,box-b8,0.000,0.490,0.970,0.550
+f4b3ba09f9f7,hpwren-pi-w-mobo-c-20260802-0730,3,lookalike,bright haze band along distant horizon,box-b8,0.000,0.490,0.970,0.550
+4e9109043637,hpwren-pi-w-mobo-c-20260827-0700,0,lookalike,hazy sunlit distant ridges at horizon,box-b8,0.000,0.490,0.950,0.570
+4e9109043637,hpwren-pi-w-mobo-c-20260827-0700,1,lookalike,hazy sunlit distant ridges at horizon,box-b8,0.000,0.490,0.970,0.590
+4e9109043637,hpwren-pi-w-mobo-c-20260827-0700,2,lookalike,hazy sunlit distant ridges at horizon,box-b8,0.000,0.480,0.970,0.580
+4e9109043637,hpwren-pi-w-mobo-c-20260827-0700,3,lookalike,hazy sunlit distant ridges at horizon,box-b8,0.000,0.480,0.970,0.580
+64633d1a6a1e,hpwren-pi-w-mobo-c-20260911-0700,0,lookalike,haze band at horizon over distant ridges,box-b8,0.000,0.490,0.930,0.550
+64633d1a6a1e,hpwren-pi-w-mobo-c-20260911-0700,1,lookalike,haze band at horizon over distant ridges,box-b8,0.000,0.490,0.930,0.550
+64633d1a6a1e,hpwren-pi-w-mobo-c-20260911-0700,2,lookalike,haze band at horizon over distant ridges,box-b8,0.000,0.490,0.950,0.540
+64633d1a6a1e,hpwren-pi-w-mobo-c-20260911-0700,3,lookalike,haze band at horizon over distant ridges,box-b8,0.000,0.490,0.950,0.540
+926681ffdd5e,hpwren-rdd-e-mobo-c-20260729-0630,0,lookalike,grey haze band at horizon under overcast,box-b8,0.000,0.440,0.920,0.540
+926681ffdd5e,hpwren-rdd-e-mobo-c-20260729-0630,1,lookalike,grey haze band at horizon under overcast,box-b8,0.000,0.440,0.920,0.540
+926681ffdd5e,hpwren-rdd-e-mobo-c-20260729-0630,2,lookalike,grey haze band at horizon under overcast,box-b8,0.000,0.440,0.920,0.540
+926681ffdd5e,hpwren-rdd-e-mobo-c-20260729-0630,3,lookalike,grey haze band at horizon under overcast,box-b8,0.000,0.440,0.920,0.540
+5d2fe18825e8,hpwren-rdd-e-mobo-c-20260808-0700,0,fog,low fog layer in valleys below distant ridges,box-b8,0.000,0.460,0.920,0.520
+5d2fe18825e8,hpwren-rdd-e-mobo-c-20260808-0700,1,fog,low fog layer in valleys below distant ridges,box-b8,0.000,0.460,0.920,0.520
+5d2fe18825e8,hpwren-rdd-e-mobo-c-20260808-0700,2,fog,low fog layer in valleys below distant ridges,box-b8,0.000,0.470,0.920,0.520
+5d2fe18825e8,hpwren-rdd-e-mobo-c-20260808-0700,3,fog,low fog layer in valleys below distant ridges,box-b8,0.000,0.470,0.920,0.520
+5176912adbb1,hpwren-rdd-e-mobo-c-20260912-0700,0,lookalike,sunlit haze over terrain below sun glare,box-b8,0.150,0.480,0.750,0.600
+5176912adbb1,hpwren-rdd-e-mobo-c-20260912-0700,1,lookalike,sunlit haze over terrain below sun glare,box-b8,0.150,0.480,0.750,0.600
+5176912adbb1,hpwren-rdd-e-mobo-c-20260912-0700,2,lookalike,sunlit haze over terrain below sun glare,box-b8,0.150,0.480,0.750,0.600
+5176912adbb1,hpwren-rdd-e-mobo-c-20260912-0700,3,lookalike,sunlit haze over terrain below sun glare,box-b8,0.150,0.480,0.750,0.600
+1522d3e6f1b1,hpwren-rdd-e-mobo-c-20260924-0730,0,fog,"camera inside fog, whole view washed out",box-b8,0.000,0.000,1.000,1.000
+1522d3e6f1b1,hpwren-rdd-e-mobo-c-20260924-0730,1,fog,"camera inside fog, whole view washed out",box-b8,0.000,0.000,1.000,1.000
+1522d3e6f1b1,hpwren-rdd-e-mobo-c-20260924-0730,2,fog,"camera inside fog, whole view washed out",box-b8,0.000,0.000,1.000,1.000
+1522d3e6f1b1,hpwren-rdd-e-mobo-c-20260924-0730,3,fog,"camera inside fog, whole view washed out",box-b8,0.000,0.000,1.000,1.000
+15ae45afce01,hpwren-rdd-n-mobo-c-20260910-0730,0,lookalike,haze band at horizon over distant mountains,box-b8,0.350,0.460,0.970,0.520
+15ae45afce01,hpwren-rdd-n-mobo-c-20260910-0730,1,lookalike,haze band at horizon over distant mountains,box-b8,0.350,0.460,0.970,0.520
+15ae45afce01,hpwren-rdd-n-mobo-c-20260910-0730,2,lookalike,haze band at horizon over distant mountains,box-b8,0.350,0.470,0.970,0.520
+15ae45afce01,hpwren-rdd-n-mobo-c-20260910-0730,3,lookalike,haze band at horizon over distant mountains,box-b8,0.350,0.470,0.970,0.520
+4152dc488374,hpwren-rdd-n-mobo-c-20260924-0730,0,fog,"camera inside fog, whole view washed out",box-b8,0.000,0.000,1.000,1.000
+4152dc488374,hpwren-rdd-n-mobo-c-20260924-0730,1,fog,"camera inside fog, whole view washed out",box-b8,0.000,0.000,1.000,1.000
+4152dc488374,hpwren-rdd-n-mobo-c-20260924-0730,2,fog,"camera inside fog, whole view washed out",box-b8,0.000,0.000,1.000,1.000
+4152dc488374,hpwren-rdd-n-mobo-c-20260924-0730,3,fog,"camera inside fog, whole view washed out",box-b8,0.000,0.000,1.000,1.000
+45c5b5b344ba,hpwren-rdd-n-mobo-c-20260925-0800,0,fog,fog bank rolling over valley and ridges,box-b8,0.350,0.460,0.990,0.630
+45c5b5b344ba,hpwren-rdd-n-mobo-c-20260925-0800,1,fog,fog bank rolling over valley and ridges,box-b8,0.330,0.450,0.990,0.680
+45c5b5b344ba,hpwren-rdd-n-mobo-c-20260925-0800,2,fog,fog bank rolling over valley and ridges,box-b8,0.370,0.450,0.990,0.680
+45c5b5b344ba,hpwren-rdd-n-mobo-c-20260925-0800,3,fog,fog bank rolling over valley and ridges,box-b8,0.380,0.460,0.990,0.700
+557b74e7dabd,hpwren-rdd-n-mobo-c-20261008-0730,0,lookalike,haze band at horizon over distant mountains,box-b8,0.380,0.460,0.980,0.520
+557b74e7dabd,hpwren-rdd-n-mobo-c-20261008-0730,1,lookalike,haze band at horizon over distant mountains,box-b8,0.380,0.460,0.980,0.520
+557b74e7dabd,hpwren-rdd-n-mobo-c-20261008-0730,2,lookalike,haze band at horizon over distant mountains,box-b8,0.380,0.470,0.980,0.520
+557b74e7dabd,hpwren-rdd-n-mobo-c-20261008-0730,3,lookalike,haze band at horizon over distant mountains,box-b8,0.380,0.470,0.980,0.520
+42f5bd529848,hpwren-rdd-s-mobo-c-20260822-0730,0,fog,stratus fog sea filling valley below camera,box-b8,0.000,0.500,0.580,0.650
+42f5bd529848,hpwren-rdd-s-mobo-c-20260822-0730,1,fog,stratus fog sea filling valley below camera,box-b8,0.000,0.500,0.590,0.630
+42f5bd529848,hpwren-rdd-s-mobo-c-20260822-0730,2,fog,stratus fog sea filling valley below camera,box-b8,0.000,0.500,0.570,0.610
+42f5bd529848,hpwren-rdd-s-mobo-c-20260822-0730,3,fog,stratus fog sea filling valley below camera,box-b8,0.000,0.500,0.570,0.600
+eeef74252138,hpwren-rdd-s-mobo-c-20260826-0730,0,fog,small residual low cloud patch at far-left horizon,box-b8,0.000,0.500,0.080,0.550
+eeef74252138,hpwren-rdd-s-mobo-c-20260826-0730,1,fog,small residual low cloud patch at far-left horizon,box-b8,0.000,0.500,0.080,0.550
+eeef74252138,hpwren-rdd-s-mobo-c-20260826-0730,2,fog,small residual low cloud patch at far-left horizon,box-b8,0.000,0.500,0.080,0.550
+eeef74252138,hpwren-rdd-s-mobo-c-20260826-0730,3,fog,small residual low cloud patch at far-left horizon,box-b8,0.000,0.500,0.080,0.550
+40e83257f1f9,hpwren-rdd-s-mobo-c-20260908-0700,0,lookalike,bright cloud/glare band touching horizon at left,box-b8,0.000,0.430,0.580,0.510
+40e83257f1f9,hpwren-rdd-s-mobo-c-20260908-0700,1,lookalike,bright cloud/glare band touching horizon at left,box-b8,0.000,0.420,0.580,0.510
+40e83257f1f9,hpwren-rdd-s-mobo-c-20260908-0700,2,lookalike,bright cloud/glare band touching horizon at left,box-b8,0.000,0.380,0.600,0.510
+40e83257f1f9,hpwren-rdd-s-mobo-c-20260908-0700,3,lookalike,bright cloud/glare band touching horizon at left,box-b8,0.000,0.370,0.600,0.510
+7bf77ffbaa0f,hpwren-rdd-s-mobo-c-20260909-0700,0,lookalike,cloud bank touching horizon at left,box-b8,0.000,0.420,0.420,0.500
+7bf77ffbaa0f,hpwren-rdd-s-mobo-c-20260909-0700,1,lookalike,cloud bank touching horizon at left,box-b8,0.000,0.420,0.420,0.500
+7bf77ffbaa0f,hpwren-rdd-s-mobo-c-20260909-0700,2,lookalike,cloud bank touching horizon at left,box-b8,0.000,0.410,0.420,0.500
+7bf77ffbaa0f,hpwren-rdd-s-mobo-c-20260909-0700,3,lookalike,cloud bank touching horizon at left,box-b8,0.000,0.410,0.420,0.500
+7239e304f507,hpwren-rdd-s-mobo-c-20261001-0730,0,fog,thin valley fog between distant ridges,box-b8,0.280,0.500,0.560,0.590
+7239e304f507,hpwren-rdd-s-mobo-c-20261001-0730,1,fog,thin valley fog between distant ridges,box-b8,0.280,0.510,0.560,0.590
+7239e304f507,hpwren-rdd-s-mobo-c-20261001-0730,2,fog,thin valley fog between distant ridges,box-b8,0.350,0.510,0.550,0.590
+7239e304f507,hpwren-rdd-s-mobo-c-20261001-0730,3,fog,thin valley fog between distant ridges,box-b8,0.350,0.510,0.550,0.590
+d48e9ac0e154,hpwren-rdd-w-mobo-c-20260822-0700,0,lookalike,distant haze in valley gap at horizon,box-b8,0.280,0.480,0.500,0.540
+d48e9ac0e154,hpwren-rdd-w-mobo-c-20260822-0700,1,lookalike,distant haze in valley gap at horizon,box-b8,0.280,0.480,0.500,0.540
+d48e9ac0e154,hpwren-rdd-w-mobo-c-20260822-0700,2,lookalike,distant haze in valley gap at horizon,box-b8,0.280,0.480,0.500,0.540
+d48e9ac0e154,hpwren-rdd-w-mobo-c-20260822-0700,3,lookalike,distant haze in valley gap at horizon,box-b8,0.280,0.480,0.500,0.540
+bca3448a1ecd,hpwren-rdd-w-mobo-c-20261009-0800,0,fog,distant marine layer patch at horizon,box-b9,0.300,0.480,0.460,0.520
+bca3448a1ecd,hpwren-rdd-w-mobo-c-20261009-0800,1,fog,distant marine layer patch at horizon,box-b9,0.300,0.480,0.460,0.520
+bca3448a1ecd,hpwren-rdd-w-mobo-c-20261009-0800,2,fog,distant marine layer patch at horizon,box-b9,0.300,0.490,0.450,0.530
+bca3448a1ecd,hpwren-rdd-w-mobo-c-20261009-0800,3,fog,distant marine layer patch at horizon,box-b9,0.300,0.490,0.450,0.530
+241c60b405ae,hpwren-rdmrc-e-mobo-c-20260817-0700,0,lookalike,sun-glare haze over horizon ridges,box-b9,0.220,0.450,0.620,0.530
+241c60b405ae,hpwren-rdmrc-e-mobo-c-20260817-0700,1,lookalike,sun-glare haze over horizon ridges,box-b9,0.220,0.450,0.620,0.530
+241c60b405ae,hpwren-rdmrc-e-mobo-c-20260817-0700,2,lookalike,sun-glare haze over horizon ridges,box-b9,0.220,0.450,0.620,0.530
+241c60b405ae,hpwren-rdmrc-e-mobo-c-20260817-0700,3,lookalike,sun-glare haze over horizon ridges,box-b9,0.220,0.450,0.620,0.530
+0918f4144056,hpwren-rdmrc-e-mobo-c-20260910-0730,0,lookalike,cloud bank touching left horizon ridges,box-b9,0.000,0.380,0.300,0.480
+0918f4144056,hpwren-rdmrc-e-mobo-c-20260910-0730,1,lookalike,cloud bank touching left horizon ridges,box-b9,0.000,0.380,0.280,0.470
+0918f4144056,hpwren-rdmrc-e-mobo-c-20260910-0730,2,lookalike,cloud bank touching left horizon ridges,box-b9,0.000,0.370,0.270,0.470
+0918f4144056,hpwren-rdmrc-e-mobo-c-20260910-0730,3,lookalike,cloud bank touching left horizon ridges,box-b9,0.000,0.370,0.250,0.470
+0f721a60f938,hpwren-rdmrc-e-mobo-c-20260919-0800,0,lookalike,sun-glare haze band at horizon,box-b9,0.450,0.450,0.780,0.530
+0f721a60f938,hpwren-rdmrc-e-mobo-c-20260919-0800,1,lookalike,sun-glare haze band at horizon,box-b9,0.450,0.450,0.780,0.530
+0f721a60f938,hpwren-rdmrc-e-mobo-c-20260919-0800,2,lookalike,sun-glare haze band at horizon,box-b9,0.450,0.450,0.780,0.530
+0f721a60f938,hpwren-rdmrc-e-mobo-c-20260919-0800,3,lookalike,sun-glare haze band at horizon,box-b9,0.450,0.450,0.780,0.530
+e82a231bf9cf,hpwren-rdmrc-e-mobo-c-20261011-0730,0,fog,"camera inside fog, whole view grey",box-b9,0.000,0.000,1.000,1.000
+e82a231bf9cf,hpwren-rdmrc-e-mobo-c-20261011-0730,1,fog,"camera inside fog, whole view grey",box-b9,0.000,0.000,1.000,1.000
+e82a231bf9cf,hpwren-rdmrc-e-mobo-c-20261011-0730,2,fog,"camera inside fog, whole view grey",box-b9,0.000,0.000,1.000,1.000
+e82a231bf9cf,hpwren-rdmrc-e-mobo-c-20261011-0730,3,fog,"camera inside fog, whole view grey",box-b9,0.000,0.000,1.000,1.000
+52b97db67552,hpwren-rdmrc-w-mobo-c-20260725-0700,0,fog,marine stratus band along horizon,box-b9,0.000,0.460,0.880,0.540
+52b97db67552,hpwren-rdmrc-w-mobo-c-20260725-0700,1,fog,marine stratus band along horizon,box-b9,0.000,0.460,0.880,0.540
+52b97db67552,hpwren-rdmrc-w-mobo-c-20260725-0700,2,fog,marine stratus band along horizon,box-b9,0.000,0.460,0.880,0.540
+52b97db67552,hpwren-rdmrc-w-mobo-c-20260725-0700,3,fog,marine stratus band along horizon,box-b9,0.000,0.460,0.880,0.540
+50455c8e8f88,hpwren-rdmrc-w-mobo-c-20260726-0630,0,lookalike,dark cloud bank meeting left horizon,box-b9,0.000,0.420,0.420,0.530
+50455c8e8f88,hpwren-rdmrc-w-mobo-c-20260726-0630,1,lookalike,dark cloud bank meeting left horizon,box-b9,0.000,0.420,0.420,0.530
+50455c8e8f88,hpwren-rdmrc-w-mobo-c-20260726-0630,2,lookalike,dark cloud bank meeting left horizon,box-b9,0.000,0.420,0.420,0.530
+50455c8e8f88,hpwren-rdmrc-w-mobo-c-20260726-0630,3,lookalike,dark cloud bank meeting left horizon,box-b9,0.000,0.420,0.420,0.530
+6291b024a629,hpwren-rdmrc-w-mobo-c-20260727-0700,0,lookalike,haze band over distant terrain at horizon,box-b9,0.000,0.500,0.880,0.560
+6291b024a629,hpwren-rdmrc-w-mobo-c-20260727-0700,1,lookalike,haze band over distant terrain at horizon,box-b9,0.000,0.500,0.880,0.560
+6291b024a629,hpwren-rdmrc-w-mobo-c-20260727-0700,2,lookalike,haze band over distant terrain at horizon,box-b9,0.000,0.500,0.880,0.560
+6291b024a629,hpwren-rdmrc-w-mobo-c-20260727-0700,3,lookalike,haze band over distant terrain at horizon,box-b9,0.000,0.500,0.880,0.560
+7c1e5750fcd2,hpwren-rdmrc-w-mobo-c-20260914-0730,0,fog,distant fog patches/marine layer at horizon,box-b9,0.020,0.510,0.880,0.570
+7c1e5750fcd2,hpwren-rdmrc-w-mobo-c-20260914-0730,1,fog,distant fog patches/marine layer at horizon,box-b9,0.020,0.510,0.880,0.570
+7c1e5750fcd2,hpwren-rdmrc-w-mobo-c-20260914-0730,2,fog,distant fog patches/marine layer at horizon,box-b9,0.020,0.520,0.880,0.590
+7c1e5750fcd2,hpwren-rdmrc-w-mobo-c-20260914-0730,3,fog,distant fog patches/marine layer at horizon,box-b9,0.020,0.520,0.880,0.590
+2477b9520a4f,hpwren-rdmrc-w-mobo-c-20260915-0700,0,fog,fog sea filling distant valleys,box-b9,0.000,0.510,0.900,0.600
+2477b9520a4f,hpwren-rdmrc-w-mobo-c-20260915-0700,1,fog,fog sea filling distant valleys,box-b9,0.000,0.510,0.900,0.600
+2477b9520a4f,hpwren-rdmrc-w-mobo-c-20260915-0700,2,fog,fog sea filling distant valleys,box-b9,0.000,0.510,0.900,0.600
+2477b9520a4f,hpwren-rdmrc-w-mobo-c-20260915-0700,3,fog,fog sea filling distant valleys,box-b9,0.000,0.510,0.900,0.600
+5fc917f49fa3,hpwren-rm-n-mobo-c-20260722-0630,0,fog,"fog wisp in right valley, fading",box-b9,0.800,0.620,0.950,0.700
+5fc917f49fa3,hpwren-rm-n-mobo-c-20260722-0630,1,fog,"fog wisp in right valley, fading",box-b9,0.820,0.620,0.950,0.690
+5fc917f49fa3,hpwren-rm-n-mobo-c-20260722-0630,2,fog,"fog wisp in right valley, fading",box-b9,,,,
+5fc917f49fa3,hpwren-rm-n-mobo-c-20260722-0630,3,fog,"fog wisp in right valley, fading",box-b9,,,,
+487b20264c68,hpwren-rm-n-mobo-c-20260724-0700,0,fog,fog sea below camera filling valleys,box-b9,0.000,0.500,1.000,1.000
+487b20264c68,hpwren-rm-n-mobo-c-20260724-0700,1,fog,fog sea below camera filling valleys,box-b9,0.000,0.500,1.000,1.000
+487b20264c68,hpwren-rm-n-mobo-c-20260724-0700,2,fog,fog sea below camera filling valleys,box-b9,0.000,0.500,1.000,1.000
+487b20264c68,hpwren-rm-n-mobo-c-20260724-0700,3,fog,fog sea below camera filling valleys,box-b9,0.000,0.500,1.000,1.000
+6be242c7c44c,hpwren-rm-n-mobo-c-20260729-0630,0,fog,"camera inside fog, whole view grey",box-b9,0.000,0.000,1.000,1.000
+6be242c7c44c,hpwren-rm-n-mobo-c-20260729-0630,1,fog,"camera inside fog, whole view grey",box-b9,0.000,0.000,1.000,1.000
+6be242c7c44c,hpwren-rm-n-mobo-c-20260729-0630,2,fog,"camera inside fog, whole view grey",box-b9,0.000,0.000,1.000,1.000
+6be242c7c44c,hpwren-rm-n-mobo-c-20260729-0630,3,fog,"camera inside fog, whole view grey",box-b9,0.000,0.000,1.000,1.000
+cc69168bbcd0,hpwren-rm-n-mobo-c-20260801-0730,0,lookalike,bright glare haze over right ridges,box-b9,0.700,0.480,0.980,0.620
+cc69168bbcd0,hpwren-rm-n-mobo-c-20260801-0730,1,lookalike,bright glare haze over right ridges,box-b9,0.700,0.480,0.980,0.620
+cc69168bbcd0,hpwren-rm-n-mobo-c-20260801-0730,2,lookalike,bright glare haze over right ridges,box-b9,0.700,0.480,0.980,0.620
+cc69168bbcd0,hpwren-rm-n-mobo-c-20260801-0730,3,lookalike,bright glare haze over right ridges,box-b9,0.700,0.480,0.980,0.620
+da9a57cb992d,hpwren-rm-n-mobo-c-20260920-0800,0,fog,low cloud resting on distant ridges,box-b9,0.000,0.400,1.000,0.570
+da9a57cb992d,hpwren-rm-n-mobo-c-20260920-0800,1,fog,low cloud resting on distant ridges,box-b9,0.000,0.400,1.000,0.570
+da9a57cb992d,hpwren-rm-n-mobo-c-20260920-0800,2,fog,low cloud resting on distant ridges,box-b9,0.000,0.400,1.000,0.570
+da9a57cb992d,hpwren-rm-n-mobo-c-20260920-0800,3,fog,low cloud resting on distant ridges,box-b9,0.000,0.400,1.000,0.570
+f7c3bf8d13a3,hpwren-rm-s-mobo-c-20260822-0700,0,lookalike,haze layers in distant valleys,box-b9,0.000,0.500,0.800,0.600
+f7c3bf8d13a3,hpwren-rm-s-mobo-c-20260822-0700,1,lookalike,haze layers in distant valleys,box-b9,0.000,0.500,0.800,0.600
+f7c3bf8d13a3,hpwren-rm-s-mobo-c-20260822-0700,2,lookalike,haze layers in distant valleys,box-b9,0.000,0.500,0.800,0.610
+f7c3bf8d13a3,hpwren-rm-s-mobo-c-20260822-0700,3,lookalike,haze layers in distant valleys,box-b9,0.000,0.500,0.800,0.610
+45ac3530838e,hpwren-rm-s-mobo-c-20261004-0730,0,lookalike,haze band at horizon over terrain,box-b9,0.000,0.480,0.800,0.560
+45ac3530838e,hpwren-rm-s-mobo-c-20261004-0730,1,lookalike,haze band at horizon over terrain,box-b9,0.000,0.480,0.800,0.560
+45ac3530838e,hpwren-rm-s-mobo-c-20261004-0730,2,lookalike,haze band at horizon over terrain,box-b9,0.000,0.480,0.800,0.560
+45ac3530838e,hpwren-rm-s-mobo-c-20261004-0730,3,lookalike,haze band at horizon over terrain,box-b9,0.000,0.480,0.800,0.560
+1848a4fa1f3e,hpwren-rm-s-mobo-c-20261009-0800,0,fog,white stratus/fog patch at horizon,box-b9,0.440,0.500,0.600,0.530
+1848a4fa1f3e,hpwren-rm-s-mobo-c-20261009-0800,1,fog,white stratus/fog patch at horizon,box-b9,0.440,0.500,0.580,0.530
+1848a4fa1f3e,hpwren-rm-s-mobo-c-20261009-0800,2,fog,white stratus/fog patch at horizon,box-b9,0.430,0.500,0.570,0.530
+1848a4fa1f3e,hpwren-rm-s-mobo-c-20261009-0800,3,fog,white stratus/fog patch at horizon,box-b9,0.440,0.500,0.570,0.530
+f4fb5ac17a02,hpwren-rm-s-mobo-c-20261016-0730,0,lookalike,haze band at horizon over terrain,box-b9,0.000,0.490,0.800,0.560
+f4fb5ac17a02,hpwren-rm-s-mobo-c-20261016-0730,1,lookalike,haze band at horizon over terrain,box-b9,0.000,0.490,0.800,0.560
+f4fb5ac17a02,hpwren-rm-s-mobo-c-20261016-0730,2,lookalike,haze band at horizon over terrain,box-b9,0.000,0.490,0.800,0.560
+f4fb5ac17a02,hpwren-rm-s-mobo-c-20261016-0730,3,lookalike,haze band at horizon over terrain,box-b9,0.000,0.490,0.800,0.560
+fdd016bd6c45,hpwren-rm-w-mobo-c-20260924-0730,0,fog,"camera inside fog, whole view grey",box-b9,0.000,0.000,1.000,1.000
+fdd016bd6c45,hpwren-rm-w-mobo-c-20260924-0730,1,fog,"camera inside fog, whole view grey",box-b9,0.000,0.000,1.000,1.000
+fdd016bd6c45,hpwren-rm-w-mobo-c-20260924-0730,2,fog,"camera inside fog, whole view grey",box-b9,0.000,0.000,1.000,1.000
+fdd016bd6c45,hpwren-rm-w-mobo-c-20260924-0730,3,fog,"camera inside fog, whole view grey",box-b9,0.000,0.000,1.000,1.000
+27f3cdf85bbd,hpwren-rm-w-mobo-c-20260925-0800,0,fog,distant fog/stratus layer on left at horizon,box-b10,0.000,0.490,0.550,0.590
+27f3cdf85bbd,hpwren-rm-w-mobo-c-20260925-0800,1,fog,distant fog/stratus layer on left at horizon,box-b10,0.000,0.490,0.500,0.590
+27f3cdf85bbd,hpwren-rm-w-mobo-c-20260925-0800,2,fog,distant fog/stratus layer on left at horizon,box-b10,0.000,0.500,0.480,0.600
+27f3cdf85bbd,hpwren-rm-w-mobo-c-20260925-0800,3,fog,distant fog/stratus layer on left at horizon,box-b10,0.000,0.500,0.450,0.600
+5818ff375c8d,hpwren-rndmsa-e-mobo-c-20260721-0630,0,lookalike,hazy distant valleys right of horizon at dawn,box-b10,0.550,0.520,0.980,0.580
+5818ff375c8d,hpwren-rndmsa-e-mobo-c-20260721-0630,1,lookalike,hazy distant valleys right of horizon at dawn,box-b10,0.550,0.520,0.980,0.580
+5818ff375c8d,hpwren-rndmsa-e-mobo-c-20260721-0630,2,lookalike,hazy distant valleys right of horizon at dawn,box-b10,0.550,0.520,0.980,0.580
+5818ff375c8d,hpwren-rndmsa-e-mobo-c-20260721-0630,3,lookalike,hazy distant valleys right of horizon at dawn,box-b10,0.550,0.520,0.980,0.580
+619620e87153,hpwren-rndmsa-e-mobo-c-20260724-0700,0,fog,valley fog on right below horizon,box-b10,0.760,0.520,1.000,0.630
+619620e87153,hpwren-rndmsa-e-mobo-c-20260724-0700,1,fog,valley fog on right below horizon,box-b10,0.750,0.520,1.000,0.630
+619620e87153,hpwren-rndmsa-e-mobo-c-20260724-0700,2,fog,valley fog on right below horizon,box-b10,0.750,0.510,1.000,0.620
+619620e87153,hpwren-rndmsa-e-mobo-c-20260724-0700,3,fog,valley fog on right below horizon,box-b10,0.740,0.510,1.000,0.620
+f2ff310ab77b,hpwren-rndmsa-e-mobo-c-20260914-0730,0,fog,fog sea below camera across full width,box-b10,0.020,0.510,1.000,0.620
+f2ff310ab77b,hpwren-rndmsa-e-mobo-c-20260914-0730,1,fog,fog sea below camera across full width,box-b10,0.020,0.510,1.000,0.620
+f2ff310ab77b,hpwren-rndmsa-e-mobo-c-20260914-0730,2,fog,fog sea below camera across full width,box-b10,0.020,0.510,1.000,0.610
+f2ff310ab77b,hpwren-rndmsa-e-mobo-c-20260914-0730,3,fog,fog sea below camera across full width,box-b10,0.020,0.510,1.000,0.610
+8754b8f37062,hpwren-rndmsa-e-mobo-c-20260915-0730,0,fog,"camera inside fog, washed-out grey view",box-b10,0.000,0.000,1.000,1.000
+8754b8f37062,hpwren-rndmsa-e-mobo-c-20260915-0730,1,fog,"camera inside fog, washed-out grey view",box-b10,0.000,0.000,1.000,1.000
+8754b8f37062,hpwren-rndmsa-e-mobo-c-20260915-0730,2,fog,"camera inside fog, washed-out grey view",box-b10,0.000,0.000,1.000,1.000
+8754b8f37062,hpwren-rndmsa-e-mobo-c-20260915-0730,3,fog,"camera inside fog, washed-out grey view",box-b10,0.000,0.000,1.000,1.000
+4efee88d820b,hpwren-rndmsa-s-mobo-c-20260924-0730,0,fog,bright fog sea on left below horizon,box-b10,0.000,0.450,0.600,0.630
+4efee88d820b,hpwren-rndmsa-s-mobo-c-20260924-0730,1,fog,bright fog sea on left below horizon,box-b10,0.000,0.450,0.600,0.630
+4efee88d820b,hpwren-rndmsa-s-mobo-c-20260924-0730,2,fog,bright fog sea on left below horizon,box-b10,0.000,0.450,0.600,0.630
+4efee88d820b,hpwren-rndmsa-s-mobo-c-20260924-0730,3,fog,bright fog sea on left below horizon,box-b10,0.000,0.450,0.600,0.630
+ebebee4ee172,hpwren-rndmsa-s-mobo-c-20261001-0730,0,lookalike,bright haze band at left horizon,box-b10,0.000,0.440,0.450,0.570
+ebebee4ee172,hpwren-rndmsa-s-mobo-c-20261001-0730,1,lookalike,bright haze band at left horizon,box-b10,0.000,0.440,0.450,0.570
+ebebee4ee172,hpwren-rndmsa-s-mobo-c-20261001-0730,2,lookalike,bright haze band at left horizon,box-b10,0.000,0.440,0.450,0.570
+ebebee4ee172,hpwren-rndmsa-s-mobo-c-20261001-0730,3,lookalike,bright haze band at left horizon,box-b10,0.000,0.440,0.450,0.570
+e6cea0d3d700,hpwren-sclm-e-mobo-c-20260924-0800,0,fog,"camera inside fog, washed-out grey view",box-b10,0.000,0.000,1.000,1.000
+e6cea0d3d700,hpwren-sclm-e-mobo-c-20260924-0800,1,fog,"camera inside fog, washed-out grey view",box-b10,0.000,0.000,1.000,1.000
+e6cea0d3d700,hpwren-sclm-e-mobo-c-20260924-0800,2,fog,"camera inside fog, washed-out grey view",box-b10,0.000,0.000,1.000,1.000
+e6cea0d3d700,hpwren-sclm-e-mobo-c-20260924-0800,3,fog,"camera inside fog, washed-out grey view",box-b10,0.000,0.000,1.000,1.000
+bb89dc2ad8ca,hpwren-sclm-e-mobo-c-20260925-0800,0,fog,"camera inside fog, washed-out grey view",box-b10,0.000,0.000,1.000,1.000
+bb89dc2ad8ca,hpwren-sclm-e-mobo-c-20260925-0800,1,fog,"camera inside fog, washed-out grey view",box-b10,0.000,0.000,1.000,1.000
+bb89dc2ad8ca,hpwren-sclm-e-mobo-c-20260925-0800,2,fog,"camera inside fog, washed-out grey view",box-b10,0.000,0.000,1.000,1.000
+bb89dc2ad8ca,hpwren-sclm-e-mobo-c-20260925-0800,3,fog,"camera inside fog, washed-out grey view",box-b10,0.000,0.000,1.000,1.000
+cb5e924a43ea,hpwren-sclm-e-mobo-c-20261005-0800,0,lookalike,bright hazy patch at horizon below sun,box-b10,0.500,0.480,0.800,0.540
+cb5e924a43ea,hpwren-sclm-e-mobo-c-20261005-0800,1,lookalike,bright hazy patch at horizon below sun,box-b10,0.500,0.480,0.800,0.540
+cb5e924a43ea,hpwren-sclm-e-mobo-c-20261005-0800,2,lookalike,bright hazy patch at horizon below sun,box-b10,0.500,0.480,0.800,0.540
+cb5e924a43ea,hpwren-sclm-e-mobo-c-20261005-0800,3,lookalike,bright hazy patch at horizon below sun,box-b10,0.500,0.480,0.800,0.540
+32e64f918d78,hpwren-sclm-e-mobo-c-20261016-0730,0,lookalike,bright cloud bank touching horizon left of sun,box-b10,0.120,0.460,0.500,0.500
+32e64f918d78,hpwren-sclm-e-mobo-c-20261016-0730,1,lookalike,bright cloud bank touching horizon left of sun,box-b10,0.120,0.460,0.500,0.500
+32e64f918d78,hpwren-sclm-e-mobo-c-20261016-0730,2,lookalike,bright cloud bank touching horizon left of sun,box-b10,0.120,0.460,0.500,0.500
+32e64f918d78,hpwren-sclm-e-mobo-c-20261016-0730,3,lookalike,bright cloud bank touching horizon left of sun,box-b10,0.120,0.460,0.500,0.500
+01d90fb2e7e2,hpwren-sclm-n-mobo-c-20260722-0630,0,fog,low cloud/mist obscuring distant terrain at horizon,box-b10,0.000,0.480,0.880,0.600
+01d90fb2e7e2,hpwren-sclm-n-mobo-c-20260722-0630,1,fog,low cloud/mist obscuring distant terrain at horizon,box-b10,0.000,0.480,0.880,0.600
+01d90fb2e7e2,hpwren-sclm-n-mobo-c-20260722-0630,2,fog,low cloud/mist obscuring distant terrain at horizon,box-b10,0.000,0.480,0.880,0.600
+01d90fb2e7e2,hpwren-sclm-n-mobo-c-20260722-0630,3,fog,low cloud/mist obscuring distant terrain at horizon,box-b10,0.000,0.480,0.880,0.620
+d882b9ea3696,hpwren-sclm-n-mobo-c-20260801-0730,0,fog,white fog band in distant valley,box-b10,0.440,0.530,0.700,0.570
+d882b9ea3696,hpwren-sclm-n-mobo-c-20260801-0730,1,fog,white fog band in distant valley,box-b10,0.450,0.530,0.720,0.580
+d882b9ea3696,hpwren-sclm-n-mobo-c-20260801-0730,2,fog,white fog band in distant valley,box-b10,0.520,0.540,0.720,0.580
+d882b9ea3696,hpwren-sclm-n-mobo-c-20260801-0730,3,fog,white fog band in distant valley,box-b10,0.500,0.540,0.700,0.570
+becc28e6027f,hpwren-sclm-n-mobo-c-20260811-0730,0,lookalike,low cloud bank and grey haze at horizon,box-b10,0.000,0.420,0.750,0.560
+becc28e6027f,hpwren-sclm-n-mobo-c-20260811-0730,1,lookalike,low cloud bank and grey haze at horizon,box-b10,0.000,0.420,0.750,0.560
+becc28e6027f,hpwren-sclm-n-mobo-c-20260811-0730,2,lookalike,low cloud bank and grey haze at horizon,box-b10,0.000,0.420,0.750,0.560
+becc28e6027f,hpwren-sclm-n-mobo-c-20260811-0730,3,lookalike,low cloud bank and grey haze at horizon,box-b10,0.000,0.420,0.750,0.560
+b2ce01f0bf96,hpwren-sclm-n-mobo-c-20260923-0800,0,lookalike,haze band along distant horizon,box-b10,0.000,0.510,0.880,0.580
+b2ce01f0bf96,hpwren-sclm-n-mobo-c-20260923-0800,1,lookalike,haze band along distant horizon,box-b10,0.000,0.510,0.880,0.580
+b2ce01f0bf96,hpwren-sclm-n-mobo-c-20260923-0800,2,lookalike,haze band along distant horizon,box-b10,0.000,0.510,0.880,0.580
+b2ce01f0bf96,hpwren-sclm-n-mobo-c-20260923-0800,3,lookalike,haze band along distant horizon,box-b10,0.000,0.510,0.880,0.580
+69d897f0eadf,hpwren-sclm-n-mobo-c-20261003-0800,0,lookalike,faint haze at distant left horizon,box-b10,0.000,0.520,0.350,0.570
+69d897f0eadf,hpwren-sclm-n-mobo-c-20261003-0800,1,lookalike,faint haze at distant left horizon,box-b10,0.000,0.520,0.350,0.570
+69d897f0eadf,hpwren-sclm-n-mobo-c-20261003-0800,2,lookalike,faint haze at distant left horizon,box-b10,0.000,0.520,0.350,0.570
+69d897f0eadf,hpwren-sclm-n-mobo-c-20261003-0800,3,lookalike,faint haze at distant left horizon,box-b10,0.000,0.520,0.350,0.570
+ff712584e2e5,hpwren-sclm-s-mobo-c-20260822-0700,0,fog,fog sea rising to engulf summit and camera,box-b10,0.000,0.480,0.980,0.880
+ff712584e2e5,hpwren-sclm-s-mobo-c-20260822-0700,1,fog,fog sea rising to engulf summit and camera,box-b10,0.000,0.440,1.000,0.880
+ff712584e2e5,hpwren-sclm-s-mobo-c-20260822-0700,2,fog,fog sea rising to engulf summit and camera,box-b10,0.000,0.250,1.000,0.950
+ff712584e2e5,hpwren-sclm-s-mobo-c-20260822-0700,3,fog,fog sea rising to engulf summit and camera,box-b10,0.000,0.030,1.000,1.000
+e040cddd7d6c,hpwren-sclm-s-mobo-c-20261009-0730,0,fog,marine fog bank at left horizon,box-b10,0.000,0.490,0.620,0.600
+e040cddd7d6c,hpwren-sclm-s-mobo-c-20261009-0730,1,fog,marine fog bank at left horizon,box-b10,0.000,0.490,0.620,0.600
+e040cddd7d6c,hpwren-sclm-s-mobo-c-20261009-0730,2,fog,marine fog bank at left horizon,box-b10,0.000,0.490,0.600,0.610
+e040cddd7d6c,hpwren-sclm-s-mobo-c-20261009-0730,3,fog,marine fog bank at left horizon,box-b10,0.000,0.490,0.600,0.610
+ecf718312d58,hpwren-sdsc-e-mobo-c-20260804-0730,0,lookalike,grey haze band at distant city horizon,box-b10,0.020,0.420,0.980,0.480
+ecf718312d58,hpwren-sdsc-e-mobo-c-20260804-0730,1,lookalike,grey haze band at distant city horizon,box-b10,0.020,0.420,0.980,0.480
+ecf718312d58,hpwren-sdsc-e-mobo-c-20260804-0730,2,lookalike,grey haze band at distant city horizon,box-b10,0.020,0.420,0.980,0.480
+ecf718312d58,hpwren-sdsc-e-mobo-c-20260804-0730,3,lookalike,grey haze band at distant city horizon,box-b10,0.020,0.420,0.980,0.480
+ed0833b7f05c,hpwren-sdsc-e-mobo-c-20260826-0700,0,fog,"morning fog over background, thinning to wisps",box-b10,0.000,0.250,1.000,0.600
+ed0833b7f05c,hpwren-sdsc-e-mobo-c-20260826-0700,1,fog,"morning fog over background, thinning to wisps",box-b10,0.000,0.300,1.000,0.580
+ed0833b7f05c,hpwren-sdsc-e-mobo-c-20260826-0700,2,fog,"morning fog over background, thinning to wisps",box-b10,0.000,0.400,1.000,0.530
+ed0833b7f05c,hpwren-sdsc-e-mobo-c-20260826-0700,3,fog,"morning fog over background, thinning to wisps",box-b10,0.000,0.410,1.000,0.530
+a13754ad27d3,hpwren-sdsc-e-mobo-c-20260908-0730,0,lookalike,bright haze band over city skyline at horizon,box-b11,0.300,0.410,0.750,0.480
+a13754ad27d3,hpwren-sdsc-e-mobo-c-20260908-0730,1,lookalike,bright haze band over city skyline at horizon,box-b11,0.300,0.410,0.750,0.480
+a13754ad27d3,hpwren-sdsc-e-mobo-c-20260908-0730,2,lookalike,bright haze band over city skyline at horizon,box-b11,0.300,0.420,0.720,0.480
+a13754ad27d3,hpwren-sdsc-e-mobo-c-20260908-0730,3,lookalike,bright haze band over city skyline at horizon,box-b11,0.300,0.420,0.720,0.480
+0deb1f2a6fd2,hpwren-sdsc-e-mobo-c-20260909-0730,0,lookalike,sunlit haze band over city at horizon below sun,box-b11,0.300,0.410,0.700,0.480
+0deb1f2a6fd2,hpwren-sdsc-e-mobo-c-20260909-0730,1,lookalike,sunlit haze band over city at horizon below sun,box-b11,0.300,0.410,0.700,0.480
+0deb1f2a6fd2,hpwren-sdsc-e-mobo-c-20260909-0730,2,lookalike,sunlit haze band over city at horizon below sun,box-b11,0.300,0.420,0.700,0.480
+0deb1f2a6fd2,hpwren-sdsc-e-mobo-c-20260909-0730,3,lookalike,sunlit haze band over city at horizon below sun,box-b11,0.300,0.420,0.700,0.480
+6995b082b23d,hpwren-sedgwick-s-mobo-c-20261013-0800,0,lookalike,"whitish haze layer below distant ridges, left",box-b11,0.000,0.500,0.500,0.570
+6995b082b23d,hpwren-sedgwick-s-mobo-c-20261013-0800,1,lookalike,"whitish haze layer below distant ridges, left",box-b11,0.000,0.500,0.500,0.570
+6995b082b23d,hpwren-sedgwick-s-mobo-c-20261013-0800,2,lookalike,"whitish haze layer below distant ridges, left",box-b11,0.000,0.500,0.500,0.570
+6995b082b23d,hpwren-sedgwick-s-mobo-c-20261013-0800,3,lookalike,"whitish haze layer below distant ridges, left",box-b11,0.000,0.500,0.500,0.570
+905d44663b97,hpwren-sedgwick-s-mobo-c-20261015-0800,0,lookalike,"sun-side haze over distant terrain, left horizon",box-b11,0.000,0.500,0.350,0.560
+905d44663b97,hpwren-sedgwick-s-mobo-c-20261015-0800,1,lookalike,"sun-side haze over distant terrain, left horizon",box-b11,0.000,0.500,0.350,0.560
+905d44663b97,hpwren-sedgwick-s-mobo-c-20261015-0800,2,lookalike,"sun-side haze over distant terrain, left horizon",box-b11,0.000,0.500,0.350,0.560
+905d44663b97,hpwren-sedgwick-s-mobo-c-20261015-0800,3,lookalike,"sun-side haze over distant terrain, left horizon",box-b11,0.000,0.500,0.350,0.560
+027969867f0d,hpwren-sedgwick-w-mobo-c-20260908-0730,0,lookalike,cumulus cloud row just above horizon,box-b11,0.380,0.420,0.840,0.490
+027969867f0d,hpwren-sedgwick-w-mobo-c-20260908-0730,1,lookalike,cumulus cloud row just above horizon,box-b11,0.410,0.420,0.850,0.490
+027969867f0d,hpwren-sedgwick-w-mobo-c-20260908-0730,2,lookalike,cumulus cloud row just above horizon,box-b11,0.420,0.430,0.850,0.490
+027969867f0d,hpwren-sedgwick-w-mobo-c-20260908-0730,3,lookalike,cumulus cloud row just above horizon,box-b11,0.430,0.440,0.850,0.500
+bf59120cecd6,hpwren-sedgwick-w-mobo-c-20260909-0800,0,lookalike,bright haze band at horizon over distant hills,box-b11,0.150,0.480,0.620,0.540
+bf59120cecd6,hpwren-sedgwick-w-mobo-c-20260909-0800,1,lookalike,bright haze band at horizon over distant hills,box-b11,0.150,0.480,0.620,0.540
+bf59120cecd6,hpwren-sedgwick-w-mobo-c-20260909-0800,2,lookalike,bright haze band at horizon over distant hills,box-b11,0.150,0.480,0.620,0.540
+bf59120cecd6,hpwren-sedgwick-w-mobo-c-20260909-0800,3,lookalike,bright haze band at horizon over distant hills,box-b11,0.150,0.480,0.620,0.540
+b1e22ab10691,hpwren-sedgwick-w-mobo-c-20260924-0800,0,lookalike,haze band over distant ridges at horizon,box-b11,0.000,0.500,0.620,0.540
+b1e22ab10691,hpwren-sedgwick-w-mobo-c-20260924-0800,1,lookalike,haze band over distant ridges at horizon,box-b11,0.000,0.500,0.620,0.540
+b1e22ab10691,hpwren-sedgwick-w-mobo-c-20260924-0800,2,lookalike,haze band over distant ridges at horizon,box-b11,0.000,0.510,0.620,0.550
+b1e22ab10691,hpwren-sedgwick-w-mobo-c-20260924-0800,3,lookalike,haze band over distant ridges at horizon,box-b11,0.000,0.510,0.620,0.550
+b842fca1bd25,hpwren-sedgwick-w-mobo-c-20261002-0730,0,lookalike,thin white cloud band touching horizon,box-b11,0.300,0.460,0.920,0.500
+b842fca1bd25,hpwren-sedgwick-w-mobo-c-20261002-0730,1,lookalike,thin white cloud band touching horizon,box-b11,0.370,0.450,0.930,0.500
+b842fca1bd25,hpwren-sedgwick-w-mobo-c-20261002-0730,2,lookalike,thin white cloud band touching horizon,box-b11,0.380,0.440,0.940,0.500
+b842fca1bd25,hpwren-sedgwick-w-mobo-c-20261002-0730,3,lookalike,thin white cloud band touching horizon,box-b11,0.420,0.450,0.950,0.500
+eff0335fe27e,hpwren-signal-n-mobo-c-20260924-0800,0,fog,"camera inside fog, whole view washed out",box-b11,0.000,0.000,1.000,1.000
+eff0335fe27e,hpwren-signal-n-mobo-c-20260924-0800,1,fog,"camera inside fog, whole view washed out",box-b11,0.000,0.000,1.000,1.000
+eff0335fe27e,hpwren-signal-n-mobo-c-20260924-0800,2,fog,"camera inside fog, whole view washed out",box-b11,0.000,0.000,1.000,1.000
+eff0335fe27e,hpwren-signal-n-mobo-c-20260924-0800,3,fog,"camera inside fog, whole view washed out",box-b11,0.000,0.000,1.000,1.000
+35ce52d9bdf5,hpwren-signal-n-mobo-c-20260929-0800,0,lookalike,haze layer over basin below distant mountains,box-b11,0.020,0.500,0.920,0.570
+35ce52d9bdf5,hpwren-signal-n-mobo-c-20260929-0800,1,lookalike,haze layer over basin below distant mountains,box-b11,0.020,0.500,0.920,0.570
+35ce52d9bdf5,hpwren-signal-n-mobo-c-20260929-0800,2,lookalike,haze layer over basin below distant mountains,box-b11,0.020,0.490,0.920,0.570
+35ce52d9bdf5,hpwren-signal-n-mobo-c-20260929-0800,3,lookalike,haze layer over basin below distant mountains,box-b11,0.020,0.490,0.920,0.570
+123c86f1ae0b,hpwren-signal-n-mobo-c-20261001-0730,0,fog,"camera inside dense fog, whole view",box-b11,0.000,0.000,1.000,1.000
+123c86f1ae0b,hpwren-signal-n-mobo-c-20261001-0730,1,fog,"camera inside dense fog, whole view",box-b11,0.000,0.000,1.000,1.000
+123c86f1ae0b,hpwren-signal-n-mobo-c-20261001-0730,2,fog,"camera inside dense fog, whole view",box-b11,0.000,0.000,1.000,1.000
+123c86f1ae0b,hpwren-signal-n-mobo-c-20261001-0730,3,fog,"camera inside dense fog, whole view",box-b11,0.000,0.000,1.000,1.000
+a53606e32671,hpwren-signal-n-mobo-c-20261003-0800,0,lookalike,thin haze band over basin at horizon,box-b11,0.020,0.490,0.920,0.540
+a53606e32671,hpwren-signal-n-mobo-c-20261003-0800,1,lookalike,thin haze band over basin at horizon,box-b11,0.020,0.490,0.920,0.540
+a53606e32671,hpwren-signal-n-mobo-c-20261003-0800,2,lookalike,thin haze band over basin at horizon,box-b11,0.020,0.490,0.920,0.550
+a53606e32671,hpwren-signal-n-mobo-c-20261003-0800,3,lookalike,thin haze band over basin at horizon,box-b11,0.020,0.490,0.920,0.550
+f141c56030a7,hpwren-signal-n-mobo-c-20261014-0730,0,lookalike,"haze band over basin at horizon, brighter left",box-b11,0.020,0.490,0.920,0.550
+f141c56030a7,hpwren-signal-n-mobo-c-20261014-0730,1,lookalike,"haze band over basin at horizon, brighter left",box-b11,0.020,0.490,0.920,0.550
+f141c56030a7,hpwren-signal-n-mobo-c-20261014-0730,2,lookalike,"haze band over basin at horizon, brighter left",box-b11,0.020,0.490,0.920,0.550
+f141c56030a7,hpwren-signal-n-mobo-c-20261014-0730,3,lookalike,"haze band over basin at horizon, brighter left",box-b11,0.020,0.490,0.920,0.550
+735586afb93e,hpwren-signal-w-mobo-c-20260722-0700,0,fog,"camera inside fog, whole view washed out",box-b11,0.000,0.000,1.000,1.000
+735586afb93e,hpwren-signal-w-mobo-c-20260722-0700,1,fog,"camera inside fog, whole view washed out",box-b11,0.000,0.000,1.000,1.000
+735586afb93e,hpwren-signal-w-mobo-c-20260722-0700,2,fog,"camera inside fog, whole view washed out",box-b11,0.000,0.000,1.000,1.000
+735586afb93e,hpwren-signal-w-mobo-c-20260722-0700,3,fog,"camera inside fog, whole view washed out",box-b11,0.000,0.000,1.000,1.000
+63a4728f33bb,hpwren-signal-w-mobo-c-20261002-0730,0,lookalike,marine haze band over ocean horizon,box-b11,0.000,0.450,0.950,0.510
+63a4728f33bb,hpwren-signal-w-mobo-c-20261002-0730,1,lookalike,marine haze band over ocean horizon,box-b11,0.000,0.450,0.950,0.510
+63a4728f33bb,hpwren-signal-w-mobo-c-20261002-0730,2,lookalike,marine haze band over ocean horizon,box-b11,0.000,0.440,0.950,0.500
+63a4728f33bb,hpwren-signal-w-mobo-c-20261002-0730,3,lookalike,marine haze band over ocean horizon,box-b11,0.000,0.440,0.950,0.500
+efbd9e3ce858,hpwren-signal-w-mobo-c-20261006-0800,0,lookalike,haze band over ocean horizon,box-b11,0.000,0.440,0.950,0.510
+efbd9e3ce858,hpwren-signal-w-mobo-c-20261006-0800,1,lookalike,haze band over ocean horizon,box-b11,0.000,0.440,0.950,0.510
+efbd9e3ce858,hpwren-signal-w-mobo-c-20261006-0800,2,lookalike,haze band over ocean horizon,box-b11,0.000,0.440,0.950,0.510
+efbd9e3ce858,hpwren-signal-w-mobo-c-20261006-0800,3,lookalike,haze band over ocean horizon,box-b11,0.000,0.440,0.950,0.510
+798fc10e6d02,hpwren-signal-w-mobo-c-20261013-0800,0,lookalike,haze band over ocean horizon,box-b11,0.000,0.440,0.950,0.510
+798fc10e6d02,hpwren-signal-w-mobo-c-20261013-0800,1,lookalike,haze band over ocean horizon,box-b11,0.000,0.440,0.950,0.510
+798fc10e6d02,hpwren-signal-w-mobo-c-20261013-0800,2,lookalike,haze band over ocean horizon,box-b11,0.000,0.440,0.950,0.510
+798fc10e6d02,hpwren-signal-w-mobo-c-20261013-0800,3,lookalike,haze band over ocean horizon,box-b11,0.000,0.440,0.950,0.510
+21cf9a5a6eed,hpwren-sjh-e-mobo-c-20260924-0800,0,fog,"camera inside dense fog, featureless grey",box-b11,0.000,0.000,1.000,1.000
+21cf9a5a6eed,hpwren-sjh-e-mobo-c-20260924-0800,1,fog,"camera inside dense fog, featureless grey",box-b11,0.000,0.000,1.000,1.000
+21cf9a5a6eed,hpwren-sjh-e-mobo-c-20260924-0800,2,fog,"camera inside dense fog, featureless grey",box-b11,0.000,0.000,1.000,1.000
+21cf9a5a6eed,hpwren-sjh-e-mobo-c-20260924-0800,3,fog,"camera inside dense fog, featureless grey",box-b11,0.000,0.000,1.000,1.000
+efad463b537c,hpwren-sjh-e-mobo-c-20260925-0800,0,fog,"camera inside fog, sun diffused through",box-b11,0.000,0.000,1.000,1.000
+efad463b537c,hpwren-sjh-e-mobo-c-20260925-0800,1,fog,"camera inside fog, sun diffused through",box-b11,0.000,0.000,1.000,1.000
+efad463b537c,hpwren-sjh-e-mobo-c-20260925-0800,2,fog,"camera inside fog, sun diffused through",box-b11,0.000,0.000,1.000,1.000
+efad463b537c,hpwren-sjh-e-mobo-c-20260925-0800,3,fog,"camera inside fog, sun diffused through",box-b11,0.000,0.000,1.000,1.000
+e0ce1df05bb7,hpwren-sjh-e-mobo-c-20261003-0800,0,lookalike,sunlit haze over terrain below sun at horizon,box-b11,0.450,0.490,0.800,0.580
+e0ce1df05bb7,hpwren-sjh-e-mobo-c-20261003-0800,1,lookalike,sunlit haze over terrain below sun at horizon,box-b11,0.470,0.490,0.800,0.580
+e0ce1df05bb7,hpwren-sjh-e-mobo-c-20261003-0800,2,lookalike,sunlit haze over terrain below sun at horizon,box-b11,0.470,0.490,0.800,0.580
+e0ce1df05bb7,hpwren-sjh-e-mobo-c-20261003-0800,3,lookalike,sunlit haze over terrain below sun at horizon,box-b11,0.470,0.490,0.800,0.580
+aab4860da82e,hpwren-sjh-e-mobo-c-20261010-0730,0,lookalike,overcast cloud base and haze band at horizon,box-b12,0.000,0.440,0.990,0.530
+aab4860da82e,hpwren-sjh-e-mobo-c-20261010-0730,1,lookalike,overcast cloud base and haze band at horizon,box-b12,0.000,0.440,0.990,0.530
+aab4860da82e,hpwren-sjh-e-mobo-c-20261010-0730,2,lookalike,overcast cloud base and haze band at horizon,box-b12,0.000,0.440,0.990,0.530
+aab4860da82e,hpwren-sjh-e-mobo-c-20261010-0730,3,lookalike,overcast cloud base and haze band at horizon,box-b12,0.000,0.440,0.990,0.530
+f5e6b5389e01,hpwren-sjh-s-mobo-c-20260822-0730,0,fog,fog sea below camera along horizon,box-b12,0.000,0.500,0.990,0.600
+f5e6b5389e01,hpwren-sjh-s-mobo-c-20260822-0730,1,fog,fog sea below camera along horizon,box-b12,0.000,0.500,0.990,0.600
+f5e6b5389e01,hpwren-sjh-s-mobo-c-20260822-0730,2,fog,fog sea below camera along horizon,box-b12,0.000,0.500,0.990,0.600
+f5e6b5389e01,hpwren-sjh-s-mobo-c-20260822-0730,3,fog,fog sea below camera along horizon,box-b12,0.000,0.500,0.990,0.600
+bd139de9efba,hpwren-sjh-s-mobo-c-20261009-0800,0,fog,small fog bank at right horizon,box-b12,0.900,0.540,0.990,0.590
+bd139de9efba,hpwren-sjh-s-mobo-c-20261009-0800,1,fog,small fog bank at right horizon,box-b12,0.930,0.540,0.990,0.590
+bd139de9efba,hpwren-sjh-s-mobo-c-20261009-0800,2,fog,small fog bank at right horizon,box-b12,0.910,0.540,0.990,0.590
+bd139de9efba,hpwren-sjh-s-mobo-c-20261009-0800,3,fog,small fog bank at right horizon,box-b12,0.920,0.540,0.990,0.590
+a391ffbab1d6,hpwren-sjh-w-mobo-c-20260722-0700,0,fog,low cloud resting on distant ridges,box-b12,0.000,0.450,0.990,0.600
+a391ffbab1d6,hpwren-sjh-w-mobo-c-20260722-0700,1,fog,low cloud resting on distant ridges,box-b12,0.000,0.450,0.990,0.600
+a391ffbab1d6,hpwren-sjh-w-mobo-c-20260722-0700,2,fog,low cloud resting on distant ridges,box-b12,0.000,0.450,0.990,0.600
+a391ffbab1d6,hpwren-sjh-w-mobo-c-20260722-0700,3,fog,low cloud resting on distant ridges,box-b12,0.000,0.450,0.990,0.600
+9688fbf71299,hpwren-sjh-w-mobo-c-20260801-0730,0,fog,fog sea below camera spilling into valley,box-b12,0.000,0.500,0.970,0.630
+9688fbf71299,hpwren-sjh-w-mobo-c-20260801-0730,1,fog,fog sea below camera spilling into valley,box-b12,0.000,0.500,0.970,0.630
+9688fbf71299,hpwren-sjh-w-mobo-c-20260801-0730,2,fog,fog sea below camera spilling into valley,box-b12,0.000,0.500,0.970,0.660
+9688fbf71299,hpwren-sjh-w-mobo-c-20260801-0730,3,fog,fog sea below camera spilling into valley,box-b12,0.000,0.500,0.970,0.670
+1ac3ddbdd0a9,hpwren-sjh-w-mobo-c-20260829-0730,0,lookalike,haze band at horizon,box-b12,0.020,0.470,0.980,0.540
+1ac3ddbdd0a9,hpwren-sjh-w-mobo-c-20260829-0730,1,lookalike,haze band at horizon,box-b12,0.020,0.470,0.980,0.540
+1ac3ddbdd0a9,hpwren-sjh-w-mobo-c-20260829-0730,2,lookalike,haze band at horizon,box-b12,0.020,0.470,0.980,0.540
+1ac3ddbdd0a9,hpwren-sjh-w-mobo-c-20260829-0730,3,lookalike,haze band at horizon,box-b12,0.020,0.470,0.980,0.540
+ab2ac167904d,hpwren-sjh-w-mobo-c-20261015-0730,0,lookalike,bright haze band at horizon,box-b12,0.020,0.450,0.980,0.520
+ab2ac167904d,hpwren-sjh-w-mobo-c-20261015-0730,1,lookalike,bright haze band at horizon,box-b12,0.020,0.450,0.980,0.520
+ab2ac167904d,hpwren-sjh-w-mobo-c-20261015-0730,2,lookalike,bright haze band at horizon,box-b12,0.020,0.450,0.980,0.520
+ab2ac167904d,hpwren-sjh-w-mobo-c-20261015-0730,3,lookalike,bright haze band at horizon,box-b12,0.020,0.450,0.980,0.520
+83e784c947c0,hpwren-sm-n-mobo-c-20260729-0700,0,fog,stratus sea below camera,box-b12,0.000,0.500,0.990,0.880
+83e784c947c0,hpwren-sm-n-mobo-c-20260729-0700,1,fog,stratus sea below camera,box-b12,0.000,0.500,0.990,0.880
+83e784c947c0,hpwren-sm-n-mobo-c-20260729-0700,2,fog,stratus sea below camera,box-b12,0.000,0.500,0.990,0.900
+83e784c947c0,hpwren-sm-n-mobo-c-20260729-0700,3,fog,stratus sea below camera,box-b12,0.000,0.500,0.990,0.900
+7e6dcd9070f0,hpwren-sm-n-mobo-c-20260829-0730,0,fog,distant stratus band at horizon,box-b12,0.180,0.450,0.680,0.500
+7e6dcd9070f0,hpwren-sm-n-mobo-c-20260829-0730,1,fog,distant stratus band at horizon,box-b12,0.200,0.450,0.680,0.500
+7e6dcd9070f0,hpwren-sm-n-mobo-c-20260829-0730,2,fog,distant stratus band at horizon,box-b12,0.150,0.450,0.650,0.500
+7e6dcd9070f0,hpwren-sm-n-mobo-c-20260829-0730,3,fog,distant stratus band at horizon,box-b12,0.180,0.450,0.680,0.500
+ebb604db3971,hpwren-sm-n-mobo-c-20260924-0730,0,fog,stratus sea below camera,box-b12,0.000,0.500,0.990,0.860
+ebb604db3971,hpwren-sm-n-mobo-c-20260924-0730,1,fog,stratus sea below camera,box-b12,0.000,0.500,0.990,0.850
+ebb604db3971,hpwren-sm-n-mobo-c-20260924-0730,2,fog,stratus sea below camera,box-b12,0.000,0.500,0.990,0.860
+ebb604db3971,hpwren-sm-n-mobo-c-20260924-0730,3,fog,stratus sea below camera,box-b12,0.000,0.500,0.990,0.860
+8676142f4f89,hpwren-sm-n-mobo-c-20260927-0800,0,lookalike,grey haze band over distant terrain,box-b12,0.000,0.460,0.980,0.540
+8676142f4f89,hpwren-sm-n-mobo-c-20260927-0800,1,lookalike,grey haze band over distant terrain,box-b12,0.000,0.460,0.980,0.540
+8676142f4f89,hpwren-sm-n-mobo-c-20260927-0800,2,lookalike,grey haze band over distant terrain,box-b12,0.000,0.460,0.980,0.540
+8676142f4f89,hpwren-sm-n-mobo-c-20260927-0800,3,lookalike,grey haze band over distant terrain,box-b12,0.000,0.460,0.980,0.540
+1418a3b91dac,hpwren-sm-n-mobo-c-20261004-0730,0,lookalike,haze band at horizon,box-b12,0.000,0.470,0.980,0.550
+1418a3b91dac,hpwren-sm-n-mobo-c-20261004-0730,1,lookalike,haze band at horizon,box-b12,0.000,0.470,0.980,0.550
+1418a3b91dac,hpwren-sm-n-mobo-c-20261004-0730,2,lookalike,haze band at horizon,box-b12,0.000,0.470,0.980,0.550
+1418a3b91dac,hpwren-sm-n-mobo-c-20261004-0730,3,lookalike,haze band at horizon,box-b12,0.000,0.470,0.980,0.550
+e2376e96c6b3,hpwren-sm-s-mobo-c-20260907-0730,0,fog,low fog patch in distant valley,box-b12,0.370,0.510,0.500,0.560
+e2376e96c6b3,hpwren-sm-s-mobo-c-20260907-0730,1,fog,low fog patch in distant valley,box-b12,0.390,0.510,0.500,0.560
+e2376e96c6b3,hpwren-sm-s-mobo-c-20260907-0730,2,fog,low fog patch in distant valley,box-b12,0.380,0.510,0.510,0.560
+e2376e96c6b3,hpwren-sm-s-mobo-c-20260907-0730,3,fog,low fog patch in distant valley,box-b12,0.380,0.510,0.500,0.560
+7145a1c76f51,hpwren-sm-s-mobo-c-20260908-0730,0,fog,whitish low fog patch in distant basin,box-b12,0.370,0.500,0.520,0.550
+7145a1c76f51,hpwren-sm-s-mobo-c-20260908-0730,1,fog,whitish low fog patch in distant basin,box-b12,0.370,0.500,0.520,0.550
+7145a1c76f51,hpwren-sm-s-mobo-c-20260908-0730,2,fog,whitish low fog patch in distant basin,box-b12,0.370,0.500,0.520,0.550
+7145a1c76f51,hpwren-sm-s-mobo-c-20260908-0730,3,fog,whitish low fog patch in distant basin,box-b12,0.370,0.500,0.520,0.550
+680baba5414f,hpwren-sm-s-mobo-c-20260926-0730,0,fog,low fog layer in distant basin,box-b12,0.380,0.510,0.920,0.580
+680baba5414f,hpwren-sm-s-mobo-c-20260926-0730,1,fog,low fog layer in distant basin,box-b12,0.380,0.510,0.900,0.580
+680baba5414f,hpwren-sm-s-mobo-c-20260926-0730,2,fog,low fog layer in distant basin,box-b12,0.380,0.510,0.880,0.580
+680baba5414f,hpwren-sm-s-mobo-c-20260926-0730,3,fog,low fog layer in distant basin,box-b12,0.380,0.510,0.900,0.580
+96b4440faf37,hpwren-sm-s-mobo-c-20261009-0800,0,fog,fog layer in distant basin,box-b12,0.300,0.500,0.900,0.560
+96b4440faf37,hpwren-sm-s-mobo-c-20261009-0800,1,fog,fog layer in distant basin,box-b12,0.300,0.500,0.910,0.560
+96b4440faf37,hpwren-sm-s-mobo-c-20261009-0800,2,fog,fog layer in distant basin,box-b12,0.300,0.510,0.900,0.560
+96b4440faf37,hpwren-sm-s-mobo-c-20261009-0800,3,fog,fog layer in distant basin,box-b12,0.300,0.510,0.900,0.560
+1518e79f67c1,hpwren-sm-w-mobo-c-20260822-0730,0,fog,valley fog patch over lake,box-b12,0.400,0.560,0.630,0.660
+1518e79f67c1,hpwren-sm-w-mobo-c-20260822-0730,1,fog,valley fog patch over lake,box-b12,0.410,0.560,0.680,0.660
+1518e79f67c1,hpwren-sm-w-mobo-c-20260822-0730,2,fog,valley fog patch over lake,box-b12,0.410,0.560,0.620,0.640
+1518e79f67c1,hpwren-sm-w-mobo-c-20260822-0730,3,fog,valley fog patch over lake,box-b12,0.410,0.560,0.640,0.640
+43b8b4644002,hpwren-sm-w-mobo-c-20260823-0730,0,fog,distant marine stratus line at horizon,box-b12,0.150,0.490,0.980,0.530
+43b8b4644002,hpwren-sm-w-mobo-c-20260823-0730,1,fog,distant marine stratus line at horizon,box-b12,0.150,0.490,0.980,0.530
+43b8b4644002,hpwren-sm-w-mobo-c-20260823-0730,2,fog,distant marine stratus line at horizon,box-b12,0.150,0.490,0.980,0.530
+43b8b4644002,hpwren-sm-w-mobo-c-20260823-0730,3,fog,distant marine stratus line at horizon,box-b12,0.150,0.490,0.980,0.530
+34b9a21c1bc1,hpwren-smarpk-e-mobo-c-20260729-0700,0,fog,low cloud on ridges obscuring distant terrain,box-b12,0.000,0.380,0.880,0.620
+34b9a21c1bc1,hpwren-smarpk-e-mobo-c-20260729-0700,1,fog,low cloud on ridges obscuring distant terrain,box-b12,0.000,0.380,0.880,0.620
+34b9a21c1bc1,hpwren-smarpk-e-mobo-c-20260729-0700,2,fog,low cloud on ridges obscuring distant terrain,box-b12,0.000,0.380,0.880,0.620
+34b9a21c1bc1,hpwren-smarpk-e-mobo-c-20260729-0700,3,fog,low cloud on ridges obscuring distant terrain,box-b12,0.000,0.380,0.880,0.620
+574a68786d6b,hpwren-smarpk-e-mobo-c-20260825-0700,0,fog,valley fog layers between distant ridges,box-b12,0.020,0.490,0.300,0.550
+574a68786d6b,hpwren-smarpk-e-mobo-c-20260825-0700,1,fog,valley fog layers between distant ridges,box-b12,0.020,0.490,0.300,0.550
+574a68786d6b,hpwren-smarpk-e-mobo-c-20260825-0700,2,fog,valley fog layers between distant ridges,box-b12,0.020,0.490,0.300,0.550
+574a68786d6b,hpwren-smarpk-e-mobo-c-20260825-0700,3,fog,valley fog layers between distant ridges,box-b12,0.020,0.490,0.300,0.550
+f9795f14ed8e,hpwren-smarpk-e-mobo-c-20260909-0730,0,lookalike,sunlit cloud bank and glare touching horizon,box-b13,0.150,0.370,0.880,0.500
+f9795f14ed8e,hpwren-smarpk-e-mobo-c-20260909-0730,1,lookalike,sunlit cloud bank and glare touching horizon,box-b13,0.180,0.370,0.880,0.500
+f9795f14ed8e,hpwren-smarpk-e-mobo-c-20260909-0730,2,lookalike,sunlit cloud bank and glare touching horizon,box-b13,0.180,0.390,0.920,0.500
+f9795f14ed8e,hpwren-smarpk-e-mobo-c-20260909-0730,3,lookalike,sunlit cloud bank and glare touching horizon,box-b13,0.200,0.410,0.920,0.500
+b000d68c92a2,hpwren-smarpk-e-mobo-c-20260924-0800,0,fog,"camera inside fog, whole view grey",box-b13,0.000,0.000,1.000,1.000
+b000d68c92a2,hpwren-smarpk-e-mobo-c-20260924-0800,1,fog,"camera inside fog, whole view grey",box-b13,0.000,0.000,1.000,1.000
+b000d68c92a2,hpwren-smarpk-e-mobo-c-20260924-0800,2,fog,"camera inside fog, whole view grey",box-b13,0.000,0.000,1.000,1.000
+b000d68c92a2,hpwren-smarpk-e-mobo-c-20260924-0800,3,fog,"camera inside fog, whole view grey",box-b13,0.000,0.000,1.000,1.000
+fa67b8f50dbb,hpwren-smarpk-e-mobo-c-20261005-0730,0,lookalike,bright sun glare haze at horizon,box-b13,0.360,0.420,0.780,0.530
+fa67b8f50dbb,hpwren-smarpk-e-mobo-c-20261005-0730,1,lookalike,bright sun glare haze at horizon,box-b13,0.360,0.420,0.780,0.530
+fa67b8f50dbb,hpwren-smarpk-e-mobo-c-20261005-0730,2,lookalike,bright sun glare haze at horizon,box-b13,0.360,0.420,0.780,0.530
+fa67b8f50dbb,hpwren-smarpk-e-mobo-c-20261005-0730,3,lookalike,bright sun glare haze at horizon,box-b13,0.360,0.420,0.780,0.530
+50be3144f449,hpwren-smarpk-n-mobo-c-20260819-0700,0,fog,fog sea below camera,box-b13,0.000,0.500,0.990,0.800
+50be3144f449,hpwren-smarpk-n-mobo-c-20260819-0700,1,fog,fog sea below camera,box-b13,0.000,0.500,0.990,0.820
+50be3144f449,hpwren-smarpk-n-mobo-c-20260819-0700,2,fog,fog sea below camera,box-b13,0.000,0.500,0.990,0.820
+50be3144f449,hpwren-smarpk-n-mobo-c-20260819-0700,3,fog,fog sea below camera,box-b13,0.000,0.490,0.990,0.800
+e05be6a05300,hpwren-smarpk-n-mobo-c-20260925-0800,0,fog,fog sea below camera,box-b13,0.000,0.500,0.990,0.780
+e05be6a05300,hpwren-smarpk-n-mobo-c-20260925-0800,1,fog,fog sea below camera,box-b13,0.000,0.500,0.990,0.750
+e05be6a05300,hpwren-smarpk-n-mobo-c-20260925-0800,2,fog,fog sea below camera,box-b13,0.000,0.500,0.990,0.700
+e05be6a05300,hpwren-smarpk-n-mobo-c-20260925-0800,3,fog,fog sea below camera,box-b13,0.000,0.500,0.990,0.700
+741b22a1c971,hpwren-smarpk-n-mobo-c-20261007-0800,0,lookalike,haze band along horizon,box-b13,0.000,0.470,0.990,0.550
+741b22a1c971,hpwren-smarpk-n-mobo-c-20261007-0800,1,lookalike,haze band along horizon,box-b13,0.000,0.470,0.990,0.550
+741b22a1c971,hpwren-smarpk-n-mobo-c-20261007-0800,2,lookalike,haze band along horizon,box-b13,0.000,0.470,0.990,0.550
+741b22a1c971,hpwren-smarpk-n-mobo-c-20261007-0800,3,lookalike,haze band along horizon,box-b13,0.000,0.470,0.990,0.550
+aeea30eb175f,hpwren-smarpk-n-mobo-c-20261008-0800,0,lookalike,haze band along horizon,box-b13,0.000,0.470,0.990,0.550
+aeea30eb175f,hpwren-smarpk-n-mobo-c-20261008-0800,1,lookalike,haze band along horizon,box-b13,0.000,0.470,0.990,0.550
+aeea30eb175f,hpwren-smarpk-n-mobo-c-20261008-0800,2,lookalike,haze band along horizon,box-b13,0.000,0.470,0.990,0.550
+aeea30eb175f,hpwren-smarpk-n-mobo-c-20261008-0800,3,lookalike,haze band along horizon,box-b13,0.000,0.470,0.990,0.550
+e8423daa0a1a,hpwren-smarpk-s-mobo-c-20260822-0700,0,fog,marine fog sea at horizon right of tower,box-b13,0.570,0.520,0.990,0.660
+e8423daa0a1a,hpwren-smarpk-s-mobo-c-20260822-0700,1,fog,marine fog sea at horizon right of tower,box-b13,0.570,0.520,0.990,0.670
+e8423daa0a1a,hpwren-smarpk-s-mobo-c-20260822-0700,2,fog,marine fog sea at horizon right of tower,box-b13,0.580,0.520,0.990,0.650
+e8423daa0a1a,hpwren-smarpk-s-mobo-c-20260822-0700,3,fog,marine fog sea at horizon right of tower,box-b13,0.580,0.520,0.990,0.640
+d28f3fb1dd7a,hpwren-smarpk-s-mobo-c-20260903-0730,0,lookalike,hazy horizon band under cloud bank,box-b13,0.600,0.470,0.990,0.560
+d28f3fb1dd7a,hpwren-smarpk-s-mobo-c-20260903-0730,1,lookalike,hazy horizon band under cloud bank,box-b13,0.600,0.470,0.990,0.560
+d28f3fb1dd7a,hpwren-smarpk-s-mobo-c-20260903-0730,2,lookalike,hazy horizon band under cloud bank,box-b13,0.600,0.480,0.990,0.560
+d28f3fb1dd7a,hpwren-smarpk-s-mobo-c-20260903-0730,3,lookalike,hazy horizon band under cloud bank,box-b13,0.600,0.480,0.990,0.560
+7b06e3f86d7d,hpwren-smarpk-s-mobo-c-20260909-0730,0,lookalike,bright hazy horizon band,box-b13,0.600,0.460,0.990,0.560
+7b06e3f86d7d,hpwren-smarpk-s-mobo-c-20260909-0730,1,lookalike,bright hazy horizon band,box-b13,0.600,0.460,0.990,0.560
+7b06e3f86d7d,hpwren-smarpk-s-mobo-c-20260909-0730,2,lookalike,bright hazy horizon band,box-b13,0.600,0.460,0.990,0.560
+7b06e3f86d7d,hpwren-smarpk-s-mobo-c-20260909-0730,3,lookalike,bright hazy horizon band,box-b13,0.600,0.460,0.990,0.560
+855e507705cc,hpwren-smarpk-s-mobo-c-20261001-0800,0,fog,fog bank low at right horizon,box-b13,0.720,0.510,0.990,0.590
+855e507705cc,hpwren-smarpk-s-mobo-c-20261001-0800,1,fog,fog bank low at right horizon,box-b13,0.750,0.510,0.990,0.600
+855e507705cc,hpwren-smarpk-s-mobo-c-20261001-0800,2,fog,fog bank low at right horizon,box-b13,0.800,0.510,0.990,0.580
+855e507705cc,hpwren-smarpk-s-mobo-c-20261001-0800,3,fog,fog bank low at right horizon,box-b13,0.840,0.510,0.990,0.580
+2f6375ba4e27,hpwren-smarpk-w-mobo-c-20260822-0700,0,fog,fog sea below horizon,box-b13,0.000,0.510,0.990,0.660
+2f6375ba4e27,hpwren-smarpk-w-mobo-c-20260822-0700,1,fog,fog sea below horizon,box-b13,0.000,0.510,0.990,0.660
+2f6375ba4e27,hpwren-smarpk-w-mobo-c-20260822-0700,2,fog,fog sea below horizon,box-b13,0.000,0.500,0.990,0.620
+2f6375ba4e27,hpwren-smarpk-w-mobo-c-20260822-0700,3,fog,fog sea below horizon,box-b13,0.000,0.500,0.990,0.630
+36e5559e54a9,hpwren-smarpk-w-mobo-c-20261009-0800,0,fog,fog sea below horizon,box-b13,0.000,0.510,0.990,0.660
+36e5559e54a9,hpwren-smarpk-w-mobo-c-20261009-0800,1,fog,fog sea below horizon,box-b13,0.000,0.510,0.990,0.660
+36e5559e54a9,hpwren-smarpk-w-mobo-c-20261009-0800,2,fog,fog sea below horizon,box-b13,0.000,0.500,0.990,0.650
+36e5559e54a9,hpwren-smarpk-w-mobo-c-20261009-0800,3,fog,fog sea below horizon,box-b13,0.000,0.500,0.990,0.640
+e036782a475e,hpwren-smer-tcs3-mobo-c-20260721-0630,0,lookalike,bright glare haze over ridge at horizon,box-b13,0.250,0.360,0.550,0.430
+e036782a475e,hpwren-smer-tcs3-mobo-c-20260721-0630,1,lookalike,bright glare haze over ridge at horizon,box-b13,0.250,0.360,0.550,0.430
+e036782a475e,hpwren-smer-tcs3-mobo-c-20260721-0630,2,lookalike,bright glare haze over ridge at horizon,box-b13,0.250,0.320,0.620,0.500
+e036782a475e,hpwren-smer-tcs3-mobo-c-20260721-0630,3,lookalike,bright glare haze over ridge at horizon,box-b13,0.250,0.300,0.620,0.480
+522469098fa3,hpwren-smer-tcs3-mobo-c-20260725-0700,0,fog,sunlit fog filling valley below,box-b13,0.000,0.330,0.990,0.690
+522469098fa3,hpwren-smer-tcs3-mobo-c-20260725-0700,1,fog,sunlit fog filling valley below,box-b13,0.000,0.380,0.990,0.700
+522469098fa3,hpwren-smer-tcs3-mobo-c-20260725-0700,2,fog,sunlit fog filling valley below,box-b13,0.000,0.300,0.990,0.680
+522469098fa3,hpwren-smer-tcs3-mobo-c-20260725-0700,3,fog,sunlit fog filling valley below,box-b13,0.000,0.400,0.990,0.690
+822c1a923549,hpwren-smer-tcs3-mobo-c-20260913-0730,0,lookalike,haze over ridgeline under overcast,box-b13,0.000,0.330,0.990,0.440
+822c1a923549,hpwren-smer-tcs3-mobo-c-20260913-0730,1,lookalike,haze over ridgeline under overcast,box-b13,0.000,0.330,0.990,0.440
+822c1a923549,hpwren-smer-tcs3-mobo-c-20260913-0730,2,lookalike,haze over ridgeline under overcast,box-b13,0.000,0.330,0.990,0.440
+822c1a923549,hpwren-smer-tcs3-mobo-c-20260913-0730,3,lookalike,haze over ridgeline under overcast,box-b13,0.000,0.330,0.990,0.440
+53b3f8b90bc7,hpwren-smer-tcs3-mobo-c-20260914-0700,0,fog,low cloud resting on ridges,box-b13,0.000,0.340,0.990,0.440
+53b3f8b90bc7,hpwren-smer-tcs3-mobo-c-20260914-0700,1,fog,low cloud resting on ridges,box-b13,0.000,0.330,0.990,0.450
+53b3f8b90bc7,hpwren-smer-tcs3-mobo-c-20260914-0700,2,fog,low cloud resting on ridges,box-b13,0.000,0.320,0.990,0.470
+53b3f8b90bc7,hpwren-smer-tcs3-mobo-c-20260914-0700,3,fog,low cloud resting on ridges,box-b13,0.000,0.280,0.990,0.480
+14e97c729ca0,hpwren-smer-tcs3-mobo-c-20260915-0800,0,lookalike,mist over distant left ridges,box-b13,0.000,0.370,0.400,0.450
+14e97c729ca0,hpwren-smer-tcs3-mobo-c-20260915-0800,1,lookalike,mist over distant left ridges,box-b13,0.000,0.370,0.400,0.450
+14e97c729ca0,hpwren-smer-tcs3-mobo-c-20260915-0800,2,lookalike,mist over distant left ridges,box-b13,0.000,0.370,0.400,0.450
+14e97c729ca0,hpwren-smer-tcs3-mobo-c-20260915-0800,3,lookalike,mist over distant left ridges,box-b13,0.000,0.370,0.400,0.450
+dddb05aa9b54,hpwren-smer-tcs8-mobo-c-20260801-0730,0,lookalike,haze band along horizon,box-b13,0.000,0.370,0.990,0.460
+dddb05aa9b54,hpwren-smer-tcs8-mobo-c-20260801-0730,1,lookalike,haze band along horizon,box-b13,0.000,0.370,0.990,0.460
+dddb05aa9b54,hpwren-smer-tcs8-mobo-c-20260801-0730,2,lookalike,haze band along horizon,box-b13,0.000,0.380,0.990,0.470
+dddb05aa9b54,hpwren-smer-tcs8-mobo-c-20260801-0730,3,lookalike,haze band along horizon,box-b13,0.000,0.380,0.990,0.470
+fdd687193568,hpwren-smer-tcs8-mobo-c-20260809-0730,0,lookalike,haze band along horizon,box-b13,0.000,0.370,0.990,0.460
+fdd687193568,hpwren-smer-tcs8-mobo-c-20260809-0730,1,lookalike,haze band along horizon,box-b13,0.000,0.370,0.990,0.460
+fdd687193568,hpwren-smer-tcs8-mobo-c-20260809-0730,2,lookalike,haze band along horizon,box-b13,0.000,0.380,0.990,0.470
+fdd687193568,hpwren-smer-tcs8-mobo-c-20260809-0730,3,lookalike,haze band along horizon,box-b13,0.000,0.380,0.990,0.470
+e367d3bc3ed7,hpwren-starr-e-mobo-c-20260725-0630,0,fog,fog sea in valley at right below ridges,box-b14,0.730,0.510,1.000,0.660
+e367d3bc3ed7,hpwren-starr-e-mobo-c-20260725-0630,1,fog,fog sea in valley at right below ridges,box-b14,0.800,0.510,1.000,0.660
+e367d3bc3ed7,hpwren-starr-e-mobo-c-20260725-0630,2,fog,fog sea in valley at right below ridges,box-b14,0.820,0.510,1.000,0.670
+e367d3bc3ed7,hpwren-starr-e-mobo-c-20260725-0630,3,fog,fog sea in valley at right below ridges,box-b14,0.820,0.510,1.000,0.670
+59eb46214df6,hpwren-starr-e-mobo-c-20260729-0730,0,fog,"camera inside fog, washed-out grey view",box-b14,0.000,0.000,1.000,1.000
+59eb46214df6,hpwren-starr-e-mobo-c-20260729-0730,1,fog,"camera inside fog, washed-out grey view",box-b14,0.000,0.000,1.000,1.000
+59eb46214df6,hpwren-starr-e-mobo-c-20260729-0730,2,fog,"camera inside fog, washed-out grey view",box-b14,0.000,0.000,1.000,1.000
+59eb46214df6,hpwren-starr-e-mobo-c-20260729-0730,3,fog,"camera inside fog, washed-out grey view",box-b14,0.000,0.000,1.000,1.000
+b28cd7d4ff84,hpwren-starr-e-mobo-c-20260920-0730,0,fog,low cloud resting on distant ridges,box-b14,0.000,0.400,1.000,0.520
+b28cd7d4ff84,hpwren-starr-e-mobo-c-20260920-0730,1,fog,low cloud resting on distant ridges,box-b14,0.000,0.400,1.000,0.520
+b28cd7d4ff84,hpwren-starr-e-mobo-c-20260920-0730,2,fog,low cloud resting on distant ridges,box-b14,0.000,0.400,1.000,0.520
+b28cd7d4ff84,hpwren-starr-e-mobo-c-20260920-0730,3,fog,low cloud resting on distant ridges,box-b14,0.000,0.400,1.000,0.520
+0045298e62a8,hpwren-starr-n-mobo-c-20260729-0700,0,fog,"camera inside fog, washed-out grey view",box-b14,0.000,0.000,1.000,1.000
+0045298e62a8,hpwren-starr-n-mobo-c-20260729-0700,1,fog,"camera inside fog, washed-out grey view",box-b14,0.000,0.000,1.000,1.000
+0045298e62a8,hpwren-starr-n-mobo-c-20260729-0700,2,fog,"camera inside fog, washed-out grey view",box-b14,0.000,0.000,1.000,1.000
+0045298e62a8,hpwren-starr-n-mobo-c-20260729-0700,3,fog,"camera inside fog, washed-out grey view",box-b14,0.000,0.000,1.000,1.000
+811b5fd70e33,hpwren-starr-n-mobo-c-20260924-0730,0,fog,"camera inside dense fog, washed-out view",box-b14,0.000,0.000,1.000,1.000
+811b5fd70e33,hpwren-starr-n-mobo-c-20260924-0730,1,fog,"camera inside dense fog, washed-out view",box-b14,0.000,0.000,1.000,1.000
+811b5fd70e33,hpwren-starr-n-mobo-c-20260924-0730,2,fog,"camera inside dense fog, washed-out view",box-b14,0.000,0.000,1.000,1.000
+811b5fd70e33,hpwren-starr-n-mobo-c-20260924-0730,3,fog,"camera inside dense fog, washed-out view",box-b14,0.000,0.000,1.000,1.000
+c5da2204b466,hpwren-starr-n-mobo-c-20261017-0800,0,lookalike,bright hazy horizon band at left,box-b14,0.000,0.400,0.280,0.530
+c5da2204b466,hpwren-starr-n-mobo-c-20261017-0800,1,lookalike,bright hazy horizon band at left,box-b14,0.000,0.400,0.280,0.530
+c5da2204b466,hpwren-starr-n-mobo-c-20261017-0800,2,lookalike,bright hazy horizon band at left,box-b14,0.000,0.400,0.280,0.530
+c5da2204b466,hpwren-starr-n-mobo-c-20261017-0800,3,lookalike,bright hazy horizon band at left,box-b14,0.000,0.400,0.280,0.530
+afc963cb7dcd,hpwren-starr-s-mobo-c-20260924-0800,0,fog,camera inside fog with sun glare,box-b14,0.000,0.000,1.000,1.000
+afc963cb7dcd,hpwren-starr-s-mobo-c-20260924-0800,1,fog,camera inside fog with sun glare,box-b14,0.000,0.000,1.000,1.000
+afc963cb7dcd,hpwren-starr-s-mobo-c-20260924-0800,2,fog,camera inside fog with sun glare,box-b14,0.000,0.000,1.000,1.000
+afc963cb7dcd,hpwren-starr-s-mobo-c-20260924-0800,3,fog,camera inside fog with sun glare,box-b14,0.000,0.000,1.000,1.000
+d18ad9c97859,hpwren-starr-s-mobo-c-20260925-0730,0,fog,marine stratus fog sea at right,box-b14,0.420,0.490,1.000,0.590
+d18ad9c97859,hpwren-starr-s-mobo-c-20260925-0730,1,fog,marine stratus fog sea at right,box-b14,0.400,0.490,1.000,0.590
+d18ad9c97859,hpwren-starr-s-mobo-c-20260925-0730,2,fog,marine stratus fog sea at right,box-b14,0.380,0.490,1.000,0.590
+d18ad9c97859,hpwren-starr-s-mobo-c-20260925-0730,3,fog,marine stratus fog sea at right,box-b14,0.360,0.490,1.000,0.590
+5367d042864e,hpwren-starr-w-mobo-c-20260722-0630,0,fog,valley fog bank forming and growing,box-b14,0.000,0.490,0.600,0.530
+5367d042864e,hpwren-starr-w-mobo-c-20260722-0630,1,fog,valley fog bank forming and growing,box-b14,0.000,0.500,0.920,0.580
+5367d042864e,hpwren-starr-w-mobo-c-20260722-0630,2,fog,valley fog bank forming and growing,box-b14,0.000,0.500,1.000,0.660
+5367d042864e,hpwren-starr-w-mobo-c-20260722-0630,3,fog,valley fog bank forming and growing,box-b14,0.000,0.500,1.000,0.680
+69914ea32f6c,hpwren-starr-w-mobo-c-20260801-0700,0,fog,fog layer in valley below horizon,box-b14,0.000,0.500,0.790,0.580
+69914ea32f6c,hpwren-starr-w-mobo-c-20260801-0700,1,fog,fog layer in valley below horizon,box-b14,0.000,0.500,0.780,0.580
+69914ea32f6c,hpwren-starr-w-mobo-c-20260801-0700,2,fog,fog layer in valley below horizon,box-b14,0.000,0.500,0.780,0.570
+69914ea32f6c,hpwren-starr-w-mobo-c-20260801-0700,3,fog,fog layer in valley below horizon,box-b14,0.000,0.500,0.800,0.580
+aba0f221d45f,hpwren-starr-w-mobo-c-20261016-0800,0,lookalike,haze band along distant horizon,box-b14,0.000,0.470,1.000,0.520
+aba0f221d45f,hpwren-starr-w-mobo-c-20261016-0800,1,lookalike,haze band along distant horizon,box-b14,0.000,0.470,1.000,0.520
+aba0f221d45f,hpwren-starr-w-mobo-c-20261016-0800,2,lookalike,haze band along distant horizon,box-b14,0.000,0.470,1.000,0.520
+aba0f221d45f,hpwren-starr-w-mobo-c-20261016-0800,3,lookalike,haze band along distant horizon,box-b14,0.000,0.470,1.000,0.520
+c9c9daa0f323,hpwren-starr-w-mobo-c-20261017-0800,0,lookalike,grey haze band touching horizon at left,box-b14,0.000,0.400,0.500,0.510
+c9c9daa0f323,hpwren-starr-w-mobo-c-20261017-0800,1,lookalike,grey haze band touching horizon at left,box-b14,0.000,0.400,0.450,0.510
+c9c9daa0f323,hpwren-starr-w-mobo-c-20261017-0800,2,lookalike,grey haze band touching horizon at left,box-b14,0.000,0.400,0.500,0.510
+c9c9daa0f323,hpwren-starr-w-mobo-c-20261017-0800,3,lookalike,grey haze band touching horizon at left,box-b14,0.000,0.420,0.450,0.510
+70cb306a2b2a,hpwren-stgo-e-mobo-c-20260730-0700,0,fog,fog sea below mountain camera,box-b14,0.000,0.500,0.780,0.700
+70cb306a2b2a,hpwren-stgo-e-mobo-c-20260730-0700,1,fog,fog sea below mountain camera,box-b14,0.000,0.500,0.780,0.700
+70cb306a2b2a,hpwren-stgo-e-mobo-c-20260730-0700,2,fog,fog sea below mountain camera,box-b14,0.000,0.500,0.780,0.680
+70cb306a2b2a,hpwren-stgo-e-mobo-c-20260730-0700,3,fog,fog sea below mountain camera,box-b14,0.000,0.500,0.780,0.680
+11ddb8455c29,hpwren-stgo-e-mobo-c-20260731-0730,0,fog,patchy fog in valleys below,box-b14,0.000,0.520,0.580,0.660
+11ddb8455c29,hpwren-stgo-e-mobo-c-20260731-0730,1,fog,patchy fog in valleys below,box-b14,0.000,0.520,0.580,0.660
+11ddb8455c29,hpwren-stgo-e-mobo-c-20260731-0730,2,fog,patchy fog in valleys below,box-b14,0.000,0.510,0.580,0.660
+11ddb8455c29,hpwren-stgo-e-mobo-c-20260731-0730,3,fog,patchy fog in valleys below,box-b14,0.000,0.510,0.580,0.660
+ec4994174dff,hpwren-stgo-e-mobo-c-20260808-0730,0,lookalike,sunlit haze layer over distant valleys,box-b14,0.000,0.480,0.650,0.600
+ec4994174dff,hpwren-stgo-e-mobo-c-20260808-0730,1,lookalike,sunlit haze layer over distant valleys,box-b14,0.000,0.480,0.650,0.600
+ec4994174dff,hpwren-stgo-e-mobo-c-20260808-0730,2,lookalike,sunlit haze layer over distant valleys,box-b14,0.000,0.480,0.650,0.600
+ec4994174dff,hpwren-stgo-e-mobo-c-20260808-0730,3,lookalike,sunlit haze layer over distant valleys,box-b14,0.000,0.480,0.650,0.600
+3f741fe74155,hpwren-stgo-e-mobo-c-20260915-0730,0,fog,bright fog sea below ridges,box-b14,0.000,0.510,0.650,0.700
+3f741fe74155,hpwren-stgo-e-mobo-c-20260915-0730,1,fog,bright fog sea below ridges,box-b14,0.000,0.510,0.650,0.700
+3f741fe74155,hpwren-stgo-e-mobo-c-20260915-0730,2,fog,bright fog sea below ridges,box-b14,0.000,0.510,0.650,0.680
+3f741fe74155,hpwren-stgo-e-mobo-c-20260915-0730,3,fog,bright fog sea below ridges,box-b14,0.000,0.510,0.650,0.680
+4cf1aa29b5ed,hpwren-stgo-n-mobo-c-20260729-0730,0,fog,fog sea filling distant basin,box-b14,0.000,0.510,0.950,0.610
+4cf1aa29b5ed,hpwren-stgo-n-mobo-c-20260729-0730,1,fog,fog sea filling distant basin,box-b14,0.000,0.510,0.950,0.610
+4cf1aa29b5ed,hpwren-stgo-n-mobo-c-20260729-0730,2,fog,fog sea filling distant basin,box-b14,0.000,0.510,0.950,0.610
+4cf1aa29b5ed,hpwren-stgo-n-mobo-c-20260729-0730,3,fog,fog sea filling distant basin,box-b14,0.000,0.510,0.950,0.610
+198d2378781c,hpwren-stgo-n-mobo-c-20260811-0730,0,lookalike,haze over distant valley floor,box-b14,0.050,0.500,0.950,0.620
+198d2378781c,hpwren-stgo-n-mobo-c-20260811-0730,1,lookalike,haze over distant valley floor,box-b14,0.050,0.500,0.950,0.620
+198d2378781c,hpwren-stgo-n-mobo-c-20260811-0730,2,lookalike,haze over distant valley floor,box-b14,0.050,0.500,0.950,0.620
+198d2378781c,hpwren-stgo-n-mobo-c-20260811-0730,3,lookalike,haze over distant valley floor,box-b14,0.050,0.500,0.950,0.620
+939cb9941593,hpwren-stgo-n-mobo-c-20260914-0730,0,fog,fog sea filling distant basin,box-b14,0.000,0.510,1.000,0.670
+939cb9941593,hpwren-stgo-n-mobo-c-20260914-0730,1,fog,fog sea filling distant basin,box-b14,0.000,0.510,1.000,0.670
+939cb9941593,hpwren-stgo-n-mobo-c-20260914-0730,2,fog,fog sea filling distant basin,box-b14,0.000,0.510,1.000,0.660
+939cb9941593,hpwren-stgo-n-mobo-c-20260914-0730,3,fog,fog sea filling distant basin,box-b14,0.000,0.510,1.000,0.660
+70b0d51e03ac,hpwren-stgo-n-mobo-c-20261007-0730,0,lookalike,haze over distant valley floor,box-b14,0.050,0.500,0.950,0.600
+70b0d51e03ac,hpwren-stgo-n-mobo-c-20261007-0730,1,lookalike,haze over distant valley floor,box-b14,0.050,0.500,0.950,0.600
+70b0d51e03ac,hpwren-stgo-n-mobo-c-20261007-0730,2,lookalike,haze over distant valley floor,box-b14,0.050,0.500,0.950,0.600
+70b0d51e03ac,hpwren-stgo-n-mobo-c-20261007-0730,3,lookalike,haze over distant valley floor,box-b14,0.050,0.500,0.950,0.600
+f3b07f68c3bb,hpwren-stgo-n-mobo-c-20261018-0800,0,lookalike,cloud bank band touching distant mountain horizon,box-b15,0.000,0.370,0.920,0.500
+f3b07f68c3bb,hpwren-stgo-n-mobo-c-20261018-0800,1,lookalike,cloud bank band touching distant mountain horizon,box-b15,0.000,0.370,0.920,0.500
+f3b07f68c3bb,hpwren-stgo-n-mobo-c-20261018-0800,2,lookalike,cloud bank band touching distant mountain horizon,box-b15,0.000,0.360,0.920,0.500
+f3b07f68c3bb,hpwren-stgo-n-mobo-c-20261018-0800,3,lookalike,cloud bank band touching distant mountain horizon,box-b15,0.000,0.360,0.920,0.500
+11ec013ef9fc,hpwren-stgo-w-mobo-c-20260722-0630,0,fog,fog sea below camera beyond ridge,box-b15,0.000,0.510,0.820,0.680
+11ec013ef9fc,hpwren-stgo-w-mobo-c-20260722-0630,1,fog,fog sea below camera beyond ridge,box-b15,0.000,0.510,0.820,0.680
+11ec013ef9fc,hpwren-stgo-w-mobo-c-20260722-0630,2,fog,fog sea below camera beyond ridge,box-b15,0.000,0.510,0.820,0.700
+11ec013ef9fc,hpwren-stgo-w-mobo-c-20260722-0630,3,fog,fog sea below camera beyond ridge,box-b15,0.000,0.510,0.820,0.690
+192e2b577407,hpwren-stgo-w-mobo-c-20260801-0730,0,fog,fog sea along horizon below camera,box-b15,0.000,0.500,0.880,0.600
+192e2b577407,hpwren-stgo-w-mobo-c-20260801-0730,1,fog,fog sea along horizon below camera,box-b15,0.000,0.500,0.880,0.600
+192e2b577407,hpwren-stgo-w-mobo-c-20260801-0730,2,fog,fog sea along horizon below camera,box-b15,0.000,0.500,0.880,0.600
+192e2b577407,hpwren-stgo-w-mobo-c-20260801-0730,3,fog,fog sea along horizon below camera,box-b15,0.000,0.500,0.880,0.600
+eb5cb9785392,hpwren-stgo-w-mobo-c-20260829-0700,0,lookalike,haze band over distant terrain at horizon,box-b15,0.000,0.490,0.900,0.580
+eb5cb9785392,hpwren-stgo-w-mobo-c-20260829-0700,1,lookalike,haze band over distant terrain at horizon,box-b15,0.000,0.490,0.900,0.580
+eb5cb9785392,hpwren-stgo-w-mobo-c-20260829-0700,2,lookalike,haze band over distant terrain at horizon,box-b15,0.000,0.490,0.900,0.580
+eb5cb9785392,hpwren-stgo-w-mobo-c-20260829-0700,3,lookalike,haze band over distant terrain at horizon,box-b15,0.000,0.490,0.900,0.580
+fece45f73cc7,hpwren-stgo-w-mobo-c-20261015-0800,0,lookalike,haze band at horizon over distant valley,box-b15,0.000,0.490,0.900,0.560
+fece45f73cc7,hpwren-stgo-w-mobo-c-20261015-0800,1,lookalike,haze band at horizon over distant valley,box-b15,0.000,0.490,0.900,0.560
+fece45f73cc7,hpwren-stgo-w-mobo-c-20261015-0800,2,lookalike,haze band at horizon over distant valley,box-b15,0.000,0.490,0.900,0.560
+fece45f73cc7,hpwren-stgo-w-mobo-c-20261015-0800,3,lookalike,haze band at horizon over distant valley,box-b15,0.000,0.490,0.900,0.560
+2d35408fec5c,hpwren-syp-e-mobo-c-20260903-0800,0,fog,bright fog bank left of ridge below horizon,box-b15,0.000,0.580,0.100,0.780
+2d35408fec5c,hpwren-syp-e-mobo-c-20260903-0800,1,fog,bright fog bank left of ridge below horizon,box-b15,0.000,0.580,0.100,0.780
+2d35408fec5c,hpwren-syp-e-mobo-c-20260903-0800,2,fog,bright fog bank left of ridge below horizon,box-b15,0.000,0.580,0.100,0.800
+2d35408fec5c,hpwren-syp-e-mobo-c-20260903-0800,3,fog,bright fog bank left of ridge below horizon,box-b15,0.000,0.580,0.100,0.800
+c769ca697606,hpwren-syp-e-mobo-c-20260909-0730,0,lookalike,sunlit hazy patch at horizon below clouds,box-b15,0.150,0.470,0.550,0.560
+c769ca697606,hpwren-syp-e-mobo-c-20260909-0730,1,lookalike,sunlit hazy patch at horizon below clouds,box-b15,0.150,0.470,0.550,0.560
+c769ca697606,hpwren-syp-e-mobo-c-20260909-0730,2,lookalike,sunlit hazy patch at horizon below clouds,box-b15,0.150,0.470,0.550,0.560
+c769ca697606,hpwren-syp-e-mobo-c-20260909-0730,3,lookalike,sunlit hazy patch at horizon below clouds,box-b15,0.150,0.470,0.550,0.560
+fec6b6f26913,hpwren-syp-e-mobo-c-20261002-0730,0,fog,fog sea below horizon right side,box-b15,0.480,0.540,0.980,0.670
+fec6b6f26913,hpwren-syp-e-mobo-c-20261002-0730,1,fog,fog sea below horizon right side,box-b15,0.480,0.540,0.980,0.670
+fec6b6f26913,hpwren-syp-e-mobo-c-20261002-0730,2,fog,fog sea below horizon right side,box-b15,0.500,0.550,0.980,0.680
+fec6b6f26913,hpwren-syp-e-mobo-c-20261002-0730,3,fog,fog sea below horizon right side,box-b15,0.550,0.550,0.980,0.660
+9203b05bdba1,hpwren-syp-e-mobo-c-20261008-0800,0,fog,fog sea right of tower below horizon,box-b15,0.580,0.540,0.980,0.740
+9203b05bdba1,hpwren-syp-e-mobo-c-20261008-0800,1,fog,fog sea right of tower below horizon,box-b15,0.580,0.540,0.980,0.740
+9203b05bdba1,hpwren-syp-e-mobo-c-20261008-0800,2,fog,fog sea right of tower below horizon,box-b15,0.580,0.550,0.980,0.730
+9203b05bdba1,hpwren-syp-e-mobo-c-20261008-0800,3,fog,fog sea right of tower below horizon,box-b15,0.580,0.550,0.980,0.730
+814092f74877,hpwren-syp-e-mobo-c-20261011-0830,0,fog,fog bank filling left valley around tower,box-b15,0.000,0.520,0.300,0.920
+814092f74877,hpwren-syp-e-mobo-c-20261011-0830,1,fog,fog bank filling left valley around tower,box-b15,0.000,0.520,0.300,0.920
+814092f74877,hpwren-syp-e-mobo-c-20261011-0830,2,fog,fog bank filling left valley around tower,box-b15,0.000,0.520,0.300,0.920
+814092f74877,hpwren-syp-e-mobo-c-20261011-0830,3,fog,fog bank filling left valley around tower,box-b15,0.000,0.520,0.300,0.920
+a729c6fa79da,hpwren-tdlln-e-mobo-c-20260804-0730,0,fog,grey mist band obscuring distant city horizon,box-b15,0.020,0.480,0.980,0.580
+a729c6fa79da,hpwren-tdlln-e-mobo-c-20260804-0730,1,fog,grey mist band obscuring distant city horizon,box-b15,0.020,0.480,0.980,0.580
+a729c6fa79da,hpwren-tdlln-e-mobo-c-20260804-0730,2,fog,grey mist band obscuring distant city horizon,box-b15,0.020,0.480,0.980,0.580
+a729c6fa79da,hpwren-tdlln-e-mobo-c-20260804-0730,3,fog,grey mist band obscuring distant city horizon,box-b15,0.020,0.480,0.980,0.580
+2808553e7d59,hpwren-tdlln-e-mobo-c-20260826-0700,0,fog,ground fog patches over city below horizon,box-b15,0.300,0.520,0.980,0.700
+2808553e7d59,hpwren-tdlln-e-mobo-c-20260826-0700,1,fog,ground fog patches over city below horizon,box-b15,0.300,0.520,0.980,0.700
+2808553e7d59,hpwren-tdlln-e-mobo-c-20260826-0700,2,fog,ground fog patches over city below horizon,box-b15,0.300,0.520,0.980,0.660
+2808553e7d59,hpwren-tdlln-e-mobo-c-20260826-0700,3,fog,ground fog patches over city below horizon,box-b15,0.350,0.520,0.980,0.620
+1f36173adfe4,hpwren-tdlln-e-mobo-c-20260908-0700,0,lookalike,low cloud bank touching horizon at sunrise,box-b15,0.020,0.400,0.850,0.510
+1f36173adfe4,hpwren-tdlln-e-mobo-c-20260908-0700,1,lookalike,low cloud bank touching horizon at sunrise,box-b15,0.020,0.400,0.850,0.510
+1f36173adfe4,hpwren-tdlln-e-mobo-c-20260908-0700,2,lookalike,low cloud bank touching horizon at sunrise,box-b15,0.020,0.400,0.850,0.510
+1f36173adfe4,hpwren-tdlln-e-mobo-c-20260908-0700,3,lookalike,low cloud bank touching horizon at sunrise,box-b15,0.020,0.400,0.850,0.510
+5d322b4ee841,hpwren-tdlln-e-mobo-c-20260909-0700,0,lookalike,cloud bank resting on horizon at sunrise,box-b15,0.100,0.390,0.980,0.500
+5d322b4ee841,hpwren-tdlln-e-mobo-c-20260909-0700,1,lookalike,cloud bank resting on horizon at sunrise,box-b15,0.100,0.390,0.980,0.500
+5d322b4ee841,hpwren-tdlln-e-mobo-c-20260909-0700,2,lookalike,cloud bank resting on horizon at sunrise,box-b15,0.100,0.400,0.980,0.500
+5d322b4ee841,hpwren-tdlln-e-mobo-c-20260909-0700,3,lookalike,cloud bank resting on horizon at sunrise,box-b15,0.100,0.400,0.980,0.500
+2419422fa9c0,hpwren-tdlln-e-mobo-c-20260924-0800,0,fog,grey mist band obscuring distant city horizon,box-b15,0.020,0.480,0.980,0.580
+2419422fa9c0,hpwren-tdlln-e-mobo-c-20260924-0800,1,fog,grey mist band obscuring distant city horizon,box-b15,0.020,0.480,0.980,0.580
+2419422fa9c0,hpwren-tdlln-e-mobo-c-20260924-0800,2,fog,grey mist band obscuring distant city horizon,box-b15,0.020,0.480,0.980,0.580
+2419422fa9c0,hpwren-tdlln-e-mobo-c-20260924-0800,3,fog,grey mist band obscuring distant city horizon,box-b15,0.020,0.480,0.980,0.580
+9748a532e79c,hpwren-tdlln-n-mobo-c-20260822-0730,0,fog,"camera inside fog, washed-out grey view",box-b15,0.000,0.000,1.000,1.000
+9748a532e79c,hpwren-tdlln-n-mobo-c-20260822-0730,1,fog,"camera inside fog, washed-out grey view",box-b15,0.000,0.000,1.000,1.000
+9748a532e79c,hpwren-tdlln-n-mobo-c-20260822-0730,2,fog,"camera inside fog, washed-out grey view",box-b15,0.000,0.000,1.000,1.000
+9748a532e79c,hpwren-tdlln-n-mobo-c-20260822-0730,3,fog,"camera inside fog, washed-out grey view",box-b15,0.000,0.000,1.000,1.000
+ae62a019d8c4,hpwren-tdlln-n-mobo-c-20261005-0800,0,lookalike,haze band at ocean horizon,box-b15,0.000,0.470,0.980,0.530
+ae62a019d8c4,hpwren-tdlln-n-mobo-c-20261005-0800,1,lookalike,haze band at ocean horizon,box-b15,0.000,0.470,0.980,0.530
+ae62a019d8c4,hpwren-tdlln-n-mobo-c-20261005-0800,2,lookalike,haze band at ocean horizon,box-b15,0.000,0.470,0.980,0.530
+ae62a019d8c4,hpwren-tdlln-n-mobo-c-20261005-0800,3,lookalike,haze band at ocean horizon,box-b15,0.000,0.470,0.980,0.530
+826ee0a4c4fc,hpwren-tdlln-n-mobo-c-20261006-0800,0,lookalike,haze band at ocean horizon,box-b15,0.000,0.460,0.980,0.530
+826ee0a4c4fc,hpwren-tdlln-n-mobo-c-20261006-0800,1,lookalike,haze band at ocean horizon,box-b15,0.000,0.460,0.980,0.530
+826ee0a4c4fc,hpwren-tdlln-n-mobo-c-20261006-0800,2,lookalike,haze band at ocean horizon,box-b15,0.000,0.460,0.980,0.530
+826ee0a4c4fc,hpwren-tdlln-n-mobo-c-20261006-0800,3,lookalike,haze band at ocean horizon,box-b15,0.000,0.460,0.980,0.530
+9a2b313db3c5,hpwren-tdlln-n-mobo-c-20261009-0800,0,fog,low stratus fog bank at ocean horizon,box-b15,0.000,0.450,0.980,0.560
+9a2b313db3c5,hpwren-tdlln-n-mobo-c-20261009-0800,1,fog,low stratus fog bank at ocean horizon,box-b15,0.000,0.450,0.980,0.560
+9a2b313db3c5,hpwren-tdlln-n-mobo-c-20261009-0800,2,fog,low stratus fog bank at ocean horizon,box-b15,0.000,0.460,0.980,0.560
+9a2b313db3c5,hpwren-tdlln-n-mobo-c-20261009-0800,3,fog,low stratus fog bank at ocean horizon,box-b15,0.000,0.440,0.980,0.560
+af2dc7110af7,hpwren-tdlln-s-mobo-c-20260823-0730,0,fog,fog bank filling everything below horizon,box-b15,0.000,0.430,1.000,1.000
+af2dc7110af7,hpwren-tdlln-s-mobo-c-20260823-0730,1,fog,fog bank filling everything below horizon,box-b15,0.000,0.430,1.000,1.000
+af2dc7110af7,hpwren-tdlln-s-mobo-c-20260823-0730,2,fog,fog bank filling everything below horizon,box-b15,0.000,0.380,1.000,1.000
+af2dc7110af7,hpwren-tdlln-s-mobo-c-20260823-0730,3,fog,fog bank filling everything below horizon,box-b15,0.000,0.380,1.000,1.000
+482ded51e4dd,hpwren-tdlln-s-mobo-c-20260827-0700,0,lookalike,haze band along coastal horizon,box-b16,0.000,0.470,0.600,0.570
+482ded51e4dd,hpwren-tdlln-s-mobo-c-20260827-0700,1,lookalike,haze band along coastal horizon,box-b16,0.000,0.480,0.600,0.570
+482ded51e4dd,hpwren-tdlln-s-mobo-c-20260827-0700,2,lookalike,haze band along coastal horizon,box-b16,0.000,0.480,0.650,0.560
+482ded51e4dd,hpwren-tdlln-s-mobo-c-20260827-0700,3,lookalike,haze band along coastal horizon,box-b16,0.000,0.480,0.650,0.560
+f0d8510fe33c,hpwren-tje-1-mobo-c-20260822-0730,0,fog,fog bank beyond levee hiding horizon,box-b16,0.030,0.050,1.000,0.420
+f0d8510fe33c,hpwren-tje-1-mobo-c-20260822-0730,1,fog,fog bank beyond levee hiding horizon,box-b16,0.030,0.050,1.000,0.420
+f0d8510fe33c,hpwren-tje-1-mobo-c-20260822-0730,2,fog,fog bank beyond levee hiding horizon,box-b16,0.030,0.050,1.000,0.420
+f0d8510fe33c,hpwren-tje-1-mobo-c-20260822-0730,3,fog,fog bank beyond levee hiding horizon,box-b16,0.030,0.050,1.000,0.420
+64e8ea2c125d,hpwren-tje-1-mobo-c-20260823-0730,0,fog,dense fog bank beyond levee,box-b16,0.030,0.050,1.000,0.440
+64e8ea2c125d,hpwren-tje-1-mobo-c-20260823-0730,1,fog,dense fog bank beyond levee,box-b16,0.030,0.050,1.000,0.440
+64e8ea2c125d,hpwren-tje-1-mobo-c-20260823-0730,2,fog,dense fog bank beyond levee,box-b16,0.030,0.050,1.000,0.440
+64e8ea2c125d,hpwren-tje-1-mobo-c-20260823-0730,3,fog,dense fog bank beyond levee,box-b16,0.030,0.050,1.000,0.440
+726427e36256,hpwren-tje-1-mobo-c-20260908-0730,0,lookalike,bright haze band above levee horizon,box-b16,0.280,0.290,0.850,0.380
+726427e36256,hpwren-tje-1-mobo-c-20260908-0730,1,lookalike,bright haze band above levee horizon,box-b16,0.280,0.290,0.850,0.380
+726427e36256,hpwren-tje-1-mobo-c-20260908-0730,2,lookalike,bright haze band above levee horizon,box-b16,0.280,0.300,0.850,0.390
+726427e36256,hpwren-tje-1-mobo-c-20260908-0730,3,lookalike,bright haze band above levee horizon,box-b16,0.280,0.300,0.850,0.390
+14b995388206,hpwren-tp-n-mobo-c-20260728-0630,0,lookalike,bright hazy patch over desert valley,box-b16,0.650,0.500,1.000,0.630
+14b995388206,hpwren-tp-n-mobo-c-20260728-0630,1,lookalike,bright hazy patch over desert valley,box-b16,0.650,0.500,1.000,0.630
+14b995388206,hpwren-tp-n-mobo-c-20260728-0630,2,lookalike,bright hazy patch over desert valley,box-b16,0.650,0.510,1.000,0.620
+14b995388206,hpwren-tp-n-mobo-c-20260728-0630,3,lookalike,bright hazy patch over desert valley,box-b16,0.650,0.510,1.000,0.620
+1074f4b8dc26,hpwren-tp-n-mobo-c-20260912-0730,0,lookalike,white haze layer over distant valley,box-b16,0.600,0.520,1.000,0.630
+1074f4b8dc26,hpwren-tp-n-mobo-c-20260912-0730,1,lookalike,white haze layer over distant valley,box-b16,0.600,0.520,1.000,0.630
+1074f4b8dc26,hpwren-tp-n-mobo-c-20260912-0730,2,lookalike,white haze layer over distant valley,box-b16,0.600,0.520,1.000,0.630
+1074f4b8dc26,hpwren-tp-n-mobo-c-20260912-0730,3,lookalike,white haze layer over distant valley,box-b16,0.600,0.520,1.000,0.630
+eb8762459648,hpwren-tp-n-mobo-c-20261011-0800,0,fog,"camera inside fog, grey view",box-b16,0.000,0.000,1.000,1.000
+eb8762459648,hpwren-tp-n-mobo-c-20261011-0800,1,fog,"camera inside fog, grey view",box-b16,0.000,0.000,1.000,1.000
+eb8762459648,hpwren-tp-n-mobo-c-20261011-0800,2,fog,"camera inside fog, grey view",box-b16,0.000,0.000,1.000,1.000
+eb8762459648,hpwren-tp-n-mobo-c-20261011-0800,3,fog,"camera inside fog, grey view",box-b16,0.000,0.000,1.000,1.000
+31d7a443b4fd,hpwren-vo-w-mobo-c-20260729-0700,0,fog,"distant stratus sea with hilltops, left",box-b16,0.000,0.520,0.450,0.580
+31d7a443b4fd,hpwren-vo-w-mobo-c-20260729-0700,1,fog,"distant stratus sea with hilltops, left",box-b16,0.000,0.520,0.450,0.580
+31d7a443b4fd,hpwren-vo-w-mobo-c-20260729-0700,2,fog,"distant stratus sea with hilltops, left",box-b16,0.000,0.530,0.450,0.580
+31d7a443b4fd,hpwren-vo-w-mobo-c-20260729-0700,3,fog,"distant stratus sea with hilltops, left",box-b16,0.000,0.530,0.450,0.580
+65a5602a2372,hpwren-vo-w-mobo-c-20260907-0730,0,lookalike,cloud bank with sun rays touching horizon,box-b16,0.100,0.420,1.000,0.530
+65a5602a2372,hpwren-vo-w-mobo-c-20260907-0730,1,lookalike,cloud bank with sun rays touching horizon,box-b16,0.100,0.420,1.000,0.530
+65a5602a2372,hpwren-vo-w-mobo-c-20260907-0730,2,lookalike,cloud bank with sun rays touching horizon,box-b16,0.120,0.430,1.000,0.530
+65a5602a2372,hpwren-vo-w-mobo-c-20260907-0730,3,lookalike,cloud bank with sun rays touching horizon,box-b16,0.120,0.430,1.000,0.530
+f241cbbb60d5,hpwren-vo-w-mobo-c-20260924-0730,0,fog,"faint distant fog layer at horizon, left",box-b16,0.000,0.510,0.500,0.560
+f241cbbb60d5,hpwren-vo-w-mobo-c-20260924-0730,1,fog,"faint distant fog layer at horizon, left",box-b16,0.000,0.510,0.500,0.560
+f241cbbb60d5,hpwren-vo-w-mobo-c-20260924-0730,2,fog,"faint distant fog layer at horizon, left",box-b16,0.000,0.520,0.500,0.570
+f241cbbb60d5,hpwren-vo-w-mobo-c-20260924-0730,3,fog,"faint distant fog layer at horizon, left",box-b16,0.000,0.520,0.500,0.570
+e1f22fb05f9c,hpwren-vo-w-mobo-c-20261006-0730,0,lookalike,bright glare haze band at horizon,box-b16,0.000,0.420,0.650,0.540
+e1f22fb05f9c,hpwren-vo-w-mobo-c-20261006-0730,1,lookalike,bright glare haze band at horizon,box-b16,0.000,0.420,0.650,0.540
+e1f22fb05f9c,hpwren-vo-w-mobo-c-20261006-0730,2,lookalike,bright glare haze band at horizon,box-b16,0.000,0.420,0.650,0.530
+e1f22fb05f9c,hpwren-vo-w-mobo-c-20261006-0730,3,lookalike,bright glare haze band at horizon,box-b16,0.000,0.420,0.650,0.530
+840ecb624318,hpwren-wc-w-mobo-c-20260822-0730,0,fog,bright marine layer band at horizon,box-b16,0.000,0.460,0.950,0.510
+840ecb624318,hpwren-wc-w-mobo-c-20260822-0730,1,fog,bright marine layer band at horizon,box-b16,0.000,0.460,0.950,0.510
+840ecb624318,hpwren-wc-w-mobo-c-20260822-0730,2,fog,bright marine layer band at horizon,box-b16,0.000,0.460,0.950,0.510
+840ecb624318,hpwren-wc-w-mobo-c-20260822-0730,3,fog,bright marine layer band at horizon,box-b16,0.000,0.460,0.950,0.510
+08e4e925f453,hpwren-wc-w-mobo-c-20261017-0800,0,lookalike,grey haze band obscuring horizon,box-b16,0.030,0.420,0.970,0.560
+08e4e925f453,hpwren-wc-w-mobo-c-20261017-0800,1,lookalike,grey haze band obscuring horizon,box-b16,0.030,0.420,0.970,0.560
+08e4e925f453,hpwren-wc-w-mobo-c-20261017-0800,2,lookalike,grey haze band obscuring horizon,box-b16,0.030,0.420,0.970,0.560
+08e4e925f453,hpwren-wc-w-mobo-c-20261017-0800,3,lookalike,grey haze band obscuring horizon,box-b16,0.030,0.420,0.970,0.560
+4ced1b01df2d,hpwren-wilson-e-mobo-c-20260827-0730,0,lookalike,"bright haze over basin, right",box-b16,0.550,0.480,0.970,0.620
+4ced1b01df2d,hpwren-wilson-e-mobo-c-20260827-0730,1,lookalike,"bright haze over basin, right",box-b16,0.550,0.480,0.970,0.620
+4ced1b01df2d,hpwren-wilson-e-mobo-c-20260827-0730,2,lookalike,"bright haze over basin, right",box-b16,0.550,0.490,0.970,0.620
+4ced1b01df2d,hpwren-wilson-e-mobo-c-20260827-0730,3,lookalike,"bright haze over basin, right",box-b16,0.550,0.490,0.970,0.620
+f586ce8cb1f7,hpwren-wilson-e-mobo-c-20260913-0800,0,fog,"stratus sea over basin, right",box-b16,0.620,0.500,1.000,0.680
+f586ce8cb1f7,hpwren-wilson-e-mobo-c-20260913-0800,1,fog,"stratus sea over basin, right",box-b16,0.620,0.500,1.000,0.670
+f586ce8cb1f7,hpwren-wilson-e-mobo-c-20260913-0800,2,fog,"stratus sea over basin, right",box-b16,0.620,0.500,1.000,0.670
+f586ce8cb1f7,hpwren-wilson-e-mobo-c-20260913-0800,3,fog,"stratus sea over basin, right",box-b16,0.620,0.500,1.000,0.660
+6bfcc8e00389,hpwren-wilson-e-mobo-c-20261009-0800,0,fog,"patchy low fog over basin, right",box-b16,0.670,0.510,1.000,0.610
+6bfcc8e00389,hpwren-wilson-e-mobo-c-20261009-0800,1,fog,"patchy low fog over basin, right",box-b16,0.670,0.510,1.000,0.610
+6bfcc8e00389,hpwren-wilson-e-mobo-c-20261009-0800,2,fog,"patchy low fog over basin, right",box-b16,0.650,0.510,1.000,0.620
+6bfcc8e00389,hpwren-wilson-e-mobo-c-20261009-0800,3,fog,"patchy low fog over basin, right",box-b16,0.650,0.510,1.000,0.620
+f4d02a392f09,hpwren-wilson-e-mobo-c-20261011-0730,0,fog,"camera inside fog, grey view",box-b16,0.000,0.000,1.000,1.000
+f4d02a392f09,hpwren-wilson-e-mobo-c-20261011-0730,1,fog,"camera inside fog, grey view",box-b16,0.000,0.000,1.000,1.000
+f4d02a392f09,hpwren-wilson-e-mobo-c-20261011-0730,2,fog,"camera inside fog, grey view",box-b16,0.000,0.000,1.000,1.000
+f4d02a392f09,hpwren-wilson-e-mobo-c-20261011-0730,3,fog,"camera inside fog, grey view",box-b16,0.000,0.000,1.000,1.000
+4446e1b1665b,hpwren-wilson-e-mobo-c-20261015-0730,0,lookalike,"bright sunlit haze over basin, right",box-b16,0.620,0.500,1.000,0.620
+4446e1b1665b,hpwren-wilson-e-mobo-c-20261015-0730,1,lookalike,"bright sunlit haze over basin, right",box-b16,0.620,0.500,1.000,0.620
+4446e1b1665b,hpwren-wilson-e-mobo-c-20261015-0730,2,lookalike,"bright sunlit haze over basin, right",box-b16,0.620,0.500,1.000,0.620
+4446e1b1665b,hpwren-wilson-e-mobo-c-20261015-0730,3,lookalike,"bright sunlit haze over basin, right",box-b16,0.620,0.500,1.000,0.620
+19e59f5b041c,hpwren-wilson-s-mobo-c-20260727-0730,0,lookalike,haze layer over basin below horizon,box-b16,0.000,0.480,0.980,0.600
+19e59f5b041c,hpwren-wilson-s-mobo-c-20260727-0730,1,lookalike,haze layer over basin below horizon,box-b16,0.000,0.480,0.980,0.600
+19e59f5b041c,hpwren-wilson-s-mobo-c-20260727-0730,2,lookalike,haze layer over basin below horizon,box-b16,0.000,0.490,0.980,0.600
+19e59f5b041c,hpwren-wilson-s-mobo-c-20260727-0730,3,lookalike,haze layer over basin below horizon,box-b16,0.000,0.490,0.980,0.600
+061b771f4b78,hpwren-wilson-s-mobo-c-20260924-0800,0,fog,stratus sea filling basin,box-b16,0.000,0.500,1.000,0.700
+061b771f4b78,hpwren-wilson-s-mobo-c-20260924-0800,1,fog,stratus sea filling basin,box-b16,0.000,0.500,1.000,0.700
+061b771f4b78,hpwren-wilson-s-mobo-c-20260924-0800,2,fog,stratus sea filling basin,box-b16,0.000,0.500,1.000,0.690
+061b771f4b78,hpwren-wilson-s-mobo-c-20260924-0800,3,fog,stratus sea filling basin,box-b16,0.000,0.500,1.000,0.690
+f11f536c2dcc,hpwren-wilson-s-mobo-c-20260925-0800,0,fog,stratus fog sea below camera,box-b17,0.000,0.520,0.980,0.700
+f11f536c2dcc,hpwren-wilson-s-mobo-c-20260925-0800,1,fog,stratus fog sea below camera,box-b17,0.000,0.520,0.980,0.700
+f11f536c2dcc,hpwren-wilson-s-mobo-c-20260925-0800,2,fog,stratus fog sea below camera,box-b17,0.000,0.520,0.980,0.700
+f11f536c2dcc,hpwren-wilson-s-mobo-c-20260925-0800,3,fog,stratus fog sea below camera,box-b17,0.000,0.520,0.980,0.700
+afe467678fca,hpwren-wilson-s-mobo-c-20261014-0730,0,lookalike,haze band over basin at horizon,box-b17,0.000,0.500,0.980,0.570
+afe467678fca,hpwren-wilson-s-mobo-c-20261014-0730,1,lookalike,haze band over basin at horizon,box-b17,0.000,0.500,0.980,0.570
+afe467678fca,hpwren-wilson-s-mobo-c-20261014-0730,2,lookalike,haze band over basin at horizon,box-b17,0.000,0.500,0.980,0.570
+afe467678fca,hpwren-wilson-s-mobo-c-20261014-0730,3,lookalike,haze band over basin at horizon,box-b17,0.000,0.500,0.980,0.570
+ee1e87b7cf69,hpwren-wilson-w-mobo-c-20260817-0730,0,lookalike,"haze band over basin, left horizon",box-b17,0.000,0.500,0.580,0.580
+ee1e87b7cf69,hpwren-wilson-w-mobo-c-20260817-0730,1,lookalike,"haze band over basin, left horizon",box-b17,0.000,0.500,0.580,0.580
+ee1e87b7cf69,hpwren-wilson-w-mobo-c-20260817-0730,2,lookalike,"haze band over basin, left horizon",box-b17,0.000,0.500,0.580,0.580
+ee1e87b7cf69,hpwren-wilson-w-mobo-c-20260817-0730,3,lookalike,"haze band over basin, left horizon",box-b17,0.000,0.500,0.580,0.580
+58b19c6aaabe,hpwren-wilson-w-mobo-c-20260829-0730,0,lookalike,"haze band over basin, left horizon",box-b17,0.000,0.490,0.550,0.590
+58b19c6aaabe,hpwren-wilson-w-mobo-c-20260829-0730,1,lookalike,"haze band over basin, left horizon",box-b17,0.000,0.490,0.550,0.590
+58b19c6aaabe,hpwren-wilson-w-mobo-c-20260829-0730,2,lookalike,"haze band over basin, left horizon",box-b17,0.000,0.500,0.550,0.590
+58b19c6aaabe,hpwren-wilson-w-mobo-c-20260829-0730,3,lookalike,"haze band over basin, left horizon",box-b17,0.000,0.500,0.550,0.590
+19e2a68956f3,hpwren-wilson-w-mobo-c-20260919-0730,0,fog,"fog sea in basin, left side",box-b17,0.000,0.510,0.500,0.680
+19e2a68956f3,hpwren-wilson-w-mobo-c-20260919-0730,1,fog,"fog sea in basin, left side",box-b17,0.000,0.510,0.470,0.680
+19e2a68956f3,hpwren-wilson-w-mobo-c-20260919-0730,2,fog,"fog sea in basin, left side",box-b17,0.000,0.510,0.450,0.680
+19e2a68956f3,hpwren-wilson-w-mobo-c-20260919-0730,3,fog,"fog sea in basin, left side",box-b17,0.000,0.510,0.450,0.670
+c0ba3adbb2a8,hpwren-wilson-w-mobo-c-20260925-0800,0,fog,"fog sea in basin, left side",box-b17,0.000,0.510,0.450,0.700
+c0ba3adbb2a8,hpwren-wilson-w-mobo-c-20260925-0800,1,fog,"fog sea in basin, left side",box-b17,0.000,0.510,0.450,0.690
+c0ba3adbb2a8,hpwren-wilson-w-mobo-c-20260925-0800,2,fog,"fog sea in basin, left side",box-b17,0.000,0.520,0.420,0.690
+c0ba3adbb2a8,hpwren-wilson-w-mobo-c-20260925-0800,3,fog,"fog sea in basin, left side",box-b17,0.000,0.520,0.400,0.660
+b1364c7751e3,hpwren-wilson-w-mobo-c-20260928-0730,0,lookalike,"haze band over basin, left horizon",box-b17,0.000,0.500,0.550,0.580
+b1364c7751e3,hpwren-wilson-w-mobo-c-20260928-0730,1,lookalike,"haze band over basin, left horizon",box-b17,0.000,0.500,0.550,0.580
+b1364c7751e3,hpwren-wilson-w-mobo-c-20260928-0730,2,lookalike,"haze band over basin, left horizon",box-b17,0.000,0.500,0.550,0.580
+b1364c7751e3,hpwren-wilson-w-mobo-c-20260928-0730,3,lookalike,"haze band over basin, left horizon",box-b17,0.000,0.500,0.550,0.580
+4479123864a7,hpwren-wlfd-s-mobo-c-20260804-0730,0,fog,"low cloud resting on ridges, thickening",box-b17,0.000,0.250,1.000,0.580
+4479123864a7,hpwren-wlfd-s-mobo-c-20260804-0730,1,fog,"low cloud resting on ridges, thickening",box-b17,0.000,0.150,1.000,0.580
+4479123864a7,hpwren-wlfd-s-mobo-c-20260804-0730,2,fog,"low cloud resting on ridges, thickening",box-b17,0.000,0.050,1.000,0.620
+4479123864a7,hpwren-wlfd-s-mobo-c-20260804-0730,3,fog,"low cloud resting on ridges, thickening",box-b17,0.000,0.030,1.000,0.640
+588a89902698,hpwren-wlfd-s-mobo-c-20260826-0730,0,lookalike,bright quarry patch on hillside,box-b17,0.500,0.510,0.600,0.560
+588a89902698,hpwren-wlfd-s-mobo-c-20260826-0730,1,lookalike,bright quarry patch on hillside,box-b17,0.500,0.510,0.600,0.560
+588a89902698,hpwren-wlfd-s-mobo-c-20260826-0730,2,lookalike,bright quarry patch on hillside,box-b17,0.500,0.510,0.600,0.560
+588a89902698,hpwren-wlfd-s-mobo-c-20260826-0730,3,lookalike,bright quarry patch on hillside,box-b17,0.500,0.510,0.600,0.560
+7208c83525c1,hpwren-wlfd-s-mobo-c-20260909-0730,0,lookalike,cloud bank touching left horizon,box-b17,0.000,0.380,0.380,0.490
+7208c83525c1,hpwren-wlfd-s-mobo-c-20260909-0730,1,lookalike,cloud bank touching left horizon,box-b17,0.000,0.380,0.420,0.480
+7208c83525c1,hpwren-wlfd-s-mobo-c-20260909-0730,2,lookalike,cloud bank touching left horizon,box-b17,0.000,0.380,0.350,0.490
+7208c83525c1,hpwren-wlfd-s-mobo-c-20260909-0730,3,lookalike,cloud bank touching left horizon,box-b17,0.000,0.380,0.380,0.480
+71f1790898ea,hpwren-wlfd-s-mobo-c-20260924-0730,0,fog,valley fog bank on right,box-b17,0.690,0.460,0.950,0.570
+71f1790898ea,hpwren-wlfd-s-mobo-c-20260924-0730,1,fog,valley fog bank on right,box-b17,0.790,0.460,0.940,0.530
+71f1790898ea,hpwren-wlfd-s-mobo-c-20260924-0730,2,fog,valley fog bank on right,box-b17,0.790,0.470,0.930,0.510
+71f1790898ea,hpwren-wlfd-s-mobo-c-20260924-0730,3,fog,valley fog bank on right,box-b17,0.800,0.480,0.900,0.510
+d93728b51f0e,hpwren-wlfd-w-mobo-c-20260822-0700,0,lookalike,haze at distant left horizon,box-b17,0.120,0.470,0.450,0.530
+d93728b51f0e,hpwren-wlfd-w-mobo-c-20260822-0700,1,lookalike,haze at distant left horizon,box-b17,0.120,0.470,0.450,0.530
+d93728b51f0e,hpwren-wlfd-w-mobo-c-20260822-0700,2,lookalike,haze at distant left horizon,box-b17,0.120,0.470,0.450,0.530
+d93728b51f0e,hpwren-wlfd-w-mobo-c-20260822-0700,3,lookalike,haze at distant left horizon,box-b17,0.120,0.470,0.450,0.530
+0e97b7908795,hpwren-wlfd-w-mobo-c-20260910-0730,0,lookalike,haze at distant left horizon,box-b17,0.120,0.470,0.450,0.520
+0e97b7908795,hpwren-wlfd-w-mobo-c-20260910-0730,1,lookalike,haze at distant left horizon,box-b17,0.120,0.470,0.450,0.520
+0e97b7908795,hpwren-wlfd-w-mobo-c-20260910-0730,2,lookalike,haze at distant left horizon,box-b17,0.120,0.470,0.450,0.520
+0e97b7908795,hpwren-wlfd-w-mobo-c-20260910-0730,3,lookalike,haze at distant left horizon,box-b17,0.120,0.470,0.450,0.520
+c7d661b7b468,hpwren-wlfd-w-mobo-c-20261001-0730,0,lookalike,haze at distant left horizon,box-b17,0.120,0.470,0.450,0.530
+c7d661b7b468,hpwren-wlfd-w-mobo-c-20261001-0730,1,lookalike,haze at distant left horizon,box-b17,0.120,0.470,0.450,0.530
+c7d661b7b468,hpwren-wlfd-w-mobo-c-20261001-0730,2,lookalike,haze at distant left horizon,box-b17,0.120,0.470,0.450,0.530
+c7d661b7b468,hpwren-wlfd-w-mobo-c-20261001-0730,3,lookalike,haze at distant left horizon,box-b17,0.120,0.470,0.450,0.530
+bf9c73e7a61a,hpwren-wlfd-w-mobo-c-20261004-0800,0,lookalike,faint haze at distant left horizon,box-b17,0.120,0.470,0.450,0.510
+bf9c73e7a61a,hpwren-wlfd-w-mobo-c-20261004-0800,1,lookalike,faint haze at distant left horizon,box-b17,0.120,0.470,0.450,0.510
+bf9c73e7a61a,hpwren-wlfd-w-mobo-c-20261004-0800,2,lookalike,faint haze at distant left horizon,box-b17,0.120,0.470,0.450,0.510
+bf9c73e7a61a,hpwren-wlfd-w-mobo-c-20261004-0800,3,lookalike,faint haze at distant left horizon,box-b17,0.120,0.470,0.450,0.510
+127065d24136,hpwren-wlfd-w-mobo-c-20261006-0730,0,lookalike,bright cloud band touching left horizon,box-b17,0.000,0.390,0.450,0.490
+127065d24136,hpwren-wlfd-w-mobo-c-20261006-0730,1,lookalike,bright cloud band touching left horizon,box-b17,0.000,0.390,0.450,0.490
+127065d24136,hpwren-wlfd-w-mobo-c-20261006-0730,2,lookalike,bright cloud band touching left horizon,box-b17,0.000,0.380,0.500,0.490
+127065d24136,hpwren-wlfd-w-mobo-c-20261006-0730,3,lookalike,bright cloud band touching left horizon,box-b17,0.000,0.380,0.450,0.490
+1c614b2fd3ed,hpwren-wlfd-w-mobo-c-20261009-0800,0,lookalike,faint haze at distant left horizon,box-b17,0.120,0.470,0.450,0.510
+1c614b2fd3ed,hpwren-wlfd-w-mobo-c-20261009-0800,1,lookalike,faint haze at distant left horizon,box-b17,0.120,0.470,0.450,0.510
+1c614b2fd3ed,hpwren-wlfd-w-mobo-c-20261009-0800,2,lookalike,faint haze at distant left horizon,box-b17,0.120,0.470,0.450,0.510
+1c614b2fd3ed,hpwren-wlfd-w-mobo-c-20261009-0800,3,lookalike,faint haze at distant left horizon,box-b17,0.120,0.470,0.450,0.510
