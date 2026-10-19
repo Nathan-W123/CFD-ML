@@ -549,8 +549,12 @@ def evaluate_real(fs_real: FeatureSet, cfg: Mapping[str, Any], artifacts: Mappin
         expert = PhysicsExpert.load(d)
         res = evaluate_model(expert, fs_real, (split,), OPERATING_POINTS, slices=("category", "mask_source"),
                              n_bins=n_bins, n_boot=n_boot)
+        calib = expert.config.get("calibration") or {}
         out[name] = {"artifacts": str(d), "calibration_source": expert.calibration_source,
-                     "calibration_label_support": (expert.config.get("calibration") or {}).get("label_support"),
+                     "calibration_label_support": calib.get("label_support"),
+                     # how each operating point's thresholds were fitted (e.g. low_false_alarm equal to
+                     # balanced when the calibration split has no fog_only clips with both labels known)
+                     "threshold_fit": calib.get("threshold_fit"),
                      "seeds": evaluate_seeds(d, fs_real, (split,), OPERATING_POINTS, n_bins)["mean_sd"],
                      **res}
     return out

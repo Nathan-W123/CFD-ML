@@ -777,6 +777,11 @@ def test_stage_b_on_smoke_only_real_data(tmp_path, fs):
         cells = [c.strip() for c in ln.strip().strip("|").split("|")]
         assert cells[2] != "n/a" and cells[3] == cells[5] == cells[6] == "n/a"
         assert cells[7].endswith(" / n/a") and cells[8].endswith(" / n/a")
+    # Without fog_only calibration clips, B's and D's low-false-alarm smoke threshold is the balanced one: said so.
+    for exp in ("B", "D"):
+        assert "balanced" in res[exp]["threshold_fit"]["low_false_alarm"]["smoke"]["reason"]
+        assert f"{exp}: " in md and "low_false_alarm threshold not fitted as such" in md
+    assert "smoke AUROC" in md and "mean ± sd over" in md
 
     # The script: Stage B on its own keeps the synthetic sections of an existing evaluation.json.
     import shutil

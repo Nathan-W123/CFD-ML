@@ -148,7 +148,7 @@ def main(argv=None):
 
     L = [f"# Zero-shot check on real footage: {args.name}", "",
          "> Sanity check, not an accuracy estimate: the exported synthetic model and its synthetic thresholds, "
-         "no fine-tuning or recalibration on real data (Stage B not run).", ""]
+         "no fine-tuning or recalibration on real data (Stage B is reported separately).", ""]
     if args.description:
         L += [args.description, ""]
     c = doc["counts"]

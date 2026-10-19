@@ -245,6 +245,18 @@ def test_temporal_comparable_needs_min_frames_after_deduplication(tmp_path):
         assert rec["temporal_comparable"] is ok, min_frames
 
 
+def test_select_rows_by_split_and_one_per_video():
+    rows = [{"video_path": "a", "split": "train", "start_s": "0"}, {"video_path": "a", "split": "train", "start_s": "60"},
+            {"video_path": "b", "split": "test_iid", "start_s": "0"}, {"video_path": "c", "split": "val_calib"},
+            {"video_path": "d"}]
+    assert S.select_rows(rows) == rows
+    assert [r["start_s"] for r in S.select_rows(rows, {"train"})] == ["0", "60"]
+    assert S.select_rows(rows, {"train"}, one_per_video=True) == [rows[0]]
+    assert [r["video_path"] for r in S.select_rows(rows, {"test_iid", "val_calib"})] == ["b", "c"]
+    assert [r["video_path"] for r in S.select_rows(rows, one_per_video=True)] == ["a", "b", "c", "d"]
+    assert S.select_rows(rows, set()) == []
+
+
 def test_spearman():
     x = np.arange(10.0)
     assert S.spearman(x, x ** 3) == pytest.approx(1.0)

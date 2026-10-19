@@ -218,6 +218,11 @@ def parse_args(argv=None):
     ap.add_argument("--splits", default=DEFAULT_SPLITS,
                     help="comma list of synthetic splits to sample from (default: every split but test_ood; "
                          "'all' for every split)")
+    ap.add_argument("--real-splits", default=None,
+                    help="comma list: only manifest rows whose split column is one of these (e.g. 'train' to "
+                         "tune the renderer, then the other splits to check it on held-out cameras)")
+    ap.add_argument("--one-per-video", action="store_true",
+                    help="only the first manifest row of each video / image folder (one clip per sequence)")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--name", default=None, help="title of the report (default: the manifest's folder)")
     return ap.parse_args(argv)
@@ -408,10 +413,27 @@ def real_clip_frames(path: Path, interval_s: float, k: int, min_frames: int, sta
     return frames[keep], got[keep], mode
 
 
-def real_records(manifest: Path, size, interval_s: float, k: int, min_frames: int) -> tuple:
-    """Per-clip statistics (native and resized to `size`) of every manifest row, and the skipped rows."""
+def select_rows(rows, splits=None, one_per_video: bool = False) -> list:
+    """Manifest rows in `splits` (by their split column; all rows when None), the first per video if asked."""
+    if splits is not None:
+        rows = [r for r in rows if (r.get("split") or "") in splits]
+    if one_per_video:
+        seen, kept = set(), []
+        for r in rows:
+            if r["video_path"] not in seen:
+                seen.add(r["video_path"])
+                kept.append(r)
+        rows = kept
+    return rows
+
+
+def real_records(manifest: Path, size, interval_s: float, k: int, min_frames: int, splits=None,
+                 one_per_video: bool = False) -> tuple:
+    """Per-clip statistics (native and resized to `size`) of the selected manifest rows, and the skipped rows."""
     with open(manifest, newline="", encoding="utf-8") as fh:
-        rows = list(csv.DictReader(fh))
+        rows = select_rows(list(csv.DictReader(fh)), splits, one_per_video)
+    if not rows:
+        raise SystemExit(f"no manifest rows selected from {manifest}" + (f" in splits {sorted(splits)}" if splits else ""))
     records, skipped = [], []
     for row in rows:
         path = _resolve(row["video_path"], manifest)
@@ -676,7 +698,9 @@ def markdown(doc: dict) -> str:
         L += [f"> **Warning**: the real frames are sampled {st['interval_s']:g} s apart but the synthetic ones "
               f"{_fmt(syn['interval_s'], 'g')} s apart: flicker and motion depend on the spacing and are not "
               "compared.", ""]
-    L += [f"* Real: `{real['manifest']}`, {len(real['clips'])} clips ({len(real['skipped'])} skipped), native "
+    sel = "".join([f" rows of split {', '.join(real['splits'])}" if real.get("splits") else "",
+                   ", one per video" if real.get("one_per_video") else ""])
+    L += [f"* Real: `{real['manifest']}`{sel}, {len(real['clips'])} clips ({len(real['skipped'])} skipped), native "
           f"sizes (H x W) {', '.join(f'{h}x{w}' for h, w in sizes) or 'none'}; up to {st['max_frames']} frames "
           f"{st['interval_s']:g} s apart, {n_temporal} clips with at least {st['min_frames']} distinct frames at "
           f"that spacing for flicker and motion, {unreg.get('real', 0)} of them left out of motion because no frame "
@@ -753,7 +777,9 @@ def main(argv=None):
     if not spacing_ok:
         print(f"warning: real frames sampled {interval:g} s apart, synthetic frames {syn_interval:g} s apart "
               f"(more than {INTERVAL_TOL:.0%} off): flicker and motion are not compared", file=sys.stderr)
-    real, skipped = real_records(manifest, size, interval, args.max_frames, args.min_frames)
+    real_splits = None if not args.real_splits else {x.strip() for x in args.real_splits.split(",") if x.strip()}
+    real, skipped = real_records(manifest, size, interval, args.max_frames, args.min_frames, real_splits,
+                                 args.one_per_video)
     if not real:
         print(f"no real clip could be read from {manifest}", file=sys.stderr)
     doc = _clean({
@@ -768,7 +794,8 @@ def main(argv=None):
                      "resize": "real frames to the synthetic pixel count, aspect kept (INTER_AREA when shrinking)"},
         "stats": compare(real, synthetic, render_cfg, interval, synthetic_interval_s=syn_interval),
         "synthetic_tracking": tracking(synthetic),
-        "real": {"manifest": str(manifest), "clips": real, "skipped": skipped},
+        "real": {"manifest": str(manifest), "splits": sorted(real_splits) if real_splits else None,
+                 "one_per_video": bool(args.one_per_video), "clips": real, "skipped": skipped},
         "synthetic": {"data": str(data), "available": available, "interval_s": syn_interval,
                       "render_config": {k: _cfg_value(render_cfg, k) for k in CONFIG_KEYS},
                       "sequences": synthetic},

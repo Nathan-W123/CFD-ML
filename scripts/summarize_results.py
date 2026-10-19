@@ -107,6 +107,26 @@ def real_section(real):
                      f"{cell('smoke', 'ece')} / {cell('fog', 'ece')} | "
                      f"{cell('smoke', 'abstain_rate', pct)} / {cell('fog', 'abstain_rate', pct)} |")
     L.append("")
+    evaluated_labels = [n for n in LABELS if (st.get(n) or {}).get("status", "evaluated") == "evaluated"]
+    seed_lines = []
+    for exp in ("C", "B", "D"):
+        sd = (real.get(exp) or {}).get("seeds") or {}
+        cells = [f"{n} AUROC {ms(sd, f'{split}.balanced.{n}.auroc')}" for n in evaluated_labels
+                 if sd.get(f"{split}.balanced.{n}.auroc")]
+        if cells:
+            n_seeds = sd[f"{split}.balanced.{evaluated_labels[0]}.auroc"].get("n_seeds", "n/a")
+            seed_lines.append(f"* {names[exp]}: {', '.join(cells)} (mean ± sd over {n_seeds} seeds)")
+    if seed_lines:
+        L += ["Over the training seeds (balanced point):", "", *seed_lines, ""]
+    notes = []
+    for exp in ("C", "B", "D"):
+        lfa = ((real.get(exp) or {}).get("threshold_fit") or {}).get("low_false_alarm") or {}
+        for n in evaluated_labels:
+            reason = (lfa.get(n) or {}).get("reason")
+            if reason:
+                notes.append(f"* {names[exp]}, {n}: low_false_alarm threshold not fitted as such: {reason}.")
+    if notes:
+        L += ["Thresholds:", "", *notes, ""]
     return L
 
 
@@ -134,7 +154,9 @@ def main(argv=None):
     ev = json.loads(Path(args.evaluation).read_text())
     syn, abl = ev["synthetic"], ev["ablations"]
     real = ev.get("real") or {}
-    L = ["# Results (synthetic evaluation)", "", f"> {ev['disclaimer']}", "", real_status_line(real), ""]
+    title = ("Results (synthetic evaluation; real footage in its own section)"
+             if real.get("status") in ("complete", "partial") else "Results (synthetic evaluation)")
+    L = [f"# {title}", "", f"> {ev['disclaimer']}", "", real_status_line(real), ""]
 
     counts = (ev.get("data") or {}).get("counts") or {}
     if counts:
