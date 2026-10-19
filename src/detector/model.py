@@ -9,8 +9,9 @@ window scored by its highest tile; the head's logit and its tile head's
 logit are then combined by a small logistic "stack" (two weights and an
 intercept). Thresholds are probabilities on the head's (stacked) output:
 
-* smoke "deploy": fitted on training cameras so that at most a target share
-  (5 %) of the real fog windows raise a smoke alarm;
+* smoke "deploy": fitted on the training cameras' out-of-fold scores so that
+  at most a target share (2.5 %, half the 5 % goal) of the real fog windows
+  raise a smoke alarm;
 * smoke / fog "balanced": the maximum-Youden threshold on training cameras.
 """
 

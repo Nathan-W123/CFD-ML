@@ -28,8 +28,10 @@ Per head (smoke, fog), on the dev rows with a known label:
 2. thresholds from the out-of-fold predictions of the chosen configuration
    (never from the refitted model's own training predictions): "balanced"
    (maximum Youden J) for both heads; for smoke also "deploy", the lowest
-   threshold at which at most --max-false-smoke (5 %) of the dev fog windows
-   (fog 1, smoke 0) raise a smoke alarm.
+   threshold at which at most --deploy-false-smoke (2.5 %) of the dev fog
+   windows (fog 1, smoke 0) raise a smoke alarm: half the goal's 5 %, a
+   margin for new cameras (the dev estimate is out-of-fold, but a test set of
+   about 50 fog windows moves the rate by 2 % per window).
 
 Reported: the cross-validated dev results, and with --final the held-out
 test cameras (evaluated once): fog AUROC, smoke AUROC (all smoke-labelled
@@ -253,7 +255,8 @@ def main(argv=None) -> int:
     ap.add_argument("--set", action="append", required=True, dest="sets")
     ap.add_argument("--out", required=True)
     ap.add_argument("--report", required=True)
-    ap.add_argument("--max-false-smoke", type=float, default=0.05)
+    ap.add_argument("--deploy-false-smoke", type=float, default=0.025,
+                    help="share of the dev fog windows allowed to raise a smoke alarm at the deploy threshold")
     ap.add_argument("--n-boot", type=int, default=1000)
     ap.add_argument("--final", action="store_true", help="evaluate on the held-out test_iid cameras (once)")
     args = ap.parse_args(argv)
@@ -298,11 +301,11 @@ def main(argv=None) -> int:
         thresholds[head] = {"balanced": youden(oof_p, y)}
         if head == "smoke":
             fog_win = np.array([(r["fog"] == 1) and (r["smoke"] == 0) for r in hr])
-            thresholds[head]["deploy"] = deploy_threshold(oof_p[fog_win], args.max_false_smoke)
+            thresholds[head]["deploy"] = deploy_threshold(oof_p[fog_win], args.deploy_false_smoke)
         oof[head] = {r["window_id"]: p for r, p in zip(hr, oof_p)}
         print(f"{head}: best {best} on {len(hr)} dev windows", file=sys.stderr)
     det = Detector(heads=heads, text=T, thresholds=thresholds,
-                   info={"model_id": MODEL_ID, "sets": args.sets, "max_false_smoke": args.max_false_smoke,
+                   info={"model_id": MODEL_ID, "sets": args.sets, "deploy_false_smoke": args.deploy_false_smoke,
                          "selection": {h: selection[h]["best"] for h in selection},
                          "tile_heads": {h: selection[h]["tile"]["C"] for h in tile_heads}},
                    tile_heads=tile_heads, stacks=stacks)
