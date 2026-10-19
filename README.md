@@ -8,7 +8,7 @@ scene, frames 5 s apart with 1 s lag pairs, for surveillance video) and far
 field (a 3.2 km scene, one frame per minute, for wildfire camera networks
 such as HPWREN and AlertWildfire). Pretrained on synthetic data only. On
 real one-frame-per-minute wildfire camera footage it separates smoke from
-smoke-free windows only weakly (AUROC 0.61), and it does not recognise real
+smoke-free windows only weakly (AUROC 0.58-0.61), and it does not recognise real
 fog: real fog windows score lower on fog than clear mornings (AUROC 0.35).**
 
 The physics expert is one of four parts of a larger system (vision, physics,
@@ -23,9 +23,10 @@ frames, and real footage goes through the same feature extractor.
 > camera footage at its timing (one frame per minute):
 >
 > * **Smoke, HPWREN FIgLib** (880 windows, 137 cameras): smoke AUROC
->   0.61 ± 0.02 zero-shot on unseen cameras (three seeds). That is slightly
->   above its synthetic test sets (0.56 ± 0.01 on test_iid, 0.59 ± 0.01 on
->   test_ood).
+>   0.61 ± 0.02 zero-shot on the 171 windows of the 35 held-out test cameras
+>   of the FIgLib-only split (three seeds); the exported model scores 0.58
+>   over all 880 windows. That is about what it reaches on its synthetic
+>   test sets (0.56 ± 0.01 on test_iid, 0.59 ± 0.01 on test_ood).
 > * **Fog, HPWREN archive** (262 labelled 2026 mornings, 88 cameras): built
 >   for this project, because no public footage at this timing carries fog
 >   labels. The model does not recognise real fog: fog AUROC 0.35
@@ -123,13 +124,13 @@ three months.
 * **Usable set.** 262 windows (131 fog, 131 clear, 88 cameras; 21 + 21 on
   the test cameras). The rest had sun glare, an archive placeholder, or an
   undecided label. No window shows smoke. The fog is mostly a fog or
-  stratus sea below the camera (100 of 152), the camera inside fog (38), or
+  stratus sea below the camera (81 of 131), the camera inside fog (36), or
   low cloud on ridges (9).
 
-| zero-shot, all 262 windows | fog AUROC | smoke alarms on fog windows / on clear windows (balanced) | at the low-false-alarm default |
+| zero-shot, all usable windows | fog AUROC | smoke alarms on fog windows / on clear windows (balanced) | at the low-false-alarm default |
 |---|---|---|---|
-| built-in fallback masks | 0.35 [0.28, 0.43] (seeds 0.39 ± 0.03) | 19 / 131 (15 %), 24 / 131 (18 %) | 0 and 0 (22 and 40 decided) |
-| boxes around the fog or look-alike | 0.27 [0.20, 0.34] (seeds 0.27 ± 0.04) | 78 / 127 (61 %), 83 / 126 (66 %) | 0 on fog; abstains on 125 of 127 |
+| built-in fallback masks (262 windows: 131 fog, 131 clear) | 0.35 [0.28, 0.43] (seeds 0.39 ± 0.03) | 19 / 131 (15 %), 24 / 131 (18 %) | 0 and 0 (22 and 40 decided) |
+| boxes around the fog or look-alike (253 windows with boxes: 127 fog, 126 clear) | 0.27 [0.20, 0.34] (seeds 0.27 ± 0.04) | 78 / 127 (61 %), 83 / 126 (66 %) | 0 and 1 (2 and 1 decided; abstains on 125 of 127 and 125 of 126) |
 
 * **The model does not recognise real fog.** It ranks fog windows below
   clear ones. On the windows it decides, its fog head says "fog" almost
@@ -139,7 +140,7 @@ three months.
 * **Fog does not trigger smoke alarms more than clear mornings do.** The
   smoke score is, if anything, lower on fog (AUROC 0.38 of P(smoke) for fog
   against clear). At the default low-false-alarm point no window raises a
-  smoke alarm.
+  smoke alarm with built-in masks (with boxes, 1 of 126 clear windows does).
 * **Why built-in masks miss fog.** The fallback detector finds change against
   the window's median frame, so a fog sea lying still for 11 minutes is
   never a candidate. Valid input is 38 % on fog windows against 56 % on
@@ -161,8 +162,10 @@ three months.
 **Stage B with real smoke and real fog**
 ([`reports/far/results.md`](reports/far/results.md#real-footage-stage-b-test_iid-split-camera-disjoint)).
 FIgLib (smoke labels) and the HPWREN fog set (fog labels) were merged,
-camera-disjoint by mount, with built-in masks. Training, calibration and
-thresholds use the real splits. The test cameras give 213 windows from 41
+camera-disjoint by mount, with built-in masks. B and D are trained,
+calibrated and thresholded on the real splits; C (zero-shot) keeps its
+synthetic calibration and thresholds, so its 2 / 21 is at the synthetic
+low-false-alarm point. The test cameras give 213 windows from 41
 cameras: 212 with a smoke label and 42 with a fog label (21 fog, 21 clear).
 
 | test cameras | smoke AUROC | fog AUROC | false smoke on the 21 fog windows, low-false-alarm point |
