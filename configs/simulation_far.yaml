@@ -193,6 +193,8 @@ render:
     shading: [0.1, 0.3]
     wavelengths_m: [30.0, 400.0]         # sub-grid puffs and wisps resolvable at ~17 m/px
     sgs_gain: [0.5, 1.5]
+    max_stretch: 1.5                     # fade texture where shear stretched it beyond this (streaks); far only:
+                                         # 480 s texture periods under km-scale shear (P90 stretch ~2, up to ~5)
   background:
     procedural_prob: 0.85
     sky_brightness: [0.45, 0.95]

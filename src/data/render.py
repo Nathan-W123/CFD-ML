@@ -259,6 +259,8 @@ def sample_render_params(rng: np.random.Generator, cfg: Dict[str, Any], hints: O
                     "wavelengths_m": [float(tex["wavelengths_m"][0]), float(tex["wavelengths_m"][1])],
                     "seed": _seed(rng),
                     "shading": _u(rng, tex.get("shading", [0.0, 0.0]))}
+    if tex.get("max_stretch"):              # a fixed setting, no draw (the random stream is unchanged)
+        p["texture"]["max_stretch"] = float(tex["max_stretch"])
     # Background: procedural unless a real image is drawn AND available.
     bg = r["background"]
     want_real = float(rng.random()) >= float(bg.get("procedural_prob", 1.0))
@@ -750,8 +752,30 @@ def _optical_depth_grid(sim: SimulationResult, rp: Mapping[str, Any], lag: bool)
     return np.nan_to_num(out, nan=0.0, posinf=0.0, neginf=0.0)
 
 
+def _stretch_attenuation(tc: np.ndarray, dx: float, max_stretch: Optional[float]) -> Optional[np.ndarray]:
+    """(T, 2, nz, nx) float32 texture attenuation per coordinate pair, or None when disabled.
+
+    The advected coordinates of a pair are stretched by the shear they have
+    seen since their last reset (largest singular value s of d(X, Z)/d(x, z)).
+    Real aerosol is mixed smooth where it is strongly sheared instead of being
+    drawn out into streaks, so a pair's texture is faded by min(1, max_stretch / s).
+    """
+    if not max_stretch:
+        return None
+    tc = np.asarray(tc, dtype=np.float64)
+    out = np.empty((tc.shape[0], 2) + tc.shape[2:], dtype=np.float32)
+    for k, (ix, iz) in enumerate(((0, 1), (2, 3))):
+        dXdz, dXdx = np.gradient(tc[:, ix], dx, axis=(1, 2))
+        dZdz, dZdx = np.gradient(tc[:, iz], dx, axis=(1, 2))
+        half = 0.5 * (dXdx ** 2 + dXdz ** 2 + dZdx ** 2 + dZdz ** 2)
+        det = dXdx * dZdz - dXdz * dZdx
+        s = np.sqrt(half + np.sqrt(np.maximum(half ** 2 - det ** 2, 0.0)))
+        out[:, k] = np.minimum(1.0, float(max_stretch) / np.maximum(s, 1e-9))
+    return out
+
+
 def _texcoord_grid(sim: SimulationResult, lag: bool, inv_p: float, offset_b: Tuple[float, float],
-                   disp: Optional[np.ndarray] = None):
+                   disp: Optional[np.ndarray] = None, max_stretch: Optional[float] = None):
     """Texture coordinates in pattern pixels on the grid, (T, nz, nx, 4) [Xa, Za, Xb, Zb], and blend weights.
 
     Pair b is read at a fixed offset of about half a tile, so pairs a and b
@@ -760,7 +784,9 @@ def _texcoord_grid(sim: SimulationResult, lag: bool, inv_p: float, offset_b: Tup
     sim.texcoords the texture is static (identity coordinates). `disp`
     ((T, nz, nx, 2) [D_x, D_z] metres, see _sgs_displacement) is subtracted
     from both pairs: the label of the air at x is that of x - D, so the
-    texture appears displaced by +D.
+    texture appears displaced by +D. With `max_stretch` (render.texture.max_stretch)
+    a fourth return value gives each pair's stretch attenuation (see
+    _stretch_attenuation), else None.
     """
     n_t = int(sim.n_frames)
     nz, nx = sim.solid.shape
@@ -771,6 +797,7 @@ def _texcoord_grid(sim: SimulationResult, lag: bool, inv_p: float, offset_b: Tup
         X, Z = np.meshgrid((np.arange(nx) + 0.5) * float(sim.dx), (np.arange(nz) + 0.5) * float(sim.dx))
         tc = np.broadcast_to(np.stack([X, Z, X, Z])[None], (n_t, 4, nz, nx))
         wts = None
+    att = _stretch_attenuation(tc, float(sim.dx), max_stretch) if advected else None
     out = np.asarray(tc, dtype=np.float64) * inv_p
     if disp is not None:
         d = np.asarray(disp, dtype=np.float64).transpose(0, 3, 1, 2) * inv_p      # (T, 2, nz, nx)
@@ -784,7 +811,7 @@ def _texcoord_grid(sim: SimulationResult, lag: bool, inv_p: float, offset_b: Tup
     w = np.tile([1.0, 0.0], (n_t, 1)) if wts is None else np.clip(np.asarray(wts, dtype=np.float64), 0.0, None)
     norm = np.sqrt((w ** 2).sum(axis=1, keepdims=True))
     coef = np.divide(w, norm, out=np.zeros_like(w), where=norm > 1e-12)
-    return out, coef, advected
+    return out, coef, advected, att
 
 
 def _sgs_velocity(sim: SimulationResult, has_lag: bool) -> Optional[np.ndarray]:
@@ -930,7 +957,8 @@ def _sgs_displacement(u_sgs: Optional[np.ndarray], times: np.ndarray, dx: float,
 
 def _sample_layers(view: _View, scene: np.ndarray, tau_grid: np.ndarray, tc_grid: np.ndarray, coef: np.ndarray,
                    pattern: np.ndarray, affines: np.ndarray, times: np.ndarray, shadow: Optional[dict],
-                   cloud: Optional[dict], active: Sequence[int], occluded: bool) -> Dict[str, List[Any]]:
+                   cloud: Optional[dict], active: Sequence[int], occluded: bool,
+                   att_grid: Optional[np.ndarray] = None) -> Dict[str, List[Any]]:
     """Pass 1: every layer of every frame, sampled through that frame's camera mapping.
 
     Only the layers a variant needs are warped (single-channel and 4-channel
@@ -950,10 +978,13 @@ def _sample_layers(view: _View, scene: np.ndarray, tau_grid: np.ndarray, tc_grid
             out["tau"].append({j: _warp(tau_grid[f, j], Gf, view, replicate) for j in active})
             xa, za, xb, zb = cv2.split(_warp(tc_grid[f], Gf, view, replicate))
             noise = np.zeros((view.H, view.W), dtype=np.float32)
+            att = None if att_grid is None else cv2.split(_warp(att_grid[f], Gf, view, replicate))
             for j, (mx, mz) in enumerate(((xa, za), (xb, zb))):
                 if coef[f, j] > 0.0:
-                    noise += np.float32(coef[f, j]) * cv2.remap(pattern, mx, mz, cv2.INTER_LINEAR,
-                                                                borderMode=cv2.BORDER_WRAP)
+                    sample = cv2.remap(pattern, mx, mz, cv2.INTER_LINEAR, borderMode=cv2.BORDER_WRAP)
+                    if att is not None:
+                        sample *= att[j]
+                    noise += np.float32(coef[f, j]) * sample
             out["noise"].append(noise)
         for name, layer in (("shadow", shadow), ("cloud", cloud)):
             if layer is None:
@@ -1195,10 +1226,13 @@ def render_sequence(sim: SimulationResult, render_params: Dict[str, Any], rng: n
     off = (0.5 * _PATTERN_SIZE + 37.3, 0.5 * _PATTERN_SIZE + 71.9)
     # Subgrid turbulence (None without sim.sgs_u or with sgs_gain 0): extra texture displacement.
     disp, sgs_record = _sgs_displacement(_sgs_velocity(sim, has_lag), times, float(sim.dx), rp["texture"])
+    max_stretch = rp["texture"].get("max_stretch")
     tex_parts = [_texcoord_grid(sim, lag, 1.0 / pixel_m, off,
-                                None if disp is None else disp[i * T:(i + 1) * T])
+                                None if disp is None else disp[i * T:(i + 1) * T], max_stretch)
                  for i, lag in enumerate((False,) + lags)]
     advected = tex_parts[0][2]
+    att_grid = (None if tex_parts[0][3] is None else
+                np.ascontiguousarray(np.concatenate([p[3] for p in tex_parts]).transpose(0, 2, 3, 1)))
 
     scene, airlight, occluded = _scene_canvas(sim, rp, view)
     shadow, cloud = _nuisance_layers(rp, view, times)
@@ -1209,7 +1243,7 @@ def render_sequence(sim: SimulationResult, render_params: Dict[str, Any], rng: n
 
     L = _sample_layers(view, scene, tau_grid, np.concatenate([p[0] for p in tex_parts]),
                        np.concatenate([p[1] for p in tex_parts]), pattern, affines, times, shadow, cloud, active,
-                       occluded)
+                       occluded, att_grid)
     scales, groups = _exposure_scales(sim, rp, L, T)
 
     haze, con, offset = float(rp["global_haze"]), float(rp["contrast"]), float(rp["brightness_offset"])

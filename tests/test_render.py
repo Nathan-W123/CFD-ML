@@ -959,3 +959,21 @@ def test_every_tracer_distractor_regime_is_rendered_as_the_primary_group():
     for category, labels in (("neither", (0, 0)), ("fog_only", (0, 1))):
         sim = SimpleNamespace(labels=labels, category=category, params={"distractor_regime": "distant_cloud"})
         assert _group_roles(sim)["tracer"] == "background"
+
+
+def test_stretch_attenuation_fades_only_sheared_texture():
+    """render.texture.max_stretch fades a pair's texture by min(1, max / stretch); off when unset."""
+    from src.data.render import _stretch_attenuation
+
+    nz, nx, dx = 16, 20, 5.0
+    z, x = np.meshgrid((np.arange(nz) + 0.5) * dx, (np.arange(nx) + 0.5) * dx, indexing="ij")
+    tc = np.zeros((2, 4, nz, nx))
+    tc[0] = np.stack([x, z, x, z])                         # frame 0: no deformation
+    tc[1] = np.stack([x + 3.0 * z, z, x, z])               # frame 1: pair a sheared (stretch ~3.3), b untouched
+    assert _stretch_attenuation(tc, dx, None) is None and _stretch_attenuation(tc, dx, 0) is None
+    att = _stretch_attenuation(tc, dx, 1.5)
+    assert att.shape == (2, 2, nz, nx) and att.dtype == np.float32
+    np.testing.assert_allclose(att[0], 1.0, atol=1e-6)
+    np.testing.assert_allclose(att[1, 1], 1.0, atol=1e-6)
+    expected = 1.5 / ((3.0 ** 2 + 2.0 + 3.0 * (3.0 ** 2 + 4.0) ** 0.5) / 2.0) ** 0.5   # 1.5 / largest singular value
+    np.testing.assert_allclose(att[1, 0], expected, rtol=1e-6)
