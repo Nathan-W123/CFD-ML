@@ -1,0 +1,569 @@
+sheet_id,window_id,fog,smoke,quality,fog_type,fog_extent,n_votes,fog_votes,smoke_votes,quality_votes
+002f8159caa4,hpwren-bh-n-mobo-c-20260728-0630,0,0,ok,,,2,0 0,0 0,ok ok
+00da61735e33,hpwren-sdsc-e-mobo-c-20260803-0700,,0,ok,,,3,? 0 ?,0 0 0,ok ok ok
+0203c6d4a773,hpwren-bi-s-mobo-c-20260820-0730,0,0,ok,,,2,0 0,0 0,ok ok
+021970ccdfce,hpwren-bi-s-mobo-c-20260920-0800,1,0,ok,below,small,2,1 1,0 0,ok ok
+0299bda394e9,hpwren-bi-w-mobo-c-20261003-0730,0,0,ok,,,2,0 0,0 0,ok ok
+029b63c24a47,hpwren-om-w-mobo-c-20261001-0800,0,0,ok,,,3,0 ? 0,0 0 0,ok ok ok
+0322c07b0aae,hpwren-tdlln-e-mobo-c-20260730-0730,0,0,ok,,,2,0 0,0 0,ok ok
+034bec8d77b5,hpwren-lp-w-mobo-c-20261009-0800,0,0,ok,,,2,0 0,0 0,ok ok
+04455db8a08c,hpwren-sedgwick-s-mobo-c-20260803-0700,1,0,ok,below,small,2,1 1,0 0,ok ok
+04f1873bda0f,hpwren-bh-w-mobo-c-20260923-0800,1,0,ok,below,small,2,1 1,0 0,ok ok
+051106ec528a,hpwren-bh-n-mobo-c-20260802-0730,0,0,ok,,,2,0 0,0 0,ok ok
+0574c2670c34,hpwren-bh-w-mobo-c-20260911-0700,0,0,ok,,,2,0 0,0 0,ok ok
+058c8a3528a3,hpwren-mpo-s-mobo-c-20260910-0730,0,0,ok,,,2,0 0,0 0,ok ok
+0607fabd80f0,hpwren-rndmsa-s-mobo-c-20260808-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+06390fa3fc2f,hpwren-om-n-mobo-c-20260821-0700,1,0,ok,below,small,3,? 1 1,0 0 0,ok ok ok
+06e9834ab86b,hpwren-69bravo-e-mobo-c-20260828-0700,,0,glare,,,3,? ? 0,0 0 0,glare glare glare
+06f80401f91f,hpwren-smarpk-e-mobo-c-20261003-0800,0,0,ok,,,2,0 0,0 0,ok ok
+07126bdeb3e4,hpwren-wc-w-mobo-c-20260903-0730,0,0,ok,,,2,0 0,0 0,ok ok
+072b9b51287e,hpwren-ch-s-mobo-c-20260730-0700,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+0763d290313c,hpwren-ch-n-mobo-c-20260819-0700,1,0,ok,below,medium,2,1 1,0 0,ok ok
+076d72742bd7,hpwren-hp-w-mobo-c-20260920-0800,1,0,ok,below,small,2,1 1,0 0,ok ok
+07b31023f94a,hpwren-chino-n-mobo-c-20260729-0700,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+08fdc9c7dcf8,hpwren-sjh-w-mobo-c-20260727-0700,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+092a17919012,hpwren-smarpk-e-mobo-c-20260920-0800,,0,ok,,,3,0 ? ?,0 0 0,ok ok ok
+0956a1512d01,hpwren-bi-n-mobo-c-20260725-0700,0,0,ok,,,2,0 0,0 0,ok ok
+0aa881e4f0ad,hpwren-signal-n-mobo-c-20261018-0730,,0,ok,,,3,? ? 0,0 0 0,ok ok ok
+0b65ef6e97bf,hpwren-wlfd-s-mobo-c-20260908-0700,0,0,ok,,,2,0 0,0 0,ok ok
+0b7ee99704fe,hpwren-stgo-w-mobo-c-20260925-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+0bde16786afe,hpwren-bl-n-mobo-c-20261006-0800,0,0,ok,,,2,0 0,0 0,ok ok
+0c809eea0ea7,hpwren-bl-e-mobo-c-20261010-0730,,,obstructed,,,3,? ? ?,? ? ?,obstructed obstructed obstructed
+0ca552f24fb6,hpwren-sm-n-mobo-c-20260909-0700,0,0,ok,,,2,0 0,0 0,ok ok
+0d84ea71e660,hpwren-smarpk-n-mobo-c-20260924-0800,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+0f6adc217c5c,hpwren-chino-e-mobo-c-20261018-0800,0,0,ok,,,3,0 0 0,0 0 0,ok glare ok
+0fdf8f291123,hpwren-sjh-w-mobo-c-20260925-0800,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+10516e466cc6,hpwren-bh-w-mobo-c-20260908-0730,0,0,ok,,,2,0 0,0 0,ok ok
+1076b7e135bb,hpwren-wlfd-s-mobo-c-20260903-0700,0,0,ok,,,2,0 0,0 0,ok ok
+10828ce3f81c,hpwren-sm-w-mobo-c-20261001-0800,0,0,ok,,,2,0 0,0 0,ok ok
+109b27266e11,hpwren-rm-n-mobo-c-20260913-0700,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+11562411738c,hpwren-ch-e-mobo-c-20260920-0730,,0,ok,,,3,? 1 ?,0 0 0,ok ok ok
+1268c5db4645,hpwren-tdlln-n-mobo-c-20260824-0730,1,,ok,enveloping,large,2,1 1,? 0,ok ok
+133393d595bd,hpwren-sedgwick-w-mobo-c-20261003-0730,0,0,ok,,,2,0 0,0 0,ok ok
+135a91f2e54c,hpwren-sjh-e-mobo-c-20261005-0730,0,0,glare,,,2,0 0,0 0,glare glare
+13601c2fd278,hpwren-dwpgm-s-mobo-c-20261002-0800,1,0,ok,below,small,2,1 1,0 0,ok ok
+1403eaf8c5df,hpwren-pi-w-mobo-c-20261002-0800,0,0,ok,,,2,0 0,0 0,ok ok
+148d0e96c421,hpwren-chino-s-mobo-c-20260724-0630,0,0,ok,,,2,0 0,0 0,ok ok
+1494a638fde2,hpwren-blkrc-w-mobo-c-20260727-0630,0,0,ok,,,2,0 0,0 0,ok ok
+149b3830a356,hpwren-om-w-mobo-c-20260827-0730,0,0,ok,,,2,0 0,0 0,ok ok
+15c0f560341c,hpwren-smarpk-w-mobo-c-20261011-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+16cb8a992b44,hpwren-bl-e-mobo-c-20260804-0730,,,obstructed,,,3,? ? ?,? ? ?,obstructed obstructed obstructed
+17310afd0d92,hpwren-marion-w-mobo-c-20260725-0630,,,ok,,,3,1 ? ?,? ? ?,ok ok ok
+17c96cfd6fd7,hpwren-bl-e-mobo-c-20260903-0730,,,obstructed,,,3,? ? ?,? ? ?,obstructed obstructed obstructed
+17fe449b7eff,hpwren-rm-s-mobo-c-20260910-0700,0,0,ok,,,2,0 0,0 0,ok ok
+184534c9f4bd,hpwren-buff-s-mobo-c-20261011-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+185fc587b56e,hpwren-signal-n-mobo-c-20260801-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+190061c8f949,hpwren-chino-s-mobo-c-20261007-0730,0,0,ok,,,2,0 0,0 0,ok ok
+191f3186dffd,hpwren-wilson-e-mobo-c-20261012-0800,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+192676e010f9,hpwren-stgo-e-mobo-c-20260920-0800,1,0,ok,below,medium,2,1 1,0 0,ok ok
+19333360e518,hpwren-bm-s-mobo-c-20260920-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+199930e5e9ae,hpwren-rm-n-mobo-c-20260903-0730,,0,ok,,,3,? ? ?,0 0 0,ok ok ok
+19b695f570e1,hpwren-chino-w-mobo-c-20260727-0630,1,0,ok,below,small,2,1 1,0 0,ok ok
+19dae1ec2be0,hpwren-ms-n-mobo-c-20261009-0730,,0,ok,,,3,? ? ?,0 0 0,ok ok ok
+1a4063c64b09,hpwren-bh-n-mobo-c-20260915-0700,,0,ok,,,3,? 0 ?,0 0 0,ok ok ok
+1a6de491bc59,hpwren-chino-e-mobo-c-20260914-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+1a745e7fc4df,hpwren-sjh-e-mobo-c-20261001-0800,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+1a85fa5f2b04,hpwren-sclm-s-mobo-c-20260912-0730,1,0,ok,bank,medium,2,1 1,0 0,ok ok
+1aa909d684a1,hpwren-rm-s-mobo-c-20261015-0800,0,0,ok,,,2,0 0,0 0,ok ok
+1aad6b8046e0,hpwren-starr-w-mobo-c-20260910-0730,0,0,ok,,,2,0 0,0 0,ok ok
+1b2964366e7f,hpwren-pi-w-mobo-c-20260905-0730,0,0,ok,,,3,0 ? 0,0 0 0,ok ok ok
+1bbfb7e93ebc,hpwren-blkrc-e-mobo-c-20260913-0730,0,0,ok,,,3,0 0 0,0 0 0,ok glare ok
+1c5716b6df91,hpwren-bl-n-mobo-c-20260824-0730,,0,ok,,,3,? ? 1,0 0 0,ok ok glare
+1d65cd46f4f7,hpwren-tp-n-mobo-c-20260730-0630,,0,ok,,,3,? ? 0,0 0 0,ok ok ok
+1d6769264663,hpwren-sjh-s-mobo-c-20261001-0800,1,,ok,enveloping,large,3,1 ? 1,? ? ?,ok obstructed ok
+1e22928b4bd9,hpwren-bh-w-mobo-c-20261014-0800,0,0,ok,,,2,0 0,0 0,ok ok
+1f170a10bbe1,hpwren-sclm-s-mobo-c-20261001-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+21a8cbda58b9,hpwren-om-n-mobo-c-20260727-0630,1,0,ok,below,medium,2,1 1,0 0,ok ok
+220d576cfba2,hpwren-lp-w-mobo-c-20260823-0730,0,0,ok,,,2,0 0,0 0,ok ok
+22aadd8a7a39,hpwren-bi-w-mobo-c-20261006-0800,0,0,ok,,,3,? 0 0,0 0 0,ok ok ok
+22b0cb282841,hpwren-wilson-w-mobo-c-20260827-0730,0,0,ok,,,2,0 0,0 0,ok ok
+2321e6a64f69,hpwren-ms-n-mobo-c-20261017-0800,0,,ok,,,3,? 0 0,? ? ?,ok ok ok
+2326d6823e1b,hpwren-signal-w-mobo-c-20261005-0730,0,0,ok,,,2,0 0,0 0,ok ok
+24c3179eb44f,hpwren-sjh-e-mobo-c-20261018-0730,0,0,glare,,,3,? 0 0,0 0 0,glare glare glare
+255326293ca0,hpwren-starr-e-mobo-c-20260915-0800,1,0,ok,low_cloud_on_terrain,large,2,1 1,0 0,ok ok
+257d89442a09,hpwren-smarpk-w-mobo-c-20260912-0730,0,0,ok,,,2,0 0,0 0,ok ok
+25b1679d3a27,hpwren-bl-e-mobo-c-20260920-0800,,,obstructed,,,3,? ? ?,? ? ?,obstructed obstructed obstructed
+25c6d6a84345,hpwren-hp-w-mobo-c-20260913-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+2639c4ae60d9,hpwren-bi-w-mobo-c-20260924-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+2696909eed96,hpwren-sm-s-mobo-c-20261016-0800,0,0,ok,,,2,0 0,0 0,ok ok
+26c2e3561ae0,hpwren-bi-n-mobo-c-20260914-0730,0,0,ok,,,2,0 0,0 0,ok ok
+270cc2da5647,hpwren-sdsc-e-mobo-c-20260730-0730,0,0,ok,,,2,0 0,0 0,ok ok
+276b09e6b08a,hpwren-dwpgm-n-mobo-c-20260928-0730,,0,ok,,,3,? 0 ?,0 0 0,ok ok ok
+27e2167e9501,hpwren-wlfd-w-mobo-c-20260808-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+2806d6b4b1c0,hpwren-sclm-s-mobo-c-20260824-0700,1,0,ok,below,medium,2,1 1,0 0,ok ok
+28ff9bcc8b5f,hpwren-smarpk-n-mobo-c-20260822-0700,1,0,ok,below,small,2,1 1,0 0,ok ok
+299dbb81d34b,hpwren-rdd-n-mobo-c-20260826-0700,0,0,ok,,,2,0 0,0 0,ok ok
+29e0bd8795d8,hpwren-ch-n-mobo-c-20261018-0800,0,0,ok,,,2,0 0,0 0,ok ok
+2a4cad28a26c,hpwren-signal-n-mobo-c-20260925-0800,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+2b30851872dc,hpwren-hp-s-mobo-c-20260801-0630,,0,ok,,,3,? ? 1,0 0 0,ok ok ok
+2b5473b3fd7f,hpwren-om-n-mobo-c-20260803-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+2c4b69d2c3d0,hpwren-chino-s-mobo-c-20260908-0700,0,0,ok,,,2,0 0,0 0,ok ok
+2c7b62042454,hpwren-rdd-n-mobo-c-20260905-0730,0,0,ok,,,2,0 0,0 0,ok ok
+2ca22daa6f59,hpwren-smer-tcs8-mobo-c-20260926-0730,0,0,ok,,,2,0 0,0 0,ok ok
+2dc8611e46ea,hpwren-mpo-s-mobo-c-20261015-0800,,0,ok,,,3,? 0 ?,0 0 0,ok ok ok
+2e480df520ad,hpwren-pi-w-mobo-c-20260903-0700,0,0,ok,,,2,0 0,0 0,ok ok
+2ed52a4e9236,hpwren-smarpk-n-mobo-c-20261017-0730,0,0,ok,,,2,0 0,0 0,ok ok
+2f715ad9b397,hpwren-starr-e-mobo-c-20260803-0700,0,0,glare,,,2,0 0,0 0,glare glare
+2f785454de3e,hpwren-rndmsa-e-mobo-c-20260725-0700,1,0,ok,below,small,3,1 1 1,0 0 0,ok glare ok
+2f9c741511b4,hpwren-starr-s-mobo-c-20260808-0730,0,0,ok,,,2,0 0,0 0,ok ok
+2fc6ad03f141,hpwren-rndmsa-e-mobo-c-20260919-0730,1,0,glare,below,small,2,1 1,0 0,glare glare
+2ff97c8518ef,hpwren-chino-n-mobo-c-20261005-0800,0,0,ok,,,2,0 0,0 0,ok ok
+30dd4868ffa4,hpwren-buff-s-mobo-c-20261009-0800,1,0,ok,below,small,2,1 1,0 0,ok ok
+31c90ebb3205,hpwren-bm-s-mobo-c-20260821-0730,,0,ok,,,3,? ? 1,0 0 0,ok ok ok
+31dcd69ce844,hpwren-smer-tcs9-w-mobo-c-20260926-0800,0,0,ok,,,2,0 0,0 0,ok ok
+322a7096fb62,hpwren-mpo-w-mobo-c-20260903-0730,0,0,ok,,,2,0 0,0 0,ok ok
+32a821000399,hpwren-sjh-w-mobo-c-20260908-0730,0,0,ok,,,2,0 0,0 0,ok ok
+33ce693674bf,hpwren-sjh-e-mobo-c-20260808-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+33f7fef303ee,hpwren-syp-e-mobo-c-20260926-0730,1,0,ok,below,medium,2,1 1,0 0,ok ok
+3487a701d40e,hpwren-bh-s-mobo-c-20260920-0730,1,0,ok,below,medium,2,1 1,0 0,ok ok
+34dbca813ef7,hpwren-bi-w-mobo-c-20260804-0700,1,0,ok,below,small,2,1 1,0 0,ok ok
+3539833fd122,hpwren-mpo-s-mobo-c-20260804-0730,0,0,ok,,,2,0 0,0 0,ok ok
+357582e5bfcc,hpwren-marconi-w-mobo-c-20260727-0700,1,0,ok,below,medium,2,1 1,0 0,ok ok
+35dec14b001b,hpwren-starr-n-mobo-c-20261016-0800,0,0,ok,,,2,0 0,0 0,ok ok
+360907148e4f,hpwren-bi-s-mobo-c-20260926-0800,1,0,ok,patches,small,3,1 ? 1,0 0 0,ok ok ok
+368b6af7d7e3,hpwren-signal-n-mobo-c-20260829-0730,0,0,ok,,,3,0 ? 0,0 0 0,ok ok ok
+36f55c4d1dee,hpwren-mpo-w-mobo-c-20260913-0700,,0,ok,,,3,? ? ?,0 0 0,ok ok ok
+387b220e2ad3,hpwren-blkrc-w-mobo-c-20260725-0700,,,ok,,,3,? ? ?,? ? ?,ok ok ok
+39edfb4567d6,hpwren-marion-e-mobo-c-20260827-0700,0,0,ok,,,2,0 0,0 0,ok ok
+3adc5b1faabf,hpwren-bh-s-mobo-c-20260827-0700,0,0,ok,,,2,0 0,0 0,ok ok
+3b7505077994,hpwren-pi-w-mobo-c-20260727-0700,,0,ok,,,3,1 ? ?,0 0 0,ok ok ok
+3bb1b83066ef,hpwren-starr-n-mobo-c-20260928-0730,0,0,ok,,,2,0 0,0 0,ok ok
+3c5b8923534b,hpwren-ch-e-mobo-c-20260907-0730,0,0,glare,,,2,0 0,0 0,glare glare
+3d1597e96307,hpwren-rm-s-mobo-c-20261003-0730,0,0,ok,,,2,0 0,0 0,ok ok
+3d32cf39aaba,hpwren-dwpgm-n-mobo-c-20260912-0800,0,0,ok,,,2,0 0,0 0,ok ok
+3d7b19a08fab,hpwren-smer-tcs3-mobo-c-20260726-0630,0,0,ok,,,2,0 0,0 0,ok ok
+3de4bf8809cf,hpwren-sm-w-mobo-c-20260827-0700,1,0,ok,patches,small,2,1 1,0 0,ok ok
+3e62a9741c0c,hpwren-sjh-e-mobo-c-20261014-0730,0,0,glare,,,2,0 0,0 0,glare glare
+3e723db70896,hpwren-marconi-e-mobo-c-20260903-0730,1,0,glare,low_cloud_on_terrain,large,2,1 1,0 0,glare glare
+3f3149e9a41d,hpwren-chino-w-mobo-c-20260925-0730,1,0,ok,below,medium,2,1 1,0 0,ok ok
+401a46d97f72,hpwren-tdlln-s-mobo-c-20260826-0730,1,0,ok,bank,medium,2,1 1,0 0,ok ok
+404ae237bcb5,hpwren-stgo-n-mobo-c-20261014-0800,0,0,ok,,,2,0 0,0 0,ok ok
+405b90f01897,hpwren-smarpk-s-mobo-c-20261009-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+40d59c0285c7,hpwren-sclm-n-mobo-c-20261001-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+414b3a762bcb,hpwren-bh-s-mobo-c-20260816-0700,1,0,ok,below,small,2,1 1,0 0,ok ok
+4190b7b0774d,hpwren-69bravo-e-mobo-c-20261001-0730,1,0,glare,below,small,2,1 1,0 0,glare glare
+41ce84d2f233,hpwren-vo-w-mobo-c-20260816-0700,1,0,ok,below,small,2,1 1,0 0,ok ok
+41d52fb29943,hpwren-ms-n-mobo-c-20260829-0700,0,0,ok,,,2,0 0,0 0,ok ok
+41f1495d00f7,hpwren-cp-w-mobo-c-20260804-0700,1,0,ok,below,small,2,1 1,0 0,ok ok
+42c4c16def25,hpwren-vo-w-mobo-c-20260724-0630,,0,ok,,,3,? ? ?,0 0 0,ok ok ok
+4334d0fefe55,hpwren-rm-n-mobo-c-20260914-0700,1,,ok,enveloping,large,2,1 1,? 0,ok ok
+43ccc4ae1f2f,hpwren-starr-s-mobo-c-20260819-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+43ef765f3bd7,hpwren-dwpgm-s-mobo-c-20261004-0730,0,0,ok,,,3,0 ? 0,0 0 0,ok ok ok
+4452c89f8428,hpwren-rdd-n-mobo-c-20261010-0800,0,0,ok,,,2,0 0,0 0,ok ok
+44a3f90411c0,hpwren-bm-s-mobo-c-20260909-0700,0,0,ok,,,2,0 0,0 0,ok ok
+44c1bfcc2011,hpwren-sclm-e-mobo-c-20261006-0730,0,0,ok,,,2,0 0,0 0,ok ok
+4530bbfc9bc6,hpwren-rdd-e-mobo-c-20260907-0730,0,0,ok,,,2,0 0,0 0,ok ok
+455dbdcb7f04,hpwren-bm-s-mobo-c-20260816-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+463886b953a4,hpwren-vo-w-mobo-c-20260927-0800,0,0,ok,,,2,0 0,0 0,ok ok
+463d091231eb,hpwren-tje-1-mobo-c-20260827-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+47279dccf6cf,hpwren-ms-n-mobo-c-20260924-0730,,0,ok,,,3,? ? ?,0 0 0,ok ok ok
+47a3de5f632e,hpwren-dwpgm-n-mobo-c-20260730-0700,1,0,ok,below,small,2,1 1,0 0,ok ok
+47c4014032fc,hpwren-dwpgm-n-mobo-c-20260818-0730,0,0,ok,,,2,0 0,0 0,ok ok
+483612560acc,hpwren-buff-e-mobo-c-20261003-0800,0,0,glare,,,2,0 0,0 0,glare glare
+486e9d098d54,hpwren-marconi-s-mobo-c-20260912-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+488834df8c91,hpwren-signal-w-mobo-c-20261015-0730,0,0,ok,,,2,0 0,0 0,ok ok
+490ffd1af7d8,hpwren-tje-1-mobo-c-20261002-0730,0,0,ok,,,2,0 0,0 0,ok ok
+4a5995ca0a45,hpwren-rm-s-mobo-c-20261011-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+4aa5243a2ca2,hpwren-bm-s-mobo-c-20260804-0700,1,0,ok,below,small,2,1 1,0 0,ok ok
+4b8f7d6cacac,hpwren-rdmrc-e-mobo-c-20260911-0730,0,0,glare,,,2,0 0,0 0,glare glare
+4c582e496027,hpwren-rm-n-mobo-c-20260731-0730,1,0,ok,below,medium,2,1 1,0 0,ok ok
+4c7b0be93eb2,hpwren-sjh-w-mobo-c-20261001-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+4ce7d4b64e64,hpwren-chino-n-mobo-c-20260914-0730,1,,ok,enveloping,large,2,1 1,0 ?,ok ok
+4cf03b4080ef,hpwren-starr-n-mobo-c-20261007-0730,0,0,ok,,,2,0 0,0 0,ok ok
+4dc35cbed95e,hpwren-mg-s-mobo-c-20260820-0700,0,0,ok,,,2,0 0,0 0,ok ok
+4df0ce7809bb,hpwren-ch-n-mobo-c-20260808-0730,1,0,ok,below,medium,2,1 1,0 0,ok ok
+4e05e84dd6d6,hpwren-blkrc-w-mobo-c-20260904-0700,1,0,ok,below,small,2,1 1,0 0,ok ok
+4e467bbf287a,hpwren-wilson-w-mobo-c-20260906-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+4edbd3fa2bbc,hpwren-rdd-e-mobo-c-20260816-0700,0,0,ok,,,2,0 0,0 0,ok ok
+4f0a3c6cec66,hpwren-ms-n-mobo-c-20261015-0800,0,0,ok,,,2,0 0,0 0,ok ok
+4fae0bc67c44,hpwren-sclm-n-mobo-c-20260925-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+507090d22b49,hpwren-wilson-w-mobo-c-20260920-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+51c9aec23314,hpwren-smarpk-n-mobo-c-20260911-0700,0,0,ok,,,2,0 0,0 0,ok ok
+5213dfb145ec,hpwren-hp-s-mobo-c-20260809-0700,0,0,ok,,,2,0 0,0 0,ok ok
+5227785fd901,hpwren-starr-e-mobo-c-20260806-0700,0,0,glare,,,2,0 0,0 0,glare glare
+5235c76f0cf1,hpwren-sm-n-mobo-c-20260803-0730,1,0,ok,below,medium,2,1 1,0 0,ok ok
+53b79a291ff1,hpwren-sedgwick-w-mobo-c-20260906-0730,0,0,ok,,,2,0 0,0 0,ok ok
+541dce55e521,hpwren-om-w-mobo-c-20260824-0700,1,0,ok,below,medium,2,1 1,0 0,ok ok
+548236531cf9,hpwren-starr-w-mobo-c-20260724-0630,1,0,ok,below,small,2,1 1,0 0,ok ok
+54f4e8297c6e,hpwren-tp-n-mobo-c-20260824-0700,0,0,ok,,,2,0 0,0 0,ok ok
+5603dd28acaf,hpwren-rdmrc-w-mobo-c-20261003-0730,0,0,ok,,,2,0 0,0 0,ok ok
+56767d6d159f,hpwren-sjh-w-mobo-c-20260807-0730,1,0,ok,bank,small,2,1 1,0 0,ok ok
+56d2163b96e5,hpwren-stgo-w-mobo-c-20261003-0800,0,0,ok,,,2,0 0,0 0,ok ok
+56dbddcf4f24,hpwren-tdlln-n-mobo-c-20261003-0730,0,0,ok,,,2,0 0,0 0,ok ok
+580c3839316c,hpwren-rndmsa-e-mobo-c-20261003-0730,0,0,glare,,,2,0 0,0 0,glare glare
+5821da066a49,hpwren-sjh-w-mobo-c-20260724-0630,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+58df09fef78e,hpwren-chino-s-mobo-c-20261018-0800,0,0,ok,,,2,0 0,0 0,ok ok
+597e8fa655e2,hpwren-sedgwick-w-mobo-c-20261004-0730,0,0,ok,,,2,0 0,0 0,ok ok
+59fce58ae045,hpwren-sjh-s-mobo-c-20260824-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+5a69faf90ce8,hpwren-om-n-mobo-c-20260818-0700,1,0,ok,below,small,2,1 1,0 0,ok ok
+5a78149d9f10,hpwren-stgo-e-mobo-c-20260827-0700,1,0,ok,below,small,3,? 1 1,0 0 0,ok ok ok
+5aa8fdb32293,hpwren-blkrc-e-mobo-c-20260821-0700,0,0,glare,,,2,0 0,0 0,glare glare
+5b4968c854fd,hpwren-stgo-n-mobo-c-20260924-0800,1,0,ok,below,small,2,1 1,0 0,ok ok
+5b49f25f5221,hpwren-marion-e-mobo-c-20260929-0800,0,0,glare,,,3,0 0 0,0 0 0,ok glare glare
+5b87538e2acc,hpwren-bi-w-mobo-c-20261015-0800,0,0,ok,,,2,0 0,0 0,ok ok
+5c41eb41835d,hpwren-mpo-s-mobo-c-20260907-0730,0,0,ok,,,2,0 0,0 0,ok ok
+5c4df266007c,hpwren-sm-n-mobo-c-20260816-0700,1,0,ok,below,medium,2,1 1,0 0,ok ok
+5d417536ec5c,hpwren-sm-w-mobo-c-20261002-0730,0,0,ok,,,2,0 0,0 0,ok ok
+5daa66617085,hpwren-bm-s-mobo-c-20260826-0700,0,0,ok,,,2,0 0,0 0,ok ok
+5e65cc2b1246,hpwren-wilson-e-mobo-c-20260915-0800,1,0,ok,below,small,2,1 1,0 0,ok ok
+5f4d23351831,hpwren-dwpgm-s-mobo-c-20261003-0800,,0,ok,,,3,? ? ?,0 0 0,ok ok ok
+5f90fcc514f2,hpwren-signal-w-mobo-c-20261014-0800,0,0,ok,,,2,0 0,0 0,ok ok
+5f959604e486,hpwren-starr-e-mobo-c-20260913-0800,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+5fd7dff53c67,hpwren-wilson-w-mobo-c-20261009-0730,0,0,ok,,,2,0 0,0 0,ok ok
+5ff1b28da75e,hpwren-69bravo-n-mobo-c-20260730-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+60007c4686a2,hpwren-bi-w-mobo-c-20260929-0800,0,0,ok,,,2,0 0,0 0,ok ok
+60876066d9c7,hpwren-dwpgm-s-mobo-c-20261013-0730,0,0,ok,,,2,0 0,0 0,ok ok
+609d2f138368,hpwren-signal-n-mobo-c-20260727-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+6194c389c7ff,hpwren-smer-tcs8-mobo-c-20260822-0730,0,0,ok,,,2,0 0,0 0,ok ok
+6256c3601820,hpwren-smarpk-e-mobo-c-20260907-0700,0,0,ok,,,2,0 0,0 0,ok ok
+645e3b95f8db,hpwren-buff-e-mobo-c-20260806-0700,,0,glare,,,3,? ? 1,0 0 0,ok glare glare
+64d6728603b4,hpwren-rm-n-mobo-c-20260802-0730,1,0,ok,below,medium,2,1 1,0 0,ok ok
+659c22e80ad5,hpwren-blkrc-w-mobo-c-20260914-0700,1,0,ok,below,small,2,1 1,0 0,ok ok
+660f6f71f5fa,hpwren-blkrc-w-mobo-c-20260913-0700,1,0,ok,below,small,2,1 1,0 0,ok ok
+663885a3d26a,hpwren-dwpgm-n-mobo-c-20261004-0800,0,0,ok,,,2,0 0,0 0,ok ok
+66793fc30394,hpwren-signal-w-mobo-c-20260925-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+668d78057626,hpwren-blkrc-w-mobo-c-20260916-0730,1,0,ok,below,medium,2,1 1,0 0,ok ok
+67229e8605e4,hpwren-stgo-n-mobo-c-20261004-0800,0,0,ok,,,2,0 0,0 0,ok ok
+67696d5f530c,hpwren-smer-tcs3-mobo-c-20260727-0630,,0,glare,,,3,0 ? ?,0 0 0,glare glare glare
+6785a4f43463,hpwren-wilson-s-mobo-c-20260908-0730,0,0,ok,,,2,0 0,0 0,ok ok
+6871740f09ee,hpwren-sedgwick-w-mobo-c-20260907-0800,0,0,ok,,,2,0 0,0 0,ok ok
+69616531ccea,hpwren-stgo-w-mobo-c-20260910-0700,0,0,ok,,,2,0 0,0 0,ok ok
+6a006aa6c7f3,hpwren-rndmsa-s-mobo-c-20261009-0800,,0,ok,,,3,? ? ?,0 0 0,ok ok ok
+6a6774d95b94,hpwren-marconi-w-mobo-c-20261001-0800,1,0,ok,below,small,2,1 1,0 0,ok ok
+6c18c594e506,hpwren-rndmsa-e-mobo-c-20260920-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+6c3fffc0cfce,hpwren-rm-s-mobo-c-20260824-0700,0,0,ok,,,2,0 0,0 0,ok ok
+6c57ebb70517,hpwren-sclm-e-mobo-c-20261001-0800,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+6da65395883b,hpwren-bh-s-mobo-c-20261010-0800,0,0,ok,,,2,0 0,0 0,ok ok
+6de126bfe38c,hpwren-rndmsa-e-mobo-c-20260801-0700,1,0,glare,below,small,2,1 1,0 0,glare glare
+6e192e969da9,hpwren-chino-e-mobo-c-20260903-0700,,0,glare,,,3,? ? ?,0 0 0,glare glare glare
+6e37e1cfc85e,hpwren-ch-e-mobo-c-20260816-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+6eb014af7d04,hpwren-marconi-w-mobo-c-20260726-0700,1,0,ok,below,small,3,? 1 1,0 0 0,ok ok ok
+6fd395201cc2,hpwren-stgo-e-mobo-c-20260908-0730,1,0,ok,patches,small,3,1 ? 1,0 0 0,ok ok ok
+6fdcc420b3cb,hpwren-signal-w-mobo-c-20261001-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+6ff5fc26ad38,hpwren-cp-w-mobo-c-20261006-0800,0,0,ok,,,2,0 0,0 0,ok ok
+7154e1339e0f,hpwren-smer-tcs8-mobo-c-20260924-0730,1,0,ok,below,medium,2,1 1,0 0,ok ok
+7203ab940578,hpwren-wc-w-mobo-c-20261009-0800,,0,ok,,,3,? 1 ?,0 0 0,ok ok ok
+730a6ad49130,hpwren-ms-n-mobo-c-20260907-0730,,0,ok,,,3,? ? 1,0 0 0,ok ok ok
+733174fd718b,hpwren-starr-s-mobo-c-20261001-0730,1,0,ok,patches,small,2,1 1,0 0,ok ok
+7349ffb9eb12,hpwren-smer-tcs3-mobo-c-20260831-0730,0,0,glare,,,2,0 0,0 0,glare glare
+745779e0e022,hpwren-sclm-e-mobo-c-20260819-0700,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+74c1e981dc81,hpwren-marconi-w-mobo-c-20260909-0700,0,0,ok,,,2,0 0,0 0,ok ok
+74da4c1a0d60,hpwren-mpo-s-mobo-c-20260920-0800,0,0,ok,,,2,0 0,0 0,ok ok
+74fa010621e1,hpwren-dwpgm-s-mobo-c-20260924-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+754661af4039,hpwren-ch-e-mobo-c-20260804-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+75515ad26f12,hpwren-blkrc-w-mobo-c-20260728-0630,0,0,ok,,,2,0 0,0 0,ok ok
+7567f7dffdea,hpwren-marconi-w-mobo-c-20260905-0730,0,0,ok,,,2,0 0,0 0,ok ok
+765ccb507fff,hpwren-signal-n-mobo-c-20261007-0800,0,0,ok,,,2,0 0,0 0,ok ok
+76af46e05742,hpwren-sclm-e-mobo-c-20260908-0700,0,0,ok,,,3,0 0 0,0 0 0,glare ok ok
+772951548318,hpwren-69bravo-n-mobo-c-20260824-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+783ba0533952,hpwren-om-n-mobo-c-20261002-0800,0,,ok,,,2,0 0,0 ?,ok ok
+7895967e3116,hpwren-rdd-w-mobo-c-20261001-0800,0,0,ok,,,2,0 0,0 0,ok ok
+790d08a59736,hpwren-syp-e-mobo-c-20261016-0830,0,0,glare,,,3,0 0 0,0 0 0,ok glare glare
+793b7b2e2c7e,hpwren-69bravo-n-mobo-c-20260912-0800,1,0,ok,below,small,3,1 ? 1,0 0 0,ok ok ok
+7a2059d36202,hpwren-rm-n-mobo-c-20260915-0730,1,0,ok,low_cloud_on_terrain,medium,2,1 1,0 0,ok ok
+7ab5046142c1,hpwren-rm-w-mobo-c-20261001-0730,0,0,ok,,,2,0 0,0 0,ok ok
+7b2e8ce3709a,hpwren-wc-w-mobo-c-20261006-0800,0,0,ok,,,2,0 0,0 0,ok ok
+7b4dbac324e6,hpwren-dwpgm-e-mobo-c-20261018-0830,0,0,glare,,,2,0 0,0 0,glare glare
+7beeca9f27a8,hpwren-ch-s-mobo-c-20261002-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+7c22bc82babb,hpwren-rdd-n-mobo-c-20260819-0730,1,0,ok,bank,large,2,1 1,0 0,ok ok
+7c7489952a13,hpwren-cp-w-mobo-c-20260818-0730,0,0,ok,,,2,0 0,0 0,ok ok
+7ca9a10e3cd7,hpwren-bl-n-mobo-c-20261005-0800,0,0,ok,,,2,0 0,0 0,ok ok
+7d410cea67d2,hpwren-wilson-e-mobo-c-20260911-0800,0,0,ok,,,3,? 0 0,0 0 0,glare ok ok
+7d7a695cd3a5,hpwren-bl-n-mobo-c-20261003-0800,0,0,ok,,,2,0 0,0 0,ok ok
+7dea3f7de086,hpwren-rdmrc-e-mobo-c-20260803-0730,0,0,glare,,,2,0 0,0 0,glare glare
+7e09f641e188,hpwren-vo-w-mobo-c-20260920-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+7e0c4ef2025b,hpwren-om-n-mobo-c-20261015-0800,0,,ok,,,2,0 0,? ?,ok ok
+7e32d0181c01,hpwren-starr-n-mobo-c-20260913-0800,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+7e3632d9e812,hpwren-stgo-w-mobo-c-20261014-0730,0,0,ok,,,2,0 0,0 0,ok ok
+7e8b56bbe011,hpwren-sjh-e-mobo-c-20260907-0730,0,0,ok,,,2,0 0,0 0,ok ok
+7eb448a98f45,hpwren-marion-w-mobo-c-20260904-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+7edf85529c88,hpwren-hp-s-mobo-c-20260804-0700,1,0,ok,below,small,3,1 ? 1,0 0 0,ok ok ok
+7ee201ebb942,hpwren-ch-e-mobo-c-20261008-0730,,0,glare,,,3,? 0 ?,0 0 0,glare glare glare
+7f3cf5113e64,hpwren-starr-w-mobo-c-20261001-0730,0,0,ok,,,2,0 0,0 0,ok ok
+7f78d30e640b,hpwren-sclm-n-mobo-c-20260724-0700,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+80b1d91c81b9,hpwren-stgo-n-mobo-c-20260910-0730,0,0,ok,,,2,0 0,0 0,ok ok
+811664730d05,hpwren-wc-w-mobo-c-20260905-0700,0,0,ok,,,2,0 0,0 0,ok ok
+8234f7621c08,hpwren-dwpgm-n-mobo-c-20260815-0700,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+824c05a4210d,hpwren-marconi-w-mobo-c-20260925-0800,1,0,ok,below,medium,2,1 1,0 0,ok ok
+82514f9edf8e,hpwren-starr-w-mobo-c-20260925-0730,1,0,ok,below,medium,2,1 1,0 0,ok ok
+833440bc60b5,hpwren-chino-n-mobo-c-20260820-0700,0,0,ok,,,2,0 0,0 0,ok ok
+838a4b414a8a,hpwren-chino-e-mobo-c-20260913-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+845ed3db57b6,hpwren-wlfd-w-mobo-c-20261016-0730,0,0,ok,,,2,0 0,0 0,ok ok
+845eddf44783,hpwren-wlfd-s-mobo-c-20260816-0730,1,0,ok,bank,small,2,1 1,0 0,ok ok
+84aa45915881,hpwren-rm-n-mobo-c-20260728-0700,1,0,ok,below,medium,2,1 1,0 0,ok ok
+84c1612e6f52,hpwren-bi-s-mobo-c-20260816-0700,1,0,ok,below,small,2,1 1,0 0,ok ok
+8504ba4c00c7,hpwren-hp-s-mobo-c-20260816-0730,0,0,ok,,,2,0 0,0 0,ok ok
+854c9e64f333,hpwren-tdlln-n-mobo-c-20261015-0730,0,0,ok,,,2,0 0,0 0,ok ok
+855b681eb03c,hpwren-dwpgm-n-mobo-c-20260728-0730,0,0,ok,,,2,0 0,0 0,ok ok
+858de6e20afe,hpwren-69bravo-n-mobo-c-20260929-0730,0,0,ok,,,2,0 0,0 0,ok ok
+8607fe869d26,hpwren-sclm-n-mobo-c-20261007-0800,0,0,ok,,,2,0 0,0 0,ok ok
+86a47035ca2b,hpwren-stgo-e-mobo-c-20260727-0630,1,0,glare,below,medium,3,? 1 1,0 0 0,glare glare ok
+86df86aa6c28,hpwren-marconi-w-mobo-c-20260724-0700,1,0,ok,below,medium,2,1 1,0 0,ok ok
+872c6b0e326d,hpwren-smarpk-s-mobo-c-20260926-0800,0,0,ok,,,2,0 0,0 0,ok ok
+8818baffd59f,hpwren-smarpk-s-mobo-c-20260924-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+88a3b861fdf0,hpwren-rdmrc-w-mobo-c-20260913-0700,1,0,ok,below,small,2,1 1,0 0,ok ok
+893159f90a06,hpwren-starr-n-mobo-c-20260828-0700,0,0,ok,,,2,0 0,0 0,ok ok
+8941bea522dc,hpwren-ch-s-mobo-c-20260909-0700,0,0,ok,,,2,0 0,0 0,ok ok
+89569d64e310,hpwren-wilson-s-mobo-c-20261009-0800,1,0,ok,below,small,2,1 1,0 0,ok ok
+8a45f5b1a642,hpwren-marion-e-mobo-c-20260815-0700,0,0,glare,,,3,0 0 0,0 0 0,glare ok glare
+8a64c9c00913,hpwren-cp-w-mobo-c-20260816-0700,1,0,ok,below,small,2,1 1,0 0,ok ok
+8a7f33e4102c,hpwren-dwpgm-e-mobo-c-20261014-0730,,0,glare,,,3,? 0 ?,0 0 0,glare glare glare
+8a8ac6a8e7a4,hpwren-marion-e-mobo-c-20260921-0800,0,0,glare,,,2,0 0,0 0,glare glare
+8ae4d1c10707,hpwren-sclm-n-mobo-c-20260727-0630,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+8badbac4510c,hpwren-bi-s-mobo-c-20260827-0730,0,0,ok,,,2,0 0,0 0,ok ok
+8bf2bc1c7852,hpwren-mg-s-mobo-c-20260808-0700,0,0,ok,,,2,0 0,0 0,ok ok
+8c0a782da012,hpwren-stgo-n-mobo-c-20260920-0730,1,0,ok,below,medium,2,1 1,0 0,ok ok
+8c0c10f3f602,hpwren-blkrc-e-mobo-c-20260804-0730,0,0,glare,,,3,0 0 0,0 0 0,glare ok glare
+8cccfe7be2a9,hpwren-sclm-n-mobo-c-20260929-0800,,0,ok,,,3,? ? ?,0 0 0,ok ok ok
+8d4633ec87eb,hpwren-cp-w-mobo-c-20260920-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+8d6488fbb34b,hpwren-buff-s-mobo-c-20260824-0700,1,0,ok,below,small,2,1 1,0 0,ok ok
+8d6c523b7048,hpwren-bh-n-mobo-c-20260914-0730,,0,ok,,,3,? ? ?,0 0 0,ok ok ok
+8ddd7f6b4a5c,hpwren-mg-s-mobo-c-20260804-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+8e64f80d2c28,hpwren-chino-e-mobo-c-20260731-0730,1,0,glare,below,small,2,1 1,0 0,glare glare
+8e75132250b4,hpwren-69bravo-e-mobo-c-20260731-0700,1,0,glare,below,small,2,1 1,0 0,glare glare
+8eff3871a454,hpwren-dwpgm-e-mobo-c-20261006-0800,0,0,glare,,,3,0 ? 0,0 0 0,glare glare glare
+902cfd5d9625,hpwren-bh-s-mobo-c-20261005-0730,0,0,ok,,,2,0 0,0 0,ok ok
+91e84d4eacfb,hpwren-ms-n-mobo-c-20260824-0700,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+92040cfa9974,hpwren-dwpgm-e-mobo-c-20260805-0730,1,0,glare,below,small,2,1 1,0 0,glare glare
+9225ec66315b,hpwren-mg-s-mobo-c-20260920-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+923f8aaff40c,hpwren-smarpk-e-mobo-c-20260816-0700,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+926dc47622d2,hpwren-smarpk-w-mobo-c-20261001-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+92be6d5ed747,hpwren-smarpk-e-mobo-c-20260803-0730,1,0,ok,below,large,2,1 1,0 0,ok ok
+92d784903379,hpwren-marconi-e-mobo-c-20260920-0800,1,0,ok,low_cloud_on_terrain,large,2,1 1,0 0,ok ok
+93ce18d0b150,hpwren-ch-e-mobo-c-20260821-0730,,0,glare,,,3,? ? 1,0 0 0,glare glare ok
+93d8cf6c81b0,hpwren-ch-n-mobo-c-20261005-0730,0,0,ok,,,2,0 0,0 0,ok ok
+9426f281a34c,hpwren-bl-n-mobo-c-20261014-0800,0,0,ok,,,2,0 0,0 0,ok ok
+942a21703796,hpwren-sm-n-mobo-c-20261002-0800,0,0,ok,,,2,0 0,0 0,ok ok
+943e98fdff59,hpwren-sedgwick-s-mobo-c-20261003-0800,0,0,ok,,,2,0 0,0 0,ok ok
+95df460fff5e,hpwren-sclm-e-mobo-c-20260826-0700,0,0,glare,,,3,? 0 0,0 0 0,glare glare glare
+961590d7e983,hpwren-signal-w-mobo-c-20260801-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+9628d6e72f3a,hpwren-tdlln-e-mobo-c-20260822-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+968782118c8c,hpwren-starr-n-mobo-c-20260731-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+9755f895c762,hpwren-pi-w-mobo-c-20260830-0730,0,,ok,,,2,0 0,0 ?,ok ok
+97f057c446ee,hpwren-rdd-s-mobo-c-20261002-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+98072131027b,hpwren-chino-n-mobo-c-20260818-0700,0,0,ok,,,2,0 0,0 0,ok ok
+986380ce52f4,hpwren-69bravo-n-mobo-c-20260819-0730,,0,ok,,,3,1 ? ?,0 0 0,ok ok ok
+98e72ef042b4,hpwren-69bravo-e-mobo-c-20260805-0700,1,0,ok,below,small,2,1 1,0 0,ok ok
+997a98ad4031,hpwren-sedgwick-s-mobo-c-20261016-0800,0,0,ok,,,2,0 0,0 0,ok ok
+9aa033b5e7f9,hpwren-stgo-w-mobo-c-20261001-0730,,0,ok,,,3,? 1 ?,0 0 0,ok ok ok
+9aff74fafde6,hpwren-wilson-w-mobo-c-20260930-0730,,0,ok,,,3,1 ? ?,0 0 0,ok ok ok
+9b217e12cd3a,hpwren-hp-w-mobo-c-20260925-0730,0,0,ok,,,2,0 0,0 0,ok ok
+9b8923f64901,hpwren-bh-w-mobo-c-20260927-0730,0,0,ok,,,3,0 ? 0,0 0 0,ok ok ok
+9bab022183f7,hpwren-pi-w-mobo-c-20260821-0700,1,0,ok,below,small,3,1 ? 1,0 0 0,ok ok ok
+9bdfadb49a5b,hpwren-marion-w-mobo-c-20260801-0700,0,0,ok,,,3,? 0 0,0 0 0,ok ok ok
+9d304dd3e18e,hpwren-chino-w-mobo-c-20261001-0800,1,0,ok,below,small,2,1 1,0 0,ok ok
+9d4783219d5e,hpwren-rm-w-mobo-c-20260819-0700,1,0,ok,below,medium,2,1 1,0 0,ok ok
+9d72a0d7767e,hpwren-tdlln-n-mobo-c-20260910-0730,0,0,ok,,,2,0 0,0 0,ok ok
+9da5caa8e8b7,hpwren-tdlln-s-mobo-c-20260824-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+9e2f3d095d08,hpwren-mpo-w-mobo-c-20260920-0800,1,0,ok,below,small,2,1 1,0 0,ok ok
+9e575ee60660,hpwren-marconi-s-mobo-c-20261001-0730,,0,ok,,,3,? 1 ?,0 0 0,ok ok ok
+9e76c8297a95,hpwren-cp-w-mobo-c-20260910-0730,1,0,ok,below,small,3,? 1 1,0 0 0,ok ok ok
+9f7749d60098,hpwren-marion-w-mobo-c-20260724-0700,0,0,ok,,,2,0 0,0 0,ok ok
+9fc62db10f55,hpwren-rdd-e-mobo-c-20260828-0700,,0,glare,,,3,? ? ?,0 0 0,glare glare glare
+9fcbe69d4082,hpwren-smarpk-e-mobo-c-20260724-0630,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+9fe7c3d681ba,hpwren-bl-e-mobo-c-20260816-0700,,,obstructed,,,3,? ? ?,? ? ?,obstructed obstructed obstructed
+a18fe87ea49d,hpwren-rdmrc-e-mobo-c-20260915-0730,0,0,ok,,,3,0 0 0,0 0 0,glare ok ok
+a34188a30aaa,hpwren-chino-e-mobo-c-20261003-0730,,0,glare,,,3,? ? ?,0 0 0,glare glare glare
+a38104acec9f,hpwren-bl-e-mobo-c-20260809-0730,,,obstructed,,,3,? ? ?,? ? ?,obstructed obstructed obstructed
+a4bc8044c59d,hpwren-rndmsa-e-mobo-c-20260727-0630,1,0,glare,below,small,2,1 1,0 0,glare glare
+a5022a2f4a96,hpwren-smer-tcs3-mobo-c-20260728-0630,0,0,glare,,,3,0 ? 0,0 0 0,glare glare glare
+a5c5e793bd5e,hpwren-bh-n-mobo-c-20260913-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+a636de9660e1,hpwren-ms-n-mobo-c-20261014-0800,0,0,ok,,,2,0 0,0 0,ok ok
+a67b7a6ed34c,hpwren-tdlln-n-mobo-c-20261011-0800,,0,ok,,,3,? 0 ?,0 0 0,ok ok ok
+a6f9360aefef,hpwren-rdmrc-w-mobo-c-20260919-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+a79ddc3171d5,hpwren-wilson-e-mobo-c-20261010-0800,0,0,ok,,,2,0 0,0 0,ok ok
+a83f4292205c,hpwren-wilson-e-mobo-c-20261004-0800,0,0,glare,,,2,0 0,0 0,glare glare
+a877c7e692fc,hpwren-blkrc-e-mobo-c-20261015-0730,0,0,glare,,,3,0 0 0,0 0 0,glare ok glare
+a8b008ed7134,hpwren-hp-s-mobo-c-20260818-0700,0,0,ok,,,2,0 0,0 0,ok ok
+a8f2701caa82,hpwren-dwpgm-n-mobo-c-20260924-0730,1,,ok,enveloping,large,2,1 1,? 0,ok ok
+a95a8d6751eb,hpwren-smer-tcs9-w-mobo-c-20260822-0730,0,0,ok,,,2,0 0,0 0,ok ok
+aa3ee7699e82,hpwren-bl-n-mobo-c-20261001-0730,,0,glare,,,3,0 ? ?,0 0 0,ok glare glare
+ab80874887f1,hpwren-bl-n-mobo-c-20261011-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+ab9f9bfb8e4b,hpwren-starr-w-mobo-c-20260817-0700,0,0,ok,,,2,0 0,0 0,ok ok
+ac585ff1834a,hpwren-starr-w-mobo-c-20260812-0700,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+acf262f9a76b,hpwren-wilson-w-mobo-c-20260819-0700,0,0,ok,,,2,0 0,0 0,ok ok
+ad299295a7e0,hpwren-chino-n-mobo-c-20261004-0800,0,0,ok,,,2,0 0,0 0,ok ok
+ad3a73386b05,hpwren-ch-n-mobo-c-20261001-0800,,0,ok,,,3,? ? 1,0 0 0,ok ok ok
+af7f0e1b15b9,hpwren-wilson-w-mobo-c-20260924-0800,1,0,ok,below,small,2,1 1,0 0,ok ok
+b004a9386825,hpwren-cp-w-mobo-c-20261015-0730,0,0,ok,,,2,0 0,0 0,ok ok
+b1da827865a1,hpwren-om-n-mobo-c-20261008-0730,0,,ok,,,2,0 0,? ?,ok ok
+b20b9bbe0c3d,hpwren-lp-w-mobo-c-20260802-0700,1,0,ok,below,medium,2,1 1,0 0,ok ok
+b24064da43dd,hpwren-stgo-w-mobo-c-20261013-0800,1,0,ok,bank,medium,2,1 1,0 0,ok ok
+b2ebf7f26728,hpwren-sjh-s-mobo-c-20260912-0730,1,0,ok,bank,small,2,1 1,0 0,ok ok
+b36bdacedec8,hpwren-ch-e-mobo-c-20260912-0700,,0,glare,,,3,? 1 ?,0 0 0,glare glare glare
+b3a1e4d0d288,hpwren-starr-w-mobo-c-20260811-0700,1,0,ok,below,medium,2,1 1,0 0,ok ok
+b3af1d3b527a,hpwren-sedgwick-w-mobo-c-20260825-0700,1,0,ok,below,small,3,1 ? 1,0 0 0,ok ok ok
+b40dd2a448dd,hpwren-smarpk-e-mobo-c-20261008-0800,0,0,ok,,,2,0 0,0 0,ok ok
+b41a9d18ed6c,hpwren-69bravo-n-mobo-c-20260924-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+b490a4c8cd16,hpwren-smer-tcs3-mobo-c-20260801-0700,0,0,glare,,,2,0 0,0 0,glare glare
+b53a9374ada9,hpwren-starr-s-mobo-c-20260923-0800,0,0,ok,,,2,0 0,0 0,ok ok
+b548c4e233cf,hpwren-signal-w-mobo-c-20260909-0700,0,0,ok,,,2,0 0,0 0,ok ok
+b68665a4f717,hpwren-chino-n-mobo-c-20260920-0730,1,,ok,enveloping,large,2,1 1,0 ?,ok ok
+b71188e504e7,hpwren-sjh-w-mobo-c-20260923-0730,0,0,ok,,,2,0 0,0 0,ok ok
+b7d9bb22c7a2,hpwren-bm-s-mobo-c-20260825-0700,0,0,ok,,,2,0 0,0 0,ok ok
+b887d56d6d08,hpwren-bh-s-mobo-c-20260804-0700,1,0,ok,below,small,2,1 1,0 0,ok ok
+b8cdbf4842a3,hpwren-starr-e-mobo-c-20260903-0730,,0,glare,,,3,? ? ?,0 0 0,glare glare glare
+b946aa07a2e7,hpwren-mpo-w-mobo-c-20261003-0800,0,0,ok,,,2,0 0,0 0,ok ok
+b97b375c27ac,hpwren-bh-n-mobo-c-20260806-0700,0,0,ok,,,2,0 0,0 0,ok ok
+b99766e70dd5,hpwren-lp-w-mobo-c-20260926-0800,0,0,ok,,,2,0 0,0 0,ok ok
+b9b3ff6b3c11,hpwren-69bravo-n-mobo-c-20261004-0730,0,0,ok,,,2,0 0,0 0,ok ok
+badb3cc51d47,hpwren-syp-e-mobo-c-20260907-0730,,0,glare,,,3,? ? 1,0 0 0,glare glare glare
+bae5b1854b28,hpwren-bh-w-mobo-c-20260808-0700,1,0,ok,below,small,3,1 ? 1,0 0 0,ok ok ok
+baede7955767,hpwren-rdmrc-w-mobo-c-20260728-0630,0,0,ok,,,2,0 0,0 0,ok ok
+bb73c2ca3046,hpwren-bi-n-mobo-c-20260913-0700,0,0,ok,,,2,0 0,0 0,ok ok
+bc53816ab0c3,hpwren-mg-s-mobo-c-20260724-0700,0,0,ok,,,2,0 0,0 0,ok ok
+bd54925689c1,hpwren-bi-n-mobo-c-20260726-0700,0,0,ok,,,2,0 0,0 0,ok ok
+bdab0b4da66c,hpwren-stgo-w-mobo-c-20260724-0700,1,0,ok,below,small,2,1 1,0 0,ok ok
+bdce492b8da9,hpwren-sjh-w-mobo-c-20261016-0800,0,0,ok,,,2,0 0,0 0,ok ok
+be2406825208,hpwren-bi-s-mobo-c-20260804-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+bfac17c5c19b,hpwren-sm-n-mobo-c-20260907-0700,0,0,ok,,,2,0 0,0 0,ok ok
+bfcfbe1b7f63,hpwren-wilson-e-mobo-c-20260727-0700,,0,ok,,,3,? ? 1,0 0 0,ok glare ok
+c00482cb5afe,hpwren-sm-s-mobo-c-20260824-0730,1,0,ok,below,medium,2,1 1,0 0,ok ok
+c0182ed292a5,hpwren-signal-n-mobo-c-20261015-0800,0,0,ok,,,2,0 0,0 0,ok ok
+c057cae5f607,hpwren-buff-e-mobo-c-20260920-0800,1,0,ok,below,medium,2,1 1,0 0,ok ok
+c06847c407fb,hpwren-stgo-w-mobo-c-20260727-0630,1,0,ok,below,small,2,1 1,0 0,ok ok
+c0a1c0a50d3e,hpwren-starr-n-mobo-c-20260914-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+c105faa735df,hpwren-ch-e-mobo-c-20260810-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+c186029983bd,hpwren-sedgwick-w-mobo-c-20260930-0730,,0,ok,,,3,? ? 1,0 0 0,ok ok ok
+c246e4ed7097,hpwren-sm-s-mobo-c-20261018-0730,0,0,ok,,,2,0 0,0 0,ok ok
+c2c25ae13e5d,hpwren-sedgwick-w-mobo-c-20260929-0800,1,0,ok,below,small,2,1 1,0 0,ok ok
+c2f538919610,hpwren-chino-s-mobo-c-20261001-0730,,0,ok,,,3,? ? ?,0 0 0,ok ok ok
+c37e0ab1acfe,hpwren-smer-tcs3-mobo-c-20260920-0800,1,0,ok,low_cloud_on_terrain,small,2,1 1,0 0,ok ok
+c3afa4b4aa4f,hpwren-rdmrc-w-mobo-c-20260920-0800,1,0,ok,below,small,2,1 1,0 0,ok ok
+c4a0322850c4,hpwren-rdd-e-mobo-c-20260804-0730,1,0,ok,low_cloud_on_terrain,medium,2,1 1,0 0,ok ok
+c4d01c5a2a5f,hpwren-hp-s-mobo-c-20260930-0800,0,0,ok,,,2,0 0,0 0,ok ok
+c4d6e4c5fa34,hpwren-signal-w-mobo-c-20260727-0700,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+c4fed2122353,hpwren-wlfd-s-mobo-c-20260729-0700,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+c512c1d1af92,hpwren-syp-e-mobo-c-20260901-0800,1,0,glare,below,medium,3,1 1 1,0 0 0,ok glare glare
+c53f15e416a2,hpwren-mpo-s-mobo-c-20260816-0730,,0,ok,,,3,1 ? ?,0 0 0,ok ok ok
+c573c49a2e7c,hpwren-starr-n-mobo-c-20261014-0800,0,0,ok,,,2,0 0,0 0,ok ok
+c64c5d9fed9d,hpwren-tdlln-n-mobo-c-20261018-0800,0,0,ok,,,2,0 0,0 0,ok ok
+c694f7e72855,hpwren-sjh-e-mobo-c-20260819-0700,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+c7e074385320,hpwren-smarpk-e-mobo-c-20260804-0700,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+c8e6f33bfd8e,hpwren-signal-w-mobo-c-20260910-0700,0,0,ok,,,2,0 0,0 0,ok ok
+c9df728d2d92,hpwren-tdlln-s-mobo-c-20261008-0800,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+ca5cb3237eb4,hpwren-blkrc-w-mobo-c-20261006-0800,0,0,ok,,,2,0 0,0 0,ok ok
+cb7d0f936ff4,hpwren-sm-s-mobo-c-20261006-0800,0,0,ok,,,2,0 0,0 0,ok ok
+cba70c1f7fa3,hpwren-rndmsa-e-mobo-c-20260913-0730,1,0,ok,below,large,2,1 1,0 0,ok ok
+cbd63a82396e,hpwren-smer-tcs3-mobo-c-20260724-0700,0,0,glare,,,2,0 0,0 0,glare glare
+cc36f2229993,hpwren-buff-e-mobo-c-20260913-0700,1,0,ok,below,large,2,1 1,0 0,ok ok
+cc78c32592a6,hpwren-rdd-e-mobo-c-20261007-0730,0,0,glare,,,2,0 0,0 0,glare glare
+cc9e94102f9b,hpwren-vo-w-mobo-c-20260804-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+cda87853be7a,hpwren-ch-s-mobo-c-20260804-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+cee134cf818c,hpwren-chino-s-mobo-c-20261005-0800,0,0,ok,,,2,0 0,0 0,ok ok
+cf1d5d5adc16,hpwren-sclm-e-mobo-c-20260808-0700,1,,ok,enveloping,large,2,1 1,? 0,ok ok
+cf25679ee609,hpwren-sm-s-mobo-c-20261004-0730,0,0,ok,,,2,0 0,0 0,ok ok
+cf2a201342de,hpwren-69bravo-n-mobo-c-20260815-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+cfe21244c012,hpwren-sclm-n-mobo-c-20261015-0800,0,0,ok,,,2,0 0,0 0,ok ok
+d143703b196d,hpwren-rdd-n-mobo-c-20261001-0800,0,0,ok,,,2,0 0,0 0,ok ok
+d15cecc250de,hpwren-smarpk-n-mobo-c-20260908-0700,0,0,ok,,,2,0 0,0 0,ok ok
+d16e1cf65f38,hpwren-rdmrc-e-mobo-c-20260904-0730,0,0,glare,,,2,0 0,0 0,glare glare
+d1d2e1baf25c,hpwren-rm-n-mobo-c-20260725-0700,1,0,ok,below,large,2,1 1,0 0,ok ok
+d253447f1250,hpwren-blkrc-w-mobo-c-20260726-0630,0,0,ok,,,2,0 0,0 0,ok ok
+d266fe8ac70e,hpwren-chino-w-mobo-c-20261012-0730,0,0,ok,,,2,0 0,0 0,ok ok
+d2c2c191f2fc,hpwren-wlfd-w-mobo-c-20261015-0800,0,0,ok,,,2,0 0,0 0,ok ok
+d319012fa2f7,hpwren-sclm-n-mobo-c-20260907-0730,0,0,ok,,,2,0 0,0 0,ok ok
+d351119199f9,hpwren-starr-e-mobo-c-20260914-0800,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+d3a6766c9e67,hpwren-pi-w-mobo-c-20260803-0730,,0,ok,,,3,? ? ?,0 0 0,ok ok ok
+d3cc5a7e92be,hpwren-69bravo-e-mobo-c-20260905-0700,1,0,ok,below,small,3,1 1 1,0 0 0,ok glare ok
+d3ebb8e5a724,hpwren-signal-n-mobo-c-20261012-0730,,0,ok,,,3,? ? ?,0 0 0,ok ok ok
+d3ece48c8f02,hpwren-smarpk-s-mobo-c-20260826-0700,0,0,ok,,,2,0 0,0 0,ok ok
+d3fa2ae581b1,hpwren-sedgwick-s-mobo-c-20261009-0800,1,0,ok,below,medium,2,1 1,0 0,ok ok
+d479f2124098,hpwren-rndmsa-s-mobo-c-20260822-0700,1,0,ok,below,small,2,1 1,0 0,ok ok
+d487cc1e6756,hpwren-rdd-e-mobo-c-20260724-0630,1,0,ok,low_cloud_on_terrain,medium,2,1 1,0 0,ok ok
+d4e47012b024,hpwren-stgo-n-mobo-c-20260913-0730,1,0,ok,below,medium,2,1 1,0 0,ok ok
+d543a51b5504,hpwren-dwpgm-s-mobo-c-20260804-0700,1,0,ok,below,medium,2,1 1,0 0,ok ok
+d5f4b8562e98,hpwren-wc-w-mobo-c-20260824-0730,,0,ok,,,3,? ? 1,0 0 0,ok ok ok
+d63cd15e0455,hpwren-rm-s-mobo-c-20261001-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+d6622a100aed,hpwren-marconi-e-mobo-c-20260806-0730,0,0,ok,,,2,0 0,0 0,ok ok
+d6c54dfcb7f3,hpwren-marconi-e-mobo-c-20260925-0800,0,0,glare,,,3,0 ? 0,0 0 0,glare glare glare
+d77e0ad7b773,hpwren-wlfd-w-mobo-c-20261005-0800,0,0,ok,,,2,0 0,0 0,ok ok
+d7a0beb4d39b,hpwren-rdd-n-mobo-c-20260808-0700,1,0,ok,bank,small,2,1 1,0 0,ok ok
+d8ace268f1a4,hpwren-rdd-s-mobo-c-20260804-0700,1,0,ok,low_cloud_on_terrain,large,2,1 1,0 0,ok ok
+da00ea93b5bd,hpwren-rm-w-mobo-c-20260808-0700,,0,ok,,,3,? ? 1,0 0 0,ok ok ok
+daed6c2a10b0,hpwren-wlfd-s-mobo-c-20260803-0730,0,0,ok,,,2,0 0,0 0,ok ok
+db4786e1322d,hpwren-bh-n-mobo-c-20260724-0700,0,0,ok,,,2,0 0,0 0,ok ok
+db53c1fd3694,hpwren-sm-s-mobo-c-20260928-0800,1,0,ok,below,medium,2,1 1,0 0,ok ok
+db87657763da,hpwren-stgo-e-mobo-c-20260921-0800,1,0,ok,below,medium,2,1 1,0 0,ok ok
+dbdb15bfde8f,hpwren-wlfd-w-mobo-c-20261018-0800,0,0,ok,,,2,0 0,0 0,ok ok
+dc545b73d29d,hpwren-sm-s-mobo-c-20261001-0730,,0,ok,,,3,? 1 0,0 0 0,ok ok ok
+dca9fe688516,hpwren-rdmrc-w-mobo-c-20260724-0630,0,0,ok,,,2,0 0,0 0,ok ok
+dcbc01af26d0,hpwren-marion-w-mobo-c-20260914-0700,0,0,ok,,,3,0 ? 0,0 0 0,ok ok ok
+dcf13f5c70c3,hpwren-marconi-e-mobo-c-20260913-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+dd0ec890a6f0,hpwren-mg-s-mobo-c-20260816-0700,1,0,ok,below,small,2,1 1,0 0,ok ok
+dda20fe864ae,hpwren-bh-w-mobo-c-20260924-0800,1,0,ok,below,medium,2,1 1,0 0,ok ok
+de9238c05394,hpwren-chino-s-mobo-c-20260727-0630,,0,ok,,,3,? ? 1,0 0 0,ok ok ok
+dee04825c400,hpwren-tp-n-mobo-c-20260901-0700,0,0,ok,,,2,0 0,0 0,ok ok
+df02569de263,hpwren-sedgwick-w-mobo-c-20261012-0830,,0,ok,,,3,? ? ?,0 0 0,ok ok ok
+df24064a79fa,hpwren-dwpgm-s-mobo-c-20260802-0700,1,0,ok,patches,small,2,1 1,0 0,ok ok
+e05a13df8c27,hpwren-sm-s-mobo-c-20260823-0730,0,0,ok,,,3,0 ? 0,0 0 0,ok ok ok
+e07bb74a9b7c,hpwren-marconi-s-mobo-c-20261011-0800,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+e0aac7cfc93c,hpwren-chino-w-mobo-c-20261014-0800,0,0,ok,,,2,0 0,0 0,ok ok
+e1b6cb6b9ad1,hpwren-hp-s-mobo-c-20260827-0730,0,0,ok,,,2,0 0,0 0,ok ok
+e1dc4a846150,hpwren-sdsc-e-mobo-c-20260729-0700,0,0,ok,,,2,0 0,0 0,ok ok
+e21d68bdd49d,hpwren-stgo-n-mobo-c-20260731-0730,1,0,ok,patches,small,2,1 1,0 0,ok ok
+e2dcbf2d34fd,hpwren-smarpk-n-mobo-c-20260923-0800,1,0,ok,below,medium,2,1 1,0 0,ok ok
+e2e661fa145e,hpwren-vo-w-mobo-c-20260908-0700,0,0,ok,,,2,0 0,0 0,ok ok
+e33acc1f36f1,hpwren-dwpgm-e-mobo-c-20261001-0730,1,0,glare,below,small,2,1 1,0 0,glare glare
+e34f5e29c8b9,hpwren-wc-w-mobo-c-20260829-0730,0,0,ok,,,3,0 ? 0,0 0 0,ok ok ok
+e3d2c4079ffe,hpwren-sclm-e-mobo-c-20260905-0730,0,0,glare,,,3,? 0 0,0 0 0,glare glare glare
+e516efcc10b9,hpwren-marion-w-mobo-c-20260913-0700,1,0,ok,below,small,2,1 1,0 0,ok ok
+e599b4c0f96b,hpwren-hp-s-mobo-c-20260920-0730,1,0,ok,below,small,3,1 ? 1,0 0 0,ok ok ok
+e59f4303e40a,hpwren-mpo-w-mobo-c-20260925-0730,,0,ok,,,3,? ? 1,0 0 0,ok ok ok
+e5bf4e269fdd,hpwren-chino-s-mobo-c-20261004-0730,0,0,ok,,,2,0 0,0 0,ok ok
+e6b0ea9cb3e4,hpwren-syp-e-mobo-c-20261018-0830,,0,glare,,,3,? ? ?,0 0 0,glare glare glare
+e6c2189b9c55,hpwren-bi-n-mobo-c-20260915-0700,0,0,ok,,,2,0 0,0 0,ok ok
+e6c41922ba23,hpwren-stgo-e-mobo-c-20260913-0800,1,0,ok,below,medium,2,1 1,0 0,ok ok
+e7203c5aa3ce,hpwren-wilson-e-mobo-c-20260914-0730,1,0,glare,below,small,2,1 1,0 0,glare glare
+e72e9010a4e6,hpwren-rdd-w-mobo-c-20260912-0730,,0,ok,,,3,? ? ?,0 0 0,ok ok ok
+e73de6d4cbae,hpwren-hp-s-mobo-c-20260909-0730,0,0,ok,,,2,0 0,0 0,ok ok
+e85b3a74d0bc,hpwren-dwpgm-e-mobo-c-20260804-0700,1,0,ok,below,medium,3,1 1 1,0 0 0,ok glare ok
+ea5174e8eae5,hpwren-starr-e-mobo-c-20260727-0700,1,0,ok,below,small,3,1 1 1,0 0 0,ok glare ok
+ea89a5866c6f,hpwren-tje-1-mobo-c-20261001-0730,,0,ok,,,3,? ? 0,0 0 0,ok ok ok
+eaa3f03578c8,hpwren-bh-s-mobo-c-20261015-0730,0,0,ok,,,2,0 0,0 0,ok ok
+eaab68676070,hpwren-bi-n-mobo-c-20260827-0700,0,0,ok,,,2,0 0,0 0,ok ok
+eb84a50bdb3c,hpwren-ch-n-mobo-c-20260927-0730,0,0,ok,,,2,0 0,0 0,ok ok
+ebab841bd37f,hpwren-stgo-n-mobo-c-20260928-0730,,0,ok,,,3,1 ? ?,0 0 0,ok ok ok
+ebbe078c4199,hpwren-bi-w-mobo-c-20260825-0730,,0,ok,,,3,? ? ?,0 0 0,ok ok ok
+ec90b370e5f6,hpwren-wc-w-mobo-c-20261003-0800,0,0,ok,,,2,0 0,0 0,ok ok
+ee5a2d6bb8dd,hpwren-tdlln-e-mobo-c-20260803-0730,,0,ok,,,3,? 0 ?,0 0 0,ok ok ok
+eee45bf4dd3c,hpwren-rdd-e-mobo-c-20260920-0730,,0,ok,,,3,? 0 ?,0 0 0,ok ok ok
+eeffe23f4abc,hpwren-wlfd-w-mobo-c-20260924-0800,1,0,ok,bank,small,2,1 1,0 0,ok ok
+ef98320df132,hpwren-sm-n-mobo-c-20260920-0800,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+efcb2fe3dc33,hpwren-chino-e-mobo-c-20260829-0700,,0,glare,,,3,0 ? ?,0 0 0,glare glare glare
+f055d61674b3,hpwren-mpo-s-mobo-c-20260909-0730,0,0,ok,,,2,0 0,0 0,ok ok
+f0fd9e3d26e6,hpwren-ch-n-mobo-c-20261014-0800,0,0,ok,,,2,0 0,0 0,ok ok
+f3221e601dc3,hpwren-chino-s-mobo-c-20260925-0800,1,0,ok,below,small,2,1 1,0 0,ok ok
+f33928262106,hpwren-rdmrc-w-mobo-c-20260801-0630,,0,ok,,,3,? ? ?,0 0 0,ok ok ok
+f4772fa7db0a,hpwren-hp-w-mobo-c-20260903-0730,,0,ok,,,3,1 ? 0,0 0 0,ok ok ok
+f4c395612333,hpwren-tdlln-n-mobo-c-20261001-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+f5332be72297,hpwren-dwpgm-s-mobo-c-20261005-0800,0,0,ok,,,3,0 ? 0,0 0 0,ok ok ok
+f54e6f7d2440,hpwren-buff-e-mobo-c-20260925-0730,1,0,glare,below,small,2,1 1,0 0,glare glare
+f59afc7cd058,hpwren-smarpk-n-mobo-c-20260808-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+f5b858e86c28,hpwren-cp-w-mobo-c-20260803-0700,1,0,ok,below,small,2,1 1,0 0,ok ok
+f61eda218e5a,hpwren-wilson-e-mobo-c-20260729-0730,1,0,ok,below,small,2,1 1,0 0,ok ok
+f66ec6262305,hpwren-bi-n-mobo-c-20260805-0730,0,0,ok,,,2,0 0,0 0,ok ok
+f698b63bd770,hpwren-sdsc-e-mobo-c-20260822-0730,1,0,ok,enveloping,large,2,1 1,0 0,ok ok
+f773dca4d449,hpwren-bi-s-mobo-c-20260909-0730,0,0,ok,,,2,0 0,0 0,ok ok
+f84d1e422cb4,hpwren-bi-w-mobo-c-20260923-0800,1,0,ok,below,small,3,? 1 1,0 0 0,ok ok ok
+f85bc0be3fdb,hpwren-rm-s-mobo-c-20261005-0800,0,0,ok,,,2,0 0,0 0,ok ok
+f89264fd80ec,hpwren-bi-w-mobo-c-20260808-0700,0,0,ok,,,2,0 0,0 0,ok ok
+f8b65bb8d63a,hpwren-bl-e-mobo-c-20260823-0730,,,obstructed,,,3,? ? ?,? ? ?,obstructed obstructed obstructed
+f91de8ca4f32,hpwren-om-n-mobo-c-20260830-0730,1,0,ok,below,medium,2,1 1,0 0,ok ok
+f92516632cad,hpwren-marion-w-mobo-c-20260922-0800,1,0,ok,below,small,2,1 1,0 0,ok ok
+f9454c24b85f,hpwren-blkrc-e-mobo-c-20261009-0730,0,0,ok,,,3,0 0 0,0 0 0,glare ok ok
+f9e35fdb1424,hpwren-69bravo-e-mobo-c-20261005-0800,0,0,glare,,,2,0 0,0 0,glare glare
+fa35bd57cc02,hpwren-pi-w-mobo-c-20261003-0800,0,0,ok,,,2,0 0,0 0,ok ok
+fac6c6d6e46b,hpwren-tdlln-n-mobo-c-20261016-0800,0,0,ok,,,2,0 0,0 0,ok ok
+fb12cc4443cf,hpwren-sedgwick-s-mobo-c-20260909-0730,0,0,ok,,,2,0 0,0 0,ok ok
+fc8c8e252d14,hpwren-starr-w-mobo-c-20260929-0800,0,0,ok,,,2,0 0,0 0,ok ok
+fcdd80123912,hpwren-sm-n-mobo-c-20260804-0700,1,0,ok,below,large,2,1 1,0 0,ok ok
+fd526de1556a,hpwren-marconi-w-mobo-c-20261004-0800,0,0,ok,,,2,0 0,0 0,ok ok
+fd57ef3a2249,hpwren-stgo-e-mobo-c-20260830-0700,0,0,glare,,,2,0 0,0 0,glare glare
+fdbe4bdc8ff4,hpwren-mg-s-mobo-c-20260926-0800,0,0,ok,,,2,0 0,0 0,ok ok
+ff640cb4aafd,hpwren-sm-n-mobo-c-20260818-0700,,0,ok,,,3,0 1 ?,0 0 0,ok ok ok
+ff75b232994b,hpwren-wlfd-w-mobo-c-20260925-0800,1,0,ok,below,small,2,1 1,0 0,ok ok
+ffc44b56b267,hpwren-vo-w-mobo-c-20260822-0700,,0,ok,,,3,? ? 0,0 0 0,ok ok ok
+ffc6c0730ede,hpwren-starr-w-mobo-c-20260727-0700,1,0,ok,below,medium,2,1 1,0 0,ok ok
+ffd837ef46e7,hpwren-rndmsa-e-mobo-c-20260728-0700,1,0,glare,below,small,3,1 1 1,0 0 0,glare ok glare
+fff68bc67a6f,hpwren-rdd-s-mobo-c-20260730-0700,1,0,ok,low_cloud_on_terrain,medium,2,1 1,0 0,ok ok

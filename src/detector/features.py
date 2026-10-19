@@ -18,7 +18,20 @@ Feature groups (names used in the detector config):
   change in similarity from the first to the last frame (7 P + 2 P);
 * motion: the motion expert's pooled 12 x 14 features (time mean and std of
   each feature over its valid steps, src/training/baselines.pooled_features),
-  when a FeatureSet row is available (28).
+  when a FeatureSet row is available (28);
+* fine: from the finer embeddings Fe of a window, shape (2, 24, D): frames 0
+  and 11, a 4 x 6 tile grid without the whole frame (embed_windows.py --grid
+  4x6 --frames 0,11 --no-full), so a tile of a 1024-px frame is about the
+  CLIP input size: per tile the mean prompt similarity in the last frame, its
+  change from the first frame and the size of the embedding change, each as
+  its top 3 over the tiles and its mean; the max over tiles of every prompt's
+  last-frame similarity and change; and the change (max-pooled and |.|
+  averaged) and last-frame embeddings (max-pooled) over the tiles
+  (12 + 2 P + 3 D).
+
+tile_instances gives the same fine tiles one by one ([last, last - first,
+prompt similarities last, their change], (N, 24, 2 D + 2 P)) for the tile
+(multiple-instance) smoke head, which scores a window by its highest tile.
 """
 
 from typing import Dict, Iterable, Optional, Sequence
@@ -76,15 +89,57 @@ def group_features(E: np.ndarray, T: np.ndarray, group: str) -> np.ndarray:
     raise ValueError(f"unknown feature group {group!r}")
 
 
+FINE_TILES = 24                     # 4 x 6
+FINE_TOP = 3
+
+
+def _check_fine(Fe: np.ndarray) -> np.ndarray:
+    Fe = np.asarray(Fe, dtype=np.float32)
+    if Fe.ndim == 3:
+        Fe = Fe[None]
+    if Fe.ndim != 4 or Fe.shape[1] != 2 or Fe.shape[2] != FINE_TILES:
+        raise ValueError(f"fine embeddings must be (N, 2, {FINE_TILES}, D) or (2, {FINE_TILES}, D), got {Fe.shape}")
+    return Fe
+
+
+def fine_features(Fe: np.ndarray, T: np.ndarray) -> np.ndarray:
+    """The "fine" group (see the module docstring) for N windows: (N, 12 + 2 P + 3 D)."""
+    Fe = _check_fine(Fe)
+    S = np.einsum("nftd,pd->nftp", Fe, np.asarray(T, np.float32)) * 100.0     # N, 2, 24, P
+    dS = S[:, 1] - S[:, 0]
+    sm, dsm = S[:, 1].mean(-1), dS.mean(-1)                                    # N, 24
+    d = Fe[:, 1] - Fe[:, 0]
+    nrm = np.linalg.norm(d, axis=-1)
+
+    def top(a):
+        return -np.sort(-a, axis=1)[:, :FINE_TOP]
+
+    return np.concatenate([top(sm), top(dsm), top(nrm), sm.mean(1, keepdims=True), dsm.mean(1, keepdims=True),
+                           nrm.mean(1, keepdims=True), S[:, 1].max(1), dS.max(1),
+                           d.max(1), np.abs(d).mean(1), Fe[:, 1].max(1)], 1)
+
+
+def tile_instances(Fe: np.ndarray, T: np.ndarray) -> np.ndarray:
+    """The fine tiles as instances of the tile smoke head: (N, 24, 2 D + 2 P)."""
+    Fe = _check_fine(Fe)
+    S = np.einsum("nftd,pd->nftp", Fe, np.asarray(T, np.float32)) * 100.0
+    return np.concatenate([Fe[:, 1], Fe[:, 1] - Fe[:, 0], S[:, 1], S[:, 1] - S[:, 0]], -1).astype(np.float32)
+
+
 def window_features(E: np.ndarray, T: np.ndarray, groups: Sequence[str],
-                    motion: Optional[np.ndarray] = None) -> np.ndarray:
-    """Concatenated feature groups for N windows; "motion" takes the given (N, 28) pooled motion features."""
+                    motion: Optional[np.ndarray] = None, fine: Optional[np.ndarray] = None) -> np.ndarray:
+    """Concatenated feature groups for N windows; "motion" takes the given (N, 28) pooled motion features,
+    "fine" the (N, 2, 24, D) fine embeddings."""
     parts = []
     for g in groups:
         if g == "motion":
             if motion is None:
                 raise ValueError("feature group 'motion' needs the pooled motion features")
             parts.append(np.asarray(motion, np.float32))
+        elif g == "fine":
+            if fine is None:
+                raise ValueError("feature group 'fine' needs the fine (4 x 6 tile) embeddings")
+            parts.append(fine_features(fine, T))
         else:
             parts.append(group_features(E, T, g))
     return np.concatenate(parts, 1).astype(np.float32)

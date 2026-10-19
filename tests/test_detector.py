@@ -140,3 +140,58 @@ def test_embed_crops_grid_and_normalisation():
     np.testing.assert_allclose(fine[0].mean(axis=(1, 2)), black, atol=2e-3)     # banner blanked
     dino = EW.crops(img, 4, 6, False, EW.IMAGENET_MEAN, EW.IMAGENET_STD)
     np.testing.assert_allclose(dino[-1].mean(axis=(1, 2)), (1.0 - EW.IMAGENET_MEAN) / EW.IMAGENET_STD, atol=2e-3)
+
+
+def test_train_detector_tile_head_and_stack(tmp_path, monkeypatch):
+    import importlib
+
+    sys.modules.pop("train_detector", None)
+    TD = importlib.import_module("train_detector")
+    rng = np.random.default_rng(3)
+    monkeypatch.setattr(TD, "text_embeddings", lambda prompts: _unit(rng.normal(0, 1, (len(prompts), D))))
+    monkeypatch.setattr(TD, "GROUP_SETS", {"fog": (("full",),), "smoke": (("full",), ("full", "fine"))})
+    monkeypatch.setattr(TD, "C_GRID", (0.1,))
+    monkeypatch.setattr(TD, "TILE_C_GRID", (0.01, 0.1))
+    splits = ["train", "train", "val_select", "val_calib", "test_iid"]
+    specs = []
+    for name, smoke_rule, fog_rule in (("fig", lambda k: k % 2, lambda k: None), ("hpf", lambda k: 0, lambda k: k % 2)):
+        rows, ids, embs, fines = [], [], [], []
+        for c in range(10):
+            for k in range(8):
+                s, f = smoke_rule(k), fog_rule(k)
+                wid = f"{name}-{c}-{k}"
+                rows.append({"video_path": "x", "camera_id": f"{name}{c}-s-mobo-c", "video_id": wid, "window_id": wid,
+                             "split": splits[c % 5], "smoke": str(s), "fog": "" if f is None else str(f)})
+                ids.append(wid)
+                embs.append(_windows(rng, 1, [0], [f or 0])[0])     # the coarse crops see no smoke
+                fe = rng.normal(0, 1, (2, 24, D))
+                if s == 1:
+                    t0 = (c * 7 + k) % 18
+                    fe[1, t0:t0 + 6, 0] += 6.0                   # a plume over 6 fine tiles, last frame
+                fines.append(_unit(fe).astype(np.float32))
+        man = tmp_path / f"{name}.csv"
+        with open(man, "w", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=list(rows[0]))
+            w.writeheader()
+            w.writerows(rows)
+        np.savez(tmp_path / f"{name}.npz", window_id=np.array(ids), emb=np.stack(embs))
+        np.savez(tmp_path / f"{name}_fine.npz", window_id=np.array(ids), emb=np.stack(fines))
+        specs += ["--set", f"{name}:{man}:{tmp_path / f'{name}.npz'}::{tmp_path / f'{name}_fine.npz'}"]
+    out, rep = tmp_path / "det", tmp_path / "rep.json"
+    assert TD.main(specs + ["--out", str(out), "--report", str(rep), "--final", "--n-boot", "10"]) == 0
+    doc = json.loads(rep.read_text())
+    sel = doc["selection"]["smoke"]
+    assert sel["tile"]["cv_auroc"] > 0.9 and sel["stacked"]["cv_auroc"] > 0.9
+    assert doc["test"]["smoke_auroc"] > 0.9
+    assert doc["dev_cv"]["smoke_auroc_within_sets"] == pytest.approx(doc["dev_cv"]["per_set"]["fig"]["smoke_auroc"])
+    det = Detector.load(out)
+    assert set(det.tile_heads) == {"smoke"} and len(det.stacks["smoke"]["coef"]) == 2
+    E = np.stack([_windows(rng, 1, [0], [0])[0]] * 2)
+    fe = _unit(rng.normal(0, 1, (2, 2, 24, D))).astype(np.float32)
+    with pytest.raises(ValueError):
+        det.proba(E)                                         # the tile head needs the fine embeddings
+    fe[1, 1, 5:11, 0] += 6.0
+    fe[1] = _unit(fe[1])
+    p = det.proba(E, fine=fe)["smoke"]
+    assert p[1] > p[0]
+    assert "tile head" in rep.with_suffix(".md").read_text()
