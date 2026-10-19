@@ -2,7 +2,7 @@
 
     python scripts/summarize_results.py --evaluation reports/evaluation.json \\
         [--oracle reports/oracle_diagnostic.json] [--benchmark reports/benchmark_cpu.json] \\
-        --out reports/results.md
+        [--qa reports/qa_train.json] --out reports/results.md
 
 Every number is copied from the inputs; nothing is recomputed. The report
 keeps the synthetic-only disclaimer and the real-world status at the top.
@@ -84,10 +84,29 @@ def main(argv=None):
                 L += ["", "Generation: " + ", ".join(f"{k.replace('_', ' ')} {v}" for k, v in keep.items()) + "."]
         L.append("")
 
+    if args.qa and Path(args.qa).exists():
+        qa = json.loads(Path(args.qa).read_text())
+        L += [f"## Data QA (qa_dataset.py, {qa.get('split')} split, {qa.get('n')} sequences)", "",
+              "| category | n | mask valid steps | flow valid steps |", "|---|---|---|---|"]
+        for c, r in (qa.get("per_category") or {}).items():
+            L.append(f"| {c} | {r['n']} | {pct(r['mask_valid_rate'])} | {pct(r['flow_valid_rate'])} |")
+        fc = qa.get("flow_consistency") or {}
+        if fc:
+            L += ["", f"Optical flow vs CFD velocity ({fc.get('n')} sequences): " + "; ".join(
+                f"{d} correlation {f3((fc.get(d) or {}).get('correlation'))}, sign agreement where the CFD moves "
+                f"{pct((fc.get(d) or {}).get('sign_agreement_where_cfd_moves'))}" for d in ("horizontal", "vertical")) + "."]
+        flags = qa.get("flags") or []
+        L += ["", f"Validity flags / parameters with folded univariate AUROC above "
+                  f"{(qa.get('parameter_audit') or {}).get('threshold')}:" + (" none." if not flags else "")]
+        L += [f"* {f}" for f in flags]
+        L.append("")
+
     L += ["## Headline: experiment C (CFD-pretrained GRU) against baselines", "",
           "AUROC is threshold-free; F1, false smoke on fog_only and abstention use the operating point "
-          "(thresholds, temperature and abstention margins fitted on val_calib only). ECE after temperature "
-          "scaling. Exported model = the seed with the best val_select loss.", "",
+          "(thresholds fitted on val_calib only). Temperature scaling and abstention apply to C only (its "
+          "temperatures and abstention margins are also fitted on val_calib), so only C's ECE is after "
+          "temperature scaling; A and the pooled logistic baseline report raw sigmoid probabilities and never "
+          "abstain. Exported model = the seed with the best val_select loss.", "",
           "| model | split | operating point | smoke AUROC | fog AUROC | smoke F1 | fog F1 | "
           "false smoke on fog_only | ECE smoke / fog | abstain (any) |",
           "|---|---|---|---|---|---|---|---|---|---|"]
@@ -96,6 +115,14 @@ def main(argv=None):
     L += headline_rows("pooled logistic (14 x mean/std)", ((abl.get("extra_baselines") or {})
                                                             .get("pooled_logistic") or {}).get("test"))
     L.append("")
+    temps, cal = syn.get("temperatures") or {}, syn.get("calibration") or {}
+    notes = ["C temperatures: " + ", ".join(f"{k} T = {f3(v)}" for k, v in temps.items()) + "."] if temps else []
+    for key, what in (("temperature_fallback", "fell back to T = 1"), ("temperature_clipped", "clipped to a bound")):
+        hit = {k: v for k, v in (cal.get(key) or {}).items() if v is not None}  # key absent in older runs
+        if hit:
+            notes.append(f"Temperature {what}: " + ", ".join(f"{k} ({v})" for k, v in hit.items()) + ".")
+    if notes:
+        L += [" ".join(notes), ""]
 
     msd = (abl.get("C") or {}).get("mean_sd_over_seeds") or {}
     if msd:

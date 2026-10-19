@@ -28,6 +28,18 @@ span two splits.
 Real footage (Stage B) is not included. `scripts/extract_features.py --real-manifest`
 turns a CSV of labelled videos into a `FeatureSet` with camera ids as groups.
 
-`backgrounds/` (optional): real landscape images for rendering, with a
-`manifest.csv` (`filename,camera_id`). Images from cameras used for real
-validation or testing must not be placed here.
+`backgrounds/` (optional): real landscape images for rendering, listed in
+`backgrounds/manifest.json`:
+
+```json
+{"images": [{"file": "ridge_01.jpg", "camera_id": "cam07"},
+            {"file": "valley_02.jpg", "camera_id": "cam12"}]}
+```
+
+`file` is relative to the directory; entries whose file is missing are
+ignored. A real image replaces the procedural background with probability
+`1 - render.background.procedural_prob`; `render.background.dir` points
+elsewhere (default `data/backgrounds`), and `render.background.exclude_cameras`
+(list of camera ids) drops images from those cameras. Images from cameras used
+for real validation or testing must not be placed here; `exclude_cameras` is an
+extra guard, not a substitute.

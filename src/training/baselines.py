@@ -238,6 +238,9 @@ def univariate_aucs(fs: FeatureSet, split: str = "train", top: Optional[int] = N
     F = pooled_features(sub.X)
     names = pooled_feature_names()
     out: Dict[str, Any] = {"split": split, "n": len(sub), "per_label": {}}
+    if len(sub) == 0:
+        out["status"] = "skipped"
+        return out
     for j, label in enumerate(LABEL_NAMES):
         res = {}
         for k, name in enumerate(names):
@@ -272,11 +275,20 @@ def _evaluate(baseline: _PooledBaseline, fs: FeatureSet, splits: Sequence[str], 
 
 def run_baselines(fs: FeatureSet, cfg: Mapping[str, Any], splits: Sequence[str] = ("test_iid", "test_ood"),
                   n_boot: int = 0, seed: int = 0) -> Dict[str, Any]:
-    """Fit A (heuristic) and the pooled logistic regression on train, thresholds on val_calib, evaluate."""
+    """Fit A (heuristic) and the pooled logistic regression on train, thresholds on val_calib, evaluate.
+
+    Without train or val_calib sequences (e.g. a test-only re-extraction) nothing can be fitted and
+    every baseline is {"status": "skipped", "reason": ...}.
+    """
     train, calib = fs.split("train"), fs.split("val_calib")
+    missing = [name for name, part in (("train", train), ("val_calib", calib)) if len(part) == 0]
     n_bins = int(cfg.get("evaluation", {}).get("calibration_bins", 10))
     out: Dict[str, Any] = {}
     for cls in (HeuristicBaseline, PooledLogisticBaseline):
+        if missing:
+            out[cls.name] = {"status": "skipped",
+                             "reason": f"the FeatureSet has no {' / '.join(missing)} sequences to fit on"}
+            continue
         b = cls().fit(train).calibrate(calib, cfg)
         out[cls.name] = {"description": (cls.__doc__ or "").strip(), **b.describe(),
                          "results": _evaluate(b, fs, splits, n_boot, seed, n_bins)}

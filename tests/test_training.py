@@ -19,7 +19,7 @@ from src.training.baselines import HeuristicBaseline, flags_only_probe, pooled_f
 from src.training.evaluate import run_evaluation
 from src.training.train import fit_calibration, model_logits, run_finetune, run_pretraining, train_model
 from src.utils.config import load_training_config
-from src.utils.io import read_json, read_yaml
+from src.utils.io import read_json, read_yaml, write_json
 from src.utils.runtime import seed_everything
 
 SIMS = {"train": 40, "val_select": 10, "val_calib": 20, "test_iid": 12, "test_ood": 6}
@@ -284,6 +284,43 @@ def test_baselines_and_shortcut_probes(fs):
     assert next(iter(uni["per_label"]["fog"])) in ("region_area_mean", "flow_v_mean_mean")
 
 
+def test_baselines_and_audit_skip_without_train_or_val_calib(tmp_path, fs):
+    from src.training.baselines import run_baselines
+    from src.training.evaluate import shortcut_audit
+
+    test_only = fs.split(["test_iid", "test_ood"])         # e.g. a test-only detector-mask re-extraction
+    cfg = _cfg()
+    base = run_baselines(test_only, cfg)
+    assert set(base) == {"A_heuristic", "pooled_logistic"}
+    assert all(b["status"] == "skipped" and "train" in b["reason"] for b in base.values())
+    no_calib = fs.split(["train", "test_iid"])
+    assert all(b["status"] == "skipped" and "val_calib" in b["reason"] for b in run_baselines(no_calib, cfg).values())
+    audit = shortcut_audit(test_only, cfg)
+    assert audit["flags_only"]["status"] == "skipped" and not audit["flags_only"]["flag"]
+    assert audit["univariate_feature_aucs"]["status"] == "skipped"
+    write_json(tmp_path / "baselines.json", {"baselines": base, "shortcut_audit": audit})   # finite JSON only
+
+
+def test_preprocessing_record_takes_timing_from_the_extraction_meta(fs):
+    from src.training.train import _preprocessing_record
+
+    cfg = _cfg()
+    tr = fs.split("train")
+    rec = _preprocessing_record(tr, cfg)                   # no timing recorded: defaults
+    assert rec["feature_config"] == {"expected_interval_s": 5.0, "flow_lag_s": 1.0}
+    assert rec["feature_timing_source"] == {"expected_interval_s": "default", "flow_lag_s": "default"}
+    timed = copy.deepcopy(tr)
+    for m in timed.meta:
+        m["feature_meta"] = {"flow_mode": "lag", "timing": {"expected_interval_s": 4.0, "expected_flow_lag_s": 0.5}}
+    rec = _preprocessing_record(timed, cfg)
+    assert rec["feature_config"] == {"expected_interval_s": 4.0, "flow_lag_s": 0.5}
+    assert set(rec["feature_timing_source"].values()) == {"train_feature_meta"}
+    assert rec["training_flow_modes"] == {"lag": len(timed)}
+    timed.meta[0]["feature_meta"]["timing"]["expected_flow_lag_s"] = 1.0
+    with pytest.raises(ValueError, match="flow_lag_s"):
+        _preprocessing_record(timed, cfg)
+
+
 # ============================================================================= data
 def test_leakage_check(fs):
     assert_no_group_leakage(fs)
@@ -404,6 +441,13 @@ def test_evaluation_json_schema(tmp_path, fs):
     assert on_disk["real"]["status"] == "pending"
     assert all((tmp_path / "reports" / f).exists() for f in ("confusion_test_iid.png", "reliability_test_ood.png",
                                                              "roc_pr_test_iid.png"))
+    # a test-only FeatureSet (e.g. a detector-mask re-extraction): baselines skipped, finite JSON still written
+    doc = run_evaluation(fs.split(["test_iid", "test_ood"]), cfg, tmp_path / "art", tmp_path / "reports_t",
+                         n_boot=10, out_path=tmp_path / "eval_test_only.json", log=None)
+    ab = read_json(tmp_path / "eval_test_only.json")["ablations"]
+    assert ab["A"]["status"] == "skipped" and ab["extra_baselines"]["pooled_logistic"]["status"] == "skipped"
+    assert doc["shortcut_audit"]["flags_only"]["status"] == "skipped"
+    assert doc["synthetic"]["test"]["test_iid"]["balanced"]["overall"]["n"] == 2 * 4 * SIMS["test_iid"]
 
 
 def test_loro_and_synthetic_proxy(tmp_path, fs):

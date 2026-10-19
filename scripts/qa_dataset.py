@@ -42,10 +42,10 @@ def flow_consistency(base, fs, sel, tm, n_max=200):
     from src.cfd.results import SimulationResult
     from src.data.feature_spec import FEATURE_INDEX
 
-    idx = np.flatnonzero(sel)[:n_max]
     u_cfd, w_cfd, u_flow, w_flow = [], [], [], []
     cache = {}
-    for i in idx:
+    # i indexes the full set (fs.meta), k the selected subset (tm = time_means(fs.X[sel]))
+    for k, i in enumerate(np.flatnonzero(sel)[:n_max]):
         meta = fs.meta[i]
         path = base / meta["sim_path"]
         if path not in cache:
@@ -60,7 +60,7 @@ def flow_consistency(base, fs, sel, tm, n_max=200):
                                float((sim.uz * weight).sum() / weight.sum()))
         if cache[path] is None:
             continue
-        fu, fw = tm[i, FEATURE_INDEX["flow_u_mean"]], tm[i, FEATURE_INDEX["flow_v_mean"]]
+        fu, fw = tm[k, FEATURE_INDEX["flow_u_mean"]], tm[k, FEATURE_INDEX["flow_v_mean"]]
         if not (np.isfinite(fu) and np.isfinite(fw)):
             continue
         u_cfd.append(cache[path][0]); w_cfd.append(cache[path][1]); u_flow.append(fu); w_flow.append(fw)

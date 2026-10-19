@@ -316,20 +316,40 @@ def _counts(fs: FeatureSet) -> Dict[str, Any]:
 
 
 def _preprocessing_record(fs: FeatureSet, cfg: Mapping[str, Any]) -> Dict[str, Any]:
-    """What inference must reproduce: extraction timing and the flow mode the model saw."""
+    """What inference must reproduce: extraction timing and the flow mode the model saw.
+
+    The timing (expected_interval_s, flow_lag_s) is what the extractor recorded per row
+    (feature_meta.timing, or a stored feature_config); cfg["features"] and the defaults are
+    used only when no row records it. Rows extracted with different timings are refused.
+    """
     flow_modes: Dict[str, int] = {}
     roi_scales = []
+    timing: Dict[str, set] = {"expected_interval_s": set(), "flow_lag_s": set()}
     for m in fs.meta:
-        mode = (m.get("feature_meta") or {}).get("flow_mode")
+        fmeta = m.get("feature_meta") or {}
+        mode = fmeta.get("flow_mode")
         if mode:
             flow_modes[mode] = flow_modes.get(mode, 0) + 1
         if "roi_scale" in m:
             roi_scales.append(float(m["roi_scale"]))
+        rec, stored = fmeta.get("timing") or {}, m.get("feature_config") or {}
+        for key, rec_key in (("expected_interval_s", "expected_interval_s"), ("flow_lag_s", "expected_flow_lag_s")):
+            v = rec.get(rec_key, stored.get(key))
+            if v is not None:
+                timing[key].add(float(v))
     fcfg = dict(cfg.get("features", {}) or {})
+    timing_source = {}
+    for key, values in timing.items():
+        if len(values) > 1:
+            raise ValueError(f"the train rows were extracted with different {key}: {sorted(values)}")
+        timing_source[key] = "train_feature_meta" if values else ("config" if key in fcfg else "default")
+        if values:
+            fcfg[key] = values.pop()
     fcfg.setdefault("expected_interval_s", 5.0)
     fcfg.setdefault("flow_lag_s", 1.0)
     return {
         "feature_config": fcfg,
+        "feature_timing_source": timing_source,
         "training_flow_modes": flow_modes,
         "training_roi_scale_range": [min(roi_scales), max(roi_scales)] if roi_scales else None,
         "training_data_source": fs.source,

@@ -548,6 +548,14 @@ def run_synthetic_proxy(fs_shifted: FeatureSet, cfg: Mapping[str, Any], init_art
     return res
 
 
+def _baseline_doc(res: Mapping[str, Any]) -> Dict[str, Any]:
+    """A run_baselines record with compact test metrics; a skipped record ({"status", "reason"}) as is."""
+    doc = dict(res)
+    if "results" in doc:
+        doc["test"] = {s: {op: compact(r) for op, r in v.items()} for s, v in doc.pop("results").items()}
+    return doc
+
+
 def run_evaluation(fs: FeatureSet, cfg: Mapping[str, Any], artifact_dir: PathLike, reports_dir: PathLike,
                    robustness_fs: Optional[FeatureSet] = None, loro: Optional[Mapping[str, Any]] = None,
                    data_summary: Optional[Mapping[str, Any]] = None, real: Optional[Mapping[str, Any]] = None,
@@ -607,10 +615,7 @@ def run_evaluation(fs: FeatureSet, cfg: Mapping[str, Any], artifact_dir: PathLik
         "test": {s: {op: compact(r["overall"]) for op, r in v.items()} for s, v in test.items()},
         "mean_sd_over_seeds": seeds["mean_sd"],
     }
-    ablation_a = dict(base["A_heuristic"])
-    ablation_a["test"] = {s: {op: compact(r) for op, r in v.items()} for s, v in ablation_a.pop("results").items()}
-    extra = dict(base["pooled_logistic"])
-    extra["test"] = {s: {op: compact(r) for op, r in v.items()} for s, v in extra.pop("results").items()}
+    ablation_a, extra = _baseline_doc(base["A_heuristic"]), _baseline_doc(base["pooled_logistic"])
     say("shortcut audit")
     audit = shortcut_audit(fs, cfg)
     rob = None

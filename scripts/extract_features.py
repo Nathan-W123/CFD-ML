@@ -9,12 +9,17 @@ Real footage (Stage B; the same extractor as for synthetic data):
 
 real.csv columns: video_path, camera_id, video_id, smoke (0/1), fog (0/1),
 optional: split (train/val_select/val_calib/test_iid), start_s, stride_s
-(window spacing, default 60), max_windows, mask_dir (one PNG per decoded
-frame named frame_<index>.png, non-zero = candidate region; without it the
-image-only fallback detector is used and recorded as mask_source).
+(window spacing, default 60), max_windows, mask_dir (one PNG per frame named
+frame_<index>.png with a 6-digit zero-padded index, e.g. frame_000123.png,
+where index is the frame's position on the clip's time line: the decoded frame
+number of a video, the time-sorted image position of a folder; same size as the
+frames, non-zero = candidate region; without it the image-only fallback
+detector is used and recorded as mask_source).
 Groups are camera ids, so one camera (and every video and window from it)
 never spans two splits. Videos whose frame timing cannot provide 1 s
-optical-flow pairs (e.g. one-minute HPWREN imagery) are skipped and listed.
+optical-flow pairs (e.g. one-minute HPWREN imagery) are skipped and listed in
+<out>.skipped.json, as are single windows that fail (undecodable frames,
+missing or mis-sized masks), with their window index.
 """
 
 import _bootstrap  # noqa: F401
@@ -31,12 +36,14 @@ import numpy as np
 
 from src.data.dataset import FeatureSet, load_sequence
 from src.data.features import (
-    FeatureConfig, IncompatibleFrameTiming, extract_features_with_meta, load_frames, select_window,
+    FeatureConfig, IncompatibleFrameTiming, _container_timestamps_usable, extract_features_with_meta,
+    load_frames, select_window,
 )
 from src.data.masks import detect_candidate_masks
 from src.utils.io import write_json
 
 REAL_SPLIT_FRACTIONS = (("train", 0.6), ("val_select", 0.1), ("val_calib", 0.1), ("test_iid", 0.2))
+FRAME_TIME_TOL_S = 1e-3   # decoded frame times vs the selected window (same time base: ~exact)
 
 
 def parse_args(argv=None):
@@ -91,16 +98,41 @@ def camera_split(camera_id: str) -> str:
 
 
 def video_timestamps(path: Path) -> np.ndarray:
+    """Per-frame times (s) on load_frames' time base: container times when its probe accepts
+    them (they must then keep increasing, else IncompatibleFrameTiming), else frame index / fps."""
+    use_container = _container_timestamps_usable(path)
     cap = cv2.VideoCapture(str(path))
+    if not cap.isOpened():
+        raise ValueError(f"cannot open video {path}")
+    fps = float(cap.get(cv2.CAP_PROP_FPS) or 0.0)
     ts = []
-    while cap.grab():
-        ts.append(cap.get(cv2.CAP_PROP_POS_MSEC) / 1000.0)
-    cap.release()
-    ts = np.asarray(ts)
-    if len(ts) > 1 and not np.all(np.diff(ts) > 0):
-        fps = cv2.VideoCapture(str(path)).get(cv2.CAP_PROP_FPS) or 1.0
-        ts = np.arange(len(ts)) / fps
-    return ts
+    try:
+        if not use_container and fps <= 0:
+            raise IncompatibleFrameTiming(f"{path}: no container timestamps and no frame rate")
+        while cap.grab():
+            t = cap.get(cv2.CAP_PROP_POS_MSEC) / 1000.0 if use_container else len(ts) / fps
+            if ts and not t > ts[-1]:
+                raise IncompatibleFrameTiming(f"{path}: frame times stop increasing at frame {len(ts)}")
+            ts.append(t)
+    finally:
+        cap.release()
+    if not ts:
+        raise ValueError(f"no frames decoded from {path}")
+    return np.asarray(ts, dtype=np.float64)
+
+
+def load_masks(mask_dir: Path, frame_idx, shape) -> np.ndarray:
+    """Boolean candidate masks from mask_dir/frame_<index:06d>.png for the given frame indices."""
+    masks = []
+    for i in frame_idx:
+        f = mask_dir / f"frame_{int(i):06d}.png"
+        m = cv2.imread(str(f), cv2.IMREAD_GRAYSCALE)
+        if m is None:
+            raise ValueError(f"missing or unreadable mask {f}")
+        if m.shape != tuple(shape):
+            raise ValueError(f"mask {f} has shape {m.shape}, frames have {tuple(shape)}")
+        masks.append(m > 0)
+    return np.stack(masks)
 
 
 def real(args):
@@ -115,6 +147,9 @@ def real(args):
         except Exception as exc:  # unreadable video / folder without timestamps
             skipped.append({"video": str(path), "reason": str(exc)})
             continue
+        # Selection and decoding share one time base: a video's times are handed to
+        # load_frames as `timestamps`; a folder's are re-derived by the same loader.
+        decode_ts = ts if path.is_file() else None
         start = float(row.get("start_s") or (ts[0] + args.flow_lag_s))
         stride = float(row.get("stride_s") or 60.0)
         max_w = int(row.get("max_windows") or 1000)
@@ -127,18 +162,26 @@ def real(args):
                 if k == 0:
                     skipped.append({"video": str(path), "reason": str(exc)})
                 break
-            want = np.concatenate([win["obs_times"], win["lag_times"]])
-            frames, _ = load_frames(path, times=want)
-            obs, lag = frames[:12], frames[12:]
-            if row.get("mask_dir"):
-                mdir = Path(row["mask_dir"])
-                masks = np.stack([cv2.imread(str(mdir / f"frame_{int(i):06d}.png"), cv2.IMREAD_GRAYSCALE) > 0
-                                  for i in win["obs_idx"]])
-                msrc = "provided"
-            else:
-                masks = detect_candidate_masks(obs, win["obs_times"])
-                msrc = "fallback_detector"
-            x, meta = extract_features_with_meta(obs, win["obs_times"], masks, lag, win["lag_times"], fcfg)
+            try:
+                want = np.concatenate([win["obs_times"], win["lag_times"]])
+                frames, got = load_frames(path, times=want, timestamps=decode_ts)
+                err = float(np.max(np.abs(got - want)))
+                if err > FRAME_TIME_TOL_S:
+                    raise IncompatibleFrameTiming(f"decoded frame times differ from the selected window "
+                                                  f"by up to {err:.3g} s")
+                obs, lag = frames[:12], frames[12:]
+                obs_t, lag_t = got[:12], got[12:]
+                if row.get("mask_dir"):
+                    masks = load_masks(Path(row["mask_dir"]), win["obs_idx"], obs.shape[1:])
+                    msrc = "provided"
+                else:
+                    masks = detect_candidate_masks(obs, obs_t)
+                    msrc = "fallback_detector"
+                x, meta = extract_features_with_meta(obs, obs_t, masks, lag, lag_t, fcfg)
+            except (IncompatibleFrameTiming, ValueError, OSError, cv2.error) as exc:
+                skipped.append({"video": str(path), "window": k, "reason": str(exc)})
+                k += 1
+                continue
             vid = row.get("video_id") or path.stem
             cam = row["camera_id"]
             feats.append(x)
@@ -149,7 +192,7 @@ def real(args):
             splits.append(row.get("split") or camera_split(cam))
             sources.append(msrc)
             metas.append({"video_path": str(path), "camera_id": cam, "window": k,
-                          "native_dt": float(win["native_dt"]), "obs_times": win["obs_times"].tolist(),
+                          "native_dt": float(win["native_dt"]), "obs_times": obs_t.tolist(),
                           "feature_meta": {kk: meta[kk] for kk in ("roi", "flow_mode") if kk in meta}})
             k += 1
     if not feats:
@@ -164,7 +207,8 @@ def real(args):
                     tags=np.array([""] * len(y)), mask_sources=np.array(sources), meta=metas, source="real")
     fs.save(args.out)
     write_json(Path(args.out).with_suffix(".skipped.json"), skipped)
-    print(json.dumps({"windows": len(feats), "videos_skipped": len(skipped),
+    print(json.dumps({"windows": len(feats), "videos_skipped": sum("window" not in s for s in skipped),
+                      "windows_skipped": sum("window" in s for s in skipped),
                       "cameras": len(set(groups)), "splits": {s: splits.count(s) for s in set(splits)}}))
     return 0
 
