@@ -494,7 +494,8 @@ Splits: `train` (fit), `val_select` (early stopping, seed choice),
 * Calibration: per-label temperature on val_calib, bounded to [0.5, 5];
   if val_calib is separable (fit hits a bound), T = 1 and a flag is stored.
 * Thresholds, stored with `fit_source = "synthetic_val_calib"` and the
-  calibration-set prevalence: `balanced` (max F1 per label) and
+  calibration-set prevalence: `balanced` (max Youden's J per label;
+  max F1 degenerated to "always positive" on weak scores) and
   `low_false_alarm` (smoke threshold giving <= 5 % false-smoke rate on
   fog_only val_calib sequences). Full ROC / PR curves are reported.
 * Abstention (`decision = -1`): logit within a margin of the threshold
@@ -520,6 +521,13 @@ Splits: `train` (fit), `val_select` (early stopping, seed choice),
   as `null` with a reason until it exists. A "synthetic transfer proxy"
   (pretrained vs scratch on a small shifted synthetic domain) may be run
   and is stored under `synthetic_proxy` with `not_real_world_evidence: true`.
+
+* Diagnostics (never model inputs): `scripts/qa_dataset.py` (gate
+  validity per category, univariate feature and parameter AUROCs, optical
+  flow vs CFD velocity), `scripts/oracle_diagnostic.py` (the twelve motion
+  features recomputed from the CFD fields, compared with the camera
+  features per feature group to localise information loss), and
+  `scripts/summarize_results.py` (evaluation.json -> reports/results.md).
 
 `evaluation.json` top level: `{"synthetic": {...}, "real": {"status":
 "pending", "reason": ...}, "ablations": {"A": ..., "B": null, "C": ...,
