@@ -357,9 +357,14 @@ def plot_reliability(probs: np.ndarray, y: np.ndarray, path: PathLike, title: st
 
 
 def plot_roc_pr(probs: np.ndarray, y: np.ndarray, path: PathLike, title: str) -> Path:
+    """ROC and PR curves per label; a label without known targets is left out (named in the title)."""
     plt = _plt()
     fig, axes = plt.subplots(1, 2, figsize=(9, 4))
+    no_labels = []
     for j, name in enumerate(LABEL_NAMES):
+        if not M.known_mask(y[:, j]).any():
+            no_labels.append(name)
+            continue
         roc = M.roc_curve(probs[:, j], y[:, j])
         pr = M.pr_curve(probs[:, j], y[:, j])
         auc, ap = M.auroc(probs[:, j], y[:, j]), M.auprc(probs[:, j], y[:, j])
@@ -375,7 +380,10 @@ def plot_roc_pr(probs: np.ndarray, y: np.ndarray, path: PathLike, title: str) ->
         ax.set_xlim(0, 1)
         ax.set_ylim(0, 1.01)
         ax.grid(alpha=0.3)
-        ax.legend(fontsize=8, loc="lower right" if ax is axes[0] else "lower left")
+        if ax.get_legend_handles_labels()[0]:
+            ax.legend(fontsize=8, loc="lower right" if ax is axes[0] else "lower left")
+    if no_labels:
+        title = f"{title}; no known targets: {', '.join(no_labels)}"
     fig.suptitle(title, fontsize=10)
     fig.tight_layout()
     path = Path(path)
@@ -386,9 +394,15 @@ def plot_roc_pr(probs: np.ndarray, y: np.ndarray, path: PathLike, title: str) ->
 
 
 def curves(probs: np.ndarray, y: np.ndarray, max_points: int = 200) -> Dict[str, Any]:
-    """ROC and PR curves per label (thresholds are calibrated probabilities), thinned to <= max_points."""
+    """ROC and PR curves per label (thresholds are calibrated probabilities), thinned to <= max_points.
+
+    A label without known targets gets {"status": "no_labels", "roc": None, "pr": None}, never a curve.
+    """
     out: Dict[str, Any] = {}
     for j, name in enumerate(LABEL_NAMES):
+        if not M.known_mask(y[:, j]).any():
+            out[name] = {"status": "no_labels", "roc": None, "pr": None}
+            continue
         roc, pr = M.roc_curve(probs[:, j], y[:, j]), M.pr_curve(probs[:, j], y[:, j])
 
         def thin(d: Mapping[str, np.ndarray]) -> Dict[str, List[Optional[float]]]:
@@ -547,16 +561,15 @@ def update_real_section(doc: Optional[Mapping[str, Any]], real: Mapping[str, Any
 
     For a Stage B run on its own (scripts/evaluate_physics.py --real without
     --features): the synthetic sections of `doc` are kept as they are; with
-    no existing document they are recorded as not run.
+    no existing document they are recorded as not run. Ablations B / D, their
+    reasons and real_label_status are cleared first, so nothing from an
+    earlier real result survives.
     """
     out = dict(doc) if doc else build_evaluation({"status": "not_run"}, None, None, None)
     out["real"] = dict(real)
     ablations = dict(out.get("ablations") or {})
-    ablations.setdefault("reasons", {})
-    for k in ("B", "D"):
-        ablations.setdefault(k, None)
-        if ablations[k] is None:
-            ablations["reasons"].setdefault(k, BD_REASON)
+    ablations.pop("real_label_status", None)
+    ablations.update({"B": None, "D": None, "reasons": {"B": BD_REASON, "D": BD_REASON}})
     _real_ablations(ablations, real)
     out["ablations"] = ablations
     return out
@@ -671,8 +684,8 @@ def run_evaluation(fs: FeatureSet, cfg: Mapping[str, Any], artifact_dir: PathLik
         "abstain_margins": (expert.config.get("abstain") or {}).get("margins"),
         "calibration": {k: v for k, v in (expert.config.get("calibration") or {}).items()
                         if k in ("fit_source", "n_sequences", "n_groups", "insufficient_calibration_data",
-                                 "insufficient_categories", "temperature_fallback", "temperature_clipped",
-                                 "prevalence")},
+                                 "insufficient_categories", "category_support", "temperature_fallback",
+                                 "temperature_clipped", "prevalence", "untrained_labels")},
         "test": test,
         "curves": test_curves,
         "validation_reference": {s: {op: compact(r["overall"]) for op, r in v.items()} for s, v in val.items()},

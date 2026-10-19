@@ -140,7 +140,7 @@ scenarios:
     haze_drift: {inflow_mg_m3: [0.2, 4.0], layer_depth_m: [40.0, 250.0]}
     dust_burst: {emission_mg_m3_s: [10.0, 120.0], duration_s: [2.0, 12.0], settling_ms: [0.1, 0.6], wind_speed_ms: [1.5, 9.0]}
     # Off in this profile (weight 0); kept so the block is complete.
-    rain_shaft: {wind_speed_ms: [0.0, 9.0], cloud_base_m: [150.0, 260.0], shaft_width_m: [40.0, 120.0], fall_speed_ms: [3.0, 8.0], emission_mg_m3_s: [5.0, 50.0], evaporation_rate_s: [0.0, 0.03], intermittency: [0.0, 0.6], modulation_period_s: [10.0, 40.0], onset_s: [-30.0, 10.0], cloud_drift_factor: [0.4, 1.0]}
+    rain_shaft: {wind_speed_ms: [0.0, 9.0], cloud_base_m: [150.0, 260.0], shaft_width_m: [40.0, 120.0], fall_speed_ms: [3.0, 8.0], shaft_mg_m3: [0.1, 1.5], evaporation_rate_s: [0.0, 0.03], intermittency: [0.0, 0.6], modulation_period_s: [10.0, 40.0], onset_s: [-30.0, 10.0], cloud_drift_factor: [0.4, 1.0]}
 
 # Held-out (test_ood) recipes. train / val_select / val_calib / test_iid never
 # sample them; test_ood alternates between them, in EVERY category (so each
@@ -214,11 +214,13 @@ render:
 robustness:
   nominal: {}
   occlusion_heavy: {occlusion_prob: 1.0, occlusion_area_frac: [0.3, 0.45]}
-  shake_heavy: {camera_shake_px: [4.0, 7.0], camera_rotation_deg: [0.8, 1.5]}
+  # Short shake correlation time: lag pairs 1 s apart get nearly independent shake (harsher).
+  shake_heavy: {camera_shake_px: [4.0, 7.0], camera_rotation_deg: [0.8, 1.5], camera_shake_tau_s: [0.2, 1.0]}
   render_shift: {noise_sigma: [0.05, 0.08], jpeg_quality: [12, 25], jpeg_prob: 1.0, contrast: [0.35, 0.55], global_haze: [0.35, 0.5]}
   zoom_out: {zoom: [0.35, 0.55]}
   detector_masks: {masks: {source_probs: {detector: 1.0}}}
   bbox_masks: {masks: {source_probs: {bbox: 1.0}}}
+  sgs_off: {texture: {sgs_gain: [0.0, 0.0]}}   # no subgrid texture motion (merges into render.texture)
 
 dataset:
   n_per_category: 50                     # pipeline-debug size; 250 for the full run

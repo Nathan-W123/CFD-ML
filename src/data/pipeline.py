@@ -19,8 +19,9 @@ flow with 60 s timing checks, and the FeatureSet records exactly that
 configuration for the exported model to reproduce at inference.
 
 Where this fits: `scripts/generate_dataset.py` (orchestration, CLI) calls
-`process_slot`; `scripts/evaluate_physics.py` calls `render_and_extract` to
-re-render test simulations for the robustness suites.
+`process_slot`, and `render_and_extract` to re-render test_iid simulations
+for the robustness suites (--suites); `scripts/benchmark_cpu.py` times
+`render_and_extract`.
 Calls into: src.cfd.scenarios, src.data.render, src.data.features, runtime seeding.
 Start reading at: process_slot.
 """

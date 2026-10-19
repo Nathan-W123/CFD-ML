@@ -169,7 +169,9 @@ scenarios:
     dust_burst: {emission_mg_m3_s: [10.0, 120.0], duration_s: [30.0, 240.0], settling_ms: [0.1, 0.6], wind_speed_ms: [2.0, 15.0], source_width_m: [50.0, 200.0], vehicle_speed_ms: [5.0, 20.0], flicker_period_s: [10.0, 60.0]}
     # Precipitation curtain from a cloud base 1.2-2.6 km up, drifting with the wind there;
     # drops fall at 3-8 m/s (several minutes to the ground) and may evaporate on the way (virga).
-    rain_shaft: {wind_speed_ms: [0.0, 15.0], cloud_base_m: [1200.0, 2600.0], shaft_width_m: [300.0, 1200.0], fall_speed_ms: [3.0, 8.0], emission_mg_m3_s: [5.0, 50.0], evaporation_rate_s: [0.0, 0.003], intermittency: [0.0, 0.6], modulation_period_s: [120.0, 600.0], onset_s: [-30.0, 10.0], cloud_drift_factor: [0.4, 1.0]}
+    # shaft_mg_m3: in-shaft concentration (tracer equivalent), 0.1-1.5 -> optical depth 0.4-6
+    # over 1 km. onset_s: literal seconds relative to the first frame (-6 to +2 min).
+    rain_shaft: {wind_speed_ms: [0.0, 15.0], cloud_base_m: [1200.0, 2600.0], shaft_width_m: [300.0, 1200.0], fall_speed_ms: [3.0, 8.0], shaft_mg_m3: [0.1, 1.5], evaporation_rate_s: [0.0, 0.003], intermittency: [0.0, 0.6], modulation_period_s: [120.0, 600.0], onset_s: [-360.0, 120.0], cloud_drift_factor: [0.4, 1.0]}
 
 holdout:
   fast_wind: {wind_speed_ms: [12.0, 15.0]}
@@ -241,6 +243,7 @@ robustness:
   zoom_out: {zoom: [0.35, 0.55]}
   detector_masks: {masks: {source_probs: {detector: 1.0}}}
   bbox_masks: {masks: {source_probs: {bbox: 1.0}}}
+  sgs_off: {texture: {sgs_gain: [0.0, 0.0]}}   # no subgrid texture motion (merges into render.texture)
 
 dataset:
   n_per_category: 50

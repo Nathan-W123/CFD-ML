@@ -33,7 +33,14 @@ Statistics (per frame, then the median over the clip's frames; the last two per 
   any scene change, so an upper bound of the camera's own flicker).
 * motion_px: median |phase-correlation shift| between consecutive sampled
   frames, px per frame interval (camera-shake proxy; pans and large moving
-  structures also count).
+  structures also count), over the pairs that register (peak response >=
+  MIN_PHASE_RESPONSE). A pair that does not (scene change, frames with little
+  in common) gives the position of a noise peak, tens of px at random, so it
+  is left out; motion_registered_frac is the fraction of pairs kept. A noise
+  peak can still clear the cutoff now and then, so a clip gets a motion value
+  only when more than half of its pairs register (MIN_REGISTERED_FRAC);
+  otherwise NaN: such clips drop out of the motion comparison and are counted
+  separately.
 
 Real input: a manifest in the scripts/extract_features.py --real-manifest
 format (only video_path is required; camera_id, video_id, smoke, fog and
@@ -42,10 +49,14 @@ read with src.data.features.load_frames on the extractor's time base. At most
 --max-frames (K) frames are sampled per clip, --interval-s apart (default: the
 synthetic observation spacing, time.frame_interval_s), so flicker and motion
 are measured over the same interval as the synthetic frames; a clip too short
-for --min-frames such frames is sampled evenly instead, and its flicker and
-motion are left out of the comparison. Synthetic input: --n-synthetic (M)
-sequences drawn (seeded) from <data>/seqs/*/*.npz, their first K observation
-frames.
+for --min-frames such frames is sampled evenly instead, and a clip sampled
+evenly or left with fewer than --min-frames distinct frames has its flicker
+and motion left out of the comparison. When the real spacing differs from the
+synthetic one by more than INTERVAL_TOL, the script warns and compares no
+flicker or motion at all (verdict no_data). Synthetic input: --n-synthetic (M)
+sequences drawn (seeded) from <data>/seqs/<split>/*.npz of --splits (default
+every split but test_ood, whose conditions are shifted on purpose), their
+first K observation frames.
 
 Resolution: real frames are measured at their native size and again after
 resizing to the synthetic frame size (render.native_size from
@@ -92,6 +103,9 @@ MIN_NOISE_PX = 64              # unsaturated pixels needed for a noise estimate
 MIN_SPREAD_GRAY = 2.0          # P95 - P5 below this: sharpness undefined
 MIN_MEAN_GRAY = 1.0            # mean frame brightness below this: flicker undefined
 INTERVAL_TOL = 0.2             # achieved / requested interval within 1 +- this: temporal stats comparable
+MIN_PHASE_RESPONSE = 0.15      # phase-correlation peak below this: the pair did not register (shift is noise)
+MIN_REGISTERED_FRAC = 0.5      # a clip's motion counts only when more than this fraction of its pairs register
+DEFAULT_SPLITS = "train,val_select,val_calib,test_iid"   # synthetic splits sampled (test_ood is shifted on purpose)
 MD_MAX_CLIPS = 60              # per-clip rows in the Markdown report (all of them in the JSON)
 SHAKE_SHIFT_PER_STD = math.sqrt(2.0) * math.sqrt(2.0 * math.log(2.0))
 # ^ median |2D shift| between two frames with independent shake / per-axis shake std (about 1.67)
@@ -199,8 +213,11 @@ def parse_args(argv=None):
     ap.add_argument("--interval-s", type=float, default=None,
                     help="real frame spacing (default: the synthetic time.frame_interval_s)")
     ap.add_argument("--min-frames", type=int, default=3,
-                    help="a real clip with fewer frames at --interval-s is sampled evenly instead")
-    ap.add_argument("--splits", default=None, help="comma list of synthetic splits to sample from (default all)")
+                    help="a real clip with fewer frames at --interval-s is sampled evenly instead; flicker and "
+                         "motion need at least this many distinct frames")
+    ap.add_argument("--splits", default=DEFAULT_SPLITS,
+                    help="comma list of synthetic splits to sample from (default: every split but test_ood; "
+                         "'all' for every split)")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--name", default=None, help="title of the report (default: the manifest's folder)")
     return ap.parse_args(argv)
@@ -305,7 +322,7 @@ def _finite_median(values) -> float:
 
 def clip_stats(frames, timestamps=None) -> dict:
     """Statistics of one clip (T, H, W) uint8: per-frame statistics as medians over the frames, flicker over
-    the frame means, motion over consecutive pairs; NaN where undefined (e.g. one frame)."""
+    the frame means, motion over the consecutive pairs that register; NaN where undefined (e.g. one frame)."""
     frames = np.asarray(frames)
     if frames.ndim != 3 or len(frames) == 0:
         raise ValueError(f"expected frames (T, H, W), got shape {frames.shape}")
@@ -315,7 +332,11 @@ def clip_stats(frames, timestamps=None) -> dict:
     ok = len(means) >= 2 and means.mean() >= MIN_MEAN_GRAY
     out["flicker"] = float(means.std(ddof=1) / means.mean()) if ok else math.nan
     shifts = [global_shift(frames[i - 1], frames[i]) for i in range(1, len(frames))]
-    out["motion_px"] = _finite_median([math.hypot(dx, dy) for dx, dy, _ in shifts])
+    # Only registered pairs: an unregistered pair's "shift" is wherever the strongest noise peak lies.
+    registered = [math.hypot(dx, dy) for dx, dy, r in shifts if r >= MIN_PHASE_RESPONSE]
+    out["motion_registered_frac"] = len(registered) / len(shifts) if shifts else math.nan
+    out["motion_px"] = (_finite_median(registered) if out["motion_registered_frac"] > MIN_REGISTERED_FRAC
+                        else math.nan)
     out["phase_response"] = _finite_median([r for _, _, r in shifts])
     ts = None if timestamps is None else np.asarray(timestamps, dtype=np.float64).ravel()
     out["interval_s"] = float(np.median(np.diff(ts))) if ts is not None and ts.size >= 2 else math.nan
@@ -403,7 +424,7 @@ def real_records(manifest: Path, size, interval_s: float, k: int, min_frames: in
             skipped.append({"video": str(path), "reason": str(exc)})
             continue
         achieved = native["interval_s"]
-        temporal = (mode == "interval" and len(frames) >= 2 and math.isfinite(achieved)
+        temporal = (mode == "interval" and len(frames) >= max(2, min_frames) and math.isfinite(achieved)
                     and abs(achieved / interval_s - 1.0) <= INTERVAL_TOL)
         records.append({
             "video_path": str(path), "camera_id": row.get("camera_id") or "",
@@ -455,6 +476,23 @@ def _values(records, key: str, stat: str, temporal_only: bool = False) -> np.nda
     return v[np.isfinite(v)]
 
 
+def _n_unregistered(records, key: str) -> int:
+    """Records (temporal-comparable ones) whose pairs mostly fail to register: no motion value."""
+    def unregistered(frac) -> bool:
+        return frac is not None and math.isfinite(frac) and frac <= MIN_REGISTERED_FRAC
+
+    return sum(1 for r in records
+               if r.get("temporal_comparable", True) and unregistered(r[key].get("motion_registered_frac")))
+
+
+def spacing_matches(real_s: float, synthetic_s: float, tol: float = INTERVAL_TOL) -> bool:
+    """False when both frame spacings are known and differ by more than tol (relative to the synthetic one):
+    flicker and motion depend on the spacing, so they are then not compared."""
+    if not (math.isfinite(real_s) and math.isfinite(synthetic_s) and synthetic_s > 0):
+        return True
+    return abs(real_s / synthetic_s - 1.0) <= tol
+
+
 def _summary(v: np.ndarray) -> dict:
     out = {"n": int(v.size)}
     out.update({f"p{p}": (float(np.percentile(v, p)) if v.size else None) for p in PERCENTILES})
@@ -504,6 +542,8 @@ def advice(stat: str, entry: dict, render_cfg: dict, interval_s: float, flag: fl
     if v == "no_data":
         why = ("no real clip has frames at the comparison spacing" if stat in TEMPORAL_STATS
                else "no real or synthetic values")
+        if (entry.get("unregistered") or {}).get("real") and not real["n"]:
+            why = "no real clip with frames at the comparison spacing has a frame pair that registers"
         return f"No comparison: {why}."
     if v == "covered":
         return (f"Covered: {real['outside']:.0%} of {real['n']} real clips fall outside the synthetic P1-P99 range "
@@ -564,21 +604,33 @@ def tracking(synthetic: list) -> dict:
     return out
 
 
-def compare(real: list, synthetic: list, render_cfg: dict, interval_s: float, flag: float = OUTSIDE_FLAG) -> dict:
+def compare(real: list, synthetic: list, render_cfg: dict, interval_s: float, flag: float = OUTSIDE_FLAG,
+            synthetic_interval_s=None) -> dict:
     """Per statistic: synthetic and real (native, resized) percentiles, coverage of the real clips by the
-    synthetic [P1, P99] range, verdict and note (on the comparable basis)."""
+    synthetic [P1, P99] range, verdict and note (on the comparable basis). With a synthetic_interval_s that
+    spacing_matches rejects, flicker and motion get no coverage and verdict "no_data" (values kept)."""
+    spacing_ok = synthetic_interval_s is None or spacing_matches(interval_s, synthetic_interval_s)
     out = {}
     for stat in STATS:
         temporal = stat in TEMPORAL_STATS
         syn = _values(synthetic, "stats", stat)
         lo, hi = (float(np.percentile(syn, p)) for p in COVER_PCT) if syn.size else (None, None)
+        cover = (None, None) if temporal and not spacing_ok else (lo, hi)
         entry = {"unit": STAT_INFO[stat]["unit"], "comparable_basis": STAT_INFO[stat]["basis"],
                  "synthetic": dict(_summary(syn), p1=lo, p99=hi)}
         for basis in ("native", "resized"):
             v = _values(real, basis, stat, temporal_only=temporal)
-            entry[f"real_{basis}"] = dict(_summary(v), **_coverage(v, lo, hi))
+            entry[f"real_{basis}"] = dict(_summary(v), **_coverage(v, *cover))
+        if stat == "motion_px":        # clips without a registered pair have no value, so no coverage above
+            entry["unregistered"] = {"real": _n_unregistered(real, entry["comparable_basis"]),
+                                     "synthetic": _n_unregistered(synthetic, "stats")}
         entry["verdict"] = verdict(entry[f"real_{entry['comparable_basis']}"], flag)
-        entry["note"] = advice(stat, entry, render_cfg, interval_s, flag)
+        if temporal and not spacing_ok:
+            entry["note"] = (f"No comparison: the real frames are sampled {interval_s:g} s apart but the synthetic "
+                             f"ones {synthetic_interval_s:g} s, and {stat} depends on the spacing; rerun with "
+                             f"--interval-s {synthetic_interval_s:g}.")
+        else:
+            entry["note"] = advice(stat, entry, render_cfg, interval_s, flag)
         out[stat] = entry
     return out
 
@@ -614,23 +666,31 @@ def _pct(v) -> str:
 def markdown(doc: dict) -> str:
     st, real, syn = doc["settings"], doc["real"], doc["synthetic"]
     n_temporal = sum(r["temporal_comparable"] for r in real["clips"])
+    unreg = doc["stats"]["motion_px"].get("unregistered") or {}
     sizes = sorted({tuple(r["native_size"]) for r in real["clips"]})
     L = [f"# Image statistics, real vs synthetic: {doc['name']}", "",
          "> Diagnostic of the rendering, not a model input. Real clips are few, so a coverage fraction moves "
          f"in steps of 1 / n; a statistic is flagged when more than {doc['outside_flag']:.0%} of the real clips "
-         "fall outside the synthetic P1-P99 range.", "",
-         f"* Real: `{real['manifest']}`, {len(real['clips'])} clips ({len(real['skipped'])} skipped), native "
-         f"sizes (H x W) {', '.join(f'{h}x{w}' for h, w in sizes) or 'none'}; up to {st['max_frames']} frames "
-         f"{st['interval_s']:g} s apart, {n_temporal} clips long enough for flicker and motion at that spacing.",
-         f"* Synthetic: `{syn['data']}`, {len(syn['sequences'])} of {syn['available']} sequences "
-         f"(seed {st['seed']}), native size {st['synthetic_size'][0]} x {st['synthetic_size'][1]}, frames "
-         f"{_fmt(syn['interval_s'], 'g')} s apart.",
-         "* Comparable basis: real frames resized to the synthetic pixel count (aspect kept), except blockiness, "
-         "which exists only on the encoder's native 8x8 grid and is compared at native resolution.", "",
-         "## Comparison (comparable basis)", "",
-         "| statistic | unit | basis | real P5 / P25 / P50 / P75 / P95 | synthetic P5 / P25 / P50 / P75 / P95 | "
-         "synthetic P1 - P99 | real below / above | verdict |",
-         "|---|---|---|---|---|---|---|---|"]
+         "fall outside the synthetic P1-P99 range.", ""]
+    if not st["temporal_spacing_ok"]:
+        L += [f"> **Warning**: the real frames are sampled {st['interval_s']:g} s apart but the synthetic ones "
+              f"{_fmt(syn['interval_s'], 'g')} s apart: flicker and motion depend on the spacing and are not "
+              "compared.", ""]
+    L += [f"* Real: `{real['manifest']}`, {len(real['clips'])} clips ({len(real['skipped'])} skipped), native "
+          f"sizes (H x W) {', '.join(f'{h}x{w}' for h, w in sizes) or 'none'}; up to {st['max_frames']} frames "
+          f"{st['interval_s']:g} s apart, {n_temporal} clips with at least {st['min_frames']} distinct frames at "
+          f"that spacing for flicker and motion, {unreg.get('real', 0)} of them left out of motion because no frame "
+          f"pair registers (phase-correlation response below {st['min_phase_response']:g}).",
+          f"* Synthetic: `{syn['data']}`, {len(syn['sequences'])} of {syn['available']} sequences in splits "
+          f"{', '.join(st['splits']) if st['splits'] else 'all'} (seed {st['seed']}), native size "
+          f"{st['synthetic_size'][0]} x {st['synthetic_size'][1]}, frames {_fmt(syn['interval_s'], 'g')} s apart, "
+          f"{unreg.get('synthetic', 0)} without a registered frame pair.",
+          "* Comparable basis: real frames resized to the synthetic pixel count (aspect kept), except blockiness, "
+          "which exists only on the encoder's native 8x8 grid and is compared at native resolution.", "",
+          "## Comparison (comparable basis)", "",
+          "| statistic | unit | basis | real P5 / P25 / P50 / P75 / P95 | synthetic P5 / P25 / P50 / P75 / P95 | "
+          "synthetic P1 - P99 | real below / above | verdict |",
+          "|---|---|---|---|---|---|---|---|"]
     for stat, e in doc["stats"].items():
         r, s = e[f"real_{e['comparable_basis']}"], e["synthetic"]
         L.append(f"| {stat} | {e['unit']} | {e['comparable_basis']} | {_pcts(r)} (n {r['n']}) | {_pcts(s)} "
@@ -681,7 +741,7 @@ def main(argv=None):
     cfg_path = data / "config_used.yaml"
     cfg = read_yaml(cfg_path) if cfg_path.is_file() else {}
     render_cfg = cfg.get("render") or {}
-    splits = args.splits.split(",") if args.splits else None
+    splits = args.splits.split(",") if args.splits not in (None, "", "all") else None
     synthetic, available = synthetic_records(data, args.n_synthetic, args.max_frames, args.seed, splits)
     size = render_cfg.get("native_size") or synthetic[0]["native_size"]
     syn_interval = _finite_median([r["stats"]["interval_s"] for r in synthetic])
@@ -689,6 +749,10 @@ def main(argv=None):
     if not (interval and math.isfinite(float(interval)) and float(interval) > 0):
         raise SystemExit("no frame interval: pass --interval-s")
     interval = float(interval)
+    spacing_ok = spacing_matches(interval, syn_interval)
+    if not spacing_ok:
+        print(f"warning: real frames sampled {interval:g} s apart, synthetic frames {syn_interval:g} s apart "
+              f"(more than {INTERVAL_TOL:.0%} off): flicker and motion are not compared", file=sys.stderr)
     real, skipped = real_records(manifest, size, interval, args.max_frames, args.min_frames)
     if not real:
         print(f"no real clip could be read from {manifest}", file=sys.stderr)
@@ -699,8 +763,10 @@ def main(argv=None):
         "settings": {"interval_s": interval, "max_frames": args.max_frames, "min_frames": args.min_frames,
                      "n_synthetic": args.n_synthetic, "seed": args.seed, "splits": splits,
                      "synthetic_size": [int(v) for v in size], "cover_percentiles": list(COVER_PCT),
+                     "temporal_spacing_ok": spacing_ok, "interval_tol": INTERVAL_TOL,
+                     "min_phase_response": MIN_PHASE_RESPONSE, "min_registered_frac": MIN_REGISTERED_FRAC,
                      "resize": "real frames to the synthetic pixel count, aspect kept (INTER_AREA when shrinking)"},
-        "stats": compare(real, synthetic, render_cfg, interval),
+        "stats": compare(real, synthetic, render_cfg, interval, synthetic_interval_s=syn_interval),
         "synthetic_tracking": tracking(synthetic),
         "real": {"manifest": str(manifest), "clips": real, "skipped": skipped},
         "synthetic": {"data": str(data), "available": available, "interval_s": syn_interval,

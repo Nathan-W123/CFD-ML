@@ -27,7 +27,12 @@ every target is known), early stopping uses the masked val_select loss, and
 every calibration fit uses the rows where its label is known. A label with
 too few known val_calib rows keeps the pretrained model's temperature,
 thresholds and margins when fine-tuning (D), or the neutral defaults
-otherwise (B), and the calibration record says why.
+otherwise (B), and the calibration record says why; a label with no known
+val_calib row and nothing to keep ("default_unfitted") gets the abstain
+margin UNTRAINED_MARGIN, so the model always abstains on it, and is listed
+in calibration.untrained_labels. With unknown-label rows the per-category
+group counts (the four smoke x fog categories) are reported as not
+applicable rather than insufficient.
 
 `run_loro` trains one model per held-out regime (leave-one-regime-out) and
 reports how the unseen regime is handled.
@@ -66,6 +71,10 @@ from src.utils.runtime import seed_everything
 
 BALANCE_RATIO = 1.5           # "auto" balancing kicks in above this label ratio
 EVAL_BATCH = 4096
+# Abstain margin (calibrated logit) of a label with no known calibration target and no pretrained rule to
+# keep ("default_unfitted"): larger than any logit the model produces, so PhysicsExpert.predict abstains on
+# that label for every input (|z - threshold| < margin). Finite, so the config stays JSON / YAML safe.
+UNTRAINED_MARGIN = 1e6
 
 
 @dataclass
@@ -289,9 +298,14 @@ def fit_calibration(logits: np.ndarray, fs_calib: FeatureSet, cfg: Mapping[str, 
     known rows (calibration.min_known_per_label, default 10, or a single known
     class) keeps the temperature, thresholds and margins of `fallback` (the
     pretrained model's config, when fine-tuning) or, without one, gets
-    T = 1, threshold logit 0 and the margin floor when nothing is known; the
-    record's "label_support" says which and why. Returns the dict merged
-    into model_config.yaml.
+    T = 1 and threshold logit 0 when nothing is known, with the abstain
+    margin UNTRAINED_MARGIN (always abstain; listed in
+    calibration.untrained_labels); the record's "label_support" says which
+    and why. When rows with an unknown label exist, the four (smoke, fog)
+    categories do not partition val_calib: "category_support" is then
+    "not_applicable" (with the counts of the partial categories and of the
+    unknown-label rows) and no category is reported insufficient. Returns
+    the dict merged into model_config.yaml.
     """
     z_raw = np.asarray(logits, dtype=np.float64)
     y = fs_calib.y
@@ -324,6 +338,7 @@ def fit_calibration(logits: np.ndarray, fs_calib: FeatureSet, cfg: Mapping[str, 
                 ops["fit"][op][name] = {"criterion": "kept_pretrained", "reason": support[name]["reason"]}
 
     acfg = cfg.get("abstain", {})
+    untrained = [name for name in LABEL_NAMES if not keep[name] and support[name]["n_known"] == 0]
     margins: Dict[str, Dict[str, float]] = {}
     margin_fit: Dict[str, Dict[str, Any]] = {}
     for op, per_label in ops["thresholds"].items():
@@ -332,6 +347,9 @@ def fit_calibration(logits: np.ndarray, fs_calib: FeatureSet, cfg: Mapping[str, 
             if keep[name]:
                 m = float(fallback["abstain"]["margins"][op][name])
                 info = {"reason": "kept_pretrained", "detail": support[name]["reason"]}
+            elif name in untrained:
+                m = UNTRAINED_MARGIN
+                info = {"reason": "untrained_label_always_abstain", "detail": support[name]["reason"]}
             else:
                 known = M.known_mask(y[:, j])
                 wj = w if known.all() else M.per_group_weights(fs_calib.groups[known])
@@ -344,7 +362,21 @@ def fit_calibration(logits: np.ndarray, fs_calib: FeatureSet, cfg: Mapping[str, 
 
     min_sims = int(cfg.get("thresholds", {}).get("min_calibration_sims_per_category", 20))
     sims_per_cat = {c: int(len(np.unique(fs_calib.groups[fs_calib.categories == c]))) for c in CATEGORIES}
-    insufficient = [c for c, n in sims_per_cat.items() if n < min_sims]
+    unknown_rows = ~M.known_mask(y).all(axis=1)
+    if unknown_rows.any():      # partially labelled rows (e.g. smoke-only): the 4 categories do not apply
+        partial = sorted(set(fs_calib.categories[unknown_rows]))
+        category_support: Dict[str, Any] = {
+            "status": "not_applicable",
+            "reason": f"{int(unknown_rows.sum())} of {len(y)} calibration rows have an unknown label, so the "
+                      "four (smoke, fog) categories do not partition the split; see label_support",
+            "n_unknown_label_rows": int(unknown_rows.sum()),
+            "partial_categories": {c: {"sequences": int(np.sum(fs_calib.categories == c)),
+                                       "groups": int(len(np.unique(fs_calib.groups[fs_calib.categories == c])))}
+                                   for c in partial}}
+        insufficient = []
+    else:
+        category_support = {"status": "applicable"}
+        insufficient = [c for c, n in sims_per_cat.items() if n < min_sims]
     prevalence = {}
     for j, name in enumerate(LABEL_NAMES):
         known = M.known_mask(y[:, j])
@@ -378,6 +410,8 @@ def fit_calibration(logits: np.ndarray, fs_calib: FeatureSet, cfg: Mapping[str, 
             "n_groups": int(len(np.unique(fs_calib.groups))),
             "groups_per_category": sims_per_cat,
             "min_groups_per_category": min_sims,
+            # status "applicable", or "not_applicable" (+ reason and counts) when some row has an unknown label
+            "category_support": category_support,
             "insufficient_calibration_data": bool(insufficient),
             "insufficient_categories": insufficient,
             "prevalence": prevalence,
@@ -393,6 +427,8 @@ def fit_calibration(logits: np.ndarray, fs_calib: FeatureSet, cfg: Mapping[str, 
             # per label: known / positive val_calib rows and how it was calibrated: "fitted",
             # "kept_pretrained", "fitted_on_insufficient_labels" or "default_unfitted" (nothing known)
             "label_support": support,
+            # the "default_unfitted" labels: abstain margin UNTRAINED_MARGIN, every decision abstains
+            "untrained_labels": untrained,
         },
     }
 
@@ -620,7 +656,9 @@ def _run_seeds(fs: FeatureSet, cfg: Mapping[str, Any], out_dir: PathLike, *, sta
         "calibration": {k: calibs[chosen][k] for k in ("temperatures", "thresholds")},
         "abstain_margins": calibs[chosen]["abstain"]["margins"],
         "insufficient_calibration_data": calibs[chosen]["calibration"]["insufficient_calibration_data"],
+        "category_support": calibs[chosen]["calibration"]["category_support"],
         "label_support": calibs[chosen]["calibration"]["label_support"],
+        "untrained_labels": calibs[chosen]["calibration"]["untrained_labels"],
         "data_counts": counts,
         "provenance": dict(provenance),
     }

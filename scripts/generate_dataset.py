@@ -177,6 +177,7 @@ def robustness(out, cfg, rows, workers):
                "fog_regime": r["fog_regime"], "distractor_regime": r["distractor_regime"],
                "context": r["context"], "render": {k: v for k, v in info["render_params"].items()
                                                    if isinstance(v, (int, float, str, bool))},
+               # extraction meta as in the main FeatureSet: evaluation applies the same input-validity and timing checks
                **_feature_record(info)}
               for r, suite, info in rec],
         source="synthetic",

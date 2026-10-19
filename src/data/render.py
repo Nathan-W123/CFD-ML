@@ -34,7 +34,8 @@ Optical model (docs/design.md section 6):
    zero-mean random field D(x, z, t) (random Fourier modes a few cells long
    whose phases follow integrated OU processes, one eddy clock per octave
    of u_sgs) with local velocity scale texture.sgs_gain * u_sgs and local
-   correlation time ~ eddy size / u_sgs, so the texture also "boils" with
+   correlation time ~ eddy size / (the cell's peak u_sgs over the
+   sequence), so the texture also "boils" with
    the unresolved turbulence, wherever it is and whatever the class (see
    _sgs_displacement). Without sim.sgs_u, or with sgs_gain 0, nothing moves.
 4. Exposure normalisation per group, on the untextured in-view peak tau of
@@ -322,7 +323,8 @@ def sample_render_params(rng: np.random.Generator, cfg: Dict[str, Any], hints: O
     # Version 2, drawn last so every value above keeps its place in the stream: correlation time
     # of the camera-shake process (0 = independent per frame, the version-1 model) and the
     # subgrid-turbulence displacement of the texture (gain 0 disables it).
-    p["camera_shake_tau_s"] = max(_u(rng, r.get("camera_shake_tau_s") or list(SHAKE_TAU_S_DEFAULT)), 0.0)
+    shake_tau = r.get("camera_shake_tau_s")
+    p["camera_shake_tau_s"] = max(_u(rng, list(SHAKE_TAU_S_DEFAULT) if shake_tau is None else shake_tau), 0.0)
     sgs_gain = tex.get("sgs_gain")
     p["texture"]["sgs_gain"] = max(_u(rng, list(SGS_GAIN_DEFAULT) if sgs_gain is None else sgs_gain), 0.0)
     p["texture"]["sgs_seed"] = _seed(rng)
@@ -814,10 +816,11 @@ def _sgs_displacement(u_sgs: Optional[np.ndarray], times: np.ndarray, dx: float,
     JSON-able record.
 
     Eddies of size ~A turn over in ~A / u_sgs, and u_sgs spans orders of magnitude within one
-    scene (wall shear in the first cell row, a plume, quiet air), so the field is built per
-    velocity octave: band b has the velocity u_b = u_max 2^-b (b < _SGS_BANDS) and its own eddy
-    time theta_b(t) = g u_b (t - t_first) / A. In band b
-      D_b(x, t) = A (u_sgs / u_b) f_b(x, theta_b(t)),
+    scene (wall shear in the first cell row, a plume, quiet air), so the field is built from
+    velocity octaves: band b has the velocity u_b = u_max 2^-b (b < _SGS_BANDS, u_max the peak
+    u_sgs of the sequence) and its own eddy time theta_b(t) = g u_b (t - t_first) / A, and carries
+    the displacement per unit velocity
+      h_b(x, t) = A f_b(x, theta_b(t)) / u_b   (seconds; rms |dh_b/dt| = g),
       f_b = sum_m c_m e_m sin(k_m . x + phi_bm(theta_b)): _SGS_MODES random Fourier modes, shared by
           the bands, wavelengths _SGS_WAVELENGTH_CELLS grid cells (so they scale with dx), random
           directions, each mode divergence-free (e_m perpendicular to k_m), c_m = sqrt(2 / M), so
@@ -827,15 +830,26 @@ def _sgs_displacement(u_sgs: Optional[np.ndarray], times: np.ndarray, dx: float,
           times (phase variance 2 (dtheta - 1 + exp(-dtheta))); the pair (omega, phi) is advanced
           exactly between the frame times (no time stepping);
       A = _SGS_STRAIN / k_rms, the rms displacement that keeps the texture warp fold-free.
-    Every cell blends the two bands bracketing its u_sgs, linearly in log2 u with variance-
-    preserving weights w / |w|. Both bands move at rms g u_sgs, so dD/dt has rms g u_sgs (vector
-    magnitude) wherever u_sgs >= u_max 2^-(B-1), and less below; D is ~A in size, zero-mean (random
-    phases; no net drift), decorrelates over ~1.5 A / (g u_sgs) (eddy size over eddy velocity,
-    within a factor 2) and vanishes where u_sgs does. A lag frame 1 s before its observation is
-    therefore displaced by ~ g u_sgs x 1 s relative to it; frames much further apart than the
-    correlation time by ~ sqrt(2) A. Class-independent: it acts wherever u_sgs is, smoke, fog or
-    clear air alike. Randomness: np.random.default_rng(texture["sgs_seed"]): modes, initial
-    phases and rates, then the innovations of every frame step (fixed counts).
+    Every cell blends the two bands bracketing its reference velocity u_ref(x) = max over all
+    frames (observation and lag) of u_sgs(x, t), linearly in log2 u_ref with variance-preserving
+    weights w / |w|: h = sum_b w_b h_b, with bands and weights fixed for the whole sequence. D is
+    h integrated against the local velocity, frame by frame in time order (observation and lag
+    frames interleaved; trapezoidal in u_sgs):
+      D(t_0) = u_sgs(t_0) h(t_0),
+      D(t_j) = D(t_{j-1}) + (u_sgs(t_j) + u_sgs(t_{j-1})) / 2 (h(t_j) - h(t_{j-1})),
+    so with u_sgs constant in time D = u_sgs h, and when u_sgs changes between frames D does not
+    jump: the part already displaced stays and only the further change scales with the new u_sgs.
+    The velocity is g u_sgs (rms, vector magnitude) everywhere and at every frame. Where u_sgs ~
+    u_ref >= u_max 2^-(B-1), D is ~A in size and decorrelates over ~1.5 A / (g u_ref) (eddy size
+    over eddy velocity, within a factor 2); where u_sgs < u_ref the eddies keep the u_ref clock and
+    the amplitude shrinks by u_sgs / u_ref; where u_ref < u_max 2^-(B-1) the slowest band's clock
+    caps the correlation time at ~1.5 A / (g u_max 2^-(B-1)) and the amplitude is ~A u_sgs /
+    (u_max 2^-(B-1)). D is zero-mean (random phases; no net drift) and vanishes where u_sgs is 0 at
+    every frame. A lag frame 1 s before its observation is therefore displaced by ~ g u_sgs x 1 s
+    relative to it; frames much further apart than the correlation time by ~ sqrt(2) A (at u_sgs ~
+    u_ref). Class-independent: it acts wherever u_sgs is, smoke, fog or clear air alike.
+    Randomness: np.random.default_rng(texture["sgs_seed"]): modes, initial phases and rates, then
+    the innovations of every frame step (fixed counts).
     """
     gain = float(texture.get("sgs_gain", 0.0) or 0.0)
     record: Dict[str, Any] = {"applied": False, "gain": gain}
@@ -888,17 +902,27 @@ def _sgs_displacement(u_sgs: Optional[np.ndarray], times: np.ndarray, dx: float,
     e_perp = math.sqrt(2.0 / M) * np.stack([-np.sin(ang), np.cos(ang)])   # c_m e_m, e_m perpendicular to k_m
     coef = np.concatenate([np.cos(phase)[:, :, None, :] * e_perp, np.sin(phase)[:, :, None, :] * e_perp], axis=-1)
     f = (coef.reshape(-1, 2 * M).astype(np.float32) @ basis).reshape(n_t, B, 2, N)
-    # Band blend per cell and frame: p = log2(u_max / u) in [0, B - 1], bands floor(p) and floor(p) + 1
-    # (u = 0 lands in the last band with zero amplitude), each scaled by A u / u_b.
+    # Band blend per cell, once for the whole sequence: p = log2(u_max / u_ref) in [0, B - 1], bands
+    # floor(p) and floor(p) + 1 (u_ref = 0 lands in the last band; D is 0 there), giving the
+    # displacement per unit velocity h = sum_b w_b A f_b / u_b, (F, 2, N).
     uf = u.reshape(n_t, N)
-    p = np.clip(np.log2(u_max / np.maximum(uf, u_max * 2.0 ** -(B + 1))), 0.0, B - 1.0)
+    u_ref = uf.max(axis=0)
+    p = np.clip(np.log2(u_max / np.maximum(u_ref, u_max * 2.0 ** -(B + 1))), 0.0, B - 1.0)
     lo = np.minimum(np.floor(p).astype(np.int64), B - 2)
     frac = p - lo
     norm = np.hypot(1.0 - frac, frac)
-    disp = np.zeros((n_t, 2, N), dtype=np.float32)
+    h = np.zeros((n_t, 2, N), dtype=np.float32)
     for band, w in ((lo, (1.0 - frac) / norm), (lo + 1, frac / norm)):
-        g = np.take_along_axis(f, np.broadcast_to(band[:, None, None, :], (n_t, 1, 2, N)), axis=1)[:, 0]
-        disp += (w * amp * uf / u_band[band]).astype(np.float32)[:, None, :] * g
+        g = np.take_along_axis(f, np.broadcast_to(band[None, None, None, :], (n_t, 1, 2, N)), axis=1)[:, 0]
+        h += (w * amp / u_band[band]).astype(np.float32) * g
+    # D = integral of u dh in time order (trapezoidal in u): no jump where u_sgs changes between frames.
+    disp = np.empty((n_t, 2, N), dtype=np.float32)
+    acc = uf[order[0]] * h[order[0]].astype(np.float64)
+    disp[order[0]] = acc
+    for j in range(1, n_t):
+        i0, i1 = order[j - 1], order[j]
+        acc = acc + (0.5 * (uf[i0] + uf[i1])) * (h[i1].astype(np.float64) - h[i0])
+        disp[i1] = acc
     record.update(applied=True, u_max_ms=u_max, amplitude_m=float(amp),
                   correlation_time_s_at_u_max=float(1.5 * amp / (gain * u_max)))
     return np.ascontiguousarray(disp.reshape(n_t, 2, nz, nx).transpose(0, 2, 3, 1)), record

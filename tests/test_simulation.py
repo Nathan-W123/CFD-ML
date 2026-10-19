@@ -8,10 +8,13 @@ import pytest
 
 from src.cfd.lbm import LatticeUnits, LBMConfig, LBMSolver, ambient_maintaining_acceleration
 from src.cfd.results import ALL_LAG_FIELDS, MissingLagFields, SimulationResult
+from src.cfd.scenario_util import Grid
 from src.cfd.scenarios import (
-    HOLDOUT_TAGS, SPLITS, build_spec, regime_weight, run_scenario, sample_scenario, scenario_seed,
+    HOLDOUT_TAGS, SPLITS, build_grid, build_spec, regime_weight, run_scenario, sample_scenario, scenario_seed,
+    terrain_heights,
 )
 from src.cfd.simulation import run_simulation
+from src.cfd.smoke import rain_component
 from src.constants import CATEGORIES, FOG_REGIMES, NEITHER_REGIMES, OPT_IN_REGIMES, SMOKE_REGIMES
 from src.utils.config import REPO_ROOT, load_simulation_config
 
@@ -456,7 +459,7 @@ def test_rain_shaft_falls_from_cloud_base():
     p["background_haze"] = None
     p["timing"]["spinup_s"] = 120.0
     p["distractor"].update(cloud_base_m=2200.0, fall_speed_ms=5.0, onset_s=-60.0, intermittency=0.0,
-                           evaporation_rate_s=0.0, center_frac=0.5)
+                           evaporation_rate_s=0.0, center_frac=0.5, shaft_mg_m3=1.0)
     res = run_scenario(p, cfg)
     assert res.valid, res.validity["reasons"]
     assert res.smoke.max() == 0.0 and res.lwc.max() == 0.0
@@ -466,6 +469,75 @@ def test_rain_shaft_falls_from_cloud_base():
     lowest = [float(z[np.nonzero(c.max(axis=1) > 0.01 * c.max())[0].min()]) for c in res.tracer]
     assert lowest[-1] < lowest[0] - 400.0 and lowest[-1] < 1000.0
     assert "precip" in res.validity["budgets"] and abs(res.validity["mass_residuals"]["precip"]) < 1e-6
+    # The in-shaft concentration is the configured shaft_mg_m3 (optical depth ~4 over 1 km), not hundreds.
+    assert 0.5 < float(res.tracer[:, :, 6:-6].max()) < 1.3
+
+
+def test_rain_shaft_concentration_is_physical_and_independent_of_dx():
+    """A rain curtain has an optical depth of order 1 over 1 km, whatever the cell size; its onset
+    is configured in literal seconds (not multiplied by the profile's time scale)."""
+    ext = FAR_CFG["render"]["tracer_mass_extinction_m2_mg"]
+    onset = FAR_CFG["scenarios"]["neither"]["rain_shaft"]["onset_s"]
+    rains = [p for p in (sample_scenario("neither", "train", i, FAR_CFG) for i in range(300))
+             if p["distractor_regime"] == "rain_shaft"]
+    assert len(rains) >= 20
+    for p in rains:
+        d = p["distractor"]
+        assert 0.3 <= ext * d["shaft_mg_m3"] * 1000.0 <= 6.0
+        assert onset[0] <= d["onset_s"] <= onset[1]
+    assert min(p["distractor"]["onset_s"] for p in rains) < 0.5 * onset[0]       # not squeezed into [-30, 10]
+    # The generation band balances the settling flux at shaft_mg_m3 on 5 m and 50 m cells alike.
+    d = rains[0]["distractor"]
+    for dx in (5.0, 50.0):
+        grid = Grid(64, 64, dx, np.zeros((64, 64), dtype=bool), 6)
+        rain = {**d, "intermittency": 0.0, "evaporation_rate_s": 0.0, "onset_s": -1e4,
+                "cloud_base_m": 40.0 * dx, "shaft_width_m": 10.0 * dx, "center_frac": 0.5}
+        comp = rain_component(rain, grid, 0.0, 0.0, lambda t: np.zeros(64))
+        rates = {}
+        comp.sources[0](0.0, {"precip": np.zeros((64, 64))}, rates)
+        column = rates["precip"].sum(axis=0).max() * dx                  # mg/m^2/s generated per column
+        assert column / d["fall_speed_ms"] == pytest.approx(d["shaft_mg_m3"], rel=0.01)
+
+
+def test_rain_shaft_cloud_drift_follows_the_mid_window_wind_and_stays_in_view():
+    cfg = FAR_CFG
+    p = copy.deepcopy(_find_far("neither", "distractor_regime", "rain_shaft", cfg))
+    p["wind"].update(speed_ms=2.0, sign=1.0, gust_fraction=0.0, flip=False, ramp_factor=2.0)
+    p["distractor"]["cloud_drift_factor"] = 1.0
+    info = build_spec(p, cfg).extra["components"]
+    grid = build_grid(p, cfg)
+    k_b = info["rain_base_row"]
+    prof = min((grid.z[k_b] / p["wind"]["reference_height_m"]) ** p["wind"]["shear_exponent"], p["wind"]["profile_cap"])
+    assert info["rain_cloud_speed_ms"] == pytest.approx(2.0 * 1.5 * prof)          # mid-ramp speed, not the t = 0 one
+    # A fast wind aloft is capped: the cloud takes at least label_min_frames frame intervals to cross the view.
+    p["wind"].update(speed_ms=12.0, sign=-1.0, ramp_factor=1.0)
+    speed = build_spec(p, cfg).extra["components"]["rain_cloud_speed_ms"]
+    view_w = grid.view_x(1.0) - grid.view_x(0.0)
+    min_view_s = cfg["validation"]["label_min_frames"] * cfg["time"]["frame_interval_s"]
+    assert speed == pytest.approx(-view_w / min_view_s)
+
+
+def test_ridge_steep_lee_side_faces_downwind():
+    signs, slope_aligned = set(), set()
+    for i in range(150):
+        for c in CATEGORIES:
+            p = sample_scenario(c, "train", i, FAR_CFG)
+            t, sign = p["terrain"], p["wind"]["sign"]
+            if t["kind"] == "slope":
+                slope_aligned.add(t["direction"] == sign)                # other kinds keep a random direction
+            if t["kind"] != "ridge":
+                continue
+            signs.add(sign)
+            assert t["direction"] == sign
+            x = np.linspace(0.0, 3200.0, 6401)
+            h = terrain_heights(t, x, build_grid(p, FAR_CFG).view_x)
+            crest = x[np.argmax(h)]
+            above = h > 0.5 * t["height_m"]
+            downwind = int((above & (sign * (x - crest) > 0)).sum())
+            upwind = int((above & (sign * (x - crest) < 0)).sum())
+            assert downwind == pytest.approx(t["lee_width_frac"] * upwind, abs=3)   # steeper downwind
+            assert downwind < upwind or t["lee_width_frac"] > 0.98
+    assert signs == {1.0, -1.0} and slope_aligned == {True, False}
 
 
 # ------------------------------------------------------------------ slow

@@ -34,7 +34,8 @@ tracer.
 Scales: physical sizes, heights and periods come from the profile config
 (near-field values are the code defaults); numerical widths scale with dx and
 window-relative schedule times (onsets, switch-offs, ramps) with the frame
-interval (see scenario_util).
+interval (see scenario_util); the rain-shaft onset is the exception, configured
+per profile in literal seconds.
 
 Where this fits: `scenarios.sample_scenario` calls `sample_smoke` /
 `sample_dust`; `scenarios.build_spec` calls `smoke_component` /
@@ -71,11 +72,14 @@ RAIN_DEFAULTS = {
     "cloud_base_m": [150.0, 260.0],        # generating level (near-field defaults; far: km)
     "shaft_width_m": [40.0, 120.0],
     "fall_speed_ms": [3.0, 8.0],           # raindrop terminal velocity (drizzle / virga to rain)
-    "emission_mg_m3_s": [5.0, 50.0],       # equivalent aerosol, rendered as tracer
+    # In-shaft concentration below the generating band (equivalent aerosol, rendered as tracer):
+    # with tracer_mass_extinction 0.004 m^2/mg, 0.1-1.5 mg/m^3 is an optical depth of 0.4-6
+    # over 1 km, a light to heavy rain curtain. The emission follows from it and dx (rain_component).
+    "shaft_mg_m3": [0.1, 1.5],
     "evaporation_rate_s": [0.0, 0.03],     # fractional loss per second on the way down (virga)
     "intermittency": [0.0, 0.6],
     "modulation_period_s": [10.0, 40.0],
-    "onset_s": [-30.0, 10.0],              # relative to the first frame, near-field seconds (x time scale)
+    "onset_s": [-30.0, 10.0],              # relative to the first frame, literal seconds (not time-scaled)
     # The precipitating cell moves slower than the wind at cloud base (cells propagate by
     # regenerating on their flanks), which also keeps a shaft in view for more of the window.
     "cloud_drift_factor": [0.4, 1.0],
@@ -330,40 +334,50 @@ def sample_rain(rng: np.random.Generator, cfg: Dict[str, Any], context: Dict[str
     block = dict(RAIN_DEFAULTS)
     block.update(cfg.get("scenarios", {}).get("neither", {}).get("rain_shaft", {}))
     ts = time_scale(context["timing"].get("frame_interval_s", 5.0))
-    onset = block["onset_s"]
     return {
         "regime": "rain_shaft",
         "cloud_base_m": uniform(rng, block["cloud_base_m"]),
         "shaft_width_m": uniform(rng, block["shaft_width_m"]),
         "fall_speed_ms": uniform(rng, block["fall_speed_ms"]),
-        "emission_mg_m3_s": uniform(rng, block["emission_mg_m3_s"]),
+        "shaft_mg_m3": uniform(rng, block["shaft_mg_m3"]),
         "evaporation_rate_s": uniform(rng, block["evaporation_rate_s"]),
         "intermittency": uniform(rng, block["intermittency"]),
         "modulation": sample_noise_spec(rng, block["modulation_period_s"]),
-        "onset_s": uniform(rng, (float(onset[0]) * ts, float(onset[1]) * ts)),   # relative to the first frame
+        "onset_s": uniform(rng, block["onset_s"]),    # relative to the first frame, seconds as configured
         "center_frac": uniform(rng, (0.2, 0.8)),      # across the view at mid-window
         "ramp_s": 3.0 * ts,
         "cloud_drift_factor": uniform(rng, block["cloud_drift_factor"]),
     }
 
 
-def rain_component(rain: Dict[str, Any], grid: Grid, first_frame_s: float, window_s: float, wind_fn) -> Component:
+def rain_component(rain: Dict[str, Any], grid: Grid, first_frame_s: float, window_s: float, wind_fn,
+                   min_view_s: float = 0.0) -> Component:
     """Precipitation generated in a two-cell band at cloud base under a cloud drifting at
-    `cloud_drift_factor` x the wind at that level; it falls at `fall_speed_ms` relative to the air (settling of the
+    `cloud_drift_factor` x the wind at that level at mid-window (capped so the cloud stays in the
+    view for at least `min_view_s`); it falls at `fall_speed_ms` relative to the air (settling of the
     "precip" scalar), is carried by the resolved wind on the way down, deposits at the ground
-    and evaporates at `evaporation_rate_s` (a fractional sink, booked as a negative source)."""
+    and evaporates at `evaporation_rate_s` (a fractional sink, booked as a negative source).
+    The emission is set so that the steady concentration below the band is `shaft_mg_m3`
+    (generation over 2 dx balances the settling flux), independent of dx."""
     comp = Component()
     width = float(rain["shaft_width_m"])
     k_b = int(np.clip(round(float(rain["cloud_base_m"]) / grid.dx - 0.5), 1, grid.nz - 2))
     band = np.zeros((grid.nz, grid.nx), dtype=bool)
     band[k_b:k_b + 2, :] = True
     band &= grid.fluid
-    u_cloud = float(rain.get("cloud_drift_factor", 1.0)) * float(wind_fn(0.0)[k_b])
+    t_mid = first_frame_s + 0.5 * window_s
+    u_cloud = float(rain.get("cloud_drift_factor", 1.0)) * float(wind_fn(t_mid)[k_b])
+    if min_view_s > 0.0:
+        # Crossing the view takes at least min_view_s; the shaft is placed at 0.2-0.8 of the view at
+        # mid-window, so that interval stays inside the window and holds that many frame intervals.
+        u_max = (grid.view_x(1.0) - grid.view_x(0.0)) / float(min_view_s)
+        u_cloud = float(np.clip(u_cloud, -u_max, u_max))
     # Placed by its position at mid-window, like drifting fog patches (scenario_util.drift_start).
-    x0 = drift_start(grid.view_x(rain["center_frac"]), u_cloud, first_frame_s + 0.5 * window_s)
+    x0 = drift_start(grid.view_x(rain["center_frac"]), u_cloud, t_mid)
     t_on = first_frame_s + float(rain["onset_s"])
     ramp = float(rain.get("ramp_s", 3.0))
-    emission = float(rain["emission_mg_m3_s"])
+    fall = float(rain["fall_speed_ms"])
+    emission = float(rain["shaft_mg_m3"]) * fall / (2.0 * grid.dx)
     inter = float(rain["intermittency"])
     mod = rain["modulation"]
     evap = float(rain["evaporation_rate_s"])
@@ -382,7 +396,7 @@ def rain_component(rain: Dict[str, Any], grid: Grid, first_frame_s: float, windo
         rates["precip"] = rates.get("precip", 0.0) + np.where(band, a * emission * prof[None, :], 0.0)
 
     comp.sources.append(sources)
-    comp.precip_settling = float(rain["fall_speed_ms"])
+    comp.precip_settling = fall
     comp.info["rain_base_row"] = k_b
     comp.info["rain_cloud_speed_ms"] = u_cloud
     return comp

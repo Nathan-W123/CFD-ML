@@ -625,6 +625,35 @@ def test_sgs_displacement_field_statistics():
     assert s["quiet"]["corr5"] > 0.9 and s["turbulent"]["corr5"] < 0.6
 
 
+def test_sgs_displacement_has_no_jumps_where_u_sgs_changes_in_time():
+    """u_sgs changing between frames (a 5x step in time; lag and observation frames at different
+    u_sgs): between consecutive frames in time order (lag and observation interleaved) D moves by
+    ~ g u_sgs dt, never by a jump of the displacement size A, and stays zero-mean."""
+    from src.data.render import _sgs_displacement
+
+    times = np.concatenate([TIMES, LAG_TIMES])
+    order = np.argsort(times, kind="stable")
+    dt = np.diff(times[order])
+    cases = {"step": np.where(times < 24.5, 0.02, 0.1),                     # 0.02 -> 0.1 m/s between the lag frame at 24 s and the observation at 25 s
+             "lag_vs_obs": np.where(np.arange(2 * T) < T, 0.1, 0.02)}       # observations 0.1, lag frames 0.02 m/s
+    for name, u_t in cases.items():
+        u = np.repeat(u_t.astype(np.float32)[:, None, None], NZ, axis=1).repeat(NX, axis=2)
+        u_mid = 0.5 * (u_t[order][1:] + u_t[order][:-1])
+        ratio, largest = [], 0.0
+        for seed in range(10):
+            D, rec = _sgs_displacement(u, times, DX, {"sgs_gain": 1.0, "sgs_seed": seed})
+            d = D[order].astype(np.float64)
+            step = np.sqrt(((d[1:] - d[:-1]) ** 2).sum(-1).mean(axis=(1, 2)))      # rms |dD| per frame step
+            ratio.append(step / (u_mid * dt))
+            largest = max(largest, float(step.max()) / rec["amplitude_m"])
+            rms = np.sqrt((d ** 2).sum(-1).mean())
+            assert np.abs(d.mean(axis=(1, 2))).max() < 0.05 * rms, name          # no net drift in any frame
+        ratio = np.mean(ratio, axis=0)
+        # Every step moves at ~ g u_sgs (1-4 s steps, well inside the ~16 s correlation time at 0.1 m/s).
+        assert ratio.min() > 0.75 and ratio.max() < 1.25, (name, ratio)
+        assert largest < 0.75, name                                         # <= 0.4 m per step vs A ~ 1 m
+
+
 def test_sgs_turbulence_in_rendered_frames():
     """A static fog layer with a static texture: identical lag and observation frames without subgrid
     motion (sgs_u None, zero, or gain 0, all rendering the same frames); with it the texture boils
@@ -747,6 +776,9 @@ def test_v2_params_come_from_config_and_are_drawn_last():
         return out
 
     assert v1(p) == v1(q)
+    # A configured 0 is a value, not a missing key (one draw either way: the stream is unchanged).
+    z = _params(30, {"camera_shake_tau_s": 0.0})
+    assert z["camera_shake_tau_s"] == 0.0 and v1(z) == v1(p) and z["texture"] == p["texture"]
     dumps_json(p)
 
 

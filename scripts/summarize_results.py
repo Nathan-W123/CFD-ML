@@ -5,7 +5,10 @@
         [--qa reports/qa_train.json] --out reports/results.md
 
 Every number is copied from the inputs; nothing is recomputed. The report
-keeps the synthetic-only disclaimer and the real-world status at the top.
+keeps the synthetic-only disclaimer and the real-world status at the top,
+and renders the real-footage (Stage B) section when evaluation.json has one
+("complete" or "partial"): a label whose status is "no_labels" (not
+annotated on the real test split) is shown as n/a with its reason, never 0.
 """
 
 import _bootstrap  # noqa: F401
@@ -46,6 +49,67 @@ def ms(mean_sd, path, fmt=f3):
     return f"{fmt(r['mean'])} ± {fmt(r['sd'])}"
 
 
+def real_status_line(real):
+    """The real-world status at the top: "partial" names the labels that were not evaluated (n/a, not 0)."""
+    status, reason = real.get("status"), real.get("reason", "")
+    if status == "partial":
+        missing = [f"{k} n/a ({v.get('status')})" for k, v in (real.get("label_status") or {}).items()
+                   if v.get("status") != "evaluated"]
+        reason = (f"Evaluated labels: {', '.join(real.get('evaluated_labels') or [])}; "
+                  + "; ".join(missing) + ". " + reason).strip()
+    return f"**Real-world status: {status}.** {reason}"
+
+
+def _real_label(o, label, key, label_status, fmt=f3):
+    """A per-label real metric: n/a when the label has no known targets ("no_labels") or the value is null."""
+    if (label_status.get(label) or {}).get("status", "evaluated") != "evaluated":
+        return "n/a"
+    pl = ((o or {}).get("per_label") or {}).get(label) or {}
+    if pl.get("status", "evaluated") != "evaluated":
+        return "n/a"
+    return fmt(pl.get(key))
+
+
+def real_section(real):
+    """Markdown lines of the real-footage section (B, C, D on the camera-disjoint real test split)."""
+    split = real.get("split", "test_iid")
+    st = real.get("label_status") or {}
+    evaluated = ", ".join(real.get("evaluated_labels") or []) or "none"
+    L = [f"## Real footage (Stage B, {split} split, camera-disjoint)", "",
+         f"Status: **{real.get('status')}**; evaluated labels: {evaluated}."]
+    for name, rec in st.items():
+        if rec.get("status") != "evaluated":
+            L.append(f"* {name}: {rec.get('status')} ({rec.get('reason', 'no known targets')}); its metrics "
+                     "are n/a, not 0.")
+    c = (real.get("counts") or {}).get(split) or {}
+    if c:
+        L.append(f"* {split}: {c.get('sequences', 'n/a')} windows, {c.get('videos', 'n/a')} videos, "
+                 f"{c.get('cameras', 'n/a')} cameras; known labels: "
+                 + ", ".join(f"{k} {v}" for k, v in (c.get("known_labels") or {}).items()) + ".")
+    L += ["", "| model | operating point | smoke AUROC | fog AUROC | smoke F1 | fog F1 | "
+              "false smoke on fog_only | ECE smoke / fog | abstain smoke / fog |",
+          "|---|---|---|---|---|---|---|---|---|"]
+    names = {"C": "C: CFD-pretrained, zero-shot", "B": "B: real data, from scratch",
+             "D": "D: CFD-pretrained, fine-tuned"}
+    for exp in ("C", "B", "D"):
+        for op in OPS:
+            o = (((real.get(exp) or {}).get(split) or {}).get(op) or {}).get("overall")
+            if not o:
+                continue
+            cc = o.get("ci95") or {}
+
+            def cell(label, key, fmt=f3):
+                v = _real_label(o, label, key, st, fmt)
+                return v + ("" if v == "n/a" or key != "auroc" else ci(cc, f"{label}.auroc"))
+            L.append(f"| {names[exp]} | {op} | {cell('smoke', 'auroc')} | {cell('fog', 'auroc')} | "
+                     f"{cell('smoke', 'f1')} | {cell('fog', 'f1')} | "
+                     f"{pct((o.get('false_smoke_on_fog_only') or {}).get('rate'))} | "
+                     f"{cell('smoke', 'ece')} / {cell('fog', 'ece')} | "
+                     f"{cell('smoke', 'abstain_rate', pct)} / {cell('fog', 'abstain_rate', pct)} |")
+    L.append("")
+    return L
+
+
 def headline_rows(name, test):
     rows = []
     for split in SPLITS:
@@ -69,8 +133,8 @@ def main(argv=None):
     args = ap.parse_args(argv)
     ev = json.loads(Path(args.evaluation).read_text())
     syn, abl = ev["synthetic"], ev["ablations"]
-    L = ["# Results (synthetic evaluation)", "", f"> {ev['disclaimer']}", "",
-         f"**Real-world status: {ev['real'].get('status')}.** {ev['real'].get('reason', '')}", ""]
+    real = ev.get("real") or {}
+    L = ["# Results (synthetic evaluation)", "", f"> {ev['disclaimer']}", "", real_status_line(real), ""]
 
     counts = (ev.get("data") or {}).get("counts") or {}
     if counts:
@@ -179,6 +243,9 @@ def main(argv=None):
                          f"{f3(r['smoke']['auroc'])} | {f3(r['fog']['auroc'])} | "
                          f"{pct(r['false_smoke_on_fog_only'])} | {pct(r['abstain_rate_any'])} |")
             L.append("")
+
+    if real.get("status") in ("complete", "partial"):
+        L += real_section(real)
 
     rob = ev.get("robustness") or {}
     if rob.get("suites"):

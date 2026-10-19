@@ -2,10 +2,12 @@
 
 On constructed arrays: the noise estimate recovers a known sigma and ignores
 scene structure, JPEG raises blockiness, contrast / brightness / flicker /
-global shift are exact, sharpness does not depend on contrast; the coverage of
-real clips by the synthetic [P1, P99] range and the notes point at the right
-render parameters; and a tiny end-to-end run (a video, an image folder and a
-missing clip in a manifest, stand-in synthetic sequences).
+global shift are exact, sharpness does not depend on contrast, motion uses
+only the frame pairs that register; the coverage of real clips by the
+synthetic [P1, P99] range and the notes point at the right render parameters,
+unregistered clips and a real / synthetic spacing mismatch stay out of the
+comparison; and a tiny end-to-end run (a video, an image folder and a missing
+clip in a manifest, stand-in synthetic sequences).
 """
 
 import csv
@@ -113,6 +115,27 @@ def test_clip_flicker_motion_and_interval():
     assert math.isnan(one["flicker"]) and math.isnan(one["motion_px"]) and math.isfinite(one["noise_sigma"])
 
 
+def test_motion_uses_only_registered_pairs():
+    img = _noisy(2.0)
+    rng = np.random.default_rng(9)
+    unrelated = [_u8(rng.normal(128.0, 30.0, img.shape)) for _ in range(3)]
+    frames = np.stack([img, np.roll(np.roll(img, 3, axis=1), -2, axis=0)] + unrelated)
+    shifts = [S.global_shift(frames[i - 1], frames[i]) for i in range(1, len(frames))]
+    # One pair registers (response ~1); three have nothing in common (response ~0, a noise peak's shift).
+    assert shifts[0][2] > 0.5 and all(r < S.MIN_PHASE_RESPONSE for _, _, r in shifts[1:])
+    assert np.median([math.hypot(dx, dy) for dx, dy, _ in shifts]) > 10.0     # unfiltered: tens of px here
+    st = S.clip_stats(frames)                  # 1 of 4 pairs registers: a stray peak could pass, no value
+    assert math.isnan(st["motion_px"]) and st["motion_registered_frac"] == pytest.approx(0.25)
+    shifted = [np.roll(np.roll(img, 3 * k, axis=1), -2 * k, axis=0) for k in range(4)]
+    mostly = S.clip_stats(np.stack(shifted + unrelated[:1]))   # 3 of 4 pairs register: their median
+    assert mostly["motion_px"] == pytest.approx(math.hypot(3, 2), abs=0.1)
+    assert mostly["motion_registered_frac"] == pytest.approx(0.75)
+    none = S.clip_stats(np.stack(unrelated))
+    assert math.isnan(none["motion_px"]) and none["motion_registered_frac"] == 0.0
+    assert math.isfinite(none["flicker"]) and math.isfinite(none["noise_sigma"])
+    assert math.isnan(S.clip_stats(img[None])["motion_registered_frac"])        # no pair at all
+
+
 def test_resize_keeps_aspect_and_matches_pixel_count():
     frames = np.zeros((2, 288, 352), np.uint8)
     small, scale = S.resize_to_pixels(frames, (192, 192))
@@ -175,6 +198,53 @@ def test_compare_coverage_verdicts_and_notes():
     assert all(e["verdict"] == "no_data" for e in out.values())
 
 
+def test_unregistered_clips_leave_the_motion_comparison():
+    real, syn = _records([50.0] * 4 + [150.0])
+    real[4]["resized"].update(motion_px=math.nan, motion_registered_frac=0.0)
+    real[3]["temporal_comparable"] = False                    # out of motion for its spacing: not counted again
+    real[3]["resized"].update(motion_px=math.nan, motion_registered_frac=0.0)
+    syn[0]["stats"].update(motion_px=math.nan, motion_registered_frac=0.0)
+    out = S.compare(real, syn, {}, interval_s=5.0)
+    m = out["motion_px"]
+    assert m["real_resized"]["n"] == 3 and m["synthetic"]["n"] == 100 and m["verdict"] == "covered"
+    assert m["unregistered"] == {"real": 1, "synthetic": 1}
+    assert out["contrast"]["real_resized"]["n"] == 5 and out["contrast"]["verdict"] == "widen_high"
+    for r in real[:3]:                                        # no real clip registers: no motion comparison
+        r["resized"].update(motion_px=math.nan, motion_registered_frac=0.0)
+    m = S.compare(real, syn, {}, interval_s=5.0)["motion_px"]
+    assert m["verdict"] == "no_data" and m["unregistered"]["real"] == 4 and "registers" in m["note"]
+
+
+def test_spacing_mismatch_leaves_flicker_and_motion_uncompared():
+    assert S.spacing_matches(5.0, 5.0) and S.spacing_matches(5.5, 5.0) and S.spacing_matches(5.0, math.nan)
+    assert not S.spacing_matches(10.0, 5.0) and not S.spacing_matches(5.0, 60.0)
+    real, syn = _records([0.5] + [50.0] * 7 + [120.0, 130.0])
+    same = S.compare(real, syn, {}, interval_s=5.5, synthetic_interval_s=5.0)
+    off = S.compare(real, syn, {}, interval_s=10.0, synthetic_interval_s=5.0)
+    for stat in S.STATS:
+        if stat in S.TEMPORAL_STATS:
+            assert same[stat]["verdict"] == "widen_both" and off[stat]["verdict"] == "no_data"
+            assert "10 s apart" in off[stat]["note"] and "--interval-s 5" in off[stat]["note"]
+            assert off[stat]["real_resized"]["n"] == 10 and off[stat]["real_resized"]["outside"] is None
+        else:
+            assert off[stat] == same[stat]
+
+
+def test_temporal_comparable_needs_min_frames_after_deduplication(tmp_path):
+    folder = tmp_path / "gap"
+    folder.mkdir()
+    rng = np.random.default_rng(8)
+    for t in (0, 5, 15, 20):                                   # the 10 s image is missing
+        cv2.imwrite(str(folder / f"cam_t{t}s.png"), _u8(_scene(64, 80, seed=6) + rng.normal(0, 3, (64, 80))))
+    manifest = tmp_path / "real.csv"
+    manifest.write_text("video_path\ngap\n", encoding="utf-8")
+    for min_frames, ok in ((4, True), (5, False)):
+        # five targets 5 s apart fit, but the 10 s one repeats a neighbour: four distinct frames
+        (rec,), skipped = S.real_records(manifest, (48, 48), 5.0, 12, min_frames)
+        assert not skipped and rec["sampling"] == "interval" and rec["native"]["n_frames"] == 4
+        assert rec["temporal_comparable"] is ok, min_frames
+
+
 def test_spearman():
     x = np.arange(10.0)
     assert S.spearman(x, x ** 3) == pytest.approx(1.0)
@@ -182,7 +252,9 @@ def test_spearman():
     assert S.spearman(x, np.ones(10)) is None and S.spearman([1.0, 2.0], [1.0, 2.0]) is None
 
 
-def test_end_to_end_video_folder_and_synthetic(tmp_path, monkeypatch):
+def _e2e_inputs(tmp_path, monkeypatch):
+    """(manifest, synthetic dir): a video, an image folder and a missing clip; four train and one test_ood
+    stand-in synthetic sequences, 5 s apart."""
     rng = np.random.default_rng(7)
     texture = _u8(_scene(80, 96, seed=5))
     video = tmp_path / "clip.avi"
@@ -210,6 +282,8 @@ def test_end_to_end_video_folder_and_synthetic(tmp_path, monkeypatch):
                                            "time:\n  frame_interval_s: 5.0\n")
     for i in range(4):
         (data / "seqs" / "train" / f"seq{i}.npz").write_bytes(b"")
+    (data / "seqs" / "test_ood").mkdir()
+    (data / "seqs" / "test_ood" / "seq9.npz").write_bytes(b"")  # not sampled by default
 
     def fake_load_sequence(path):                              # stand-in for the stored-sequence format
         k = int(Path(path).stem[-1])
@@ -220,6 +294,11 @@ def test_end_to_end_video_folder_and_synthetic(tmp_path, monkeypatch):
     import src.data.dataset
 
     monkeypatch.setattr(src.data.dataset, "load_sequence", fake_load_sequence)
+    return manifest, data
+
+
+def test_end_to_end_video_folder_and_synthetic(tmp_path, monkeypatch):
+    manifest, data = _e2e_inputs(tmp_path, monkeypatch)
     out = tmp_path / "stats.json"
     rc = S.main(["--real-manifest", str(manifest), "--synthetic", str(data), "--out", str(out),
                  "--n-synthetic", "3", "--max-frames", "12"])
@@ -233,9 +312,30 @@ def test_end_to_end_video_folder_and_synthetic(tmp_path, monkeypatch):
     for c in clips.values():
         h, w = c["resized_size"]
         assert abs(h * w / 48 ** 2 - 1.0) < 0.1
-    assert len(doc["synthetic"]["sequences"]) == 3 and doc["synthetic"]["available"] == 4
+    assert len(doc["synthetic"]["sequences"]) == 3 and doc["synthetic"]["available"] == 4     # test_ood left out
+    assert doc["settings"]["splits"] == ["train", "val_select", "val_calib", "test_iid"]
     assert doc["settings"]["interval_s"] == 5.0 and doc["settings"]["synthetic_size"] == [48, 48]
+    assert doc["settings"]["temporal_spacing_ok"] is True
     assert set(doc["stats"]) == set(S.STATS)
+    assert doc["stats"]["motion_px"]["unregistered"] == {"real": 0, "synthetic": 0}
     assert doc["synthetic_tracking"]["noise_sigma~noise_sigma"] == pytest.approx(1.0)
     md = out.with_suffix(".md").read_text()
     assert "## What to change in `render:`" in md and "missing.avi" in md
+    assert "in splits train, val_select, val_calib, test_iid" in md and "**Warning**" not in md
+    assert "0 of them left out of motion because no frame pair registers" in md
+
+
+def test_end_to_end_spacing_mismatch_warns(tmp_path, monkeypatch, capsys):
+    manifest, data = _e2e_inputs(tmp_path, monkeypatch)
+    out = tmp_path / "stats.json"
+    rc = S.main(["--real-manifest", str(manifest), "--synthetic", str(data), "--out", str(out),
+                 "--n-synthetic", "5", "--max-frames", "12", "--interval-s", "10", "--splits", "all"])
+    assert rc == 0
+    err = capsys.readouterr().err
+    assert "warning" in err and "10 s apart" in err and "5 s apart" in err
+    doc = json.loads(out.read_text())
+    assert doc["settings"]["temporal_spacing_ok"] is False and doc["settings"]["splits"] is None
+    assert doc["synthetic"]["available"] == 5
+    for stat in S.TEMPORAL_STATS:
+        assert doc["stats"][stat]["verdict"] == "no_data" and "10 s apart" in doc["stats"][stat]["note"]
+    assert "**Warning**" in out.with_suffix(".md").read_text()

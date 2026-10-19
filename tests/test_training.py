@@ -2,6 +2,7 @@
 
 import copy
 import json
+from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
@@ -182,6 +183,8 @@ def test_fit_calibration_operating_points(fs):
     assert rate <= 0.05 + 1e-9
     assert cal["calibration"]["groups_per_category"]["fog_only"] == 20
     assert cal["calibration"]["insufficient_calibration_data"] is False
+    assert cal["calibration"]["category_support"] == {"status": "applicable"}
+    assert cal["calibration"]["untrained_labels"] == []
 
 
 # ============================================================================= metrics
@@ -665,6 +668,21 @@ def test_training_and_calibration_with_unknown_fog_labels(fs):
     assert cal["temperatures"]["fog"] == 1.0 and cal["thresholds"]["balanced"]["fog"]["logit"] == 0.0
     assert cal["calibration"]["prevalence"]["fog"]["per_sequence"] is None
     assert cal["thresholds"]["low_false_alarm"]["smoke"] == cal["thresholds"]["balanced"]["smoke"]
+    # Nothing known about fog and nothing to keep: always abstain on it, never a confident decision.
+    from src.training.train import UNTRAINED_MARGIN
+
+    assert cal["calibration"]["untrained_labels"] == ["fog"]
+    for op in ("balanced", "low_false_alarm"):
+        assert cal["abstain"]["margins"][op]["fog"] == UNTRAINED_MARGIN
+        assert cal["calibration"]["abstain_fit"][op]["fog"]["reason"] == "untrained_label_always_abstain"
+        assert 0.25 <= cal["abstain"]["margins"][op]["smoke"] < UNTRAINED_MARGIN
+    # Smoke-only rows: the four (smoke, fog) categories are not applicable, not "insufficient".
+    cs = cal["calibration"]["category_support"]
+    assert cs["status"] == "not_applicable" and cs["n_unknown_label_rows"] == len(vc)
+    assert set(cs["partial_categories"]) == {"smoke_fog_unknown", "no_smoke_fog_unknown"}
+    assert sum(v["sequences"] for v in cs["partial_categories"].values()) == len(vc)
+    assert cal["calibration"]["insufficient_categories"] == []
+    assert cal["calibration"]["insufficient_calibration_data"] is False
     # Fine-tuning: a label without known calibration rows keeps the pretrained model's rules.
     pre = {"temperatures": {"smoke": 1.3, "fog": 2.2},
            "thresholds": {op: {"smoke": {"logit": 0.1}, "fog": {"logit": 0.7}} for op in ("balanced", "low_false_alarm")},
@@ -673,6 +691,7 @@ def test_training_and_calibration_with_unknown_fog_labels(fs):
     assert kept["temperatures"]["fog"] == 2.2 and kept["thresholds"]["balanced"]["fog"]["logit"] == 0.7
     assert kept["abstain"]["margins"]["low_false_alarm"]["fog"] == 0.45
     assert kept["calibration"]["label_support"]["fog"]["calibration"] == "kept_pretrained"
+    assert kept["calibration"]["untrained_labels"] == []
     assert kept["temperatures"]["smoke"] == cal["temperatures"]["smoke"]      # known labels are still fitted
     dumps_json(kept)                                                          # finite, JSON / YAML-safe
 
@@ -701,6 +720,20 @@ def test_stage_b_on_smoke_only_real_data(tmp_path, fs):
     b = run_finetune(real, cfg, tmp_path / "pre", tmp_path / "B", from_scratch=True, log=None)
     assert d["label_support"]["fog"]["calibration"] == "kept_pretrained"
     assert b["label_support"]["fog"]["calibration"] == "default_unfitted"
+    assert b["untrained_labels"] == ["fog"] and d["untrained_labels"] == []
+    assert b["category_support"]["status"] == "not_applicable" and b["insufficient_calibration_data"] is False
+    # B never learned fog: the exported expert abstains on fog for every input, at every operating point.
+    from src.inference.predict import PhysicsExpert
+
+    test = real.split("test_iid")
+    expert_b = PhysicsExpert.load(tmp_path / "B")
+    for op in ("balanced", "low_false_alarm"):
+        pb = expert_b.predict(test.X, op)
+        assert np.all(pb["decisions"][:, 1] == -1)
+        assert all("fog_near_threshold" in r for r, ok in zip(pb["abstain_reasons"], pb["valid_input"]) if ok)
+    expert_b.config["abstain"]["margins"]["balanced"]["fog"] = 0.0          # it is the untrained margin that abstains
+    pb = expert_b.predict(test.X, "balanced")
+    assert pb["valid_input"].any() and np.all(pb["decisions"][pb["valid_input"], 1] != -1)
     pre, cd = read_yaml(tmp_path / "pre" / "model_config.yaml"), read_yaml(tmp_path / "D" / "model_config.yaml")
     assert cd["temperatures"]["fog"] == pre["temperatures"]["fog"]
     assert cd["thresholds"]["balanced"]["fog"] == pre["thresholds"]["balanced"]["fog"]
@@ -731,6 +764,20 @@ def test_stage_b_on_smoke_only_real_data(tmp_path, fs):
     assert "B" not in merged["ablations"]["reasons"]
     write_json(tmp_path / "eval.json", merged)                            # finite JSON only
 
+    # The Markdown report renders the real section; fog (no_labels) is n/a there, never 0.
+    write_json(tmp_path / "eval_real.json", update_real_section(None, res))
+    assert _script("summarize_results").main(["--evaluation", str(tmp_path / "eval_real.json"),
+                                              "--out", str(tmp_path / "results.md")]) == 0
+    md = (tmp_path / "results.md").read_text()
+    assert "**Real-world status: partial.**" in md and "## Real footage" in md and "fog: no_labels" in md
+    rows = [ln for ln in md.splitlines() if ln.startswith(("| C: ", "| B: ", "| D: "))]
+    assert len(rows) == 6
+    for ln in rows:
+        # model | op | smoke AUROC | fog AUROC | smoke F1 | fog F1 | false smoke on fog_only | ECE | abstain
+        cells = [c.strip() for c in ln.strip().strip("|").split("|")]
+        assert cells[2] != "n/a" and cells[3] == cells[5] == cells[6] == "n/a"
+        assert cells[7].endswith(" / n/a") and cells[8].endswith(" / n/a")
+
     # The script: Stage B on its own keeps the synthetic sections of an existing evaluation.json.
     import shutil
 
@@ -752,3 +799,177 @@ def test_stage_b_on_smoke_only_real_data(tmp_path, fs):
     assert out["synthetic"] == {"kept": True} and out["real"]["status"] == "partial"
     assert out["real"]["D"]["test_iid"]["balanced"]["overall"]["per_label"]["fog"]["auroc"] is None
     assert out["ablations"]["B"] is not None and out["ablations"]["D"] is not None
+
+
+# ============================================================================= real-result bookkeeping, scripts
+def _script(name):
+    """Import scripts/<name>.py as a fresh module.
+
+    A copy cached by another test may have bound names that test patched while
+    it was imported (tests/test_image_stats.py imports extract_features with
+    src.data.dataset.load_sequence monkeypatched), so it is never reused.
+    """
+    import importlib
+    import sys
+
+    scripts = str(Path(__file__).resolve().parents[1] / "scripts")
+    sys.modules.pop(name, None)
+    sys.path.insert(0, scripts)
+    try:
+        return importlib.import_module(name)
+    finally:
+        sys.path.remove(scripts)
+
+
+def test_update_real_section_never_keeps_stale_real_results():
+    from src.training.evaluate import BD_REASON, update_real_section
+
+    old = {"synthetic": {"kept": True}, "real": {"status": "complete"},
+           "ablations": {"A": {"a": 1}, "B": {"old": "B"}, "C": {"c": 1}, "D": {"old": "D"}, "reasons": {},
+                         "real_label_status": {"fog": {"status": "evaluated"}}, "extra_baselines": {"p": 1}}}
+    snapshot = copy.deepcopy(old)
+    ab = update_real_section(old, {"status": "pending", "reason": "no footage"})["ablations"]
+    assert ab["B"] is None and ab["D"] is None and ab["reasons"] == {"B": BD_REASON, "D": BD_REASON}
+    assert "real_label_status" not in ab
+    assert (ab["A"], ab["C"], ab["extra_baselines"]) == ({"a": 1}, {"c": 1}, {"p": 1})
+    assert old == snapshot                                                   # the input is not modified
+    new = {"status": "partial", "B": {"new": "B"}, "D": None, "label_status": {"smoke": {"status": "evaluated"}}}
+    doc = update_real_section(old, new)
+    ab = doc["ablations"]
+    assert ab["B"] == {"new": "B"} and ab["D"] is None and ab["reasons"] == {"D": BD_REASON}
+    assert ab["real_label_status"] == {"smoke": {"status": "evaluated"}} and doc["real"]["status"] == "partial"
+    assert doc["synthetic"] == {"kept": True}
+
+
+def test_curves_and_roc_plot_skip_a_label_without_known_targets(tmp_path):
+    from src.training.evaluate import curves, plot_roc_pr
+
+    rng = np.random.default_rng(0)
+    y = np.stack([(rng.random(60) < 0.5).astype(float), np.full(60, np.nan)], axis=1)
+    probs = rng.random((60, 2))
+    c = curves(probs, y)
+    assert c["fog"] == {"status": "no_labels", "roc": None, "pr": None}
+    assert "status" not in c["smoke"] and c["smoke"]["roc"]["fpr"][0] == 0.0 and c["smoke"]["roc"]["tpr"][-1] == 1.0
+    json.dumps(c, allow_nan=False)
+    assert plot_roc_pr(probs, y, tmp_path / "roc.png", "smoke only").exists()
+    assert plot_roc_pr(probs, np.full((60, 2), np.nan), tmp_path / "none.png", "nothing known").exists()
+
+
+def test_real_feature_config_sources_and_timing_conflicts(tmp_path, capsys):
+    from src.data.pipeline import feature_timing
+    from src.utils.io import write_yaml
+
+    ef = _script("extract_features")
+    art = tmp_path / "art"
+    art.mkdir()
+    write_yaml(art / "model_config.yaml", {"preprocessing": {"feature_config": {
+        "expected_interval_s": 60.0, "flow_lag_s": 0.0, "max_offset_s": 10.0, "work_size": 96, "unknown_key": 1}}})
+    base = ["--real-manifest", "m.csv", "--out", "o.npz"]
+    fcfg, rec = ef.real_feature_config(ef.parse_args(base + ["--artifacts", str(art)]))
+    assert (fcfg.expected_interval_s, fcfg.flow_lag_s, fcfg.max_offset_s, fcfg.work_size) == (60.0, 0.0, 10.0, 96)
+    assert fcfg.flow_mode == "consecutive" and rec["source"] == f"artifacts:{art}" and rec["forced"] is False
+    # an explicit value equal to the model's is fine (none and 0 both mean consecutive flow) ...
+    _, rec = ef.real_feature_config(ef.parse_args(base + ["--artifacts", str(art), "--flow-lag-s", "none",
+                                                          "--max-offset-s", "10"]))
+    assert rec["forced"] is False
+    # ... a contradicting one is refused unless forced
+    with pytest.raises(SystemExit, match="contradicts the exported model"):
+        ef.real_feature_config(ef.parse_args(base + ["--artifacts", str(art), "--interval-s", "5"]))
+    fcfg, rec = ef.real_feature_config(ef.parse_args(base + ["--artifacts", str(art), "--interval-s", "5",
+                                                             "--force-timing"]))
+    assert fcfg.expected_interval_s == 5.0 and rec["forced"] is True
+    assert rec["overridden"] == {"expected_interval_s": 5.0}
+    # the exported model defines the timing: a profile on top of it is an error
+    far = Path(__file__).resolve().parents[1] / "configs" / "simulation_far.yaml"
+    with pytest.raises(SystemExit):
+        ef.parse_args(base + ["--artifacts", str(art), "--profile", str(far)])
+    assert "exclude each other" in capsys.readouterr().err
+    fcfg, rec = ef.real_feature_config(ef.parse_args(base + ["--profile", str(far)]))
+    want = feature_timing(read_yaml(far))
+    assert (fcfg.expected_interval_s, fcfg.flow_lag_s, fcfg.max_offset_s) == \
+        (want["expected_interval_s"], want["flow_lag_s"], want["max_offset_s"])
+    assert rec["source"] == f"profile:{far}"
+
+
+def _minute_folder(path, n=14, seed=0):
+    """One frame per minute (+- 3 s jitter): a dark plume rising from a fixed base, timestamps.csv sidecar."""
+    import cv2
+
+    rng = np.random.default_rng(seed)
+    path.mkdir(parents=True)
+    t = 60.0 * np.arange(n) + rng.uniform(-3, 3, n)
+    t[0] = 0.0
+    yy, xx = np.mgrid[0:72, 0:96]
+    rows = ["filename,timestamp_s"]
+    for k in range(n):
+        img = 150.0 + 20.0 * np.sin(xx / 7.0) * np.cos(yy / 5.0) + rng.normal(0, 2, (72, 96))
+        plume = (np.abs(xx - 48) < 6 + k) & (yy > 60 - 3 * k)
+        img[plume] -= 60.0
+        name = f"f{k:03d}.jpg"
+        cv2.imwrite(str(path / name), np.clip(img, 0, 255).astype(np.uint8))
+        rows.append(f"{name},{t[k]:.3f}")
+    (path / "timestamps.csv").write_text("\n".join(rows) + "\n")
+    return t
+
+
+def test_extract_real_consecutive_windows_and_synthetic_stored_config(tmp_path):
+    from dataclasses import asdict
+
+    from src.data.features import FeatureConfig, extract_features_with_meta
+    from src.data.pipeline import feature_timing
+
+    ef = _script("extract_features")
+    far = Path(__file__).resolve().parents[1] / "configs" / "simulation_far.yaml"
+    timing = feature_timing(read_yaml(far))
+    t = _minute_folder(tmp_path / "seq")
+    manifest = tmp_path / "real.csv"
+    manifest.write_text("video_path,camera_id,video_id,smoke,fog,split,start_s,max_windows,window_id,camera_mount\n"
+                        f"{tmp_path / 'seq'},stgo-s-mobo-c,seq,1,,test_iid,0.000,1,seq-post0,stgo-s\n")
+    assert ef.main(["--real-manifest", str(manifest), "--out", str(tmp_path / "far.npz"), "--profile", str(far)]) == 0
+    fs = FeatureSet.load(tmp_path / "far.npz")
+    assert len(fs) == 1 and fs.y[0, 0] == 1.0 and np.isnan(fs.y[0, 1]) and fs.source == "real"
+    m = fs.meta[0]
+    assert m["camera_mount"] == "stgo-s" and m["flow_mode"] == "consecutive" and m["window_id"] == "seq-post0"
+    assert m["feature_config"]["expected_interval_s"] == timing["expected_interval_s"]
+    assert m["feature_config"]["max_offset_s"] == timing["max_offset_s"]
+    assert not m["feature_config"]["flow_lag_s"]                              # no lag frames
+    np.testing.assert_allclose(m["obs_times"], t[:12], atol=1e-3)            # 12 consecutive observations
+    # The near-field timing (lag pairs 1 s apart) refuses one-minute imagery: nothing is extracted.
+    assert ef.main(["--real-manifest", str(manifest), "--out", str(tmp_path / "near.npz")]) == 1
+    assert "flow_lag_s" in json.dumps(read_json(tmp_path / "near.skipped.json"))
+
+    # Synthetic re-extraction: each row with its stored feature_config and roi_scale, not near-field defaults.
+    rng = np.random.default_rng(1)
+    T, H, W = 12, 48, 64
+    frames = rng.integers(60, 200, (T, H, W), dtype=np.uint8)
+    masks = np.zeros((T, H, W), dtype=bool)
+    masks[:, 20:40, 24:40] = True
+    frames[masks] = (frames[masks] * 0.5).astype(np.uint8)
+    rendered = SimpleNamespace(frames=frames, lag_frames=None, masks=masks, timestamps=np.arange(T) * 60.0,
+                               lag_timestamps=None, mask_source="degraded", visibility={}, render_params={})
+    sim = SimpleNamespace(sim_id="s", category="smoke_only", regime="ridge_cloud", labels=(1, 0), seed=1,
+                          params={"split": "test_iid"}, valid=True, validity={}, dx=50.0)
+    data = tmp_path / "syn"
+    seq_path = save_sequence(data / "seqs" / "s-v0", rendered, sim, "s-v0")
+    stored = {"expected_interval_s": 60.0, "flow_lag_s": 0.0, "max_offset_s": 10.0, "work_size": 64}
+    FeatureSet(X=np.zeros((1, 12, 14), np.float32), y=[[1.0, 0.0]], seq_ids=["s-v0"], sim_ids=["s"], groups=["s"],
+               splits=["test_iid"], categories=["smoke_only"], regimes=["ridge_cloud"], tags=[""],
+               mask_sources=["degraded"], meta=[{"seq_path": str(seq_path.relative_to(data)), "roi_scale": 1.7,
+                                                 "feature_config": stored}]).save(data / "features.npz")
+    assert ef.main(["--data", str(data), "--out", str(tmp_path / "re.npz")]) == 0
+    want, meta = extract_features_with_meta(frames, np.arange(T) * 60.0, masks, None, None,
+                                            FeatureConfig(**stored, roi_scale=1.7))
+    re_fs = FeatureSet.load(tmp_path / "re.npz")
+    np.testing.assert_array_equal(re_fs.X[0], want)
+    assert meta["flow_mode"] == "consecutive" == re_fs.meta[0]["flow_mode"]
+    assert re_fs.meta[0]["feature_config"] == {k: v for k, v in asdict(FeatureConfig(**stored)).items()
+                                               if k != "roi_scale"} and re_fs.meta[0]["roi_scale"] == 1.7
+    # timing overrides: the rows record the timing they were re-extracted with
+    assert ef.main(["--data", str(data), "--out", str(tmp_path / "re30.npz"), "--interval-s", "30"]) == 0
+    m30 = FeatureSet.load(tmp_path / "re30.npz").meta[0]
+    assert m30["feature_config"]["expected_interval_s"] == 30.0 and m30["feature_config"]["work_size"] == 64
+    assert m30["feature_meta"]["timing"] == extract_features_with_meta(
+        frames, np.arange(T) * 60.0, masks, None, None,
+        FeatureConfig(**{**stored, "expected_interval_s": 30.0}, roi_scale=1.7))[1]["timing"]
+    near, _ = extract_features_with_meta(frames, np.arange(T) * 60.0, masks, None, None, FeatureConfig())
+    assert not np.array_equal(near, want)                                    # the defaults would differ

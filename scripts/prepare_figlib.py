@@ -14,15 +14,25 @@ before to 40 min after). Imagery courtesy of HPWREN, the High Performance
 Wireless Research and Education Network, UC San Diego; credit
 https://www.hpwren.ucsd.edu/ whenever it is used (written to <out>/CREDIT.txt).
 
-Per sequence (the chosen N are spread over cameras: round robin over the
-cameras in a fixed hashed order, oldest sequence of each camera first):
+The chosen N are split-aware: N is divided over train / val_select /
+val_calib / test_iid in proportion to --fractions (every split with a
+non-zero fraction gets at least one sequence when N allows; a split with
+too few sequences hands its share to the others), and within a split the
+sequences are spread over its cameras (round robin over the cameras in a
+fixed hashed order, oldest sequence of each camera first). With --zero-shot
+it is that round robin over every camera. Per sequence:
 
 1. the tarball https://cdn.hpwren.ucsd.edu/HPWREN-FIgLib-Data/Tar/<name>.tgz
    is downloaded to <out>/_downloads/<name>.tgz.part (resumed with an HTTP
-   range request when a partial file exists) and renamed when complete;
+   range request when a partial file exists) and renamed only when its size
+   matches the server's (Content-Length, or the total of Content-Range when
+   resuming); a short transfer keeps the .part, is listed as skipped and
+   resumes on the next run;
 2. it is read member by member, refusing absolute paths, ".." and anything
    that is not a regular file; only <unix_ts>_<offset_s>.jpg images are used
-   (nothing from the archive is written to disk as is);
+   (nothing from the archive is written to disk as is); a truncated or
+   corrupt archive is deleted and the sequence listed as skipped (a rerun
+   downloads it again);
 3. every frame is downscaled to at most --max-width pixels (default 1024) and
    re-encoded as JPEG quality 90 into <out>/<name>/; the tarball is deleted;
 4. <out>/<name>/timestamps.csv (filename,timestamp_s relative to the first
@@ -38,18 +48,22 @@ per sequence, --pre-windows windows (default 1; the latest first) of 12 frames
 is checked with features.select_window at the far-field timing (no lag
 frames, tolerance --max-offset-s, default 10 s) before it is listed. fog is
 left empty (unknown: FIgLib does not annotate fog). camera_id is the camera
-part of the name (e.g. rm-n-mobo-c), so different fires on one camera share a
-group; the split is camera-disjoint and deterministic: crc32 of the camera's
-mount (site-direction, so the colour and mono cameras mobo-c / mobo-m of one
-mount stay together) against --fractions (default train 0.5, val_select
-0.15, val_calib 0.15, test_iid 0.2), or test_iid for everything with
---zero-shot. Every window has its own window_id, so window ids never collide.
+part of the name: the trailing <site>[-<direction>]-<camera model> (e.g.
+rm-n-mobo-c; 20220302-Jimfire-0921-stgo-s-mobo-c -> stgo-s-mobo-c), so
+different fires on one camera share a group; camera_mount (its
+site-direction, e.g. stgo-s) is written to every row too. The split is
+camera-disjoint and deterministic: crc32 of the camera's mount (so the
+colour and mono cameras mobo-c / mobo-m of one mount stay together) against
+--fractions (default train 0.5, val_select 0.15, val_calib 0.15, test_iid
+0.2), or test_iid for everything with --zero-shot. Every window has its own
+window_id, so window ids never collide.
 """
 
 import _bootstrap  # noqa: F401
 
 import argparse
 import csv
+import http.client
 import json
 import os
 import re
@@ -125,22 +139,57 @@ def list_sequences(index_url: str = INDEX_URL) -> list:
     return names
 
 
-def choose(names, n: int) -> list:
-    """N names spread over cameras: round robin over cameras (fixed crc32 order), oldest sequence first."""
+def _round_robin(by_camera: dict) -> list:
+    """Every name of {camera: [names, oldest first]}: round robin over the cameras in fixed crc32 order."""
+    order = sorted(by_camera, key=lambda c: (_unit_hash(c), c))
+    out, depth = [], 0
+    while any(len(v) > depth for v in by_camera.values()):
+        out.extend(by_camera[cam][depth] for cam in order if len(by_camera[cam]) > depth)
+        depth += 1
+    return out
+
+
+def split_quotas(n: int, fractions) -> list:
+    """Sequences per split (SPLIT_NAMES order) for n in proportion to the fractions: every split with a
+    non-zero fraction gets at least one when n allows, the rest by largest remainder (ties: earlier split)."""
+    f = np.asarray(fractions, dtype=np.float64)
+    ideal = n * f / f.sum()
+    q = np.floor(ideal).astype(int)
+    pos = np.flatnonzero(f > 0)
+    if n >= len(pos):
+        q[pos] = np.maximum(q[pos], 1)
+    while q.sum() > n:                     # trim where the quota most exceeds its share, keeping one each
+        cand = [i for i in range(len(q)) if q[i] > 1] or [i for i in range(len(q)) if q[i] > 0]
+        q[max(cand, key=lambda i: (q[i] - ideal[i], -i))] -= 1
+    while q.sum() < n:
+        q[max(pos, key=lambda i: (ideal[i] - q[i], -i))] += 1
+    return [int(v) for v in q]
+
+
+def choose(names, n: int, fractions=None, zero_shot: bool = False) -> list:
+    """N names, split-aware: N divided over the splits in proportion to `fractions` (split_quotas; a
+    split short of sequences hands its share to the splits furthest below their share), and within a split
+    spread over its cameras (round robin, fixed crc32 order, oldest sequence first). Without fractions, or
+    with zero_shot (everything is test_iid), the round robin over every camera."""
     by_camera = defaultdict(list)
     for name in sorted(names):
         try:
             by_camera[camera_id(name)].append(name)
         except ValueError:
             print(f"skipping {name}: no camera in the name", file=sys.stderr)
-    order = sorted(by_camera, key=lambda c: (_unit_hash(c), c))
-    picked, depth = [], 0
-    while len(picked) < n and any(len(v) > depth for v in by_camera.values()):
-        for cam in order:
-            if len(by_camera[cam]) > depth and len(picked) < n:
-                picked.append(by_camera[cam][depth])
-        depth += 1
-    return picked
+    if fractions is None or zero_shot:
+        return _round_robin(by_camera)[:n]
+    per_split = {s: _round_robin({c: v for c, v in by_camera.items() if split_for(c, fractions) == s})
+                 for s in SPLIT_NAMES}
+    quota = dict(zip(SPLIT_NAMES, split_quotas(n, fractions)))
+    take = {s: min(quota[s], len(per_split[s])) for s in SPLIT_NAMES}
+    ideal = {s: n * f / float(np.sum(fractions)) for s, f in zip(SPLIT_NAMES, fractions)}
+    while sum(take.values()) < n:
+        spare = [s for s in SPLIT_NAMES if take[s] < len(per_split[s]) and ideal[s] > 0]
+        if not spare:
+            break
+        take[max(spare, key=lambda s: (ideal[s] - take[s], -SPLIT_NAMES.index(s)))] += 1
+    return [name for s in SPLIT_NAMES for name in per_split[s][:take[s]]]
 
 
 # =============================================================================
@@ -148,8 +197,24 @@ def choose(names, n: int) -> list:
 # =============================================================================
 
 
+def _expected_size(resp, have: int):
+    """Full size of the file a response completes: Content-Length for 200, the total after '/' in
+    Content-Range for 206 (else what we have + Content-Length); None when the server does not say."""
+    length = resp.headers.get("Content-Length")
+    if resp.status == 206:
+        m = re.match(r"\s*bytes\s+\d+-\d+/(\d+)\s*$", resp.headers.get("Content-Range") or "")
+        if m:
+            return int(m.group(1))
+        return have + int(length) if length is not None else None
+    return int(length) if length is not None else None
+
+
 def download(url: str, dest: Path) -> Path:
-    """Download to <dest>.part (resuming a partial file with a range request), then rename to dest."""
+    """Download to <dest>.part (resuming a partial file with a range request), then rename to dest.
+
+    The .part is renamed only when its size is the server's (`_expected_size`); a short transfer
+    raises OSError and keeps the .part, so the next run resumes it.
+    """
     if dest.exists():
         return dest
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -166,6 +231,7 @@ def download(url: str, dest: Path) -> Path:
     with resp:
         mode = "ab" if have and resp.status == 206 else "wb"     # 200: the server ignored the range
         total = resp.headers.get("Content-Length")
+        expected = _expected_size(resp, have)
         print(f"  downloading {url} ({'resuming at ' + str(have) + ' B, ' if mode == 'ab' else ''}"
               f"{int(total) / 1e6:.1f} MB to go)" if total else f"  downloading {url}", flush=True)
         with open(part, mode) as fh:
@@ -174,6 +240,9 @@ def download(url: str, dest: Path) -> Path:
                 if not chunk:
                     break
                 fh.write(chunk)
+    size = part.stat().st_size
+    if expected is not None and size != expected:
+        raise OSError(f"incomplete download of {url}: {size} of {expected} bytes in {part}; rerun to resume")
     os.replace(part, dest)
     return dest
 
@@ -201,30 +270,41 @@ def downscale_jpeg(data: bytes, max_width: int) -> tuple:
 
 
 def prepare_sequence(name: str, out: Path, max_width: int) -> dict:
-    """Download, check, downscale and index one sequence; returns its sequence.json record."""
+    """Download, check, downscale and index one sequence; returns its sequence.json record.
+
+    A truncated or corrupt archive (tar / gzip / zlib errors, EOF) is deleted and raises ValueError,
+    so the caller lists the sequence as skipped and a rerun downloads it again.
+    """
     seq_dir = out / name
     record_path = seq_dir / "sequence.json"
     if record_path.exists() and (seq_dir / "timestamps.csv").exists():
         return json.loads(record_path.read_text())
     tgz = download(TAR_URL.format(name=name), out / "_downloads" / f"{name}.tgz")
-    seq_dir.mkdir(parents=True, exist_ok=True)
-    frames = []
+    frames, jpegs = [], []
     sizes = set()
-    with tarfile.open(tgz, "r:*") as tf:
-        for member in tf:
-            if not _safe_member(member):
-                continue
-            base = PurePosixPath(member.name).name
-            m = FRAME_RE.match(base)
-            if m is None:
-                continue
-            fh = tf.extractfile(member)
-            if fh is None:
-                continue
-            jpeg, size = downscale_jpeg(fh.read(), max_width)
-            (seq_dir / base).write_bytes(jpeg)
-            sizes.add(size)
-            frames.append({"filename": base, "unix_s": int(m.group(1)), "offset_s": int(m.group(2))})
+    try:
+        with tarfile.open(tgz, "r:*") as tf:
+            for member in tf:
+                if not _safe_member(member):
+                    continue
+                base = PurePosixPath(member.name).name
+                m = FRAME_RE.match(base)
+                if m is None:
+                    continue
+                fh = tf.extractfile(member)
+                if fh is None:
+                    continue
+                jpeg, size = downscale_jpeg(fh.read(), max_width)
+                jpegs.append((base, jpeg))
+                sizes.add(size)
+                frames.append({"filename": base, "unix_s": int(m.group(1)), "offset_s": int(m.group(2))})
+    except (tarfile.TarError, EOFError, zlib.error, OSError) as exc:
+        tgz.unlink(missing_ok=True)
+        raise ValueError(f"{name}: truncated or corrupt archive ({type(exc).__name__}: {exc}); deleted, "
+                         "a rerun downloads it again") from exc
+    seq_dir.mkdir(parents=True, exist_ok=True)       # written only once the whole archive has been read
+    for base, jpeg in jpegs:
+        (seq_dir / base).write_bytes(jpeg)
     if len(frames) < N_STEPS:
         raise ValueError(f"{name}: only {len(frames)} frames in the archive")
     frames.sort(key=lambda f: f["unix_s"])
@@ -306,14 +386,15 @@ def manifest_rows(record: dict, seq_dir: Path, args) -> list:
                      "smoke": 1 if kind == "post" else 0, "fog": "", "split": split,
                      "start_s": f"{start:.3f}", "max_windows": 1, "window_id": f"{record['name']}-{kind}{k}",
                      "plume_offset_first_s": int(off0), "plume_offset_last_s": int(off1),
-                     "camera_mount": record["mount"]})
+                     "camera_mount": record.get("mount") or camera_mount(record["camera_id"])})
     return rows
 
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--out", default="data/real/figlib")
-    ap.add_argument("--n", type=int, default=20, help="number of sequences (spread over cameras)")
+    ap.add_argument("--n", type=int, default=20,
+                    help="number of sequences (divided over the splits by --fractions, spread over cameras)")
     ap.add_argument("--names", default=None, help="comma list of sequence names instead of --n")
     ap.add_argument("--max-width", type=int, default=1024, help="downscale frames to at most this width (px)")
     ap.add_argument("--interval-s", type=float, default=60.0, help="observation spacing of a window")
@@ -331,13 +412,15 @@ def main(argv=None):
     out.mkdir(parents=True, exist_ok=True)
     (out / "CREDIT.txt").write_text(CREDIT + "\n", encoding="utf-8")
     print(CREDIT)
-    names = args.names.split(",") if args.names else choose(list_sequences(args.index_url), args.n)
+    names = (args.names.split(",") if args.names else
+             choose(list_sequences(args.index_url), args.n, args.fractions, args.zero_shot))
     rows, skipped = [], []
     for i, name in enumerate(names):
         print(f"[{i + 1}/{len(names)}] {name}", flush=True)
         try:
             record = prepare_sequence(name, out, args.max_width)
-        except (OSError, ValueError, tarfile.TarError, urllib.error.URLError) as exc:
+        except (OSError, ValueError, EOFError, zlib.error, tarfile.TarError, urllib.error.URLError,
+                http.client.HTTPException) as exc:
             print(f"  skipped: {exc}", file=sys.stderr)
             skipped.append({"name": name, "reason": str(exc)})
             continue

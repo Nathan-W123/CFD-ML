@@ -6,8 +6,9 @@ Synthetic (re-extraction from data/<name>/seqs, e.g. to measure the mask-source 
 
     Each row is re-extracted with the extractor settings it was generated with
     (its stored feature_config and roi_scale: observation interval, flow lag
-    or consecutive flow, timing tolerance); --interval-s / --flow-lag-s /
-    --max-offset-s override them.
+    or consecutive flow, timing tolerance; the FeatureConfig defaults only for
+    rows that record none); --interval-s / --flow-lag-s / --max-offset-s
+    override them.
 
 Real footage (Stage B; the same extractor as for synthetic data):
     python scripts/extract_features.py --real-manifest real.csv --artifacts artifacts --out data/real/features.npz
@@ -18,10 +19,12 @@ Real footage (Stage B; the same extractor as for synthetic data):
     model's preprocessing.feature_config, exactly as
     PhysicsExpert.features_from_frames uses it), else --profile (a simulation
     profile's time block: frame_interval_s, flow_lag_s, max_offset_s), else
-    the FeatureConfig defaults. An explicit --interval-s / --flow-lag-s /
-    --max-offset-s that contradicts the exported model is an error unless
-    --force-timing is given (features at another timing would be judged
-    against the model's own timing anyway, and the windows would be refused).
+    the FeatureConfig defaults; --profile together with --artifacts is an
+    error (the exported model defines the timing). An explicit --interval-s /
+    --flow-lag-s / --max-offset-s that contradicts the exported model is an
+    error unless --force-timing is given (features at another timing would be
+    judged against the model's own timing anyway, and the windows would be
+    refused).
 
     Two flow modes, the configuration's: "lag" (near-field: 12 observations
     `interval` apart, each with a frame `flow_lag_s` earlier; footage whose
@@ -34,12 +37,13 @@ real.csv columns: video_path (a video file or an image folder with a
 timestamps.csv sidecar or *_t<seconds>s.<ext> names), camera_id, video_id,
 smoke, fog (0 / 1, or empty = unknown: stored as NaN and left out of training
 and evaluation for that label), optional: split (train / val_select /
-val_calib / test_iid), start_s, stride_s (window spacing, default 12
-observation intervals), max_windows, window_id (unique id of the row's
-windows; needed when one video appears in several rows, else the row's start_s
-goes into the id), mask_dir (one PNG per frame named frame_<index>.png with a
-6-digit zero-padded index, e.g. frame_000123.png, where index is the frame's
-position on the clip's time line: the decoded frame number of a video, the
+val_calib / test_iid), camera_mount (copied into the row meta), start_s,
+stride_s (window spacing, default 12 observation intervals), max_windows,
+window_id (unique id of the row's windows; needed when one video appears in
+several rows, else the row's start_s goes into the id), mask_dir (one PNG
+per frame named frame_<index>.png with a 6-digit zero-padded index, e.g.
+frame_000123.png, where index is the frame's position on the clip's time
+line: the decoded frame number of a video, the
 time-sorted image position of a folder; same size as the frames, non-zero =
 candidate region; without it the image-only fallback detector is used and
 recorded as mask_source).
@@ -106,7 +110,10 @@ def parse_args(argv=None):
                          "(e.g. configs/simulation_far.yaml: time.frame_interval_s / flow_lag_s / max_offset_s)")
     ap.add_argument("--force-timing", action="store_true",
                     help="allow --interval-s / --flow-lag-s / --max-offset-s to differ from the exported model")
-    return ap.parse_args(argv)
+    args = ap.parse_args(argv)
+    if args.artifacts and args.profile:
+        ap.error("--profile and --artifacts exclude each other: the exported model defines the timing")
+    return args
 
 
 def _same_timing(key: str, a, b) -> bool:
@@ -158,7 +165,7 @@ def synthetic(args):
         keep &= np.isin(fs.splits, args.splits.split(","))
     fs = fs.subset(keep)
     X = np.zeros_like(fs.X)
-    sources = []
+    sources, metas = [], []
     known = {f.name for f in dc_fields(FeatureConfig)}
     overrides = {key: getattr(args, arg) for arg, key in TIMING_KEYS.items() if getattr(args, arg) is not None}
     for i, meta in enumerate(fs.meta):
@@ -167,13 +174,22 @@ def synthetic(args):
         if args.mask_source == "detector":
             masks = detect_candidate_masks(seq["frames"], seq["timestamps"])
         stored = {k: v for k, v in (meta.get("feature_config") or {}).items() if k in known}
-        fcfg = FeatureConfig(**{**stored, "roi_scale": float(meta.get("roi_scale", 3.0)), **overrides})
-        X[i], _ = extract_features_with_meta(seq["frames"], seq["timestamps"], masks,
-                                             seq["lag_frames"], seq["lag_timestamps"], fcfg)
+        if meta.get("roi_scale") is not None:            # drawn per synthetic variant, stored beside the config
+            stored["roi_scale"] = float(meta["roi_scale"])
+        fcfg = FeatureConfig(**{**stored, **overrides})
+        X[i], fmeta = extract_features_with_meta(seq["frames"], seq["timestamps"], masks,
+                                                 seq["lag_frames"], seq["lag_timestamps"], fcfg)
         sources.append("detector" if args.mask_source == "detector" else fs.mask_sources[i])
+        # the row records the extraction it now holds (timing overrides included), as the generator does
+        record = {k: fmeta[k] for k in ("roi", "flow_mode", "timing", "counts") if k in fmeta}
+        metas.append({**meta, "flow_mode": fmeta.get("flow_mode"),
+                      "feature_config": {k: v for k, v in asdict(fcfg).items() if k != "roi_scale"},
+                      "feature_meta": {**(meta.get("feature_meta") or {}), **record},
+                      "stabilization": {k: (fmeta.get("stabilization") or {}).get(k)
+                                        for k in ("applied", "reason", "textured_frac", "n_corners")}})
     out = FeatureSet(X=X, y=fs.y, seq_ids=fs.seq_ids, sim_ids=fs.sim_ids, groups=fs.groups,
                      splits=fs.splits, categories=fs.categories, regimes=fs.regimes, tags=fs.tags,
-                     mask_sources=np.array(sources), meta=fs.meta, source="synthetic")
+                     mask_sources=np.array(sources), meta=metas, source="synthetic")
     out.save(args.out)
     print(f"{len(X)} sequences -> {args.out}")
 
@@ -329,6 +345,7 @@ def real(args):
             splits.append(row.get("split") or camera_split(cam))
             sources.append(msrc)
             metas.append({"video_path": key, "camera_id": cam, "window": k, "window_id": base,
+                          **({"camera_mount": row["camera_mount"]} if row.get("camera_mount") else {}),
                           "manifest_row": r_i, "native_dt": float(win["native_dt"]),
                           "obs_times": obs_t.tolist(), "flow_mode": meta.get("flow_mode"),
                           "labels_known": {n: bool(np.isfinite(v)) for n, v in zip(LABEL_NAMES, labels)},

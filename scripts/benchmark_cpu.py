@@ -3,9 +3,12 @@
 Usage:
     python scripts/benchmark_cpu.py --out reports/benchmark_cpu.json [--sims-per-category 3]
         [--features data/synthetic/features.npz] [--artifacts artifacts]
+    python scripts/benchmark_cpu.py --config configs/simulation_far.yaml --out reports/benchmark_cpu_far.json
 
 Everything runs in this one process with every library pinned to one
-thread (the effective thread counts are recorded). Writes JSON plus a short
+thread (the effective thread counts are recorded). --config selects the
+simulation profile (default configs/simulation.yaml); rendering and feature
+extraction use its frames and feature timing. Writes JSON plus a short
 Markdown table next to it.
 """
 
@@ -51,7 +54,7 @@ def bench_simulation(cfg, per_category):
 
 
 def bench_render_features(cfg, n=4):
-    from src.data.pipeline import render_and_extract, simulate_slot
+    from src.data.pipeline import feature_timing, render_and_extract, simulate_slot
 
     sim, _ = simulate_slot("smoke_only", "train", 20_000, cfg, max_attempts=3)
     if sim is None:
@@ -61,7 +64,7 @@ def bench_render_features(cfg, n=4):
         t0 = time.perf_counter()
         render_and_extract(sim, cfg, v)
         times.append(time.perf_counter() - t0)
-    from src.data.features import extract_features
+    from src.data.features import FeatureConfig, extract_features
     from src.data.render import render_sequence, sample_render_params
     from src.utils.runtime import child_rng
 
@@ -70,10 +73,11 @@ def bench_render_features(cfg, n=4):
     rendered = render_sequence(sim, rp, child_rng(1, 2))
     t_render = time.perf_counter() - t0
     t0 = time.perf_counter()
-    extract_features(rendered.frames, rendered.timestamps, rendered.masks, rendered.lag_frames, rendered.lag_timestamps)
+    extract_features(rendered.frames, rendered.timestamps, rendered.masks, rendered.lag_frames,
+                     rendered.lag_timestamps, FeatureConfig(**feature_timing(cfg)))
     t_feat = time.perf_counter() - t0
     return {"render_plus_features_mean_s": float(np.mean(times)), "render_s": t_render, "features_s": t_feat,
-            "frame_shape": list(rendered.frames.shape)}
+            "frame_shape": list(rendered.frames.shape), "lag_frames": rendered.lag_frames is not None}
 
 
 def bench_training(tcfg, features_path, epochs=3):
@@ -151,6 +155,7 @@ def bench_inference(artifacts):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap.add_argument("--config", default=None, help="simulation YAML (default configs/simulation.yaml)")
     ap.add_argument("--out", default="reports/benchmark_cpu.json")
     ap.add_argument("--sims-per-category", type=int, default=3)
     ap.add_argument("--features", default=None)
@@ -158,11 +163,11 @@ def main(argv=None):
     ap.add_argument("--skip", default="", help="comma list of sections to skip: simulation,render,training,inference")
     args = ap.parse_args(argv)
     skip = set(filter(None, args.skip.split(",")))
-    cfg = load_simulation_config()
+    cfg = load_simulation_config(args.config)
     tcfg = load_training_config()
     report = {"machine": {"platform": platform.platform(), "processor": platform.processor(),
                           "python": sys.version.split()[0]},
-              "threads": _bootstrap.THREADS,
+              "threads": _bootstrap.THREADS, "config": args.config or "configs/simulation.yaml",
               "grid": cfg["grid"], "time": cfg["time"]}
     if "simulation" not in skip:
         report["simulation"] = bench_simulation(cfg, args.sims_per_category)
@@ -184,8 +189,10 @@ def main(argv=None):
         lines.append(f"| CFD simulation (accepted, incl. precursor) | {sim['mean_s_per_accepted_sim']:.1f} s/sim ({sim['sims_per_hour']:.0f} sims/h) |")
     rf = report.get("render_features", {})
     if "render_s" in rf:
-        lines.append(f"| Render 12 + 12 lag frames | {rf['render_s'] * 1e3:.0f} ms |")
-        lines.append(f"| Feature extraction (12 x 14) | {rf['features_s'] * 1e3:.0f} ms |")
+        n_obs = rf["frame_shape"][0]
+        frames = f"{n_obs} + {n_obs} lag frames" if rf["lag_frames"] else f"{n_obs} frames (no lag frames)"
+        lines.append(f"| Render {frames} | {rf['render_s'] * 1e3:.0f} ms |")
+        lines.append(f"| Feature extraction ({n_obs} x 14) | {rf['features_s'] * 1e3:.0f} ms |")
     tr = report.get("training", {})
     if "epoch_s_mean" in tr:
         lines.append(f"| GRU training epoch ({tr['n_train_sequences']} sequences) | {tr['epoch_s_mean']:.2f} s |")

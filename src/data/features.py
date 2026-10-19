@@ -10,8 +10,9 @@ Two flow modes, fixed by the `FeatureConfig` a model was trained with:
 
 * "lag" (near-field profile: observations 5 s apart, lag frames 1 s
   earlier): flow over each short lag pair. Without lag frames the extractor
-  falls back to consecutive flow and flags it (`timing.reasons` gets
-  "consecutive_flow"; the inference API refuses it unless allowed).
+  falls back to consecutive flow from a zero start and flags it
+  (`timing.reasons` gets "consecutive_flow"; the inference API refuses it
+  unless allowed).
 * "consecutive" (`flow_lag_s` None or 0; far-field profile, one frame per
   minute as camera networks such as HPWREN / AlertWildfire record): flow
   between consecutive observations. This is a first-class mode: lag frames,
@@ -47,9 +48,10 @@ Pipeline (docs/design.md section 7):
    L = sqrt(H * W) of the resized ROI and every rate per second, so the
    features do not depend on how large the scene appears in the image.
 5. `_flow_stats`: DIS optical flow from the lag frame to the observation frame
-   (or between consecutive observations, from zero and from the centroid
-   displacement), a forward-backward check, and winsorised statistics,
-   affine divergence and mean |curl| on the eroded mask.
+   (or between consecutive observations: from zero, and in the consecutive
+   mode also from the centroid displacement), a forward-backward check, and
+   winsorised statistics, affine divergence and mean |curl| on the eroded
+   mask.
 6. Geometry of the resized masks: area, log-area growth and centroid
    velocity between observations, `_roughness` and `_anchor_stability`.
 
@@ -292,11 +294,14 @@ def extract_features_with_meta(frames, timestamps, masks, lag_frames=None, lag_t
         if flow_mode == "lag":
             margin, guesses = _FLOW_MARGIN_PX, ()
         else:
-            # Over a long spacing the region may move further than DIS tracks from rest:
-            # also start from its centroid displacement (working px, image axes).
-            margin = _FLOW_MARGIN_CONSECUTIVE_PX
-            d = centroids[t] - centroids[t - 1]
-            guesses = ((float(d[0]), float(d[1])),) if math.hypot(*d) >= _GUESS_MIN_PX else ()
+            margin, guesses = _FLOW_MARGIN_CONSECUTIVE_PX, ()
+            if cfg.flow_mode == "consecutive":
+                # First-class consecutive mode only (a lag configuration's fallback keeps the zero
+                # start): over a long spacing the region may move further than DIS tracks from rest,
+                # so also start from its centroid displacement (working px, image axes).
+                d = centroids[t] - centroids[t - 1]
+                if math.hypot(*d) >= _GUESS_MIN_PX:
+                    guesses = ((float(d[0]), float(d[1])),)
         res = _flow_stats(prev, obs_w[t], masks_w[t], crop_masks, margin, cfg, engine, guesses)
         region_px[t] = res["region_px"]
         fb_err[t] = res["fb_px"]
@@ -1039,9 +1044,7 @@ class _FlowEngine:
             return cv2.calcOpticalFlowFarneback(a, b, flow, 0.5, 3, 15, 3, 5, 1.2, cv2.OPTFLOW_USE_INITIAL_FLOW)
         if self._dis_init is None:
             self._dis_init = cv2.DISOpticalFlow_create(cv2.DISOPTICAL_FLOW_PRESET_MEDIUM)
-            if hasattr(self._dis_init, "setUseInitialFlow"):   # OpenCV 4.x; 5.x uses a given flow as the start
-                self._dis_init.setUseInitialFlow(True)
-        return self._dis_init.calc(a, b, flow)
+        return self._dis_init.calc(a, b, flow)     # DIS refines a passed CV_32FC2 flow of the same size as its start
 
 
 def _flow_crop(masks: Sequence[np.ndarray], margin: int, shape) -> Tuple[int, int, int, int]:

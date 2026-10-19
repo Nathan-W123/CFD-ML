@@ -171,7 +171,10 @@ def sample_context(rng: np.random.Generator, cfg: Dict[str, Any], category: str,
                    "width_m": uniform(rng, widths[kind]),
                    "direction": 1.0 if rng.random() < 0.5 else -1.0}
         if kind == "ridge":
-            terrain["lee_width_frac"] = uniform(rng, (0.5, 1.0))   # a steeper slope on one side
+            # The steeper slope is the lee side: it faces downwind (the direction draw above is
+            # still consumed, so the random stream of every kind is unchanged).
+            terrain["direction"] = wind["sign"]
+            terrain["lee_width_frac"] = uniform(rng, (0.5, 1.0))
     else:
         terrain = {"kind": "flat", "height_m": 0.0}
     fog_present = CATEGORY_LABELS[category][1] == 1
@@ -476,7 +479,11 @@ def build_spec(params: Dict[str, Any], cfg: Dict[str, Any], dt: Optional[float] 
         elif distractor["regime"] == "dust_burst":
             components.append(dust_component(distractor, grid, first))
         elif distractor["regime"] == "rain_shaft":
-            components.append(rain_component(distractor, grid, first, window, wind))
+            # The cloud drifts slowly enough to stay in view for label_min_frames frames.
+            timing = params["timing"]
+            min_frames = min(int(cfg.get("validation", {}).get("label_min_frames", 6)), int(timing["n_frames"]))
+            components.append(rain_component(distractor, grid, first, window, wind,
+                                             min_view_s=min_frames * float(timing["frame_interval_s"])))
     if params.get("background_haze") is not None:
         components.append(haze_component(params["background_haze"], grid))
 
