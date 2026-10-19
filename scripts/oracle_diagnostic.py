@@ -45,7 +45,7 @@ from src.data.feature_spec import FEATURE_NAMES, N_STEPS
 from src.training import metrics as M
 from src.training.baselines import _LogisticRegression, pooled_features
 from src.utils.config import load_simulation_config
-from src.utils.io import write_json
+from src.utils.io import read_yaml, write_json
 
 ORACLE_NAMES = FEATURE_NAMES[:12]
 GROUPS = {"velocity": list(range(0, 6)), "region": list(range(6, 12)), "all": list(range(0, 12))}
@@ -164,7 +164,9 @@ def main(argv=None):
     args = ap.parse_args(argv)
 
     base = Path(args.data)
-    cfg = load_simulation_config()
+    # The dataset's own merged config (profile + overrides): line of sight, extinction, view margin.
+    used = base / "config_used.yaml"
+    cfg = read_yaml(used) if used.exists() else load_simulation_config()
     settings = validation_settings(cfg)
     render = cfg.get("render", {})
     smoke_ext = float(render.get("smoke_mass_extinction_m2_mg", 0.0076))

@@ -8,6 +8,37 @@ change, the change is made here first.
 Status: synthetic pipeline only. Nothing in this repository has been
 validated on real camera footage.
 
+## Profiles
+
+A profile is a complete simulation config (one schema for all);
+`scripts/generate_dataset.py --config` selects it. A model is trained on
+one profile and exported with its timing.
+
+| | near field (default) | far field |
+|---|---|---|
+| config | `configs/simulation.yaml` | `configs/simulation_far.yaml` |
+| domain | 320 m, 64 x 64 cells of 5 m | 3200 m, 64 x 64 cells of 50 m |
+| observations | 12, 5 s apart (55 s) | 12, 60 s apart (11 min) |
+| optical flow | lag pairs: a frame 1 s before each observation (`time.flow_lag_s: 1`) | consecutive observations, no lag frames (`time.flow_lag_s: null`) |
+| frame-time tolerance | `time.max_offset_s: 0.5` | `time.max_offset_s: 10` |
+| starting dt | 0.1 s | 0.5 s |
+| wind (held out) | 0-7 m/s (7-9) | 0-12 m/s (12-15) |
+| terrain (held out) | hill, valley, slope, 5-40 m (45-80 m hill) | also ridge, 50-600 m (700-1000 m hill) |
+| opt-in regimes | off (weight 0) | ridge_cloud (fog), rain_shaft (neither) |
+| footage it serves | surveillance video at >= 2 frames/s | wildfire camera networks at one frame per minute (HPWREN, AlertWildfire) |
+
+The CFD code is scale-agnostic: physical constants (sizes, heights,
+depths, periods, sponge rates, heat cap, texture period, inversion offset,
+wind reference height) come from the config, with the near-field values as
+code defaults; numerical widths (edge ramps, tanh fronts, layer softness)
+are multiples of `dx`; schedule times defined relative to the observation
+window (onsets, switch-offs, activity ramps) scale with
+`frame_interval_s / 5 s` (`scenario_util.time_scale`). The extractor's
+timing comes from the profile's `time` block (`pipeline.feature_timing`),
+is stored with every row and exported with the model
+(`preprocessing.feature_config`, `training_flow_modes`), so inference
+measures what training measured.
+
 ## 0. Conventions
 
 * Python >= 3.10, numpy, numba (`@njit(cache=True)`, never `parallel=True`),
@@ -48,8 +79,11 @@ ambient state at rest:
 
 Transported scalars: the anomalies theta_l' = theta_l - theta_l_ref(z) and
 q_t' = q_t - q_t_ref(z) of the phase-change-conserved variables
-(theta_l = theta - L_v/(c_p Exner) q_l, q_t = q_v + q_l), smoke C, tracer D
-and four texture coordinates. They are advected by the LBM velocity in
+(theta_l = theta - L_v/(c_p Exner) q_l, q_t = q_v + q_l), smoke C, tracer D,
+in rain-shaft scenes a precipitation scalar P with its own fast settling
+velocity (so background haze in D is not rained out with it; reported to the
+renderer as part of the tracer), and four texture coordinates. They are
+advected by the LBM velocity in
 finite-volume advective form (flux divergence minus C div u, see
 scalars.py) and diffused with an eddy diffusivity K (sampled independently
 of the LBM viscosity):
@@ -61,6 +95,12 @@ for the anomalies, so the ambient state is exactly steady.
 
 Moisture: theta, q_v and q_l are diagnosed every step by saturation
 adjustment from (theta_l, q_t); latent heat is included through theta_l.
+
+Subgrid velocity: at every snapshot the run stores u_sgs = C_s dx |S| (m/s),
+|S| the resolved strain-rate magnitude estimated exactly as the collision's
+Smagorinsky model does (half-force-corrected non-equilibrium stress, local
+tau). It is computed only at snapshot times; the renderer uses it to move
+the texture with the unresolved eddies (section 6).
 
 Boundaries:
 * Bottom: no-slip wall (half-way bounce-back) at z = 0, plus optional
@@ -79,23 +119,26 @@ Boundaries:
   removed: in 2D it fed the inverse cascade and destabilised runs.) A
   source-free precursor spins up the flow before the scenario starts.
 * Drifting features (fog patches, fog-bank fronts, advected smoke layers)
-  are placed by their position at the first frame (`drift_start`); a part
-  that starts upwind of the domain enters through the inflow boundary only
-  once its front reaches it.
+  are placed by their position at the first frame (`drift_start`; a rain
+  shaft's cloud by its position at mid-window); a part that starts upwind of
+  the domain enters through the inflow boundary only once its front reaches
+  it. Precipitation has zero ghost values on every open side (a
+  zero-gradient top would feed falling rain back in).
 * The ambient wind may accelerate over the observation window (`ramp_factor`,
   drawn for every category alike, end speed inside the split's wind range);
   fog_dissipating can use such a context as its clearing mechanism.
 
 Lattice units: `dx` (m), `dt` (s); `u_lat = u dt/dx`,
 `nu_lat = nu dt/dx^2`, `tau = 0.5 + 3 nu_lat`, `a_lat = a dt^2/dx`.
-The starting `dt` (0.1 s) is halved before the run when the expected peak
-speed would exceed `target_lattice_speed`, and the run is restarted with a
-halved `dt` (up to `max_dt_halvings`) if the measured lattice speed ever
-exceeds `max_lattice_speed`. A run that still fails, or fails any check in
+The starting `dt` (`time.dt_s`: 0.1 s near field, 0.5 s far field) is
+halved before the run when the expected peak speed would exceed
+`target_lattice_speed`, and the run is restarted with a halved `dt` (up to
+`max_dt_halvings`) if the measured lattice speed ever exceeds
+`max_lattice_speed`. A run that still fails, or fails any check in
 `src/cfd/validation.py`, is rejected and never rendered. On 5 m cells with
-winds to 7 m/s and hot plumes most runs need it: in the full dataset 25 %
-of accepted runs used 0.1 s, 44 % 0.05 s and 31 % 0.025 s (frame times are
-physical and identical for all).
+winds to 7 m/s and hot plumes most runs need it: in the engine v1 near-field
+dataset 25 % of accepted runs used 0.1 s, 44 % 0.05 s and 31 % 0.025 s
+(frame times are physical and identical for all).
 
 ## 2. `src/cfd/lbm.py`  (owner: LBM)
 
@@ -144,6 +187,8 @@ class LBMSolver:
     def step(self, ax: np.ndarray | None, az: np.ndarray | None) -> None
         # one collide + stream + boundary update with body acceleration (m/s^2, (nz, nx))
     def velocity(self) -> tuple[np.ndarray, np.ndarray]    # physical (ux, uz) m/s, 0 in solid
+    def strain_rate(self) -> np.ndarray                     # |S| = sqrt(2 S:S), 1/s, from the non-equilibrium stress; 0 in solid
+    def sgs_velocity(self) -> np.ndarray                    # u_sgs = C_s dx |S|, m/s (recomputed on demand)
     def max_lattice_speed(self) -> float                    # over fluid cells
     def max_mach(self) -> float                             # max_lattice_speed / sqrt(CS2)
     def total_mass(self) -> float                           # sum of rho over fluid cells
@@ -245,15 +290,59 @@ def scenario_seed(cfg, split, category, index, attempt=0) -> int    # derive_see
 def sample_scenario(category, split, index, cfg, attempt=0) -> dict  # JSON-able params, deterministic
 def build_spec(params, cfg, dt=None, halvings=0) -> SimulationSpec
 def run_scenario(params, cfg) -> SimulationResult    # dt halving retries; raises SimulationUnstable
+def regime_weight(regime, weights) -> float   # from the category's block (missing -> 0); no block: 1, opt-in 0
 # simulation.py
 def run_simulation(spec, cfg) -> SimulationResult
+def has_lag_frames(flow_lag_s) -> bool        # False for None / 0 (no lag snapshots)
+# results.py
+@dataclass
+class SimulationResult:
+    sim_id, category, regime, labels, seed, params, dx, valid, validity, extra
+    times: (T,)                        # s since the first observation
+    smoke, lwc, tracer: (T, nz, nx)    # mg/m^3, g/m^3, mg/m^3 (tracer includes a rain shaft's precipitation)
+    texcoords: (T, 4, nz, nx); tex_weights: (T, 2); solid: (nz, nx) bool
+    sgs_u: (T, nz, nx) | None          # subgrid velocity scale C_s dx |S|, m/s (None in files older than v2)
+    lag_times, smoke_lag, lwc_lag, tracer_lag, texcoords_lag, tex_weights_lag, sgs_u_lag
+                                       # at times - flow_lag_s; ALL None for a profile without lag frames
+    theta_anom, qv, ux, uz             # diagnostics only, never model inputs
+    has_lag: bool                      # property: lag snapshots were stored
+    def field_at(name, lag=False)      # a lag field of a run without lag frames raises MissingLagFields
+    def save(path, diagnostics=True) / load(path)
+class MissingLagFields(ValueError)
 ```
 
 Context-first sampling (see the `scenarios.py` docstring): wind speed
-(0-7 m/s for every category), direction, gusts, mixing, terrain (P = 0.35,
-same shapes for every category), atmosphere, spin-up, background haze and
-the camera nuisances are class-independent; a compatible regime is then
-chosen. `params` keys used downstream:
+(near 0-7 m/s, far 0-12 m/s, for every category), direction, gusts,
+mixing, terrain (near P = 0.35 of hill / valley / slope, far P = 0.5 with
+ridges too; the same shapes for every category), atmosphere, spin-up,
+background haze and the camera nuisances are class-independent; a
+compatible regime is then chosen with the profile's
+`scenarios.regime_weights`, renormalised over the compatible regimes. A
+regime missing from a category's block, or weighted 0, is never sampled;
+the opt-in regimes (`constants.OPT_IN_REGIMES`: ridge_cloud, rain_shaft)
+need a positive weight, which only the far profile gives them. Regimes:
+
+* smoke: hot_plume, smoldering, crosswind, pulsing, advected_smoke;
+* fog: radiation_fog, advected_fog_bank, terrain_fog (valley), fog_patch,
+  fog_dissipating, steam_fog (flat ground), and ridge_cloud: an orographic
+  cap cloud. The humid inflow is set so that air lifted by `lcl_frac` of
+  the ridge height saturates, and every level stays sub-saturated at rest,
+  so no liquid is prescribed: the cloud forms during the spin-up where the
+  ridge lifts the air, stays over the crest while the air moves through it,
+  evaporates in the lee descent and may trail downstream aloft. Needs a hill
+  or ridge of at least `min_terrain_height_m` and wind;
+* neither: haze_drift, dust_burst, illumination_change, camera_artifact,
+  distant_cloud, and rain_shaft: precipitation generated in a band at cloud
+  base under a cloud drifting with a fraction of the mid-window wind there
+  (capped so it stays in view for `label_min_frames` frames), falling at
+  3-8 m/s, intermittent, optionally evaporating on the way down (virga). It
+  is parameterised by its in-shaft concentration (`shaft_mg_m3`: optical
+  depth 0.4-6 over 1 km, independent of dx); its onset is in literal
+  seconds per profile. The three look-alikes without aerosol need their
+  class-independent nuisance; their weights are set so that each is at
+  least ~12 % of neither scenes in both profiles (2-5 % in v1).
+
+`params` keys used downstream:
 
 * `sim_id`, `category`, `split`, `index`, `attempt`, `seed`, `labels`,
   `regime`, `smoke_regime`, `fog_regime`, `distractor_regime`, `holdout_tags`
@@ -264,13 +353,18 @@ chosen. `params` keys used downstream:
   MUST honour (it samples their strengths, not their presence)
 * `background_haze`: dict or None (tracer as faint background haze);
   `distractor`: for neither (`haze_drift` / `dust_burst` put aerosol in the
-  tracer field; `illumination_change` / `camera_artifact` / `distant_cloud`
-  have no aerosol and rely on the corresponding nuisance)
+  tracer field, `rain_shaft` in the precipitation scalar;
+  `illumination_change` / `camera_artifact` / `distant_cloud` have no
+  aerosol and rely on the corresponding nuisance)
 
 Held-out recipes (`test_ood` only, every category, alternating by index):
-`fast_wind` (7-9 m/s) and `elevated_source` (a 45-80 m hill; smoke sources
-on the hilltop). Validity (`validation.py`) includes label support: the
+`fast_wind` (near 7-9 m/s, far 12-15 m/s) and `elevated_source` (a hill of
+45-80 m near, 700-1000 m far; smoke sources on the hilltop). Validity
+(`validation.py`, observation snapshots only) includes label support: the
 labelled aerosol(s) visible in view, unlabelled ones absent.
+
+A profile without lag frames (`time.flow_lag_s` null or 0) stores no lag
+snapshots; everything else in the run is the same.
 
 ## 6. `src/data/render.py` and `src/data/masks.py`  (owner: render)
 
@@ -278,10 +372,10 @@ labelled aerosol(s) visible in view, unlabelled ones absent.
 @dataclass
 class RenderedSequence:
     frames: np.ndarray          # (T, H, W) uint8 grayscale at the observation times
-    lag_frames: np.ndarray      # (T, H, W) uint8 at the lag times (t_k - flow_lag_s)
+    lag_frames: np.ndarray | None      # (T, H, W) uint8 at the lag times (t_k - flow_lag_s); None without lag
     masks: np.ndarray           # (T, H, W) bool candidate masks at the observation times
     timestamps: np.ndarray      # (T,) float64 s (= sim.times)
-    lag_timestamps: np.ndarray  # (T,) float64 s (= sim.lag_times)
+    lag_timestamps: np.ndarray | None  # (T,) float64 s (= sim.lag_times); None without lag
     mask_source: str            # "degraded" | "bbox" | "detector"
     opacity: np.ndarray         # (T, H, W) float32 total aerosol opacity (diagnostic only)
     component_opacity: dict     # {"smoke","fog","tracer","cloud"} -> (T, H, W) float16 (diagnostic only)
@@ -299,8 +393,9 @@ Optical model: for each component `c` in {smoke, fog, tracer}, extinction
 line-of-sight depth L_c (drawn independently from one distribution) gives
 optical depth `tau_c(x, z)` on the grid. It is upsampled (bilinear) to the
 camera view and MODULATED BY ADVECTED TEXTURE: a fixed high-resolution
-tileable noise pattern (several octaves, wavelengths ~3-40 m, one class-
-independent random gain per sequence, identical for all components) is
+tileable noise pattern (several octaves, wavelengths `render.texture.wavelengths_m`:
+3-40 m near, 30-400 m far; one class-independent random gain per sequence,
+identical for all components) is
 sampled at the upsampled texture coordinates `sim.texcoords` (pair a and pair
 b blended with `sim.tex_weights`), so the texture moves exactly with the
 simulated air. Without this step a quasi-steady concentration field produces
@@ -308,7 +403,27 @@ no optical flow at all (the reviewers measured flow/fluid ratios of
 0.001-0.02). Then `alpha = 1 - exp(-sum_c tau_c)` and
 `I = (1 - alpha) B + alpha A`, with ONE aerosol-brightness distribution for
 all aerosols. Lag frames are rendered with the same parameters from the
-`_lag` fields.
+`_lag` fields; a simulation without lag snapshots gets the observation
+frames only (`lag_frames` None), and masks, visibility and exposure come
+from the observation frames in both cases.
+
+Subgrid texture turbulence: the texture also moves with the unresolved
+eddies. Where `sim.sgs_u` exists, the texture coordinates are displaced by
+a smooth, zero-mean, divergence-free random field D (12 random Fourier
+modes of 3-8 cells, so it scales with dx; rms strain 0.3, so the warp never
+folds) whose local velocity scale is `texture.sgs_gain * u_sgs`
+(`render.texture.sgs_gain`, [0.5, 1.5] in both profiles) and whose local
+correlation time is about eddy size / u_sgs. The field is built from
+velocity octaves below the sequence's peak u_sgs, each with its own eddy
+clock; every cell blends the two octaves bracketing its peak u_sgs over the
+sequence, a band that is fixed for the whole sequence. D is integrated from
+velocity-scaled increments in time order (observation and lag frames
+interleaved), so it does not jump where u_sgs changes between frames. It is
+class-independent (it acts wherever u_sgs is, clear air included) and
+deterministic from `texture.sgs_seed`; `sgs_gain` 0 (robustness suite
+`sgs_off`) or a simulation without `sgs_u` disables it. A lag frame 1 s
+before its observation is displaced by about `sgs_gain * u_sgs * 1 s`
+relative to it; frames a minute apart see decorrelated sub-grid texture.
 
 Native resolution: frames are rendered at `render.native_size` (default
 192 x 192), noise and JPEG are applied at that size (not at the 128 px
@@ -333,6 +448,18 @@ zoom and backgrounds (procedural sky gradient + multi-scale ridge and ground
 texture, so stabilisation has something to lock onto) are sampled identically
 for every category.
 
+Camera shake: shake (x, y), rotation and zoom jitter are a stationary
+Ornstein-Uhlenbeck (AR(1)) process sampled at the actual frame times
+(observation and lag frames interleaved): stationary std `camera_shake_px` /
+`camera_rotation_deg` / `zoom_jitter`, correlation time
+`render.camera_shake_tau_s` (near 0.5-4 s, so a lag frame 1 s earlier
+shakes almost with its observation; far 1-30 s, so frames a minute apart are
+practically independent), clipped at 3 std; tau 0 is the v1 model
+(independent per frame). Render params are version 2: the v2 keys
+(`camera_shake_tau_s`, `texture.sgs_gain`, `texture.sgs_seed`) are drawn
+last, so every earlier value is what v1 drew, and stored v1 params still
+render as before.
+
 Nuisances: `params["render_hints"]` decides PRESENCE of shadow / strong
 camera artefact / detector false-positive boost / distant cloud; strengths
 come from config ranges identical for every category. `distant_cloud`
@@ -353,6 +480,12 @@ mask. `check_label_visibility` accepts a sequence only if every labelled
 component has peak opacity >= `render.label_min_opacity` in at least
 `render.label_min_frames` frames and every unlabelled component of {smoke,
 fog} stays below `render.absent_max_opacity`.
+
+Robustness suites (`robustness:` in each profile; re-renders of the test_iid
+simulations, merged into the render config): `nominal`, `occlusion_heavy`,
+`shake_heavy` (near field: also a short shake correlation time, 0.2-1 s, so
+the 1 s lag pairs get nearly independent shake), `render_shift`, `zoom_out`,
+`detector_masks`, `bbox_masks` and `sgs_off` (no subgrid texture motion).
 
 ```python
 # masks.py
@@ -380,28 +513,39 @@ class FeatureConfig:
     roi_scale: float = 2.0          # ROI side = roi_scale * max(extent w, h) (synthetic: drawn from [1.5, 2.5])
     roi_min_px: int = 32            # minimum ROI side in native pixels
     stabilize: bool = True
+    require_stabilization: bool = True  # no camera-motion estimate -> flow gate closed
     min_mask_frac: float = 0.002    # of the analysis frame
     flow_method: str = "dis"        # "dis" (default) | "farneback"
     flow_erode_px: int = 2          # flow statistics on the mask eroded by this (working px)
     fb_max_px: float = 1.0          # forward-backward consistency (median, working px)
     anchor_band_px: int = 6
     min_roughness_px: int = 100
-    expected_interval_s: float = 5.0
-    flow_lag_s: float = 1.0
-    max_offset_s: float = 0.5
+    expected_interval_s: float = 5.0        # far-field profile: 60
+    flow_lag_s: float | None = 1.0          # None or 0: consecutive-observation flow (far field)
+    max_offset_s: float = 0.5               # per frame; observation intervals get 2x (far field: 10)
+    flow_mode: str                          # property: "lag" | "consecutive"
 
 def extract_features(frames, timestamps, masks, lag_frames=None, lag_timestamps=None,
                      cfg: FeatureConfig | None = None) -> np.ndarray      # (T, 14) float32
 def extract_features_with_meta(...same...) -> tuple[np.ndarray, dict]
     # meta: roi box, stabilisation per frame (used / skipped + reason, quality),
-    # flow mode ("lag" | "consecutive"), achieved intervals, valid frame counts
+    # flow_mode ("lag" | "consecutive"), lag_frames_ignored, per-frame flow status /
+    # dt / fb error / start ("zero" | "centroid"), valid frame counts, and
+    # timing: intervals_s, flow_lags_s, expected_interval_s, expected_flow_lag_s
+    # (0 for a consecutive configuration), expected_flow_mode, max_offset_s,
+    # interval_compatible, lag_compatible (None when not applicable),
+    # flow_mode_compatible, compatible, reasons
 def stabilize_sequence(frames, masks, lag_frames=None) -> tuple[...]
 def select_window(timestamps, n=12, interval_s=5.0, start=None, max_offset_s=0.5,
                   flow_lag_s=1.0) -> dict
-    # {"obs_idx": (n,), "lag_idx": (n,), "offsets": ..., "native_dt": ...}; raises
-    # IncompatibleFrameTiming when a selected frame is > max_offset_s from its target,
-    # indices repeat, the clip is too short, or the native frame spacing exceeds
-    # flow_lag_s / 2 (e.g. one-minute HPWREN/FIgLib imagery is refused, not stretched)
+    # {"obs_idx": (n,), "lag_idx": (n,) | None, "offsets": ..., "native_dt": ...,
+    # "flow_mode": "lag" | "consecutive"}; raises IncompatibleFrameTiming when a
+    # selected frame is > max_offset_s from its target, indices repeat, the clip is
+    # too short, or (lag mode only) the native frame spacing exceeds flow_lag_s / 2
+    # (one-minute imagery cannot give 1 s pairs and is refused, not stretched).
+    # flow_lag_s None / 0: no lag frames, first target at the first frame, any frame
+    # rate that puts a frame within max_offset_s of every target (one-minute
+    # HPWREN / FIgLib imagery included)
 def load_frames(path, times=None, timestamps=None) -> tuple[np.ndarray, np.ndarray]
     # video file (timestamps from the container) or image folder (timestamps from a
     # sidecar CSV or a filename pattern; raises if there are none); decodes only `times`
@@ -433,14 +577,25 @@ Pipeline (identical for synthetic and real input):
    larger than the image, resized so its longer side is `work_size`. All
    lengths are in units of `L = sqrt(H_roi * W_roi)` of the resized ROI and
    all rates per second. With no mask in any frame, the full image is used.
-5. Flow: OpenCV DIS (PRESET_MEDIUM) from the lag frame to the observation
-   frame (`lag_frames` given) — displacements stay small and texture stays
-   correlated — or, without lag frames, between consecutive observations
-   (flagged as `flow_mode = "consecutive"`; the inference API refuses it
-   unless explicitly allowed). DIS recovers smooth-field displacements that
-   Farneback underestimates 2-5x. `flow_valid[t] = 1` only if t has a flow
-   pair, both masks are valid, stabilisation succeeded for the pair, and
-   the median forward-backward error over the eroded region is <= `fb_max_px`.
+5. Flow: OpenCV DIS (PRESET_MEDIUM), in the configuration's flow mode.
+   `"lag"` (near field): from the lag frame to the observation frame —
+   displacements stay small and texture stays correlated; without lag
+   frames a lag configuration falls back to consecutive flow from a zero
+   start and flags it (`timing.reasons` "consecutive_flow"; the inference
+   API refuses it unless explicitly allowed). `"consecutive"` (far field,
+   `flow_lag_s` None / 0): flow between consecutive observations is the
+   first-class mode; lag frames, if passed, are ignored (recorded), and
+   because a minute's displacement can exceed what DIS tracks from rest,
+   each pair is also run from a uniform start at the mask-centroid
+   displacement (when it is >= 3 working px); among the starts that pass
+   the forward-backward check the zero start is kept unless the centroid
+   start reconstructs the frame with a photometric residual >= 5 % lower
+   (`meta["flow"]["start"]`). The centroid start exists only in the
+   consecutive configuration; lag configurations are unchanged. DIS
+   recovers smooth-field displacements that Farneback underestimates 2-5x.
+   `flow_valid[t] = 1` only if t has a flow pair, both masks are valid,
+   stabilisation succeeded for the pair, and the median forward-backward
+   error over the eroded region is <= `fb_max_px`.
 6. Per-frame features (layout and gates in `feature_spec.py`):
    flow mean / std are winsorised (5-95 %) statistics on the mask eroded by
    `flow_erode_px` (fallback: closed flow gate when < 20 px remain);
@@ -461,8 +616,14 @@ Pipeline (identical for synthetic and real input):
    `flow_valid`, both of which describe t itself. The missingness is
    implicit, because timestep 0 is always the GRU's first step and, for
    t >= 1, the `mask_pair` gate is mask_valid[t] AND mask_valid[t-1], both
-   visible to the network. Flow at t = 0 comes from its own 1 s lag frame,
-   so flow_valid[0] can legitimately be 1.
+   visible to the network. In the lag mode flow at t = 0 comes from its own
+   1 s lag frame, so flow_valid[0] can legitimately be 1; in the
+   consecutive mode t = 0 has no pair, so flow_valid[0] = 0 and at most 11
+   steps carry flow.
+7. Timing record (`meta["timing"]`): an observation interval is compatible
+   within 2 x `max_offset_s` of `expected_interval_s` (near 5 +- 1 s, far
+   60 +- 20 s), a lag within `max_offset_s` of `flow_lag_s`, and the flow
+   mode must be the configuration's.
 
 ## 8. `src/data/normalization.py`  (owner: training)
 
@@ -494,13 +655,18 @@ def load_encoder(artifact_dir) -> (PhysicsEncoder, FeatureNormalizer, dict)
 ```python
 @dataclass
 class FeatureSet:
-    X: (N, 12, 14) float32 raw features; y: (N, 2) float32
+    X: (N, 12, 14) float32 raw features
+    y: (N, 2) float32 in [0, 1]; NaN = unknown (e.g. real footage whose fog is not annotated)
     seq_ids, sim_ids, groups, splits, categories, regimes, tags, mask_sources: (N,) str arrays
     meta: list[dict]       # per sequence: params subset, render params, feature meta
     source: str            # "synthetic" | "real"
-    save(path) / load(path) / subset(mask) / split(name)
-def save_sequence(path, rendered, sim, seq_id, extra=None) -> Path
-def load_sequence(path) -> dict
+    known: (N, 2) bool     # property: target is not NaN
+    save(path) / load(path) / subset(mask) / split(name)   # NaN round-trips
+PARTIAL_CATEGORIES         # category of a row with a NaN target, e.g. "smoke_fog_unknown"
+def label_category(smoke, fog) -> str      # one of CATEGORIES, or of PARTIAL_CATEGORIES
+def parse_label(value) -> float            # manifest cell: 0 / 1, or NaN for "", "nan", "unknown", "?", "-"
+def save_sequence(path, rendered, sim, seq_id, extra=None) -> Path   # no lag arrays without lag frames
+def load_sequence(path) -> dict            # lag_frames / lag_timestamps None when none were stored
 def assert_no_group_leakage(fs) -> None   # groups and seeds never span two splits
 class SequenceTensorDataset(torch.utils.data.Dataset)
 ```
@@ -515,26 +681,50 @@ Splits: `train` (fit), `val_select` (early stopping, seed choice),
   AdamW (lr 1e-3, wd 1e-4), batch 64, <= 50 epochs, early stopping
   (patience 7) on val_select loss, grad clip 1.0, three seeds, one thread,
   deterministic. Report test metrics as mean ± sd over the seeds; export
-  the val_select-best seed and say so.
+  the val_select-best seed and say so. The export records what inference
+  must reproduce: `preprocessing.feature_config` (the extractor settings
+  of the train rows, timing included) and `training_flow_modes` (counts of
+  "lag" / "consecutive" rows).
+* Unknown labels (NaN targets, e.g. real footage with smoke annotated and
+  fog not): the loss is masked (per label over its known entries, then
+  averaged over the labels that have any; identical to plain BCE when
+  everything is known), early stopping uses the masked val_select loss,
+  and every calibration fit uses only the rows where its label is known.
 * Calibration: per-label temperature on val_calib, bounded to [0.5, 5];
   if val_calib is separable, T = 1 and a flag is stored; any other optimum
-  at a bound uses the bound (flagged `clipped`).
-* Thresholds, stored with `fit_source = "synthetic_val_calib"` and the
-  calibration-set prevalence: `balanced` (max Youden's J per label;
-  max F1 degenerated to "always positive" on weak scores) and
-  `low_false_alarm` (smoke threshold giving <= 5 % false-smoke rate on
-  fog_only val_calib sequences). Full ROC / PR curves are reported.
+  at a bound uses the bound (flagged `clipped`). A label with too few
+  known val_calib rows (`calibration.min_known_per_label`, default 10, or
+  one class) keeps the pretrained model's temperature, thresholds and
+  margins when fine-tuning (D); otherwise it is fitted on what there is
+  (`fitted_on_insufficient_labels`). A label with no known row and nothing
+  to keep (`default_unfitted`: T = 1, threshold logit 0) is listed in
+  `calibration.untrained_labels` and gets an abstain margin larger than any
+  logit, so the model always abstains on it. `calibration.label_support`
+  says, per label, how it was calibrated.
+* Thresholds, stored with `fit_source` (`"synthetic_val_calib"`, or
+  `"real_val_calib"` after Stage B) and the calibration-set prevalence:
+  `balanced` (max Youden's J per label; max F1 degenerated to "always
+  positive" on weak scores) and `low_false_alarm` (smoke threshold giving
+  <= 5 % false-smoke rate on fog_only val_calib sequences). Full ROC / PR
+  curves are reported.
 * Abstention (`decision = -1`): logit within a margin of the threshold
   (margin in logit space, floor 0.25, widened on val_calib until the
   confident error <= 5 % with abstention <= 30 %), OR input-validity
   failure: fewer than 3 valid-mask frames, fewer than 2 valid-flow frames,
-  more than 20 % of open-gate normalised entries clipped, or an
-  incompatible frame interval. `predict()` returns `calibration_source`.
+  more than 20 % of open-gate normalised entries clipped, an incompatible
+  frame interval (judged against the model's exported timing: interval
+  within 2 x `max_offset_s`, lag within `max_offset_s`), or a flow mode the
+  model was not trained on: consecutive flow for a lag-trained model
+  (`consecutive_flow`, unless `allow_consecutive`), lag-pair flow for a
+  model trained only on consecutive flow (`lag_flow`). `predict()` returns
+  `calibration_source`.
 * Metrics (numpy only): per-label precision / recall / F1 / AUROC / AUPRC,
   4-class confusion from the two decisions, smoke/fog confusion,
   false-smoke rate on fog_only, Brier, ECE with equal-mass bins, abstain
   rate and selective accuracy; 95 % CIs from a grouped bootstrap over
-  sim_id (camera id for real data).
+  sim_id (camera id for real data). Each uses only the rows where its
+  label is known (the 4-class confusion and fog_only need both); a label
+  with no known row gets null metrics and status "no_labels", never 0.
 * Baselines: A = heuristic (fixed functional form on time-pooled flow_v_mean,
   centroid_dz, anchor_stability, area_growth; coefficients fitted on train
   only; thresholds from val_calib); time-pooled logistic regression (mean
@@ -552,29 +742,64 @@ Splits: `train` (fit), `val_select` (early stopping, seed choice),
   validity per category, univariate feature and parameter AUROCs, optical
   flow vs CFD velocity), `scripts/oracle_diagnostic.py` (the twelve motion
   features recomputed from the CFD fields, compared with the camera
-  features per feature group to localise information loss), and
-  `scripts/summarize_results.py` (evaluation.json -> reports/results.md).
+  features per feature group to localise information loss),
+  `scripts/image_stats.py` (real vs synthetic frame statistics: noise,
+  contrast, brightness, sharpness, JPEG blockiness, flicker, camera motion;
+  says which `render:` ranges to widen), and `scripts/summarize_results.py`
+  (evaluation.json -> reports/results.md).
 
-`evaluation.json` top level: `{"synthetic": {...}, "real": {"status":
-"pending", "reason": ...}, "ablations": {"A": ..., "B": null, "C": ...,
-"D": null, "reasons": {...}}, "synthetic_proxy": ..., "shortcut_audit":
-..., "robustness": ..., "loro": ..., "data": {counts, acceptance}}`.
+`evaluation.json` top level: `{"synthetic": {...}, "real": {...},
+"ablations": {"A": ..., "B": null, "C": ..., "D": null, "reasons": {...}},
+"synthetic_proxy": ..., "shortcut_audit": ..., "robustness": ..., "loro":
+..., "data": {counts, acceptance}}`. `real.status` is `"pending"` (with
+the reason) until Stage B runs, then `"complete"` (every label evaluated),
+`"partial"` (some label has no known target on the real test split, e.g.
+smoke-only supervision) or `"no_labels"`; `real.label_status` gives, per
+label, `"evaluated"` or `"no_labels"` with the reason, and the counts of
+known targets per split. With a complete or partial result, ablations B and
+D are filled and carry `real_label_status`.
 
 Real data (Stage B): group = camera/location id; camera-disjoint
 train/val/test; B (scratch) uses `training.lr`, D (fine-tune) uses
 `finetune.lr`; identical epochs, patience, seeds, splits and normaliser
-policy; report counts of real sequences, videos and cameras.
+policy; report counts of real sequences, videos and cameras (and known
+labels per split). Smoke-only labels are enough: with fog unknown, D keeps
+the pretrained fog calibration and B always abstains on fog. Real
+manifests are prepared by `scripts/prepare_firesense.py` (near field;
+testpos03 / 04 / 05 excluded with the reason: decoder crash, edited
+footage, container clock ~27 % slow), `scripts/prepare_mivia.py` (near
+field; labels in `configs/real/mivia_smoke_labels.csv`) and
+`scripts/prepare_figlib.py` (far field: HPWREN FIgLib, one frame per
+minute, imagery courtesy of HPWREN, credit https://www.hpwren.ucsd.edu/;
+12-frame windows entirely before the plume's first visible frame are
+smoke = 0, windows starting >= 60 s after it smoke = 1, straddling windows
+are never written; fog is unknown). `scripts/extract_features.py` takes
+the extractor settings from `--artifacts` (the exported model), else
+`--profile` (a profile's `time` block); timing flags that contradict the
+model need `--force-timing`. `scripts/evaluate_real_zero_shot.py` runs the
+exported model unchanged on real windows (not Stage B).
 
 ```python
 # src/inference/predict.py — imports only torch, numpy, yaml, cv2 and src.models / src.data
 class PhysicsExpert:
     @classmethod
     def load(cls, artifact_dir) -> "PhysicsExpert"
-    def features_from_frames(self, frames, timestamps, masks=None) -> tuple[np.ndarray, dict]
+    def features_from_frames(self, frames, timestamps, masks=None, lag_frames=None,
+                             lag_timestamps=None, feature_cfg=None) -> tuple[np.ndarray, dict]
+        # extractor rebuilt from the exported feature_config; masks=None runs the fallback detector
     def encode(self, features) -> np.ndarray     # raw (B, 12, 14) or (12, 14) -> (B, 16)
-    def predict(self, features, operating_point="balanced", meta=None) -> dict
+    def predict(self, features, operating_point="low_false_alarm", meta=None,
+                allow_consecutive=False) -> dict
         # logits, probs, decisions (1 / 0 / -1 abstain), abstain_reasons, calibration_source
+    training_flow_modes: tuple[str, ...]          # ("lag",), ("consecutive",) or both
+    consecutive_native: bool                      # trained only on consecutive flow (far field)
 ```
+
+`predict` defaults to `low_false_alarm`: in the engine v1 evaluation the
+balanced point called smoke on ~76 % of the fog_only clips it decided on,
+so `balanced` is for uses where a missed fire costs more than a fog false
+alarm. A model trained only on consecutive flow takes consecutive input as
+native (lag frames passed to `features_from_frames` are ignored).
 
 ## 12. Data splits and leakage rules
 
@@ -588,6 +813,9 @@ class PhysicsExpert:
   val_select; temperatures, thresholds and the abstain band on val_calib.
   Test splits are evaluated once per trained model.
 * Real footage: group = camera/location id; one original video never spans
-  two splits; evaluation cameras are unseen in training. Real background
-  images used for rendering (if any) must come from cameras disjoint from
-  real validation/test cameras.
+  two splits; evaluation cameras are unseen in training. FIgLib splits are
+  assigned per camera mount (crc32 of the site-direction, e.g. `stgo-s`),
+  so the colour and mono cameras of one mount, and every fire seen from it,
+  share a split; groups stay camera ids. Real background images used for
+  rendering (if any) must come from cameras disjoint from real
+  validation/test cameras.

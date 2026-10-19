@@ -941,3 +941,21 @@ def test_render_speed_budget():
         render_sequence(sim, rp, np.random.default_rng(i))
     per = (time.perf_counter() - t0) / 3
     assert per < 1.0, per   # generous for CI; the measured budget is ~150 ms (see module report)
+
+
+def test_every_tracer_distractor_regime_is_rendered_as_the_primary_group():
+    """A neither scene's own tracer distractor (haze, dust, rain) gets the primary exposure range,
+    not the faint background-haze one; background haze in other scenes stays background."""
+    from types import SimpleNamespace
+
+    from src.constants import NEITHER_REGIMES
+    from src.data.render import PRIMARY_TRACER_REGIMES, _group_roles
+
+    tracer_regimes = {"haze_drift", "dust_burst", "rain_shaft"}
+    assert tracer_regimes <= set(NEITHER_REGIMES) and set(PRIMARY_TRACER_REGIMES) == tracer_regimes
+    for regime in tracer_regimes:
+        sim = SimpleNamespace(labels=(0, 0), category="neither", params={"distractor_regime": regime})
+        assert _group_roles(sim)["tracer"] == "primary"
+    for category, labels in (("neither", (0, 0)), ("fog_only", (0, 1))):
+        sim = SimpleNamespace(labels=labels, category=category, params={"distractor_regime": "distant_cloud"})
+        assert _group_roles(sim)["tracer"] == "background"
