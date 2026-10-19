@@ -1,0 +1,56 @@
+model:
+  input_dim: 14
+  seq_len: 12
+  hidden_size: 32
+  num_layers: 1
+  embedding_dim: 16
+  dropout: 0.1
+  output_names:
+  - smoke
+  - fog
+normalization:
+  clip: 5.0
+training:
+  loss: bce_with_logits
+  optimizer: adamw
+  lr: 0.001
+  weight_decay: 0.0001
+  batch_size: 64
+  max_epochs: 50
+  early_stopping_patience: 7
+  grad_clip_norm: 1.0
+  seeds:
+  - 0
+  - 1
+  - 2
+  balance: auto
+  selection_metric: val_loss
+calibration:
+  temperature_scaling: true
+  temperature_bounds:
+  - 0.5
+  - 5.0
+thresholds:
+  operating_points:
+    balanced: youden
+    low_false_alarm:
+      max_false_smoke_on_fog_only: 0.05
+  min_calibration_sims_per_category: 20
+abstain:
+  logit_margin_floor: 0.25
+  target_error: 0.05
+  max_rate: 0.3
+  min_mask_frames: 3
+  min_flow_frames: 2
+  max_clip_fraction: 0.2
+audit:
+  flags_only_auc_max: 0.6
+  parameter_auc_max: 0.6
+finetune:
+  lr: 0.0001
+  max_epochs: 50
+  early_stopping_patience: 7
+  freeze_encoder_epochs: 0
+evaluation:
+  calibration_bins: 10
+  bootstrap_resamples: 1000

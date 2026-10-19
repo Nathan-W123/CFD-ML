@@ -1,0 +1,364 @@
+artifact_format_version: 1
+model:
+  input_dim: 14
+  seq_len: 12
+  hidden_size: 32
+  num_layers: 1
+  embedding_dim: 16
+  dropout: 0.1
+  output_names:
+  - smoke
+  - fog
+feature_names:
+- flow_u_mean
+- flow_v_mean
+- flow_u_std
+- flow_v_std
+- flow_divergence
+- flow_vorticity_abs
+- region_area
+- area_growth
+- centroid_dx
+- centroid_dz
+- boundary_roughness
+- anchor_stability
+- mask_valid
+- flow_valid
+preprocessing:
+  n_steps: 12
+  n_features: 14
+  feature_names:
+  - flow_u_mean
+  - flow_v_mean
+  - flow_u_std
+  - flow_v_std
+  - flow_divergence
+  - flow_vorticity_abs
+  - region_area
+  - area_growth
+  - centroid_dx
+  - centroid_dz
+  - boundary_roughness
+  - anchor_stability
+  - mask_valid
+  - flow_valid
+  feature_gates:
+  - flow
+  - flow
+  - flow
+  - flow
+  - flow
+  - flow
+  - mask
+  - mask_pair
+  - mask_pair
+  - mask_pair
+  - mask
+  - mask_pair
+  - none
+  - none
+  validity_flags:
+  - mask_valid
+  - flow_valid
+  normalizer_file: feature_normalizer.json
+  normalizer_fit_split: train
+  normalizer_clip: 5.0
+  closed_gate_value: 0.0
+  feature_config:
+    work_size: 128
+    roi: union_bbox
+    roi_min_px: 32
+    stabilize: true
+    require_stabilization: true
+    min_mask_frac: 0.002
+    flow_method: dis
+    flow_erode_px: 2
+    fb_max_px: 1.0
+    anchor_band_px: 6
+    min_roughness_px: 100
+    expected_interval_s: 60.0
+    flow_lag_s: 0.0
+    max_offset_s: 10.0
+  feature_config_source: train_feature_meta
+  feature_timing_source:
+    expected_interval_s: train_feature_meta
+    flow_lag_s: train_feature_meta
+    max_offset_s: train_feature_meta
+  training_flow_modes:
+    consecutive: 1799
+  training_roi_scale_range:
+  - 1.500110394988802
+  - 2.4993300897615485
+  training_data_source: synthetic
+  training_mask_sources:
+    bbox: 378
+    degraded: 895
+    detector: 526
+files:
+  encoder: physics_encoder.pt
+  classifier: physics_classifier.pt
+  normalizer: feature_normalizer.json
+  config: model_config.yaml
+torch_version: 2.14.1+cpu
+temperatures:
+  smoke: 1.2378984418738401
+  fog: 1.6250811346232124
+thresholds:
+  balanced:
+    smoke:
+      logit: 0.09577608824915257
+      prob: 0.5239257355090519
+    fog:
+      logit: 0.179264214706524
+      prob: 0.544696421989229
+  low_false_alarm:
+    smoke:
+      logit: 0.5813663518291542
+      prob: 0.6413817432361443
+    fog:
+      logit: 0.179264214706524
+      prob: 0.544696421989229
+abstain:
+  margins:
+    balanced:
+      smoke: 0.25
+      fog: 0.25
+    low_false_alarm:
+      smoke: 0.25263642734032926
+      fog: 0.25
+  margin_space: calibrated_logit
+  input_validity:
+    min_mask_frames: 3
+    min_flow_frames: 2
+    max_clip_fraction: 0.2
+    incompatible_frame_interval: true
+calibration:
+  fit_source: synthetic_val_calib
+  split: val_calib
+  weighting: per_simulation
+  n_sequences: 456
+  n_groups: 152
+  groups_per_category:
+    smoke_only: 38
+    fog_only: 38
+    neither: 38
+    both: 38
+  min_groups_per_category: 20
+  category_support:
+    status: applicable
+  insufficient_calibration_data: false
+  insufficient_categories: []
+  prevalence:
+    smoke:
+      per_sequence: 0.5
+      per_simulation: 0.5
+    fog:
+      per_sequence: 0.5
+      per_simulation: 0.5000000000000001
+  temperature_fit:
+    smoke:
+      bounds:
+      - 0.5
+      - 5.0
+      fitted_T: 1.2378984418738401
+      at_bound: null
+      fallback: false
+      reason: null
+      nll_T1: 0.6737877768392434
+      nll: 0.6727094280530702
+    fog:
+      bounds:
+      - 0.5
+      - 5.0
+      fitted_T: 1.6250811346232124
+      at_bound: null
+      fallback: false
+      reason: null
+      nll_T1: 0.673270076802162
+      nll: 0.6625718027711153
+  temperature_fallback:
+    smoke: null
+    fog: null
+  temperature_clipped:
+    smoke: null
+    fog: null
+  threshold_fit:
+    balanced:
+      smoke:
+        criterion: max_youden_j
+        n_known: 456
+        youden_j: 0.22368421052631732
+        tpr: 0.5789473684210532
+        fpr: 0.3552631578947359
+        precision: 0.6197183098591558
+        recall: 0.5789473684210532
+      fog:
+        criterion: max_youden_j
+        n_known: 456
+        youden_j: 0.27631578947368557
+        tpr: 0.6271929824561407
+        fpr: 0.3508771929824552
+        precision: 0.6412556053811668
+        recall: 0.6271929824561407
+    low_false_alarm:
+      smoke:
+        criterion: false_smoke_on_fog_only<=0.05
+        rate: 0.043859649122807334
+        n_negatives: 114
+        constraint_active: true
+        constraint_fitted: true
+      fog:
+        criterion: same_as_balanced
+  abstain_fit:
+    balanced:
+      smoke:
+        abstain_rate: 0.4407894736842115
+        confident_error: 0.36470588235294404
+        error_without_abstention: 0.3881578947368432
+        target_reached: false
+        floor: 0.25
+        target_error: 0.05
+        max_rate: 0.3
+      fog:
+        abstain_rate: 0.31140350877193035
+        confident_error: 0.36305732484076575
+        error_without_abstention: 0.3618421052631588
+        target_reached: false
+        floor: 0.25
+        target_error: 0.05
+        max_rate: 0.3
+    low_false_alarm:
+      smoke:
+        abstain_rate: 0.2456140350877193
+        confident_error: 0.44476744186046596
+        error_without_abstention: 0.46491228070175505
+        target_reached: false
+        floor: 0.25
+        target_error: 0.05
+        max_rate: 0.3
+      fog:
+        abstain_rate: 0.31140350877193035
+        confident_error: 0.36305732484076575
+        error_without_abstention: 0.3618421052631588
+        target_reached: false
+        floor: 0.25
+        target_error: 0.05
+        max_rate: 0.3
+  label_support:
+    smoke:
+      n_known: 456
+      n_pos: 228
+      n_unknown: 0
+      sufficient: true
+      reason: null
+      calibration: fitted
+    fog:
+      n_known: 456
+      n_pos: 228
+      n_unknown: 0
+      sufficient: true
+      reason: null
+      calibration: fitted
+  untrained_labels: []
+operating_points:
+- balanced
+- low_false_alarm
+fit:
+  stage: A_cfd_pretraining
+  experiment: C
+  seed: 0
+  seeds:
+  - 0
+  - 1
+  - 2
+  exported_seed: 2
+  is_exported_model: false
+  selection: lowest val_select loss (early-stopping split) among seeds
+  val_select_loss_per_seed:
+    '0': 0.658427357673645
+    '1': 0.6587780714035034
+    '2': 0.6570835113525391
+  best_epoch: 15
+  epochs_run: 22
+  stopped_early: true
+  pos_weight: null
+  balance: none
+  training:
+    lr: 0.001
+    max_epochs: 50
+    patience: 7
+    batch_size: 64
+    weight_decay: 0.0001
+    grad_clip_norm: 1.0
+    freeze_encoder_epochs: 0
+    seed: 0
+    loss: bce_with_logits_masked_unknown
+    optimizer: adamw
+    known_train_targets:
+      smoke: 1799
+      fog: 1799
+  normalizer_fit: train split only
+  data_source: synthetic
+  data_counts:
+    test_iid:
+      sequences: 296
+      groups: 148
+      originals: 148
+      per_category:
+        smoke_only: 74
+        fog_only: 74
+        neither: 74
+        both: 74
+      known_labels:
+        smoke: 296
+        fog: 296
+    test_ood:
+      sequences: 400
+      groups: 200
+      originals: 200
+      per_category:
+        smoke_only: 100
+        fog_only: 100
+        neither: 100
+        both: 100
+      known_labels:
+        smoke: 400
+        fog: 400
+    train:
+      sequences: 1799
+      groups: 600
+      originals: 600
+      per_category:
+        smoke_only: 449
+        fog_only: 450
+        neither: 450
+        both: 450
+      known_labels:
+        smoke: 1799
+        fog: 1799
+    val_calib:
+      sequences: 456
+      groups: 152
+      originals: 152
+      per_category:
+        smoke_only: 114
+        fog_only: 114
+        neither: 114
+        both: 114
+      known_labels:
+        smoke: 456
+        fog: 456
+    val_select:
+      sequences: 297
+      groups: 99
+      originals: 99
+      per_category:
+        smoke_only: 72
+        fog_only: 75
+        neither: 75
+        both: 75
+      known_labels:
+        smoke: 297
+        fog: 297
+  torch_threads: 1
+  init: random

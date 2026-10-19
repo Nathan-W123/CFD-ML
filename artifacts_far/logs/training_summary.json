@@ -1,0 +1,236 @@
+{
+  "abstain_margins": {
+    "balanced": {
+      "fog": 0.2579319641750826,
+      "smoke": 0.25
+    },
+    "low_false_alarm": {
+      "fog": 0.2579319641750826,
+      "smoke": 0.3188461857014406
+    }
+  },
+  "artifacts": {
+    "classifier": "artifacts_far/physics_classifier.pt",
+    "config": "artifacts_far/model_config.yaml",
+    "encoder": "artifacts_far/physics_encoder.pt",
+    "normalizer": "artifacts_far/feature_normalizer.json"
+  },
+  "calibration": {
+    "temperatures": {
+      "fog": 1.0171066485966869,
+      "smoke": 1.302184007463163
+    },
+    "thresholds": {
+      "balanced": {
+        "fog": {
+          "logit": 0.03461642673150517,
+          "prob": 0.5086532426039124
+        },
+        "smoke": {
+          "logit": 0.08420688729421645,
+          "prob": 0.5210392911756098
+        }
+      },
+      "low_false_alarm": {
+        "fog": {
+          "logit": 0.03461642673150517,
+          "prob": 0.5086532426039124
+        },
+        "smoke": {
+          "logit": 0.5544823819758513,
+          "prob": 0.6351749112607663
+        }
+      }
+    }
+  },
+  "category_support": {
+    "status": "applicable"
+  },
+  "data_counts": {
+    "test_iid": {
+      "groups": 148,
+      "known_labels": {
+        "fog": 296,
+        "smoke": 296
+      },
+      "originals": 148,
+      "per_category": {
+        "both": 74,
+        "fog_only": 74,
+        "neither": 74,
+        "smoke_only": 74
+      },
+      "sequences": 296
+    },
+    "test_ood": {
+      "groups": 200,
+      "known_labels": {
+        "fog": 400,
+        "smoke": 400
+      },
+      "originals": 200,
+      "per_category": {
+        "both": 100,
+        "fog_only": 100,
+        "neither": 100,
+        "smoke_only": 100
+      },
+      "sequences": 400
+    },
+    "train": {
+      "groups": 600,
+      "known_labels": {
+        "fog": 1799,
+        "smoke": 1799
+      },
+      "originals": 600,
+      "per_category": {
+        "both": 450,
+        "fog_only": 450,
+        "neither": 450,
+        "smoke_only": 449
+      },
+      "sequences": 1799
+    },
+    "val_calib": {
+      "groups": 152,
+      "known_labels": {
+        "fog": 456,
+        "smoke": 456
+      },
+      "originals": 152,
+      "per_category": {
+        "both": 114,
+        "fog_only": 114,
+        "neither": 114,
+        "smoke_only": 114
+      },
+      "sequences": 456
+    },
+    "val_select": {
+      "groups": 99,
+      "known_labels": {
+        "fog": 297,
+        "smoke": 297
+      },
+      "originals": 99,
+      "per_category": {
+        "both": 75,
+        "fog_only": 75,
+        "neither": 75,
+        "smoke_only": 72
+      },
+      "sequences": 297
+    }
+  },
+  "data_source": "synthetic",
+  "experiment": "C",
+  "exported_seed": 2,
+  "insufficient_calibration_data": false,
+  "label_support": {
+    "fog": {
+      "calibration": "fitted",
+      "n_known": 456,
+      "n_pos": 228,
+      "n_unknown": 0,
+      "reason": null,
+      "sufficient": true
+    },
+    "smoke": {
+      "calibration": "fitted",
+      "n_known": 456,
+      "n_pos": 228,
+      "n_unknown": 0,
+      "reason": null,
+      "sufficient": true
+    }
+  },
+  "provenance": {
+    "init": "random"
+  },
+  "seed_artifacts": {
+    "0": "artifacts_far/seeds/seed_0",
+    "1": "artifacts_far/seeds/seed_1",
+    "2": "artifacts_far/seeds/seed_2"
+  },
+  "seeds": {
+    "0": {
+      "balance": "none",
+      "best_epoch": 15,
+      "best_val_select_loss": 0.658427357673645,
+      "epochs_run": 22,
+      "pos_weight": null,
+      "settings": {
+        "batch_size": 64,
+        "freeze_encoder_epochs": 0,
+        "grad_clip_norm": 1.0,
+        "known_train_targets": {
+          "fog": 1799,
+          "smoke": 1799
+        },
+        "loss": "bce_with_logits_masked_unknown",
+        "lr": 0.001,
+        "max_epochs": 50,
+        "optimizer": "adamw",
+        "patience": 7,
+        "seed": 0,
+        "weight_decay": 0.0001
+      },
+      "stopped_early": true,
+      "train_seconds": 3.7071784510008
+    },
+    "1": {
+      "balance": "none",
+      "best_epoch": 4,
+      "best_val_select_loss": 0.6587780714035034,
+      "epochs_run": 11,
+      "pos_weight": null,
+      "settings": {
+        "batch_size": 64,
+        "freeze_encoder_epochs": 0,
+        "grad_clip_norm": 1.0,
+        "known_train_targets": {
+          "fog": 1799,
+          "smoke": 1799
+        },
+        "loss": "bce_with_logits_masked_unknown",
+        "lr": 0.001,
+        "max_epochs": 50,
+        "optimizer": "adamw",
+        "patience": 7,
+        "seed": 1,
+        "weight_decay": 0.0001
+      },
+      "stopped_early": true,
+      "train_seconds": 1.7134059110030648
+    },
+    "2": {
+      "balance": "none",
+      "best_epoch": 6,
+      "best_val_select_loss": 0.6570835113525391,
+      "epochs_run": 13,
+      "pos_weight": null,
+      "settings": {
+        "batch_size": 64,
+        "freeze_encoder_epochs": 0,
+        "grad_clip_norm": 1.0,
+        "known_train_targets": {
+          "fog": 1799,
+          "smoke": 1799
+        },
+        "loss": "bce_with_logits_masked_unknown",
+        "lr": 0.001,
+        "max_epochs": 50,
+        "optimizer": "adamw",
+        "patience": 7,
+        "seed": 2,
+        "weight_decay": 0.0001
+      },
+      "stopped_early": true,
+      "train_seconds": 1.9051793439975881
+    }
+  },
+  "stage": "A_cfd_pretraining",
+  "training_curves": "artifacts_far/logs/training_curves.png",
+  "untrained_labels": []
+}
