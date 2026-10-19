@@ -160,7 +160,19 @@ def test_contact_sheet_is_blind_and_ids_are_stable(tmp_path):
     # the banner rows of every tile are blank (beyond the minute label box)
     for r0 in (0, H.SHEET_TILE[1]):
         for c0 in (0, H.SHEET_TILE[0]):
-            assert sheet[r0:r0 + H.SHEET_BANNER_PX - 2, c0 + 160:c0 + H.SHEET_TILE[0]].max() < 8
+            assert sheet[r0:r0 + H.SHEET_BANNER_PX - 8, c0 + 180:c0 + H.SHEET_TILE[0]].max() < 8   # clear of the
+            # JPEG block that straddles the blank banner and the image
+    # with a region of interest: frames 0 and 11 above, zooms of them around zoom_x below
+    H.write_sheet(folder, files, tmp_path / "z.jpg", zoom_x=0.9)
+    z = cv2.imread(str(tmp_path / "z.jpg"))
+    assert z.shape == sheet.shape
+    top, bottom = z[100:400, 200:700], z[H.SHEET_TILE[1] + 100:H.SHEET_TILE[1] + 400, 200:700]
+    assert abs(float(top.mean()) - float(bottom.mean())) < 4          # same frame (flat test images)
+    assert abs(float(z[100:400, H.SHEET_TILE[0] + 200:].mean()) - 220) < 6   # frame 11 on the right
+    img = np.zeros((100, 400, 3), np.uint8)
+    img[:, 300:] = 255
+    crop = H._zoom_crop(img, 0.95)
+    assert crop.shape[0] == 45 and crop.shape[1] == round(45 * 1.5) and crop[:, -1].min() == 255
     sid = H.sheet_id_for("hpwren-om-w-mobo-c-20260824-0700")
     assert sid == H.sheet_id_for("hpwren-om-w-mobo-c-20260824-0700") and len(sid) == 12
     assert "om-w" not in sid and sid != H.sheet_id_for("hpwren-om-w-mobo-c-20260825-0700")

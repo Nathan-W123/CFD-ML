@@ -127,6 +127,7 @@ LIST_URL = "https://cdn.hpwren.ucsd.edu/hpwren-cameras/{cam}/{yyyy}/{day}/{day}_
 IMAGE_URL = "https://cdn.hpwren.ucsd.edu/MTA/{cam}/large/{day}/Q{q}/{name}"
 STATIONS_URL = "https://mesonet.agron.iastate.edu/geojson/network/CA_ASOS.geojson"
 METAR_URL = "https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py"
+INCIDENTS_URL = "https://incidents.fire.ca.gov/umbraco/api/IncidentApi/List?inactive=true&year={year}"
 CREDIT = ("HPWREN camera archive: imagery courtesy of HPWREN, the High Performance Wireless Research and "
           "Education Network, University of California San Diego, https://www.hpwren.ucsd.edu/. Weather "
           "evidence: METARs via the Iowa Environmental Mesonet ASOS archive (mesonet.agron.iastate.edu).")
@@ -143,7 +144,7 @@ SLOTS = [(h, m) for h in range(6, 11) for m in (0, 30) if (6, 30) <= (h, m) <= (
 MIN_SUN_DEG = 5.0
 FOG_CODES = ("FG",)                 # matches FG, BCFG, MIFG, PRFG, FZFG
 CANDIDATE_FIELDS = ["window_id", "camera", "site", "day", "slot", "start_unix_target", "kind", "split",
-                    "stations", "evidence"]
+                    "stations", "evidence", "zoom_x"]
 
 
 # =============================================================================
@@ -405,6 +406,64 @@ def select_candidates(cams: list, stations: list, metar: dict, days: list, n_fog
     return fog_rows + clear_rows
 
 
+def parse_incidents(items: list) -> list:
+    """CAL FIRE incidents with a start time and a location: name, id, start (unix), acres, lat, lon, county."""
+    out = []
+    for i in items:
+        try:
+            t = dt.datetime.fromisoformat(str(i["Started"]).replace("Z", "+00:00"))
+            lat, lon = float(i["Latitude"]), float(i["Longitude"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if t.tzinfo is None:
+            t = t.replace(tzinfo=dt.timezone.utc)
+        if not (math.isfinite(lat) and math.isfinite(lon)) or (lat == 0 and lon == 0):
+            continue
+        out.append({"name": str(i.get("Name", "")).strip(), "id": str(i.get("UniqueId", "")),
+                    "start": t.timestamp(), "acres": float(i.get("AcresBurned") or 0.0), "lat": lat, "lon": lon,
+                    "county": i.get("County", "")})
+    return sorted(out, key=lambda r: r["start"])
+
+
+def select_fire_candidates(cams: list, incidents: list, start: dt.date, end: dt.date, max_km: float = 50.0,
+                           fov_margin_deg: float = 5.0, min_acres: float = 5.0, max_cameras: int = 4,
+                           offsets_min=(-90, 10, 30)) -> list:
+    """Windows around reported fire starts (see the module docstring, select-fires), as candidate rows."""
+    a = dt.datetime(start.year, start.month, start.day, tzinfo=TZ).timestamp()
+    b = (dt.datetime(end.year, end.month, end.day, tzinfo=TZ) + dt.timedelta(days=1)).timestamp()
+    rows, seen = [], set()
+    for inc in incidents:
+        if not (a <= inc["start"] < b) or inc["acres"] < min_acres:
+            continue
+        hits = []
+        for cam in cams:
+            d, brg = distance_bearing(cam["lat"], cam["lon"], inc["lat"], inc["lon"])
+            off = (brg - cam["azimuth"] + 180.0) % 360.0 - 180.0
+            if 1.0 <= d <= max_km and abs(off) <= cam["hfov"] / 2.0 - fov_margin_deg:
+                hits.append((d, cam["camera"], cam, off))
+        for d, _, cam, off in sorted(hits, key=lambda h: (h[0], h[1]))[:max_cameras]:
+            for o in offsets_min:
+                t = inc["start"] + 60.0 * o
+                if min(solar_elevation_deg(cam["lat"], cam["lon"], t),
+                       solar_elevation_deg(cam["lat"], cam["lon"], t + INTERVAL_S * N_STEPS)) < MIN_SUN_DEG:
+                    continue
+                local = dt.datetime.fromtimestamp(t, TZ)
+                wid = f"hpwrenfire-{cam['camera']}-{local:%Y%m%d-%H%M}"
+                if wid in seen:
+                    continue
+                seen.add(wid)
+                ev = {"incident": inc["name"], "incident_id": inc["id"], "acres": inc["acres"],
+                      "started_unix": int(inc["start"]), "offset_min": o, "distance_km": round(d, 1),
+                      "bearing_offset_deg": round(off, 1), "county": inc["county"]}
+                rows.append({"window_id": wid, "camera": cam["camera"], "site": cam["site"],
+                             "day": local.date().isoformat(), "slot": local.strftime("%H:%M"),
+                             "start_unix_target": int(t), "kind": "fire_pre" if o < 0 else "fire_post",
+                             "split": split_for(cam["camera"], (0.5, 0.15, 0.15, 0.2)), "stations": "",
+                             "evidence": json.dumps(ev, separators=(",", ":")),
+                             "zoom_x": f"{min(max(0.5 + off / cam['hfov'], 0.0), 1.0):.3f}"})
+    return rows
+
+
 # =============================================================================
 # Frames
 # =============================================================================
@@ -465,17 +524,37 @@ def sheet_id_for(window_id: str) -> str:
     return hashlib.sha1(f"{SHEET_SALT}:{window_id}".encode("utf-8")).hexdigest()[:12]
 
 
-def write_sheet(folder: Path, files: list, path: Path) -> None:
-    """2 x 2 contact sheet of frames SHEET_FRAMES with only their minute index (blind to camera, time, kind)."""
+def _zoom_crop(img: np.ndarray, zoom_x: float) -> np.ndarray:
+    """A crop of aspect SHEET_TILE around x = zoom_x (fraction of the width), 0.45 of the height, centred at 0.55."""
+    h, w = img.shape[:2]
+    ch = int(round(0.45 * h))
+    cw = min(w, int(round(ch * SHEET_TILE[0] / SHEET_TILE[1])))
+    x0 = int(round(min(max(zoom_x * w - cw / 2, 0), w - cw)))
+    y0 = int(round(min(max(0.55 * h - ch / 2, 0), h - ch)))
+    return img[y0:y0 + ch, x0:x0 + cw]
+
+
+def write_sheet(folder: Path, files: list, path: Path, zoom_x=None) -> None:
+    """Contact sheet with only minute indices (blind to camera, time, kind): frames SHEET_FRAMES in a 2 x 2
+    grid, or, with zoom_x (a region of interest, fraction of the width), frames 0 and 11 above and a zoom
+    of the same frames around zoom_x below."""
+    if zoom_x in ("", None):
+        panels = [(k, None) for k in SHEET_FRAMES]
+    else:
+        panels = [(0, None), (N_STEPS - 1, None), (0, float(zoom_x)), (N_STEPS - 1, float(zoom_x))]
     tiles = []
-    for k in SHEET_FRAMES:
+    for k, zx in panels:
         img = cv2.imread(str(folder / files[k]), cv2.IMREAD_COLOR)
         if img is None:
             raise ValueError(f"cannot read {folder / files[k]}")
-        img = cv2.resize(img, SHEET_TILE, interpolation=cv2.INTER_AREA)
-        img[:SHEET_BANNER_PX] = 0                       # the camera's burned-in banner names camera and time
-        cv2.rectangle(img, (0, 0), (150, 34), (0, 0, 0), -1)
-        cv2.putText(img, f"t = {k} min", (8, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
+        img[:int(round(img.shape[0] * SHEET_BANNER_PX / SHEET_TILE[1]))] = 0   # banner: camera name and time
+        if zx is not None:
+            img = _zoom_crop(img, zx)
+        img = cv2.resize(img, SHEET_TILE, interpolation=cv2.INTER_AREA if zx is None else cv2.INTER_CUBIC)
+        img[:SHEET_BANNER_PX] = 0 if zx is None else img[:SHEET_BANNER_PX]
+        label = f"t = {k} min" if zx is None else f"zoom t = {k}"
+        cv2.rectangle(img, (0, 0), (170, 34), (0, 0, 0), -1)
+        cv2.putText(img, label, (8, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
         tiles.append(img)
     grid = np.vstack([np.hstack(tiles[:2]), np.hstack(tiles[2:])])
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -530,6 +609,7 @@ def download_window(out: Path, cand: dict, max_width: int, max_residual_s: float
             "kind_candidate": cand["kind"], "stations": cand["stations"],
             "evidence": json.loads(cand["evidence"]) if cand.get("evidence") else [],
             "sheet_id": sheet_id_for(cand["window_id"]), "files": files, "credit": CREDIT,
+            "zoom_x": float(cand["zoom_x"]) if cand.get("zoom_x") not in (None, "") else None,
             "source": IMAGE_URL.format(cam=cam, day=day, q="<q>", name="<unix>.jpg")}
     write_json(meta_path, meta)
     return meta
@@ -607,10 +687,38 @@ def _download_one(out: Path, c: dict, max_width: int, max_residual_s: float):
         meta = download_window(out, c, max_width, max_residual_s)
         sheet = out / "_sheets" / f"{meta['sheet_id']}.jpg"
         if not sheet.is_file():
-            write_sheet(out / meta["window_id"], meta["files"], sheet)
+            write_sheet(out / meta["window_id"], meta["files"], sheet, meta.get("zoom_x"))
         return meta, None
     except (ValueError, urllib.error.URLError, OSError) as exc:
         return None, {"window_id": c["window_id"], "reason": str(exc)}
+
+
+def cmd_select_fires(args) -> int:
+    out = Path(args.out)
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "CREDIT.txt").write_text(CREDIT + " Fire starts: CAL FIRE incident list (incidents.fire.ca.gov).\n")
+    sites_cache = out / "_cache" / "sites.js"
+    if not sites_cache.is_file():
+        sites_cache.parent.mkdir(parents=True, exist_ok=True)
+        sites_cache.write_bytes(_get(SITES_URL))
+    start, end = dt.date.fromisoformat(args.start), dt.date.fromisoformat(args.end)
+    items = []
+    for year in range(start.year, end.year + 1):
+        cache = out / "_cache" / f"incidents_{year}.json"
+        if not cache.is_file():
+            cache.write_bytes(_get(INCIDENTS_URL.format(year=year), timeout=120))
+        items += json.loads(cache.read_text())
+    cams = parse_sites(sites_cache.read_text())
+    rows = select_fire_candidates(cams, parse_incidents(items), start, end, max_km=args.max_km,
+                                  min_acres=args.min_acres, max_cameras=args.max_cameras,
+                                  offsets_min=tuple(args.offsets_min))
+    _write_csv(out / "candidates.csv", rows, CANDIDATE_FIELDS)
+    kinds = defaultdict(int)
+    for r in rows:
+        kinds[r["kind"]] += 1
+    print(json.dumps({"incidents": len({json.loads(r['evidence'])['incident_id'] for r in rows}),
+                      "candidates": dict(kinds), "cameras": len({r["camera"] for r in rows})}))
+    return 0
 
 
 def cmd_download(args) -> int:
@@ -640,11 +748,11 @@ def cmd_sheets(args) -> int:
     """(Re)write the contact sheets and sheets.csv of every downloaded window."""
     out = Path(args.out)
     sheets = []
-    for meta_path in sorted(out.glob("hpwren-*/window.json")):
+    for meta_path in sorted(out.glob("hpwren*-*/window.json")):
         meta = json.loads(meta_path.read_text())
         sheet = out / "_sheets" / f"{meta['sheet_id']}.jpg"
         if args.force or not sheet.is_file():
-            write_sheet(meta_path.parent, meta["files"], sheet)
+            write_sheet(meta_path.parent, meta["files"], sheet, meta.get("zoom_x"))
         sheets.append({"sheet_id": meta["sheet_id"], "window_id": meta["window_id"]})
     _write_csv(out / "sheets.csv", sorted(sheets, key=lambda r: r["sheet_id"]), ["sheet_id", "window_id"])
     print(json.dumps({"sheets": len(sheets)}))
@@ -665,7 +773,7 @@ def _majority(values, min_count: int):
     return None
 
 
-def consolidate_votes(votes: list) -> list:
+def consolidate_votes(votes: list, primary: str = "fog") -> list:
     """Final labels per sheet from independent votes (see the module docstring, consolidate)."""
     by_sheet = defaultdict(list)
     for v in votes:
@@ -676,9 +784,15 @@ def consolidate_votes(votes: list) -> list:
         smokes = [parse_label(v.get("smoke")) for v in vs]
         quals = [(v.get("quality") or "ok").strip().lower() for v in vs]
         need = len(vs) // 2 + 1
-        fog = _majority(fogs, need)                   # 2 votes: both agree; 3 votes: 2 of 3 ("" = unknown)
-        fog = fog if fog in ("0", "1") else ""
-        smoke = "0" if smokes and all(s == "0" for s in smokes) else ("1" if smokes.count("1") >= need else "")
+        def majority(vals):                           # 2 votes: both agree; 3 votes: 2 of 3 ("" = unknown)
+            v = _majority(vals, need)
+            return v if v in ("0", "1") else ""
+
+        def conservative(vals):                       # 0 only when every vote says 0
+            return "0" if vals and all(x == "0" for x in vals) else ("1" if vals.count("1") >= need else "")
+
+        fog = majority(fogs) if primary == "fog" else conservative(fogs)
+        smoke = majority(smokes) if primary == "smoke" else conservative(smokes)
         quality = _majority(quals, need) or "disputed"
         types = [v.get("fog_type") or "" for v, f in zip(vs, fogs) if f == "1" and v.get("fog_type")]
         extents = [v.get("fog_extent") or "" for v, f in zip(vs, fogs) if f == "1" and v.get("fog_extent")]
@@ -690,11 +804,11 @@ def consolidate_votes(votes: list) -> list:
     return out
 
 
-def needs_third_vote(votes_two: list) -> bool:
-    """A sheet needs a third vote when its two votes do not agree on a definite fog label and usable quality."""
-    fogs = [parse_label(v.get("fog")) for v in votes_two]
+def needs_third_vote(votes_two: list, primary: str = "fog") -> bool:
+    """A sheet needs a third vote when its two votes do not agree on a definite primary label and quality."""
+    labs = [parse_label(v.get(primary)) for v in votes_two]
     quals = [(v.get("quality") or "ok").strip().lower() for v in votes_two]
-    return not (len(fogs) == 2 and fogs[0] == fogs[1] != "" and quals[0] == quals[1])
+    return not (len(labs) == 2 and labs[0] == labs[1] != "" and quals[0] == quals[1])
 
 
 def cohen_kappa(a: list, b: list):
@@ -713,20 +827,21 @@ def cmd_consolidate(args) -> int:
     out = Path(args.out)
     votes = _read_csv(Path(args.votes))
     by_sheet = {r["sheet_id"]: r["window_id"] for r in _read_csv(out / "sheets.csv")}
-    labels = consolidate_votes(votes)
+    labels = consolidate_votes(votes, args.primary)
     for lab in labels:
         lab["window_id"] = by_sheet.get(lab["sheet_id"], "")
     _write_csv(Path(args.labels), labels, LABEL_FIELDS)
-    r1 = {v["sheet_id"]: parse_label(v["fog"]) for v in votes if str(v.get("round")) == "1"}
-    r2 = {v["sheet_id"]: parse_label(v["fog"]) for v in votes if str(v.get("round")) == "2"}
+    r1 = {v["sheet_id"]: parse_label(v[args.primary]) for v in votes if str(v.get("round")) == "1"}
+    r2 = {v["sheet_id"]: parse_label(v[args.primary]) for v in votes if str(v.get("round")) == "2"}
     common = sorted(set(r1) & set(r2))
     both = [(r1[s], r2[s]) for s in common if r1[s] != "" and r2[s] != ""]
     stats = {"sheets": len(labels), "fog": {k: sum(lab["fog"] == k for lab in labels) for k in ("1", "0", "")},
              "smoke": {k: sum(lab["smoke"] == k for lab in labels) for k in ("1", "0", "")},
              "quality_ok": sum(lab["quality"] == "ok" for lab in labels),
-             "rounds_1_2": {"sheets": len(common), "both_definite": len(both),
-                            "fog_agreement": (sum(x == y for x, y in both) / len(both)) if both else None,
-                            "fog_cohen_kappa": cohen_kappa([r1[s] for s in common], [r2[s] for s in common])}}
+             "rounds_1_2": {"label": args.primary, "sheets": len(common), "both_definite": len(both),
+                            f"{args.primary}_agreement": (sum(x == y for x, y in both) / len(both)) if both else None,
+                            f"{args.primary}_cohen_kappa": cohen_kappa([r1[s] for s in common],
+                                                                       [r2[s] for s in common])}}
     write_json(Path(args.labels).with_suffix(".stats.json"), stats)
     print(json.dumps(stats))
     return 0
@@ -759,15 +874,15 @@ def cmd_manifest(args) -> int:
         if (lab.get("quality") or "ok").strip().lower() not in ("ok", ""):
             dropped["quality"] += 1
             continue
-        if fog == "":
-            dropped["fog_unknown"] += 1
+        if (fog if args.require == "fog" else smoke) == "":
+            dropped[f"{args.require}_unknown"] += 1
             continue
         meta = json.loads(meta_path.read_text())
         cam = meta["camera"]
         rows.append({"video_path": str(out / wid), "camera_id": cam, "video_id": wid, "smoke": smoke, "fog": fog,
                      "split": split_for(cam, tuple(args.fractions)), "start_s": f"{meta['grid_start_s']:.2f}",
                      "max_windows": 1, "window_id": wid, "camera_mount": camera_mount(cam),
-                     "source": "hpwren_fog", "kind_candidate": meta.get("kind_candidate", "")})
+                     "source": args.source, "kind_candidate": meta.get("kind_candidate", "")})
     fields = ["video_path", "camera_id", "video_id", "smoke", "fog", "split", "start_s", "max_windows",
               "window_id", "camera_mount", "source", "kind_candidate"]
     _write_csv(out / "real.csv", rows, fields)
@@ -808,6 +923,15 @@ def main(argv=None) -> int:
     s.add_argument("--max-per-camera", type=int, default=4)
     s.add_argument("--max-km", type=float, default=40.0)
     s.add_argument("--seed", default="")
+    f = sub.add_parser("select-fires", help="candidate windows around CAL FIRE incident starts")
+    f.add_argument("--out", required=True)
+    f.add_argument("--start", required=True)
+    f.add_argument("--end", required=True)
+    f.add_argument("--max-km", type=float, default=50.0)
+    f.add_argument("--min-acres", type=float, default=5.0)
+    f.add_argument("--max-cameras", type=int, default=4)
+    f.add_argument("--offsets-min", type=int, nargs="+", default=[-90, 10, 30],
+                   help="window starts relative to the reported start (minutes); negative = before (smoke-free)")
     d = sub.add_parser("download", help="download candidate windows and write contact sheets")
     d.add_argument("--out", required=True)
     d.add_argument("--max-width", type=int, default=1024)
@@ -822,16 +946,20 @@ def main(argv=None) -> int:
     m.add_argument("--fractions", type=float, nargs=4, default=[0.5, 0.15, 0.15, 0.2],
                    metavar=("TRAIN", "VAL_SELECT", "VAL_CALIB", "TEST_IID"),
                    help="must match prepare_figlib.py --fractions so a camera gets the same split")
+    m.add_argument("--require", choices=("fog", "smoke"), default="fog", help="label a row must have")
+    m.add_argument("--source", default="hpwren_fog")
     c = sub.add_parser("consolidate", help="votes -> one label per sheet (+ agreement statistics)")
     c.add_argument("--out", required=True)
     c.add_argument("--votes", required=True)
     c.add_argument("--labels", required=True)
+    c.add_argument("--primary", choices=("fog", "smoke"), default="fog",
+                   help="label decided by majority (the other: 0 only when every vote says 0)")
     g = sub.add_parser("merge", help="concatenate manifests")
     g.add_argument("--out", required=True)
     g.add_argument("manifests", nargs="+")
     args = ap.parse_args(argv)
-    return {"select": cmd_select, "download": cmd_download, "sheets": cmd_sheets, "consolidate": cmd_consolidate,
-            "manifest": cmd_manifest, "merge": cmd_merge}[args.cmd](args)
+    return {"select": cmd_select, "select-fires": cmd_select_fires, "download": cmd_download, "sheets": cmd_sheets,
+            "consolidate": cmd_consolidate, "manifest": cmd_manifest, "merge": cmd_merge}[args.cmd](args)
 
 
 if __name__ == "__main__":
