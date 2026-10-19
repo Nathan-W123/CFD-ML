@@ -799,6 +799,43 @@ the extractor settings from `--artifacts` (the exported model), else
 model need `--force-timing`. `scripts/evaluate_real_zero_shot.py` runs the
 exported model unchanged on real windows (not Stage B).
 
+Real fog at the far-field timing (`scripts/prepare_hpwren_fog.py`): no
+public footage at one frame per minute carries fog labels, so the set is
+built from the HPWREN camera archive, which keeps every frame for about three
+months.
+
+1. **Proposing windows.** Airport METARs (IEM) propose morning windows. A
+   fog morning is one where an airport inside the camera's view reports
+   FG, visibility of 1 mile or less, BR with visibility of 3 miles or less,
+   or a ceiling at or below 1000 ft between 03:00 and 10:00 local. Clear
+   mornings are matched to the same cameras and time slots, and only slots
+   with the sun at least 5° up are used.
+2. **Labelling.** The labels come from looking at the frames, not from the
+   METARs:
+   * contact sheets with the camera banner blanked and opaque ids;
+   * labelled by the rules in `configs/real/hpwren_fog_labeling_guide.md`;
+   * two independent votes per sheet, and a third where the first two
+     disagree or one is unsure;
+   * consolidated by majority, with Cohen's kappa reported.
+3. **Splits.** Windows take the camera-mount split of `prepare_figlib.py`,
+   so FIgLib and HPWREN windows of one camera share a split, and
+   `scripts/merge_features.py` (`FeatureSet.concat` plus the leakage check)
+   combines the two sets.
+
+Two tests use these windows:
+
+* **Full chain.** Masks come from the fallback detector, as the model would
+  run today.
+* **Region level.** Masks come from per-frame boxes drawn around the fog,
+  or, in fog-free windows, around the most fog- or smoke-like region
+  (`scripts/region_boxes.py`). The fallback detector finds change against
+  the window's median frame, so it never proposes a static fog sea, and the
+  model was trained with masks around the aerosol (box masks among them).
+
+All labels and boxes are from AI vision labellers, not people; their
+agreement is reported, and a human spot check is recommended before the
+numbers are relied on.
+
 ```python
 # src/inference/predict.py — imports only torch, numpy, yaml, cv2 and src.models / src.data
 class PhysicsExpert:

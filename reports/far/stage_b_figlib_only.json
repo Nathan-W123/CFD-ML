@@ -1,0 +1,3129 @@
+{
+ "note": "Stage B on FIgLib alone (smoke labels only), before the HPWREN fog set was added; superseded in evaluation.json by the combined FIgLib + HPWREN fog Stage B.",
+ "real": {
+  "B": {
+   "artifacts": "runs/real_figlib/B",
+   "calibration_label_support": {
+    "fog": {
+     "calibration": "default_unfitted",
+     "n_known": 0,
+     "n_pos": 0,
+     "n_unknown": 131,
+     "reason": "no known labels in the calibration split",
+     "sufficient": false
+    },
+    "smoke": {
+     "calibration": "fitted",
+     "n_known": 131,
+     "n_pos": 65,
+     "n_unknown": 0,
+     "reason": null,
+     "sufficient": true
+    }
+   },
+   "calibration_source": "real_val_calib",
+   "seeds": {
+    "test_iid.balanced.abstain_rate_any": {
+     "mean": 1.0,
+     "n_seeds": 3,
+     "sd": 0.0,
+     "values": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "test_iid.balanced.n": {
+     "mean": 171.0,
+     "n_seeds": 3,
+     "sd": 0.0,
+     "values": [
+      171.0,
+      171.0,
+      171.0
+     ]
+    },
+    "test_iid.balanced.smoke.abstain_rate": {
+     "mean": 0.6939571150097467,
+     "n_seeds": 3,
+     "sd": 0.07632269766258051,
+     "values": [
+      0.7192982456140351,
+      0.7543859649122807,
+      0.6081871345029239
+     ]
+    },
+    "test_iid.balanced.smoke.auprc": {
+     "mean": 0.6019864888069345,
+     "n_seeds": 3,
+     "sd": 0.015998813857181382,
+     "values": [
+      0.607703363282806,
+      0.5839145689135683,
+      0.6143415342244294
+     ]
+    },
+    "test_iid.balanced.smoke.auroc": {
+     "mean": 0.5786327126688572,
+     "n_seeds": 3,
+     "sd": 0.020201877012839858,
+     "values": [
+      0.6018619934282585,
+      0.5651697699890471,
+      0.5688663745892661
+     ]
+    },
+    "test_iid.balanced.smoke.brier": {
+     "mean": 0.24454852900774884,
+     "n_seeds": 3,
+     "sd": 0.0020339000312021684,
+     "values": [
+      0.24234419108033622,
+      0.24635242445895,
+      0.2449489714839603
+     ]
+    },
+    "test_iid.balanced.smoke.ece": {
+     "mean": 0.08633888832577434,
+     "n_seeds": 3,
+     "sd": 0.011646744800594418,
+     "values": [
+      0.0973930025875627,
+      0.0874452000875069,
+      0.07417846230225339
+     ]
+    },
+    "test_iid.balanced.smoke.f1": {
+     "mean": 0.528506254763238,
+     "n_seeds": 3,
+     "sd": 0.057458516862746375,
+     "values": [
+      0.5921787709497207,
+      0.4805194805194805,
+      0.5128205128205128
+     ]
+    },
+    "test_iid.balanced.smoke.n_pos": {
+     "mean": 88.0,
+     "n_seeds": 3,
+     "sd": 0.0,
+     "values": [
+      88.0,
+      88.0,
+      88.0
+     ]
+    },
+    "test_iid.balanced.smoke.precision": {
+     "mean": 0.5770863123804301,
+     "n_seeds": 3,
+     "sd": 0.014565729170426842,
+     "values": [
+      0.5824175824175825,
+      0.5606060606060606,
+      0.5882352941176471
+     ]
+    },
+    "test_iid.balanced.smoke.recall": {
+     "mean": 0.49242424242424243,
+     "n_seeds": 3,
+     "sd": 0.09664659713767482,
+     "values": [
+      0.6022727272727273,
+      0.42045454545454547,
+      0.45454545454545453
+     ]
+    },
+    "test_iid.balanced.smoke.selective_accuracy": {
+     "mean": 0.6285980810234542,
+     "n_seeds": 3,
+     "sd": 0.05805510368910143,
+     "values": [
+      0.6875,
+      0.5714285714285714,
+      0.6268656716417911
+     ]
+    },
+    "test_iid.low_false_alarm.abstain_rate_any": {
+     "mean": 1.0,
+     "n_seeds": 3,
+     "sd": 0.0,
+     "values": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "test_iid.low_false_alarm.n": {
+     "mean": 171.0,
+     "n_seeds": 3,
+     "sd": 0.0,
+     "values": [
+      171.0,
+      171.0,
+      171.0
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.abstain_rate": {
+     "mean": 0.6939571150097467,
+     "n_seeds": 3,
+     "sd": 0.07632269766258051,
+     "values": [
+      0.7192982456140351,
+      0.7543859649122807,
+      0.6081871345029239
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.auprc": {
+     "mean": 0.6019864888069345,
+     "n_seeds": 3,
+     "sd": 0.015998813857181382,
+     "values": [
+      0.607703363282806,
+      0.5839145689135683,
+      0.6143415342244294
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.auroc": {
+     "mean": 0.5786327126688572,
+     "n_seeds": 3,
+     "sd": 0.020201877012839858,
+     "values": [
+      0.6018619934282585,
+      0.5651697699890471,
+      0.5688663745892661
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.brier": {
+     "mean": 0.24454852900774884,
+     "n_seeds": 3,
+     "sd": 0.0020339000312021684,
+     "values": [
+      0.24234419108033622,
+      0.24635242445895,
+      0.2449489714839603
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.ece": {
+     "mean": 0.08633888832577434,
+     "n_seeds": 3,
+     "sd": 0.011646744800594418,
+     "values": [
+      0.0973930025875627,
+      0.0874452000875069,
+      0.07417846230225339
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.f1": {
+     "mean": 0.528506254763238,
+     "n_seeds": 3,
+     "sd": 0.057458516862746375,
+     "values": [
+      0.5921787709497207,
+      0.4805194805194805,
+      0.5128205128205128
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.n_pos": {
+     "mean": 88.0,
+     "n_seeds": 3,
+     "sd": 0.0,
+     "values": [
+      88.0,
+      88.0,
+      88.0
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.precision": {
+     "mean": 0.5770863123804301,
+     "n_seeds": 3,
+     "sd": 0.014565729170426842,
+     "values": [
+      0.5824175824175825,
+      0.5606060606060606,
+      0.5882352941176471
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.recall": {
+     "mean": 0.49242424242424243,
+     "n_seeds": 3,
+     "sd": 0.09664659713767482,
+     "values": [
+      0.6022727272727273,
+      0.42045454545454547,
+      0.45454545454545453
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.selective_accuracy": {
+     "mean": 0.6285980810234542,
+     "n_seeds": 3,
+     "sd": 0.05805510368910143,
+     "values": [
+      0.6875,
+      0.5714285714285714,
+      0.6268656716417911
+     ]
+    }
+   },
+   "test_iid": {
+    "balanced": {
+     "overall": {
+      "abstain_rate": {
+       "any": 1.0,
+       "fog": 1.0,
+       "smoke": 0.6081871345029239
+      },
+      "abstain_reasons": {
+       "few_valid_flow_frames": 76,
+       "few_valid_mask_frames": 40,
+       "fog_near_threshold": 95,
+       "smoke_near_threshold": 28
+      },
+      "ci95": {
+       "abstain_rate.any": {
+        "hi": 1.0,
+        "lo": 1.0,
+        "n_valid": 1000
+       },
+       "false_smoke_on_fog_only.rate": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.auprc": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.auroc": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.brier": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.ece": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.f1": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.precision": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.recall": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "selective_accuracy.joint": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "smoke.auprc": {
+        "hi": 0.7101812064112475,
+        "lo": 0.5398561218395599,
+        "n_valid": 1000
+       },
+       "smoke.auroc": {
+        "hi": 0.6568875893437296,
+        "lo": 0.485118647593446,
+        "n_valid": 1000
+       },
+       "smoke.brier": {
+        "hi": 0.2572269992159356,
+        "lo": 0.230854149004289,
+        "n_valid": 1000
+       },
+       "smoke.ece": {
+        "hi": 0.1620083635422797,
+        "lo": 0.061213754427583686,
+        "n_valid": 1000
+       },
+       "smoke.f1": {
+        "hi": 0.6,
+        "lo": 0.4217666584706172,
+        "n_valid": 1000
+       },
+       "smoke.precision": {
+        "hi": 0.6909090909090909,
+        "lo": 0.5,
+        "n_valid": 1000
+       },
+       "smoke.recall": {
+        "hi": 0.5632555780933063,
+        "lo": 0.35100816427511133,
+        "n_valid": 1000
+       }
+      },
+      "confusion_4class": {
+       "abstained": [
+        0,
+        0,
+        0,
+        0
+       ],
+       "classes": [
+        "smoke_only",
+        "fog_only",
+        "neither",
+        "both"
+       ],
+       "matrix": [
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ]
+       ],
+       "n": 0,
+       "n_unknown_labels": 171
+      },
+      "confusion_4class_selective": {
+       "abstained": [
+        0,
+        0,
+        0,
+        0
+       ],
+       "classes": [
+        "smoke_only",
+        "fog_only",
+        "neither",
+        "both"
+       ],
+       "matrix": [
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ]
+       ],
+       "n": 0,
+       "n_unknown_labels": 171
+      },
+      "false_smoke_on_fog_only": {
+       "n_abstained": 0,
+       "n_false_smoke": 0,
+       "n_fog_only": 0,
+       "rate": null
+      },
+      "false_smoke_on_fog_only_selective": {
+       "n_abstained": 0,
+       "n_false_smoke": 0,
+       "n_fog_only": 0,
+       "rate": null
+      },
+      "n": 171,
+      "n_groups": 35,
+      "n_known": {
+       "both": 0,
+       "fog": 0,
+       "smoke": 171
+      },
+      "per_label": {
+       "fog": {
+        "abstain_rate": null,
+        "auprc": null,
+        "auroc": null,
+        "brier": null,
+        "ece": null,
+        "f1": null,
+        "n": 0,
+        "n_pos": null,
+        "n_unknown": 171,
+        "precision": null,
+        "prevalence": null,
+        "recall": null,
+        "selective_accuracy": null,
+        "selective_precision": null,
+        "selective_recall": null,
+        "status": "no_labels"
+       },
+       "smoke": {
+        "abstain_rate": 0.6081871345029239,
+        "auprc": 0.6143415342244294,
+        "auroc": 0.5688663745892661,
+        "brier": 0.2449489714839603,
+        "ece": 0.07417846230225339,
+        "f1": 0.5128205128205128,
+        "n": 171,
+        "n_pos": 88,
+        "n_unknown": 0,
+        "precision": 0.5882352941176471,
+        "prevalence": 0.5146198830409356,
+        "recall": 0.45454545454545453,
+        "selective_accuracy": 0.6268656716417911,
+        "selective_precision": 0.65,
+        "selective_recall": 0.7027027027027027,
+        "status": "evaluated"
+       }
+      },
+      "selective_accuracy": {
+       "coverage_joint": 0.0,
+       "fog": null,
+       "joint": null,
+       "smoke": 0.6268656716417911
+      },
+      "smoke_fog_confusion": {
+       "fog_only_as_smoke_only": null,
+       "fog_only_with_smoke": null,
+       "smoke_only_as_fog_only": null,
+       "smoke_only_with_fog": null
+      }
+     },
+     "slices": {
+      "category": {
+       "no_smoke_fog_unknown": {
+        "abstain_rate_any": 1.0,
+        "false_smoke_on_fog_only": null,
+        "fog": {
+         "abstain_rate": null,
+         "auprc": null,
+         "auroc": null,
+         "brier": null,
+         "ece": null,
+         "f1": null,
+         "n_pos": null,
+         "precision": null,
+         "recall": null,
+         "selective_accuracy": null,
+         "status": "no_labels"
+        },
+        "fog_only_with_smoke": null,
+        "n": 83,
+        "selective_accuracy_joint": null,
+        "smoke": {
+         "abstain_rate": 0.6385542168674698,
+         "auprc": null,
+         "auroc": null,
+         "brier": 0.2614932366598318,
+         "ece": 0.5052151690719962,
+         "f1": 0.0,
+         "n_pos": 0,
+         "precision": 0.0,
+         "recall": null,
+         "selective_accuracy": 0.5333333333333333
+        },
+        "smoke_only_with_fog": null
+       },
+       "smoke_fog_unknown": {
+        "abstain_rate_any": 1.0,
+        "false_smoke_on_fog_only": null,
+        "fog": {
+         "abstain_rate": null,
+         "auprc": null,
+         "auroc": null,
+         "brier": null,
+         "ece": null,
+         "f1": null,
+         "n_pos": null,
+         "precision": null,
+         "recall": null,
+         "selective_accuracy": null,
+         "status": "no_labels"
+        },
+        "fog_only_with_smoke": null,
+        "n": 88,
+        "selective_accuracy_joint": null,
+        "smoke": {
+         "abstain_rate": 0.5795454545454546,
+         "auprc": null,
+         "auroc": null,
+         "brier": 0.22934472137489967,
+         "ece": 0.46976796739101534,
+         "f1": 0.625,
+         "n_pos": 88,
+         "precision": 1.0,
+         "recall": 0.45454545454545453,
+         "selective_accuracy": 0.7027027027027027
+        },
+        "smoke_only_with_fog": null
+       }
+      },
+      "mask_source": {
+       "fallback_detector": {
+        "abstain_rate_any": 1.0,
+        "false_smoke_on_fog_only": null,
+        "fog": {
+         "abstain_rate": null,
+         "auprc": null,
+         "auroc": null,
+         "brier": null,
+         "ece": null,
+         "f1": null,
+         "n_pos": null,
+         "precision": null,
+         "recall": null,
+         "selective_accuracy": null,
+         "status": "no_labels"
+        },
+        "fog_only_with_smoke": null,
+        "n": 171,
+        "selective_accuracy_joint": null,
+        "smoke": {
+         "abstain_rate": 0.6081871345029239,
+         "auprc": 0.6143415342244294,
+         "auroc": 0.5688663745892661,
+         "brier": 0.2449489714839603,
+         "ece": 0.07417846230225339,
+         "f1": 0.5128205128205128,
+         "n_pos": 88,
+         "precision": 0.5882352941176471,
+         "recall": 0.45454545454545453,
+         "selective_accuracy": 0.6268656716417911
+        },
+        "smoke_only_with_fog": null
+       }
+      }
+     }
+    },
+    "low_false_alarm": {
+     "overall": {
+      "abstain_rate": {
+       "any": 1.0,
+       "fog": 1.0,
+       "smoke": 0.6081871345029239
+      },
+      "abstain_reasons": {
+       "few_valid_flow_frames": 76,
+       "few_valid_mask_frames": 40,
+       "fog_near_threshold": 95,
+       "smoke_near_threshold": 28
+      },
+      "ci95": {
+       "abstain_rate.any": {
+        "hi": 1.0,
+        "lo": 1.0,
+        "n_valid": 1000
+       },
+       "false_smoke_on_fog_only.rate": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.auprc": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.auroc": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.brier": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.ece": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.f1": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.precision": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.recall": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "selective_accuracy.joint": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "smoke.auprc": {
+        "hi": 0.7101812064112475,
+        "lo": 0.5398561218395599,
+        "n_valid": 1000
+       },
+       "smoke.auroc": {
+        "hi": 0.6568875893437296,
+        "lo": 0.485118647593446,
+        "n_valid": 1000
+       },
+       "smoke.brier": {
+        "hi": 0.2572269992159356,
+        "lo": 0.230854149004289,
+        "n_valid": 1000
+       },
+       "smoke.ece": {
+        "hi": 0.1620083635422797,
+        "lo": 0.061213754427583686,
+        "n_valid": 1000
+       },
+       "smoke.f1": {
+        "hi": 0.6,
+        "lo": 0.4217666584706172,
+        "n_valid": 1000
+       },
+       "smoke.precision": {
+        "hi": 0.6909090909090909,
+        "lo": 0.5,
+        "n_valid": 1000
+       },
+       "smoke.recall": {
+        "hi": 0.5632555780933063,
+        "lo": 0.35100816427511133,
+        "n_valid": 1000
+       }
+      },
+      "confusion_4class": {
+       "abstained": [
+        0,
+        0,
+        0,
+        0
+       ],
+       "classes": [
+        "smoke_only",
+        "fog_only",
+        "neither",
+        "both"
+       ],
+       "matrix": [
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ]
+       ],
+       "n": 0,
+       "n_unknown_labels": 171
+      },
+      "confusion_4class_selective": {
+       "abstained": [
+        0,
+        0,
+        0,
+        0
+       ],
+       "classes": [
+        "smoke_only",
+        "fog_only",
+        "neither",
+        "both"
+       ],
+       "matrix": [
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ]
+       ],
+       "n": 0,
+       "n_unknown_labels": 171
+      },
+      "false_smoke_on_fog_only": {
+       "n_abstained": 0,
+       "n_false_smoke": 0,
+       "n_fog_only": 0,
+       "rate": null
+      },
+      "false_smoke_on_fog_only_selective": {
+       "n_abstained": 0,
+       "n_false_smoke": 0,
+       "n_fog_only": 0,
+       "rate": null
+      },
+      "n": 171,
+      "n_groups": 35,
+      "n_known": {
+       "both": 0,
+       "fog": 0,
+       "smoke": 171
+      },
+      "per_label": {
+       "fog": {
+        "abstain_rate": null,
+        "auprc": null,
+        "auroc": null,
+        "brier": null,
+        "ece": null,
+        "f1": null,
+        "n": 0,
+        "n_pos": null,
+        "n_unknown": 171,
+        "precision": null,
+        "prevalence": null,
+        "recall": null,
+        "selective_accuracy": null,
+        "selective_precision": null,
+        "selective_recall": null,
+        "status": "no_labels"
+       },
+       "smoke": {
+        "abstain_rate": 0.6081871345029239,
+        "auprc": 0.6143415342244294,
+        "auroc": 0.5688663745892661,
+        "brier": 0.2449489714839603,
+        "ece": 0.07417846230225339,
+        "f1": 0.5128205128205128,
+        "n": 171,
+        "n_pos": 88,
+        "n_unknown": 0,
+        "precision": 0.5882352941176471,
+        "prevalence": 0.5146198830409356,
+        "recall": 0.45454545454545453,
+        "selective_accuracy": 0.6268656716417911,
+        "selective_precision": 0.65,
+        "selective_recall": 0.7027027027027027,
+        "status": "evaluated"
+       }
+      },
+      "selective_accuracy": {
+       "coverage_joint": 0.0,
+       "fog": null,
+       "joint": null,
+       "smoke": 0.6268656716417911
+      },
+      "smoke_fog_confusion": {
+       "fog_only_as_smoke_only": null,
+       "fog_only_with_smoke": null,
+       "smoke_only_as_fog_only": null,
+       "smoke_only_with_fog": null
+      }
+     },
+     "slices": {
+      "category": {
+       "no_smoke_fog_unknown": {
+        "abstain_rate_any": 1.0,
+        "false_smoke_on_fog_only": null,
+        "fog": {
+         "abstain_rate": null,
+         "auprc": null,
+         "auroc": null,
+         "brier": null,
+         "ece": null,
+         "f1": null,
+         "n_pos": null,
+         "precision": null,
+         "recall": null,
+         "selective_accuracy": null,
+         "status": "no_labels"
+        },
+        "fog_only_with_smoke": null,
+        "n": 83,
+        "selective_accuracy_joint": null,
+        "smoke": {
+         "abstain_rate": 0.6385542168674698,
+         "auprc": null,
+         "auroc": null,
+         "brier": 0.2614932366598318,
+         "ece": 0.5052151690719962,
+         "f1": 0.0,
+         "n_pos": 0,
+         "precision": 0.0,
+         "recall": null,
+         "selective_accuracy": 0.5333333333333333
+        },
+        "smoke_only_with_fog": null
+       },
+       "smoke_fog_unknown": {
+        "abstain_rate_any": 1.0,
+        "false_smoke_on_fog_only": null,
+        "fog": {
+         "abstain_rate": null,
+         "auprc": null,
+         "auroc": null,
+         "brier": null,
+         "ece": null,
+         "f1": null,
+         "n_pos": null,
+         "precision": null,
+         "recall": null,
+         "selective_accuracy": null,
+         "status": "no_labels"
+        },
+        "fog_only_with_smoke": null,
+        "n": 88,
+        "selective_accuracy_joint": null,
+        "smoke": {
+         "abstain_rate": 0.5795454545454546,
+         "auprc": null,
+         "auroc": null,
+         "brier": 0.22934472137489967,
+         "ece": 0.46976796739101534,
+         "f1": 0.625,
+         "n_pos": 88,
+         "precision": 1.0,
+         "recall": 0.45454545454545453,
+         "selective_accuracy": 0.7027027027027027
+        },
+        "smoke_only_with_fog": null
+       }
+      },
+      "mask_source": {
+       "fallback_detector": {
+        "abstain_rate_any": 1.0,
+        "false_smoke_on_fog_only": null,
+        "fog": {
+         "abstain_rate": null,
+         "auprc": null,
+         "auroc": null,
+         "brier": null,
+         "ece": null,
+         "f1": null,
+         "n_pos": null,
+         "precision": null,
+         "recall": null,
+         "selective_accuracy": null,
+         "status": "no_labels"
+        },
+        "fog_only_with_smoke": null,
+        "n": 171,
+        "selective_accuracy_joint": null,
+        "smoke": {
+         "abstain_rate": 0.6081871345029239,
+         "auprc": 0.6143415342244294,
+         "auroc": 0.5688663745892661,
+         "brier": 0.2449489714839603,
+         "ece": 0.07417846230225339,
+         "f1": 0.5128205128205128,
+         "n_pos": 88,
+         "precision": 0.5882352941176471,
+         "recall": 0.45454545454545453,
+         "selective_accuracy": 0.6268656716417911
+        },
+        "smoke_only_with_fog": null
+       }
+      }
+     }
+    }
+   },
+   "threshold_fit": {
+    "balanced": {
+     "fog": {
+      "criterion": "max_youden_j",
+      "n_known": 0,
+      "reason": "no_known_labels"
+     },
+     "smoke": {
+      "criterion": "max_youden_j",
+      "fpr": 0.30951871657753993,
+      "n_known": 131,
+      "precision": 0.6380464011006192,
+      "recall": 0.558762322015334,
+      "tpr": 0.558762322015334,
+      "youden_j": 0.2492436054377941
+     }
+    },
+    "low_false_alarm": {
+     "fog": {
+      "criterion": "same_as_balanced"
+     },
+     "smoke": {
+      "constraint_active": false,
+      "constraint_fitted": false,
+      "criterion": "false_smoke_on_fog_only<=0.05",
+      "n_negatives": 0,
+      "rate": null,
+      "reason": "no fog_only sequences with both labels known: the threshold equals the balanced one"
+     }
+    }
+   }
+  },
+  "C": {
+   "artifacts": "artifacts_far",
+   "calibration_label_support": {
+    "fog": {
+     "calibration": "fitted",
+     "n_known": 456,
+     "n_pos": 228,
+     "n_unknown": 0,
+     "reason": null,
+     "sufficient": true
+    },
+    "smoke": {
+     "calibration": "fitted",
+     "n_known": 456,
+     "n_pos": 228,
+     "n_unknown": 0,
+     "reason": null,
+     "sufficient": true
+    }
+   },
+   "calibration_source": "synthetic_val_calib",
+   "seeds": {
+    "test_iid.balanced.abstain_rate_any": {
+     "mean": 0.8011695906432749,
+     "n_seeds": 3,
+     "sd": 0.04678362573099415,
+     "values": [
+      0.847953216374269,
+      0.7543859649122807,
+      0.8011695906432749
+     ]
+    },
+    "test_iid.balanced.n": {
+     "mean": 171.0,
+     "n_seeds": 3,
+     "sd": 0.0,
+     "values": [
+      171.0,
+      171.0,
+      171.0
+     ]
+    },
+    "test_iid.balanced.smoke.abstain_rate": {
+     "mean": 0.746588693957115,
+     "n_seeds": 3,
+     "sd": 0.03000936514296424,
+     "values": [
+      0.7719298245614035,
+      0.7134502923976608,
+      0.7543859649122807
+     ]
+    },
+    "test_iid.balanced.smoke.auprc": {
+     "mean": 0.6129989980404332,
+     "n_seeds": 3,
+     "sd": 0.041039081995914904,
+     "values": [
+      0.5855649714082416,
+      0.5932535415115583,
+      0.6601784812014998
+     ]
+    },
+    "test_iid.balanced.smoke.auroc": {
+     "mean": 0.6093464768163563,
+     "n_seeds": 3,
+     "sd": 0.021528328569267008,
+     "values": [
+      0.5980284775465499,
+      0.5958378970427163,
+      0.6341730558598029
+     ]
+    },
+    "test_iid.balanced.smoke.brier": {
+     "mean": 0.2418339365776855,
+     "n_seeds": 3,
+     "sd": 0.003001654691022855,
+     "values": [
+      0.2443245031942869,
+      0.24267617316877327,
+      0.23850113336999643
+     ]
+    },
+    "test_iid.balanced.smoke.ece": {
+     "mean": 0.08580080322478346,
+     "n_seeds": 3,
+     "sd": 0.008689767862985557,
+     "values": [
+      0.08554181829094508,
+      0.09461716858219726,
+      0.07724342280120805
+     ]
+    },
+    "test_iid.balanced.smoke.f1": {
+     "mean": 0.5978743414807082,
+     "n_seeds": 3,
+     "sd": 0.011803572072414028,
+     "values": [
+      0.6077348066298343,
+      0.6010928961748634,
+      0.5847953216374269
+     ]
+    },
+    "test_iid.balanced.smoke.n_pos": {
+     "mean": 88.0,
+     "n_seeds": 3,
+     "sd": 0.0,
+     "values": [
+      88.0,
+      88.0,
+      88.0
+     ]
+    },
+    "test_iid.balanced.smoke.precision": {
+     "mean": 0.5909182854792117,
+     "n_seeds": 3,
+     "sd": 0.011738484406466057,
+     "values": [
+      0.5913978494623656,
+      0.5789473684210527,
+      0.6024096385542169
+     ]
+    },
+    "test_iid.balanced.smoke.recall": {
+     "mean": 0.6060606060606061,
+     "n_seeds": 3,
+     "sd": 0.032803992567592345,
+     "values": [
+      0.625,
+      0.625,
+      0.5681818181818182
+     ]
+    },
+    "test_iid.balanced.smoke.selective_accuracy": {
+     "mean": 0.6631780917495204,
+     "n_seeds": 3,
+     "sd": 0.08551421522959961,
+     "values": [
+      0.6153846153846154,
+      0.6122448979591837,
+      0.7619047619047619
+     ]
+    },
+    "test_iid.low_false_alarm.abstain_rate_any": {
+     "mean": 0.7972709551656919,
+     "n_seeds": 3,
+     "sd": 0.08797882336371737,
+     "values": [
+      0.8421052631578947,
+      0.8538011695906432,
+      0.695906432748538
+     ]
+    },
+    "test_iid.low_false_alarm.n": {
+     "mean": 171.0,
+     "n_seeds": 3,
+     "sd": 0.0,
+     "values": [
+      171.0,
+      171.0,
+      171.0
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.abstain_rate": {
+     "mean": 0.6978557504873294,
+     "n_seeds": 3,
+     "sd": 0.06853175762669374,
+     "values": [
+      0.7251461988304093,
+      0.7485380116959064,
+      0.6198830409356725
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.auprc": {
+     "mean": 0.6129989980404332,
+     "n_seeds": 3,
+     "sd": 0.041039081995914904,
+     "values": [
+      0.5855649714082416,
+      0.5932535415115583,
+      0.6601784812014998
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.auroc": {
+     "mean": 0.6093464768163563,
+     "n_seeds": 3,
+     "sd": 0.021528328569267008,
+     "values": [
+      0.5980284775465499,
+      0.5958378970427163,
+      0.6341730558598029
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.brier": {
+     "mean": 0.2418339365776855,
+     "n_seeds": 3,
+     "sd": 0.003001654691022855,
+     "values": [
+      0.2443245031942869,
+      0.24267617316877327,
+      0.23850113336999643
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.ece": {
+     "mean": 0.08580080322478346,
+     "n_seeds": 3,
+     "sd": 0.008689767862985557,
+     "values": [
+      0.08554181829094508,
+      0.09461716858219726,
+      0.07724342280120805
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.f1": {
+     "mean": 0.12476342411147957,
+     "n_seeds": 3,
+     "sd": 0.07276580175505552,
+     "values": [
+      0.06451612903225806,
+      0.205607476635514,
+      0.10416666666666667
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.n_pos": {
+     "mean": 88.0,
+     "n_seeds": 3,
+     "sd": 0.0,
+     "values": [
+      88.0,
+      88.0,
+      88.0
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.precision": {
+     "mean": 0.6013157894736842,
+     "n_seeds": 3,
+     "sd": 0.023054494036756874,
+     "values": [
+      0.6,
+      0.5789473684210527,
+      0.625
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.recall": {
+     "mean": 0.07196969696969698,
+     "n_seeds": 3,
+     "sd": 0.04731059089695756,
+     "values": [
+      0.03409090909090909,
+      0.125,
+      0.056818181818181816
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.selective_accuracy": {
+     "mean": 0.5021149722782577,
+     "n_seeds": 3,
+     "sd": 0.056477286845803415,
+     "values": [
+      0.5106382978723404,
+      0.4418604651162791,
+      0.5538461538461539
+     ]
+    }
+   },
+   "test_iid": {
+    "balanced": {
+     "overall": {
+      "abstain_rate": {
+       "any": 0.7543859649122807,
+       "fog": 0.5672514619883041,
+       "smoke": 0.7134502923976608
+      },
+      "abstain_reasons": {
+       "few_valid_flow_frames": 76,
+       "few_valid_mask_frames": 40,
+       "fog_near_threshold": 21,
+       "smoke_near_threshold": 46
+      },
+      "ci95": {
+       "abstain_rate.any": {
+        "hi": 0.8415052606408416,
+        "lo": 0.6626506024096386,
+        "n_valid": 1000
+       },
+       "false_smoke_on_fog_only.rate": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.auprc": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.auroc": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.brier": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.ece": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.f1": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.precision": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.recall": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "selective_accuracy.joint": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "smoke.auprc": {
+        "hi": 0.6810675008924687,
+        "lo": 0.5286860584229011,
+        "n_valid": 1000
+       },
+       "smoke.auroc": {
+        "hi": 0.6700239611211485,
+        "lo": 0.5221703930692695,
+        "n_valid": 1000
+       },
+       "smoke.brier": {
+        "hi": 0.2527553420616848,
+        "lo": 0.23209812238947222,
+        "n_valid": 1000
+       },
+       "smoke.ece": {
+        "hi": 0.16437714136583303,
+        "lo": 0.06844412368863494,
+        "n_valid": 1000
+       },
+       "smoke.f1": {
+        "hi": 0.6745970695970696,
+        "lo": 0.5303703150664476,
+        "n_valid": 1000
+       },
+       "smoke.precision": {
+        "hi": 0.6477272727272727,
+        "lo": 0.51040625,
+        "n_valid": 1000
+       },
+       "smoke.recall": {
+        "hi": 0.7396122685185186,
+        "lo": 0.5232178968655208,
+        "n_valid": 1000
+       }
+      },
+      "confusion_4class": {
+       "abstained": [
+        0,
+        0,
+        0,
+        0
+       ],
+       "classes": [
+        "smoke_only",
+        "fog_only",
+        "neither",
+        "both"
+       ],
+       "matrix": [
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ]
+       ],
+       "n": 0,
+       "n_unknown_labels": 171
+      },
+      "confusion_4class_selective": {
+       "abstained": [
+        0,
+        0,
+        0,
+        0
+       ],
+       "classes": [
+        "smoke_only",
+        "fog_only",
+        "neither",
+        "both"
+       ],
+       "matrix": [
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ]
+       ],
+       "n": 0,
+       "n_unknown_labels": 171
+      },
+      "false_smoke_on_fog_only": {
+       "n_abstained": 0,
+       "n_false_smoke": 0,
+       "n_fog_only": 0,
+       "rate": null
+      },
+      "false_smoke_on_fog_only_selective": {
+       "n_abstained": 0,
+       "n_false_smoke": 0,
+       "n_fog_only": 0,
+       "rate": null
+      },
+      "n": 171,
+      "n_groups": 35,
+      "n_known": {
+       "both": 0,
+       "fog": 0,
+       "smoke": 171
+      },
+      "per_label": {
+       "fog": {
+        "abstain_rate": null,
+        "auprc": null,
+        "auroc": null,
+        "brier": null,
+        "ece": null,
+        "f1": null,
+        "n": 0,
+        "n_pos": null,
+        "n_unknown": 171,
+        "precision": null,
+        "prevalence": null,
+        "recall": null,
+        "selective_accuracy": null,
+        "selective_precision": null,
+        "selective_recall": null,
+        "status": "no_labels"
+       },
+       "smoke": {
+        "abstain_rate": 0.7134502923976608,
+        "auprc": 0.5932535415115583,
+        "auroc": 0.5958378970427163,
+        "brier": 0.24267617316877327,
+        "ece": 0.09461716858219726,
+        "f1": 0.6010928961748634,
+        "n": 171,
+        "n_pos": 88,
+        "n_unknown": 0,
+        "precision": 0.5789473684210527,
+        "prevalence": 0.5146198830409356,
+        "recall": 0.625,
+        "selective_accuracy": 0.6122448979591837,
+        "selective_precision": 0.6153846153846154,
+        "selective_recall": 0.8571428571428571,
+        "status": "evaluated"
+       }
+      },
+      "selective_accuracy": {
+       "coverage_joint": 0.24561403508771928,
+       "fog": null,
+       "joint": null,
+       "smoke": 0.6122448979591837
+      },
+      "smoke_fog_confusion": {
+       "fog_only_as_smoke_only": null,
+       "fog_only_with_smoke": null,
+       "smoke_only_as_fog_only": null,
+       "smoke_only_with_fog": null
+      }
+     },
+     "slices": {
+      "category": {
+       "no_smoke_fog_unknown": {
+        "abstain_rate_any": 0.7951807228915663,
+        "false_smoke_on_fog_only": null,
+        "fog": {
+         "abstain_rate": null,
+         "auprc": null,
+         "auroc": null,
+         "brier": null,
+         "ece": null,
+         "f1": null,
+         "n_pos": null,
+         "precision": null,
+         "recall": null,
+         "selective_accuracy": null,
+         "status": "no_labels"
+        },
+        "fog_only_with_smoke": null,
+        "n": 83,
+        "selective_accuracy_joint": null,
+        "smoke": {
+         "abstain_rate": 0.7469879518072289,
+         "auprc": null,
+         "auroc": null,
+         "brier": 0.25544093521331274,
+         "ece": 0.49847776669574057,
+         "f1": 0.0,
+         "n_pos": 0,
+         "precision": 0.0,
+         "recall": null,
+         "selective_accuracy": 0.2857142857142857
+        },
+        "smoke_only_with_fog": null
+       },
+       "smoke_fog_unknown": {
+        "abstain_rate_any": 0.7159090909090909,
+        "false_smoke_on_fog_only": null,
+        "fog": {
+         "abstain_rate": null,
+         "auprc": null,
+         "auroc": null,
+         "brier": null,
+         "ece": null,
+         "f1": null,
+         "n_pos": null,
+         "precision": null,
+         "recall": null,
+         "selective_accuracy": null,
+         "status": "no_labels"
+        },
+        "fog_only_with_smoke": null,
+        "n": 88,
+        "selective_accuracy_joint": null,
+        "smoke": {
+         "abstain_rate": 0.6818181818181818,
+         "auprc": null,
+         "auroc": null,
+         "brier": 0.23063668169494642,
+         "ece": 0.4739190559170093,
+         "f1": 0.7692307692307693,
+         "n_pos": 88,
+         "precision": 1.0,
+         "recall": 0.625,
+         "selective_accuracy": 0.8571428571428571
+        },
+        "smoke_only_with_fog": null
+       }
+      },
+      "mask_source": {
+       "fallback_detector": {
+        "abstain_rate_any": 0.7543859649122807,
+        "false_smoke_on_fog_only": null,
+        "fog": {
+         "abstain_rate": null,
+         "auprc": null,
+         "auroc": null,
+         "brier": null,
+         "ece": null,
+         "f1": null,
+         "n_pos": null,
+         "precision": null,
+         "recall": null,
+         "selective_accuracy": null,
+         "status": "no_labels"
+        },
+        "fog_only_with_smoke": null,
+        "n": 171,
+        "selective_accuracy_joint": null,
+        "smoke": {
+         "abstain_rate": 0.7134502923976608,
+         "auprc": 0.5932535415115583,
+         "auroc": 0.5958378970427163,
+         "brier": 0.24267617316877327,
+         "ece": 0.09461716858219726,
+         "f1": 0.6010928961748634,
+         "n_pos": 88,
+         "precision": 0.5789473684210527,
+         "recall": 0.625,
+         "selective_accuracy": 0.6122448979591837
+        },
+        "smoke_only_with_fog": null
+       }
+      }
+     }
+    },
+    "low_false_alarm": {
+     "overall": {
+      "abstain_rate": {
+       "any": 0.8538011695906432,
+       "fog": 0.5672514619883041,
+       "smoke": 0.7485380116959064
+      },
+      "abstain_reasons": {
+       "few_valid_flow_frames": 76,
+       "few_valid_mask_frames": 40,
+       "fog_near_threshold": 21,
+       "smoke_near_threshold": 52
+      },
+      "ci95": {
+       "abstain_rate.any": {
+        "hi": 0.9181286549707602,
+        "lo": 0.7777777777777778,
+        "n_valid": 1000
+       },
+       "false_smoke_on_fog_only.rate": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.auprc": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.auroc": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.brier": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.ece": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.f1": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.precision": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.recall": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "selective_accuracy.joint": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "smoke.auprc": {
+        "hi": 0.6810675008924687,
+        "lo": 0.5286860584229011,
+        "n_valid": 1000
+       },
+       "smoke.auroc": {
+        "hi": 0.6700239611211485,
+        "lo": 0.5221703930692695,
+        "n_valid": 1000
+       },
+       "smoke.brier": {
+        "hi": 0.2527553420616848,
+        "lo": 0.23209812238947222,
+        "n_valid": 1000
+       },
+       "smoke.ece": {
+        "hi": 0.16437714136583303,
+        "lo": 0.06844412368863494,
+        "n_valid": 1000
+       },
+       "smoke.f1": {
+        "hi": 0.3177570093457944,
+        "lo": 0.10201504844361987,
+        "n_valid": 1000
+       },
+       "smoke.precision": {
+        "hi": 0.8126420454545453,
+        "lo": 0.36354545454545456,
+        "n_valid": 1000
+       },
+       "smoke.recall": {
+        "hi": 0.20225053504547885,
+        "lo": 0.056818181818181816,
+        "n_valid": 1000
+       }
+      },
+      "confusion_4class": {
+       "abstained": [
+        0,
+        0,
+        0,
+        0
+       ],
+       "classes": [
+        "smoke_only",
+        "fog_only",
+        "neither",
+        "both"
+       ],
+       "matrix": [
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ]
+       ],
+       "n": 0,
+       "n_unknown_labels": 171
+      },
+      "confusion_4class_selective": {
+       "abstained": [
+        0,
+        0,
+        0,
+        0
+       ],
+       "classes": [
+        "smoke_only",
+        "fog_only",
+        "neither",
+        "both"
+       ],
+       "matrix": [
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ]
+       ],
+       "n": 0,
+       "n_unknown_labels": 171
+      },
+      "false_smoke_on_fog_only": {
+       "n_abstained": 0,
+       "n_false_smoke": 0,
+       "n_fog_only": 0,
+       "rate": null
+      },
+      "false_smoke_on_fog_only_selective": {
+       "n_abstained": 0,
+       "n_false_smoke": 0,
+       "n_fog_only": 0,
+       "rate": null
+      },
+      "n": 171,
+      "n_groups": 35,
+      "n_known": {
+       "both": 0,
+       "fog": 0,
+       "smoke": 171
+      },
+      "per_label": {
+       "fog": {
+        "abstain_rate": null,
+        "auprc": null,
+        "auroc": null,
+        "brier": null,
+        "ece": null,
+        "f1": null,
+        "n": 0,
+        "n_pos": null,
+        "n_unknown": 171,
+        "precision": null,
+        "prevalence": null,
+        "recall": null,
+        "selective_accuracy": null,
+        "selective_precision": null,
+        "selective_recall": null,
+        "status": "no_labels"
+       },
+       "smoke": {
+        "abstain_rate": 0.7485380116959064,
+        "auprc": 0.5932535415115583,
+        "auroc": 0.5958378970427163,
+        "brier": 0.24267617316877327,
+        "ece": 0.09461716858219726,
+        "f1": 0.205607476635514,
+        "n": 171,
+        "n_pos": 88,
+        "n_unknown": 0,
+        "precision": 0.5789473684210527,
+        "prevalence": 0.5146198830409356,
+        "recall": 0.125,
+        "selective_accuracy": 0.4418604651162791,
+        "selective_precision": null,
+        "selective_recall": 0.0,
+        "status": "evaluated"
+       }
+      },
+      "selective_accuracy": {
+       "coverage_joint": 0.14619883040935672,
+       "fog": null,
+       "joint": null,
+       "smoke": 0.4418604651162791
+      },
+      "smoke_fog_confusion": {
+       "fog_only_as_smoke_only": null,
+       "fog_only_with_smoke": null,
+       "smoke_only_as_fog_only": null,
+       "smoke_only_with_fog": null
+      }
+     },
+     "slices": {
+      "category": {
+       "no_smoke_fog_unknown": {
+        "abstain_rate_any": 0.891566265060241,
+        "false_smoke_on_fog_only": null,
+        "fog": {
+         "abstain_rate": null,
+         "auprc": null,
+         "auroc": null,
+         "brier": null,
+         "ece": null,
+         "f1": null,
+         "n_pos": null,
+         "precision": null,
+         "recall": null,
+         "selective_accuracy": null,
+         "status": "no_labels"
+        },
+        "fog_only_with_smoke": null,
+        "n": 83,
+        "selective_accuracy_joint": null,
+        "smoke": {
+         "abstain_rate": 0.7710843373493976,
+         "auprc": null,
+         "auroc": null,
+         "brier": 0.25544093521331274,
+         "ece": 0.49847776669574057,
+         "f1": 0.0,
+         "n_pos": 0,
+         "precision": 0.0,
+         "recall": null,
+         "selective_accuracy": 1.0
+        },
+        "smoke_only_with_fog": null
+       },
+       "smoke_fog_unknown": {
+        "abstain_rate_any": 0.8181818181818182,
+        "false_smoke_on_fog_only": null,
+        "fog": {
+         "abstain_rate": null,
+         "auprc": null,
+         "auroc": null,
+         "brier": null,
+         "ece": null,
+         "f1": null,
+         "n_pos": null,
+         "precision": null,
+         "recall": null,
+         "selective_accuracy": null,
+         "status": "no_labels"
+        },
+        "fog_only_with_smoke": null,
+        "n": 88,
+        "selective_accuracy_joint": null,
+        "smoke": {
+         "abstain_rate": 0.7272727272727273,
+         "auprc": null,
+         "auroc": null,
+         "brier": 0.23063668169494642,
+         "ece": 0.4739190559170093,
+         "f1": 0.2222222222222222,
+         "n_pos": 88,
+         "precision": 1.0,
+         "recall": 0.125,
+         "selective_accuracy": 0.0
+        },
+        "smoke_only_with_fog": null
+       }
+      },
+      "mask_source": {
+       "fallback_detector": {
+        "abstain_rate_any": 0.8538011695906432,
+        "false_smoke_on_fog_only": null,
+        "fog": {
+         "abstain_rate": null,
+         "auprc": null,
+         "auroc": null,
+         "brier": null,
+         "ece": null,
+         "f1": null,
+         "n_pos": null,
+         "precision": null,
+         "recall": null,
+         "selective_accuracy": null,
+         "status": "no_labels"
+        },
+        "fog_only_with_smoke": null,
+        "n": 171,
+        "selective_accuracy_joint": null,
+        "smoke": {
+         "abstain_rate": 0.7485380116959064,
+         "auprc": 0.5932535415115583,
+         "auroc": 0.5958378970427163,
+         "brier": 0.24267617316877327,
+         "ece": 0.09461716858219726,
+         "f1": 0.205607476635514,
+         "n_pos": 88,
+         "precision": 0.5789473684210527,
+         "recall": 0.125,
+         "selective_accuracy": 0.4418604651162791
+        },
+        "smoke_only_with_fog": null
+       }
+      }
+     }
+    }
+   },
+   "threshold_fit": {
+    "balanced": {
+     "fog": {
+      "criterion": "max_youden_j",
+      "fpr": 0.6140350877192987,
+      "n_known": 456,
+      "precision": 0.5744680851063828,
+      "recall": 0.8289473684210525,
+      "tpr": 0.8289473684210525,
+      "youden_j": 0.21491228070175383
+     },
+     "smoke": {
+      "criterion": "max_youden_j",
+      "fpr": 0.4561403508771928,
+      "n_known": 456,
+      "precision": 0.5648535564853561,
+      "recall": 0.5921052631578952,
+      "tpr": 0.5921052631578952,
+      "youden_j": 0.13596491228070245
+     }
+    },
+    "low_false_alarm": {
+     "fog": {
+      "criterion": "same_as_balanced"
+     },
+     "smoke": {
+      "constraint_active": true,
+      "constraint_fitted": true,
+      "criterion": "false_smoke_on_fog_only<=0.05",
+      "n_negatives": 114,
+      "rate": 0.043859649122807334
+     }
+    }
+   }
+  },
+  "D": {
+   "artifacts": "runs/real_figlib/D",
+   "calibration_label_support": {
+    "fog": {
+     "calibration": "kept_pretrained",
+     "n_known": 0,
+     "n_pos": 0,
+     "n_unknown": 131,
+     "reason": "no known labels in the calibration split",
+     "sufficient": false
+    },
+    "smoke": {
+     "calibration": "fitted",
+     "n_known": 131,
+     "n_pos": 65,
+     "n_unknown": 0,
+     "reason": null,
+     "sufficient": true
+    }
+   },
+   "calibration_source": "real_val_calib",
+   "seeds": {
+    "test_iid.balanced.abstain_rate_any": {
+     "mean": 0.7485380116959064,
+     "n_seeds": 3,
+     "sd": 0.011695906432748537,
+     "values": [
+      0.7602339181286549,
+      0.7368421052631579,
+      0.7485380116959064
+     ]
+    },
+    "test_iid.balanced.n": {
+     "mean": 171.0,
+     "n_seeds": 3,
+     "sd": 0.0,
+     "values": [
+      171.0,
+      171.0,
+      171.0
+     ]
+    },
+    "test_iid.balanced.smoke.abstain_rate": {
+     "mean": 0.6471734892787525,
+     "n_seeds": 3,
+     "sd": 0.016881586818410076,
+     "values": [
+      0.6666666666666666,
+      0.6374269005847953,
+      0.6374269005847953
+     ]
+    },
+    "test_iid.balanced.smoke.auprc": {
+     "mean": 0.5618564509061484,
+     "n_seeds": 3,
+     "sd": 0.001586670231077206,
+     "values": [
+      0.5620228881318912,
+      0.560193122673788,
+      0.5633533419127661
+     ]
+    },
+    "test_iid.balanced.smoke.auroc": {
+     "mean": 0.5815534866739686,
+     "n_seeds": 3,
+     "sd": 0.0012940349469476012,
+     "values": [
+      0.5820098576122672,
+      0.5800930996714129,
+      0.5825575027382256
+     ]
+    },
+    "test_iid.balanced.smoke.brier": {
+     "mean": 0.2501918312543217,
+     "n_seeds": 3,
+     "sd": 0.0001231556231262106,
+     "values": [
+      0.25011623198208605,
+      0.25033394229938255,
+      0.2501253194814964
+     ]
+    },
+    "test_iid.balanced.smoke.ece": {
+     "mean": 0.10088637999873586,
+     "n_seeds": 3,
+     "sd": 0.009369491420468282,
+     "values": [
+      0.11081159593926536,
+      0.09219483975788438,
+      0.09965270429905786
+     ]
+    },
+    "test_iid.balanced.smoke.f1": {
+     "mean": 0.6109516035204264,
+     "n_seeds": 3,
+     "sd": 0.0080057000913978,
+     "values": [
+      0.6021505376344086,
+      0.6129032258064516,
+      0.6178010471204188
+     ]
+    },
+    "test_iid.balanced.smoke.n_pos": {
+     "mean": 88.0,
+     "n_seeds": 3,
+     "sd": 0.0,
+     "values": [
+      88.0,
+      88.0,
+      88.0
+     ]
+    },
+    "test_iid.balanced.smoke.precision": {
+     "mean": 0.5752922528234594,
+     "n_seeds": 3,
+     "sd": 0.0055345661674117055,
+     "values": [
+      0.5714285714285714,
+      0.5816326530612245,
+      0.5728155339805825
+     ]
+    },
+    "test_iid.balanced.smoke.recall": {
+     "mean": 0.6515151515151515,
+     "n_seeds": 3,
+     "sd": 0.017358241268772105,
+     "values": [
+      0.6363636363636364,
+      0.6477272727272727,
+      0.6704545454545454
+     ]
+    },
+    "test_iid.balanced.smoke.selective_accuracy": {
+     "mean": 0.629881154499151,
+     "n_seeds": 3,
+     "sd": 0.00147033175515183,
+     "values": [
+      0.631578947368421,
+      0.6290322580645161,
+      0.6290322580645161
+     ]
+    },
+    "test_iid.low_false_alarm.abstain_rate_any": {
+     "mean": 0.7485380116959064,
+     "n_seeds": 3,
+     "sd": 0.011695906432748537,
+     "values": [
+      0.7602339181286549,
+      0.7368421052631579,
+      0.7485380116959064
+     ]
+    },
+    "test_iid.low_false_alarm.n": {
+     "mean": 171.0,
+     "n_seeds": 3,
+     "sd": 0.0,
+     "values": [
+      171.0,
+      171.0,
+      171.0
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.abstain_rate": {
+     "mean": 0.6471734892787525,
+     "n_seeds": 3,
+     "sd": 0.016881586818410076,
+     "values": [
+      0.6666666666666666,
+      0.6374269005847953,
+      0.6374269005847953
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.auprc": {
+     "mean": 0.5618564509061484,
+     "n_seeds": 3,
+     "sd": 0.001586670231077206,
+     "values": [
+      0.5620228881318912,
+      0.560193122673788,
+      0.5633533419127661
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.auroc": {
+     "mean": 0.5815534866739686,
+     "n_seeds": 3,
+     "sd": 0.0012940349469476012,
+     "values": [
+      0.5820098576122672,
+      0.5800930996714129,
+      0.5825575027382256
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.brier": {
+     "mean": 0.2501918312543217,
+     "n_seeds": 3,
+     "sd": 0.0001231556231262106,
+     "values": [
+      0.25011623198208605,
+      0.25033394229938255,
+      0.2501253194814964
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.ece": {
+     "mean": 0.10088637999873586,
+     "n_seeds": 3,
+     "sd": 0.009369491420468282,
+     "values": [
+      0.11081159593926536,
+      0.09219483975788438,
+      0.09965270429905786
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.f1": {
+     "mean": 0.6109516035204264,
+     "n_seeds": 3,
+     "sd": 0.0080057000913978,
+     "values": [
+      0.6021505376344086,
+      0.6129032258064516,
+      0.6178010471204188
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.n_pos": {
+     "mean": 88.0,
+     "n_seeds": 3,
+     "sd": 0.0,
+     "values": [
+      88.0,
+      88.0,
+      88.0
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.precision": {
+     "mean": 0.5752922528234594,
+     "n_seeds": 3,
+     "sd": 0.0055345661674117055,
+     "values": [
+      0.5714285714285714,
+      0.5816326530612245,
+      0.5728155339805825
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.recall": {
+     "mean": 0.6515151515151515,
+     "n_seeds": 3,
+     "sd": 0.017358241268772105,
+     "values": [
+      0.6363636363636364,
+      0.6477272727272727,
+      0.6704545454545454
+     ]
+    },
+    "test_iid.low_false_alarm.smoke.selective_accuracy": {
+     "mean": 0.629881154499151,
+     "n_seeds": 3,
+     "sd": 0.00147033175515183,
+     "values": [
+      0.631578947368421,
+      0.6290322580645161,
+      0.6290322580645161
+     ]
+    }
+   },
+   "test_iid": {
+    "balanced": {
+     "overall": {
+      "abstain_rate": {
+       "any": 0.7368421052631579,
+       "fog": 0.6491228070175439,
+       "smoke": 0.6374269005847953
+      },
+      "abstain_reasons": {
+       "few_valid_flow_frames": 76,
+       "few_valid_mask_frames": 40,
+       "fog_near_threshold": 35,
+       "smoke_near_threshold": 33
+      },
+      "ci95": {
+       "abstain_rate.any": {
+        "hi": 0.8171576354679803,
+        "lo": 0.6404981760145918,
+        "n_valid": 1000
+       },
+       "false_smoke_on_fog_only.rate": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.auprc": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.auroc": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.brier": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.ece": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.f1": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.precision": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.recall": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "selective_accuracy.joint": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "smoke.auprc": {
+        "hi": 0.6548254502901812,
+        "lo": 0.504330316452493,
+        "n_valid": 1000
+       },
+       "smoke.auroc": {
+        "hi": 0.6564086912306444,
+        "lo": 0.5007342488462372,
+        "n_valid": 1000
+       },
+       "smoke.brier": {
+        "hi": 0.2654882730522042,
+        "lo": 0.2348240431452775,
+        "n_valid": 1000
+       },
+       "smoke.ece": {
+        "hi": 0.1705677479065418,
+        "lo": 0.07000710347683108,
+        "n_valid": 1000
+       },
+       "smoke.f1": {
+        "hi": 0.6818581544084056,
+        "lo": 0.5433526011560693,
+        "n_valid": 1000
+       },
+       "smoke.precision": {
+        "hi": 0.6479063570612866,
+        "lo": 0.5212291769750949,
+        "n_valid": 1000
+       },
+       "smoke.recall": {
+        "hi": 0.762516447368421,
+        "lo": 0.5348639006342494,
+        "n_valid": 1000
+       }
+      },
+      "confusion_4class": {
+       "abstained": [
+        0,
+        0,
+        0,
+        0
+       ],
+       "classes": [
+        "smoke_only",
+        "fog_only",
+        "neither",
+        "both"
+       ],
+       "matrix": [
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ]
+       ],
+       "n": 0,
+       "n_unknown_labels": 171
+      },
+      "confusion_4class_selective": {
+       "abstained": [
+        0,
+        0,
+        0,
+        0
+       ],
+       "classes": [
+        "smoke_only",
+        "fog_only",
+        "neither",
+        "both"
+       ],
+       "matrix": [
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ]
+       ],
+       "n": 0,
+       "n_unknown_labels": 171
+      },
+      "false_smoke_on_fog_only": {
+       "n_abstained": 0,
+       "n_false_smoke": 0,
+       "n_fog_only": 0,
+       "rate": null
+      },
+      "false_smoke_on_fog_only_selective": {
+       "n_abstained": 0,
+       "n_false_smoke": 0,
+       "n_fog_only": 0,
+       "rate": null
+      },
+      "n": 171,
+      "n_groups": 35,
+      "n_known": {
+       "both": 0,
+       "fog": 0,
+       "smoke": 171
+      },
+      "per_label": {
+       "fog": {
+        "abstain_rate": null,
+        "auprc": null,
+        "auroc": null,
+        "brier": null,
+        "ece": null,
+        "f1": null,
+        "n": 0,
+        "n_pos": null,
+        "n_unknown": 171,
+        "precision": null,
+        "prevalence": null,
+        "recall": null,
+        "selective_accuracy": null,
+        "selective_precision": null,
+        "selective_recall": null,
+        "status": "no_labels"
+       },
+       "smoke": {
+        "abstain_rate": 0.6374269005847953,
+        "auprc": 0.560193122673788,
+        "auroc": 0.5800930996714129,
+        "brier": 0.25033394229938255,
+        "ece": 0.09219483975788438,
+        "f1": 0.6129032258064516,
+        "n": 171,
+        "n_pos": 88,
+        "n_unknown": 0,
+        "precision": 0.5816326530612245,
+        "prevalence": 0.5146198830409356,
+        "recall": 0.6477272727272727,
+        "selective_accuracy": 0.6290322580645161,
+        "selective_precision": 0.631578947368421,
+        "selective_recall": 0.9473684210526315,
+        "status": "evaluated"
+       }
+      },
+      "selective_accuracy": {
+       "coverage_joint": 0.2631578947368421,
+       "fog": null,
+       "joint": null,
+       "smoke": 0.6290322580645161
+      },
+      "smoke_fog_confusion": {
+       "fog_only_as_smoke_only": null,
+       "fog_only_with_smoke": null,
+       "smoke_only_as_fog_only": null,
+       "smoke_only_with_fog": null
+      }
+     },
+     "slices": {
+      "category": {
+       "no_smoke_fog_unknown": {
+        "abstain_rate_any": 0.7831325301204819,
+        "false_smoke_on_fog_only": null,
+        "fog": {
+         "abstain_rate": null,
+         "auprc": null,
+         "auroc": null,
+         "brier": null,
+         "ece": null,
+         "f1": null,
+         "n_pos": null,
+         "precision": null,
+         "recall": null,
+         "selective_accuracy": null,
+         "status": "no_labels"
+        },
+        "fog_only_with_smoke": null,
+        "n": 83,
+        "selective_accuracy_joint": null,
+        "smoke": {
+         "abstain_rate": 0.7108433734939759,
+         "auprc": null,
+         "auroc": null,
+         "brier": 0.24535897502702944,
+         "ece": 0.48117020136441097,
+         "f1": 0.0,
+         "n_pos": 0,
+         "precision": 0.0,
+         "recall": null,
+         "selective_accuracy": 0.125
+        },
+        "smoke_only_with_fog": null
+       },
+       "smoke_fog_unknown": {
+        "abstain_rate_any": 0.6931818181818182,
+        "false_smoke_on_fog_only": null,
+        "fog": {
+         "abstain_rate": null,
+         "auprc": null,
+         "auroc": null,
+         "brier": null,
+         "ece": null,
+         "f1": null,
+         "n_pos": null,
+         "precision": null,
+         "recall": null,
+         "selective_accuracy": null,
+         "status": "no_labels"
+        },
+        "fog_only_with_smoke": null,
+        "n": 88,
+        "selective_accuracy_joint": null,
+        "smoke": {
+         "abstain_rate": 0.5681818181818182,
+         "auprc": null,
+         "auroc": null,
+         "brier": 0.2550262409767155,
+         "ece": 0.492646941921149,
+         "f1": 0.7862068965517242,
+         "n_pos": 88,
+         "precision": 1.0,
+         "recall": 0.6477272727272727,
+         "selective_accuracy": 0.9473684210526315
+        },
+        "smoke_only_with_fog": null
+       }
+      },
+      "mask_source": {
+       "fallback_detector": {
+        "abstain_rate_any": 0.7368421052631579,
+        "false_smoke_on_fog_only": null,
+        "fog": {
+         "abstain_rate": null,
+         "auprc": null,
+         "auroc": null,
+         "brier": null,
+         "ece": null,
+         "f1": null,
+         "n_pos": null,
+         "precision": null,
+         "recall": null,
+         "selective_accuracy": null,
+         "status": "no_labels"
+        },
+        "fog_only_with_smoke": null,
+        "n": 171,
+        "selective_accuracy_joint": null,
+        "smoke": {
+         "abstain_rate": 0.6374269005847953,
+         "auprc": 0.560193122673788,
+         "auroc": 0.5800930996714129,
+         "brier": 0.25033394229938255,
+         "ece": 0.09219483975788438,
+         "f1": 0.6129032258064516,
+         "n_pos": 88,
+         "precision": 0.5816326530612245,
+         "recall": 0.6477272727272727,
+         "selective_accuracy": 0.6290322580645161
+        },
+        "smoke_only_with_fog": null
+       }
+      }
+     }
+    },
+    "low_false_alarm": {
+     "overall": {
+      "abstain_rate": {
+       "any": 0.7368421052631579,
+       "fog": 0.6491228070175439,
+       "smoke": 0.6374269005847953
+      },
+      "abstain_reasons": {
+       "few_valid_flow_frames": 76,
+       "few_valid_mask_frames": 40,
+       "fog_near_threshold": 35,
+       "smoke_near_threshold": 33
+      },
+      "ci95": {
+       "abstain_rate.any": {
+        "hi": 0.8171576354679803,
+        "lo": 0.6404981760145918,
+        "n_valid": 1000
+       },
+       "false_smoke_on_fog_only.rate": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.auprc": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.auroc": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.brier": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.ece": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.f1": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.precision": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "fog.recall": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "selective_accuracy.joint": {
+        "hi": null,
+        "lo": null,
+        "n_valid": 0
+       },
+       "smoke.auprc": {
+        "hi": 0.6548254502901812,
+        "lo": 0.504330316452493,
+        "n_valid": 1000
+       },
+       "smoke.auroc": {
+        "hi": 0.6564086912306444,
+        "lo": 0.5007342488462372,
+        "n_valid": 1000
+       },
+       "smoke.brier": {
+        "hi": 0.2654882730522042,
+        "lo": 0.2348240431452775,
+        "n_valid": 1000
+       },
+       "smoke.ece": {
+        "hi": 0.1705677479065418,
+        "lo": 0.07000710347683108,
+        "n_valid": 1000
+       },
+       "smoke.f1": {
+        "hi": 0.6818581544084056,
+        "lo": 0.5433526011560693,
+        "n_valid": 1000
+       },
+       "smoke.precision": {
+        "hi": 0.6479063570612866,
+        "lo": 0.5212291769750949,
+        "n_valid": 1000
+       },
+       "smoke.recall": {
+        "hi": 0.762516447368421,
+        "lo": 0.5348639006342494,
+        "n_valid": 1000
+       }
+      },
+      "confusion_4class": {
+       "abstained": [
+        0,
+        0,
+        0,
+        0
+       ],
+       "classes": [
+        "smoke_only",
+        "fog_only",
+        "neither",
+        "both"
+       ],
+       "matrix": [
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ]
+       ],
+       "n": 0,
+       "n_unknown_labels": 171
+      },
+      "confusion_4class_selective": {
+       "abstained": [
+        0,
+        0,
+        0,
+        0
+       ],
+       "classes": [
+        "smoke_only",
+        "fog_only",
+        "neither",
+        "both"
+       ],
+       "matrix": [
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ],
+        [
+         0,
+         0,
+         0,
+         0
+        ]
+       ],
+       "n": 0,
+       "n_unknown_labels": 171
+      },
+      "false_smoke_on_fog_only": {
+       "n_abstained": 0,
+       "n_false_smoke": 0,
+       "n_fog_only": 0,
+       "rate": null
+      },
+      "false_smoke_on_fog_only_selective": {
+       "n_abstained": 0,
+       "n_false_smoke": 0,
+       "n_fog_only": 0,
+       "rate": null
+      },
+      "n": 171,
+      "n_groups": 35,
+      "n_known": {
+       "both": 0,
+       "fog": 0,
+       "smoke": 171
+      },
+      "per_label": {
+       "fog": {
+        "abstain_rate": null,
+        "auprc": null,
+        "auroc": null,
+        "brier": null,
+        "ece": null,
+        "f1": null,
+        "n": 0,
+        "n_pos": null,
+        "n_unknown": 171,
+        "precision": null,
+        "prevalence": null,
+        "recall": null,
+        "selective_accuracy": null,
+        "selective_precision": null,
+        "selective_recall": null,
+        "status": "no_labels"
+       },
+       "smoke": {
+        "abstain_rate": 0.6374269005847953,
+        "auprc": 0.560193122673788,
+        "auroc": 0.5800930996714129,
+        "brier": 0.25033394229938255,
+        "ece": 0.09219483975788438,
+        "f1": 0.6129032258064516,
+        "n": 171,
+        "n_pos": 88,
+        "n_unknown": 0,
+        "precision": 0.5816326530612245,
+        "prevalence": 0.5146198830409356,
+        "recall": 0.6477272727272727,
+        "selective_accuracy": 0.6290322580645161,
+        "selective_precision": 0.631578947368421,
+        "selective_recall": 0.9473684210526315,
+        "status": "evaluated"
+       }
+      },
+      "selective_accuracy": {
+       "coverage_joint": 0.2631578947368421,
+       "fog": null,
+       "joint": null,
+       "smoke": 0.6290322580645161
+      },
+      "smoke_fog_confusion": {
+       "fog_only_as_smoke_only": null,
+       "fog_only_with_smoke": null,
+       "smoke_only_as_fog_only": null,
+       "smoke_only_with_fog": null
+      }
+     },
+     "slices": {
+      "category": {
+       "no_smoke_fog_unknown": {
+        "abstain_rate_any": 0.7831325301204819,
+        "false_smoke_on_fog_only": null,
+        "fog": {
+         "abstain_rate": null,
+         "auprc": null,
+         "auroc": null,
+         "brier": null,
+         "ece": null,
+         "f1": null,
+         "n_pos": null,
+         "precision": null,
+         "recall": null,
+         "selective_accuracy": null,
+         "status": "no_labels"
+        },
+        "fog_only_with_smoke": null,
+        "n": 83,
+        "selective_accuracy_joint": null,
+        "smoke": {
+         "abstain_rate": 0.7108433734939759,
+         "auprc": null,
+         "auroc": null,
+         "brier": 0.24535897502702944,
+         "ece": 0.48117020136441097,
+         "f1": 0.0,
+         "n_pos": 0,
+         "precision": 0.0,
+         "recall": null,
+         "selective_accuracy": 0.125
+        },
+        "smoke_only_with_fog": null
+       },
+       "smoke_fog_unknown": {
+        "abstain_rate_any": 0.6931818181818182,
+        "false_smoke_on_fog_only": null,
+        "fog": {
+         "abstain_rate": null,
+         "auprc": null,
+         "auroc": null,
+         "brier": null,
+         "ece": null,
+         "f1": null,
+         "n_pos": null,
+         "precision": null,
+         "recall": null,
+         "selective_accuracy": null,
+         "status": "no_labels"
+        },
+        "fog_only_with_smoke": null,
+        "n": 88,
+        "selective_accuracy_joint": null,
+        "smoke": {
+         "abstain_rate": 0.5681818181818182,
+         "auprc": null,
+         "auroc": null,
+         "brier": 0.2550262409767155,
+         "ece": 0.492646941921149,
+         "f1": 0.7862068965517242,
+         "n_pos": 88,
+         "precision": 1.0,
+         "recall": 0.6477272727272727,
+         "selective_accuracy": 0.9473684210526315
+        },
+        "smoke_only_with_fog": null
+       }
+      },
+      "mask_source": {
+       "fallback_detector": {
+        "abstain_rate_any": 0.7368421052631579,
+        "false_smoke_on_fog_only": null,
+        "fog": {
+         "abstain_rate": null,
+         "auprc": null,
+         "auroc": null,
+         "brier": null,
+         "ece": null,
+         "f1": null,
+         "n_pos": null,
+         "precision": null,
+         "recall": null,
+         "selective_accuracy": null,
+         "status": "no_labels"
+        },
+        "fog_only_with_smoke": null,
+        "n": 171,
+        "selective_accuracy_joint": null,
+        "smoke": {
+         "abstain_rate": 0.6374269005847953,
+         "auprc": 0.560193122673788,
+         "auroc": 0.5800930996714129,
+         "brier": 0.25033394229938255,
+         "ece": 0.09219483975788438,
+         "f1": 0.6129032258064516,
+         "n_pos": 88,
+         "precision": 0.5816326530612245,
+         "recall": 0.6477272727272727,
+         "selective_accuracy": 0.6290322580645161
+        },
+        "smoke_only_with_fog": null
+       }
+      }
+     }
+    }
+   },
+   "threshold_fit": {
+    "balanced": {
+     "fog": {
+      "criterion": "kept_pretrained",
+      "reason": "no known labels in the calibration split"
+     },
+     "smoke": {
+      "criterion": "max_youden_j",
+      "fpr": 0.3583155080213903,
+      "n_known": 131,
+      "precision": 0.6586602139582274,
+      "recall": 0.7080777656078862,
+      "tpr": 0.7080777656078862,
+      "youden_j": 0.3497622575864959
+     }
+    },
+    "low_false_alarm": {
+     "fog": {
+      "criterion": "kept_pretrained",
+      "reason": "no known labels in the calibration split"
+     },
+     "smoke": {
+      "constraint_active": false,
+      "constraint_fitted": false,
+      "criterion": "false_smoke_on_fog_only<=0.05",
+      "n_negatives": 0,
+      "rate": null,
+      "reason": "no fog_only sequences with both labels known: the threshold equals the balanced one"
+     }
+    }
+   }
+  },
+  "counts": {
+   "test_iid": {
+    "cameras": 35,
+    "known_labels": {
+     "fog": 0,
+     "smoke": 171
+    },
+    "sequences": 171,
+    "videos": 46
+   },
+   "train": {
+    "cameras": 72,
+    "known_labels": {
+     "fog": 0,
+     "smoke": 439
+    },
+    "sequences": 439,
+    "videos": 114
+   },
+   "val_calib": {
+    "cameras": 12,
+    "known_labels": {
+     "fog": 0,
+     "smoke": 131
+    },
+    "sequences": 131,
+    "videos": 33
+   },
+   "val_select": {
+    "cameras": 18,
+    "known_labels": {
+     "fog": 0,
+     "smoke": 139
+    },
+    "sequences": 139,
+    "videos": 36
+   }
+  },
+  "evaluated_labels": [
+   "smoke"
+  ],
+  "label_status": {
+   "fog": {
+    "known_per_split": {
+     "test_iid": 0,
+     "train": 0,
+     "val_calib": 0,
+     "val_select": 0
+    },
+    "n_known": 0,
+    "n_pos": 0,
+    "n_unknown": 171,
+    "reason": "no known fog targets on the real test_iid split (fog not annotated: NaN = unknown); fog metrics are null, not 0",
+    "status": "no_labels"
+   },
+   "smoke": {
+    "known_per_split": {
+     "test_iid": 171,
+     "train": 439,
+     "val_calib": 131,
+     "val_select": 139
+    },
+    "n_known": 171,
+    "n_pos": 88,
+    "n_unknown": 0,
+    "status": "evaluated"
+   }
+  },
+  "split": "test_iid",
+  "status": "partial"
+ }
+}
