@@ -134,3 +134,31 @@ def test_channel_flow_converges_with_resolution():
         exact = a / (2 * nu) * z * (nz - z)
         errors.append(np.abs(s.velocity()[0][:, 0] - exact).max() / exact.max())
     assert errors[2] < errors[0] or errors[2] < 1e-3
+
+
+def test_regularized_collision_matches_bgk_guo_moments():
+    """Mass, momentum and momentum flux after a forced collision: regularized == BGK-Guo.
+
+    The regularized scheme only filters the higher-order (ghost) moments; with
+    a force not parallel to the velocity its second moment must still equal
+    BGK-Guo's Pi_eq + (1 - omega) Pi_neq + (1 - omega / 2)(uF + Fu).
+    """
+    from src.cfd.lbm import EXF, EZF, _collide
+
+    rng = np.random.default_rng(3)
+    shape = (1, 1)
+    u0, v0, r0 = 0.05, -0.03, 1.02
+    eu = E[:, 0] * u0 + E[:, 1] * v0
+    feq0 = r0 * W * (1 + 3 * eu + 4.5 * eu ** 2 - 1.5 * (u0 * u0 + v0 * v0))
+    f = (feq0 * (1 + 0.02 * rng.standard_normal(9))).reshape(1, 1, 9)
+    ax, az = np.full(shape, 0.004), np.full(shape, -0.006)
+    moments = []
+    for regularized in (True, False):
+        out = np.zeros_like(f)
+        rho, ux, uz = np.zeros(shape), np.zeros(shape), np.zeros(shape)
+        _collide(f.copy(), rho, ux, uz, ax, az, np.zeros(shape, bool), 0.53, 0.0, np.zeros(shape),
+                 np.zeros(1), 0, regularized, EXF, EZF, W, out)
+        g = out[0, 0]
+        moments.append(np.array([g.sum(), g @ E[:, 0], g @ E[:, 1], g @ (E[:, 0] ** 2),
+                                 g @ (E[:, 0] * E[:, 1]), g @ (E[:, 1] ** 2)]))
+    np.testing.assert_allclose(moments[0], moments[1], rtol=0, atol=1e-12)

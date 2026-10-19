@@ -72,6 +72,8 @@ def context_summary(params: Mapping[str, Any]) -> Dict[str, Any]:
         "wind_speed_ms": float(params["wind"]["speed_ms"]),
         "wind_sign": float(params["wind"]["sign"]),
         "gust_fraction": float(params["wind"]["gust_fraction"]),
+        "wind_ramp_factor": float(params["wind"].get("ramp_factor", 1.0)),
+        "wind_flip": bool(params["wind"].get("flip", False)),
         "terrain_kind": params["terrain"]["kind"],
         "terrain_height_m": float(params["terrain"].get("height_m", 0.0)),
         "spinup_s": float(params["timing"]["spinup_s"]),

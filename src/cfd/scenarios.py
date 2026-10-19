@@ -108,8 +108,15 @@ def sample_context(rng: np.random.Generator, cfg: Dict[str, Any], category: str,
         "gust_fraction": uniform(rng, common.get("wind_gust_fraction", [0.0, 0.3])),
         "gusts": sample_noise_spec(rng, common.get("wind_gust_period_s", [8.0, 40.0])),
         "flip": bool(speed < 2.0 and rng.random() < float(common.get("wind_direction_flip_prob", 0.05))),
-        "ramp_factor": 1.0,
     }
+    # An accelerating wind over the observation window, for every category alike
+    # (fog_dissipating may use it as its clearing mechanism, it never creates it).
+    # The end-of-window speed stays inside the split's wind range, so the ramp
+    # never reaches the fast_wind hold-out outside test_ood.
+    ramp_drawn = rng.random() < float(common.get("wind_ramp_prob", 0.1))
+    ramp = uniform(rng, common.get("wind_ramp_factor", [1.3, 2.0]))
+    cap = hold["fast_wind_ms"][1] if fast else hold["fast_wind_ms"][0]
+    wind["ramp_factor"] = float(min(ramp, max(1.0, cap / speed))) if ramp_drawn and speed > 0.0 else 1.0
     mixing = {
         "nu_m2s": uniform(rng, common.get("eddy_viscosity_m2s", [1.5, 3.0])),
         "smagorinsky_cs": uniform(rng, common.get("smagorinsky_cs", [0.1, 0.2])),
@@ -254,8 +261,6 @@ def sample_scenario(category: str, split: str, index: int, cfg: Dict[str, Any], 
             distractor = {"regime": regime}
     else:
         regime = "+".join(r for r in (smoke_regime, fog_regime) if r)
-    if fog is not None and fog["regime"] == "fog_dissipating" and fog["mechanism"] == "wind_ramp":
-        context["wind"]["ramp_factor"] = fog["ramp_factor"]
     return {
         "sim_id": sim_id_for(split, category, index, attempt),
         "category": category,

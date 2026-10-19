@@ -492,7 +492,8 @@ Splits: `train` (fit), `val_select` (early stopping, seed choice),
   deterministic. Report test metrics as mean ± sd over the seeds; export
   the val_select-best seed and say so.
 * Calibration: per-label temperature on val_calib, bounded to [0.5, 5];
-  if val_calib is separable (fit hits a bound), T = 1 and a flag is stored.
+  if val_calib is separable, T = 1 and a flag is stored; any other optimum
+  at a bound uses the bound (flagged `clipped`).
 * Thresholds, stored with `fit_source = "synthetic_val_calib"` and the
   calibration-set prevalence: `balanced` (max Youden's J per label;
   max F1 degenerated to "always positive" on weak scores) and

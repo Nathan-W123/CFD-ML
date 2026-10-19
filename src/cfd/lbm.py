@@ -163,6 +163,11 @@ def _collide(f, rho, ux, uz, ax, az, solid, tau0, cs_smag, sponge, u_amb_lat, to
                 pxx += ex[q] * ex[q] * d
                 pxz += ex[q] * ez[q] * d
                 pzz += ez[q] * ez[q] * d
+            # The raw moments go into the regularized projection (BGK-Guo then holds to
+            # second order); the half-force-corrected ones estimate the strain rate.
+            pxx_r = pxx
+            pxz_r = pxz
+            pzz_r = pzz
             pxx += u * fx
             pzz += v * fz
             pxz += 0.5 * (u * fz + v * fx)
@@ -185,7 +190,7 @@ def _collide(f, rho, ux, uz, ax, az, solid, tau0, cs_smag, sponge, u_amb_lat, to
                     qxz = ex[q] * ez[q]
                     # Guo's velocity carries half the force, so the non-equilibrium part
                     # also has a first moment -F/2: keep its first-order Hermite term.
-                    fneq = (4.5 * w[q] * (qxx * pxx + 2.0 * qxz * pxz + qzz * pzz)
+                    fneq = (4.5 * w[q] * (qxx * pxx_r + 2.0 * qxz * pxz_r + qzz * pzz_r)
                             - 1.5 * w[q] * (ex[q] * fx + ez[q] * fz))
                     f_post[k, i, q] = feq[q] + (1.0 - omega) * fneq + pref * src
                 else:

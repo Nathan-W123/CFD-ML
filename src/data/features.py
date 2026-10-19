@@ -16,10 +16,14 @@ Pipeline (docs/design.md section 7):
    corners tracked (band-passed Lucas-Kanade + RANSAC) ONLY outside the
    dilated union of the candidate masks. A frame whose estimate fails the
    quality check or the bound is left unwarped and its flow is marked
-   invalid. The whole step is skipped (and recorded) when less than 20 % of
-   the image is textured background, when most estimates fail, or when the
-   "background" drifts steadily over the window (unmasked fog, not camera
-   shake), so a frame-filling fog bank is never "stabilised away".
+   invalid. The whole step is skipped (and recorded) when less than 3 % of
+   the image is textured background or fewer than 12 background corners
+   exist, when most estimates fail, or when the "background" drifts steadily
+   over the window (unmasked fog, not camera shake), so a frame-filling fog
+   bank is never "stabilised away". A skipped step leaves camera motion in
+   the flow, so with `require_stabilization` (default) the flow gate is
+   closed for the whole clip ("stabilization_unavailable"); set it to False
+   only for footage known to come from a rigid, static mount.
 3. `_persistent_filter` drops mask components that touch nothing in the
    previous or next observation (single-frame detector false positives).
 4. `_roi_box`: one square analysis frame per clip around the union of the
@@ -70,7 +74,8 @@ from src.utils.io import PathLike
 
 # ---- stabilisation ---------------------------------------------------------
 _STAB_DILATE_FRAC = 0.04        # mask union dilation, fraction of min(H, W) (>= 5 px)
-_STAB_MIN_TEXTURED_FRAC = 0.20  # textured background required, fraction of the image
+_STAB_MIN_TEXTURED_FRAC = 0.03  # textured background required, fraction of the image (the corner,
+                                # inlier and residual checks below guard the estimate itself)
 _STAB_TEXTURE_BLUR = 2.5        # Gaussian sigma before the texture gradient (suppresses noise)
 _STAB_TEXTURE_GRAD = 0.75       # gray levels / px (9x9 mean gradient); pixel noise up to sigma ~12 stays below
 _STAB_EST_MAX_SIDE = 384        # estimate on a copy whose shorter side is at most this
@@ -116,6 +121,7 @@ class FeatureConfig:
     roi_scale: float = 2.0          # ROI side = roi_scale * max(region extent w, h) (synthetic: drawn from [1.5, 2.5])
     roi_min_px: int = 32            # minimum ROI side in native pixels
     stabilize: bool = True
+    require_stabilization: bool = True  # no camera-motion estimate -> flow gate closed (see module doc)
     min_mask_frac: float = 0.002    # of the analysis frame
     flow_method: str = "dis"        # "dis" (default) | "farneback"
     flow_erode_px: int = 2          # flow statistics on the mask eroded by this (working px)
@@ -228,6 +234,8 @@ def extract_features_with_meta(frames, timestamps, masks, lag_frames=None, lag_t
     region_px = [0] * n
     status: List[str] = [""] * n
     engine = _FlowEngine(cfg.flow_method)
+    # stabilize=False asserts a static camera; otherwise an unremoved camera motion invalidates the flow.
+    stab_required = bool(cfg.stabilize and cfg.require_stabilization)
     for t in range(n):
         if flow_mode == "lag":
             prev, prev_mask_ok, prev_stab_ok = lag_w[t], True, stab["lag_ok"][t]
@@ -246,6 +254,9 @@ def extract_features_with_meta(frames, timestamps, masks, lag_frames=None, lag_t
             continue
         if not (stab["obs_ok"][t] and prev_stab_ok):
             status[t] = "stabilization_failed"
+            continue
+        if stab_required and not stab["info"]["applied"]:
+            status[t] = "stabilization_unavailable"
             continue
         if not (np.isfinite(dt) and dt > 0):
             status[t] = "bad_timing"

@@ -35,6 +35,7 @@ Calls into: thermo, scenario_util.
 
 from __future__ import annotations
 
+import math
 from typing import Any, Dict, Optional
 
 import numpy as np
@@ -119,13 +120,16 @@ def sample_fog(regime: str, rng: np.random.Generator, cfg: Dict[str, Any], conte
                    inflow_depth_m=uniform(rng, (20.0, 100.0)),
                    inversion_dtheta_dz=uniform(rng, (0.0, 0.03)))
     elif regime == "fog_dissipating":
-        mech = ["dry_inflow", "surface_warming", "wind_ramp"][int(rng.integers(0, 3))]
+        # "wind_ramp" only where the class-independent context already accelerates the wind.
+        mechs = ["dry_inflow", "surface_warming"]
+        if float(context.get("wind", {}).get("ramp_factor", 1.0)) > 1.0:
+            mechs.append("wind_ramp")
+        mech = mechs[int(rng.integers(0, len(mechs)))]
         out.update(mechanism=mech,
                    mechanism_onset_s=uniform(rng, (-30.0, 10.0)),   # relative to the first frame
                    inversion_dtheta_dz=uniform(rng, (0.005, 0.04)),
                    dry_inflow_rh=uniform(rng, block.get("dry_inflow_rh", [0.4, 0.85])),
-                   surface_warming_k_s=uniform(rng, block.get("surface_warming_k_s", [0.002, 0.02])),
-                   ramp_factor=uniform(rng, (1.3, 2.0)))
+                   surface_warming_k_s=uniform(rng, block.get("surface_warming_k_s", [0.002, 0.02])))
     elif regime == "steam_fog":
         # Re-draw until mixing surface air with ambient air actually supersaturates.
         for _ in range(50):
@@ -259,7 +263,7 @@ def fog_component(fog: Dict[str, Any], grid: Grid, refs, p: np.ndarray, pi: np.n
                         rates["theta"] = rates.get("theta", 0.0) + rate
 
                 comp.sources.append(warming)
-            # "wind_ramp" is applied by scenarios through the wind function.
+            # "wind_ramp": the context's accelerating wind (scenarios.wind_function) clears the fog.
         return comp
 
     if regime == "advected_fog_bank":
@@ -282,13 +286,22 @@ def fog_component(fog: Dict[str, Any], grid: Grid, refs, p: np.ndarray, pi: np.n
             fields["ql"][...] = np.where(grid.fluid, inside * ql_bank[:, None] * tex, 0.0)
 
         mod = fog["modulation"]
+        x_b = 0.0 if upwind_left else grid.nx * grid.dx
+        s_dir = 1.0 if upwind_left else -1.0
 
         def inflow(t, ghosts):
+            # The bank enters only once its front (front_x at t = 0, drifting at
+            # u_drift) has reached the upwind boundary; until then the inflow is ambient.
+            w_b = 0.5 * (1.0 + math.tanh(s_dir * (front_x + u_drift * t - x_b) / 15.0))
+            if w_b < 1e-6:
+                return
             side = "left" if upwind_left else "right"
             level = 0.85 + 0.15 * np.tanh(smooth_noise(t, mod))
-            ghosts.setdefault("theta", {})[side] = theta_bank
-            ghosts.setdefault("qv", {})[side] = qv_bank
-            ghosts.setdefault("ql", {})[side] = level * ql_bank
+            for name, bank in (("theta", theta_bank), ("qv", qv_bank), ("ql", level * ql_bank)):
+                sides = ghosts.setdefault(name, {})
+                base = sides.get(side)
+                base = np.zeros_like(bank) if base is None else base
+                sides[side] = base + w_b * (bank - base)
 
         comp.initial.append(initial)
         comp.inflow.append(inflow)

@@ -29,7 +29,7 @@ training:
 # stopping and seed choice); counts are made per simulation, not per variant.
 calibration:
   temperature_scaling: true  # per-label temperature
-  temperature_bounds: [0.5, 5.0]  # a fit at a bound means val_calib is separable: T = 1 and a flag
+  temperature_bounds: [0.5, 5.0]  # separable val_calib: T = 1 and a flag; other fits at a bound use the bound
 
 thresholds:
   operating_points:
@@ -41,7 +41,7 @@ thresholds:
 abstain:
   logit_margin_floor: 0.25   # |logit - threshold logit| below the margin -> abstain (-1)
   target_error: 0.05         # widen the margin until confident-prediction error <= this ...
-  max_rate: 0.3              # ... but never abstain on more than this fraction of val_calib
+  max_rate: 0.3              # ... but never WIDEN it beyond this fraction of val_calib (the floor takes precedence)
   min_mask_frames: 3         # input-validity abstention
   min_flow_frames: 2
   max_clip_fraction: 0.2

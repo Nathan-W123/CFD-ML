@@ -280,19 +280,16 @@ def boxes_from_masks(masks: np.ndarray, rng: np.random.Generator, jitter: float 
 
 
 def _to_gray_float(frames: np.ndarray) -> np.ndarray:
-    """(T, H, W) or (T, H, W, 3) uint8 / float in [0, 1] -> (T, H, W) float32 in [0, 1]."""
-    f = np.asarray(frames)
-    if f.ndim == 4:
-        if f.shape[-1] == 1:
-            f = f[..., 0]
-        else:
-            f = np.stack([cv2.cvtColor(np.ascontiguousarray(x[..., :3]), cv2.COLOR_BGR2GRAY) for x in f])
-    if f.ndim != 3:
-        raise ValueError(f"expected (T, H, W) or (T, H, W, C) frames, got shape {f.shape}")
-    if f.dtype == np.uint8:
-        return f.astype(np.float32) / 255.0
-    f = f.astype(np.float32)
-    return f / 255.0 if f.max(initial=0.0) > 1.5 else f
+    """(T, H, W) or (T, H, W, C) frames -> (T, H, W) float32 in [0, 1].
+
+    Goes through features._to_gray_u8, the one conversion of every image input
+    (uint8, bool, float in [0, 1] or [0, 255], uint16; gray, BGR or BGRA), so
+    the detector and the feature extractor always see the same image.
+    """
+    from src.data.features import _to_gray_u8
+
+    (g,) = _to_gray_u8(frames)
+    return g.astype(np.float32) / 255.0
 
 
 def _local_std(img: np.ndarray, sigma: float) -> np.ndarray:

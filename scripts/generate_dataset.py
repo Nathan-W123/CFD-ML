@@ -243,6 +243,7 @@ def main(argv=None):
             "render_seed": r["info"]["render_seed"], "variant": r["info"]["variant"],
             "context": r["context"], "render": r["render"],
             "feature_meta": {k: v for k, v in r["info"]["feature_meta"].items() if k in ("roi", "flow_mode", "timing", "counts")},
+            "stabilization": {k: r["info"]["feature_meta"].get("stabilization", {}).get(k) for k in ("applied", "reason", "textured_frac", "n_corners")},
             "roi_scale": r["info"]["feature_config"]["roi_scale"],
             "sim_path": r["sim_path"], "seq_path": r["seq_path"],
         } for r in rows],

@@ -35,11 +35,10 @@ Calls into: numpy only (plus the shared helpers in scenarios_util).
 
 from __future__ import annotations
 
+import math
 from typing import Any, Dict
 
 import numpy as np
-
-import math
 
 from src.cfd import thermo
 from src.cfd.scenario_util import (
@@ -222,13 +221,21 @@ def _advected(smoke: Dict[str, Any], grid: Grid, comp: Component, first_frame_s:
     def initial_warmth(fields):
         fields["theta"] += np.where(grid.fluid, warmth * profile[:, None] * np.where(reach, 1.0, edge), 0.0)
 
+    x_b = 0.0 if upwind_left else grid.nx * grid.dx
+    s_dir = 1.0 if upwind_left else -1.0
+
     def inflow(t, ghosts):
+        # The layer enters only once its front (front_x at t = 0, drifting at
+        # u_drift) has reached the upwind boundary.
+        w_b = 0.5 * (1.0 + math.tanh(s_dir * (front_x + u_drift * t - x_b) / 15.0))
+        if w_b < 1e-6:
+            return
         puff = smooth_noise01(t, mod)
         level = c_in * (1.0 - inter + inter * puff)
         side = "left" if upwind_left else "right"
-        ghosts.setdefault("smoke", {})[side] = level * profile
+        ghosts.setdefault("smoke", {})[side] = w_b * level * profile
         th = ghosts["theta"][side]
-        ghosts["theta"][side] = th + warmth * (0.5 + puff) * profile
+        ghosts["theta"][side] = th + w_b * warmth * (0.5 + puff) * profile
 
     comp.initial.append(initial)
     comp.initial.append(initial_warmth)

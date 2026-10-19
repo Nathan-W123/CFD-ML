@@ -404,12 +404,13 @@ def fit_temperature(logits, y, bounds: Tuple[float, float] = (0.5, 5.0), weights
     """Temperature T minimising the (weighted) NLL of sigmoid(logit / T), searched within `bounds`.
 
     The NLL is convex in 1 / T, so a golden-section search finds the
-    constrained optimum exactly. When it lies at a bound the fit is not
-    trusted (docs/design.md section 11): T = 1, `fallback` is set and
-    `reason` says why: "separable" (every positive logit above every negative
-    one, so the NLL keeps falling as T -> 0) or "optimum_at_upper_bound" /
-    "optimum_at_lower_bound" (logits far too confident / timid, or
-    uninformative); the constrained optimum is kept in `bound_T` for reference.
+    constrained optimum exactly. When it lies at a bound (docs/design.md
+    section 11): if val_calib is separable (every positive logit above every
+    negative one, so the NLL keeps falling as T -> 0) the fit is not trusted,
+    T = 1 and `fallback` is set; otherwise ("optimum_at_upper_bound" /
+    "optimum_at_lower_bound": logits far too confident / timid, or
+    uninformative) the bound itself is used, with `clipped` set: by
+    convexity it has a lower calibration NLL than T = 1.
     """
     z = np.asarray(logits, dtype=np.float64).ravel()
     t = _bool(y)
@@ -438,10 +439,13 @@ def fit_temperature(logits, y, bounds: Tuple[float, float] = (0.5, 5.0), weights
     edge = 1e-3 * (hi - lo)
     if a_opt - lo < edge or hi - a_opt < edge:
         side = "upper" if a_opt - lo < edge else "lower"              # upper / lower bound of T
-        separable = bool(z[t].min() > z[~t].max())
-        info.update(at_bound=side, fallback=True, bound_T=float(bounds[1] if side == "upper" else bounds[0]),
-                    reason="separable" if separable else f"optimum_at_{side}_bound", nll=info["nll_T1"])
-        return 1.0, info
+        bound_T = float(bounds[1] if side == "upper" else bounds[0])
+        if bool(z[t].min() > z[~t].max()):
+            info.update(at_bound=side, fallback=True, bound_T=bound_T, reason="separable", nll=info["nll_T1"])
+            return 1.0, info
+        info.update(at_bound=side, clipped=True, bound_T=bound_T, reason=f"optimum_at_{side}_bound",
+                    nll=_weighted_bce(z / bound_T, t, w))
+        return bound_T, info
     info["nll"] = _weighted_bce(a_opt * z, t, w)
     return float(1.0 / a_opt), info
 

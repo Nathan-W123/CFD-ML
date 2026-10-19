@@ -288,9 +288,12 @@ def fit_calibration(logits: np.ndarray, fs_calib: FeatureSet, cfg: Mapping[str, 
             "insufficient_categories": insufficient,
             "prevalence": prevalence,
             "temperature_fit": temp_fit,
-            # T = 1 because the fit hit a bound: "separable", "optimum_at_upper_bound", ... or None
+            # T = 1 instead of a fit ("separable", "single_class", "disabled") or None
             "temperature_fallback": {n: temp_fit[n].get("reason") if temp_fit[n].get("fallback") else None
                                      for n in LABEL_NAMES},
+            # T clipped to a bound ("optimum_at_upper_bound" / "optimum_at_lower_bound") or None
+            "temperature_clipped": {n: temp_fit[n].get("reason") if temp_fit[n].get("clipped") else None
+                                    for n in LABEL_NAMES},
             "threshold_fit": ops["fit"],
             "abstain_fit": margin_fit,
         },
@@ -393,7 +396,7 @@ def _run_seeds(fs: FeatureSet, cfg: Mapping[str, Any], out_dir: PathLike, *, sta
     Xtr, Xvs = normalizer.transform(train.X), normalizer.transform(vsel.X)
     tcfg = dict(cfg.get("training", {}))
     seeds = [int(s) for s in tcfg.get("seeds", [0, 1, 2])]
-    preprocessing = _preprocessing_record(fs, cfg)
+    preprocessing = _preprocessing_record(train, cfg)  # what the model was fitted on (train split only)
     counts = _counts(fs)
     results: Dict[int, Dict[str, Any]] = {}
     histories: Dict[int, List[Dict[str, Any]]] = {}

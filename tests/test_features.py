@@ -294,6 +294,12 @@ def test_frame_filling_fog_bank_keeps_its_motion():
     X, meta = _extract(frames, masks, lags)
     assert not meta["stabilization"]["applied"]
     assert meta["stabilization"]["reason"] == "insufficient_textured_background"
+    # Camera motion cannot be separated from the fog's: by default the flow gate closes ...
+    assert np.all(X[:, FI["flow_valid"]] == 0.0)
+    assert set(meta["flow"]["status"]) == {"stabilization_unavailable"}
+    assert np.all(X[:, :6] == 0.0)
+    # ... and a footage source declared static (rigid mount) keeps the motion.
+    X, meta = _extract(frames, masks, lags, FeatureConfig(require_stabilization=False))
     assert np.all(X[:, FI["flow_valid"]] == 1.0)
     expected = speed / _roi_side(meta) / LAG_S
     np.testing.assert_allclose(X[:, FI["flow_u_mean"]], expected, rtol=0.10)
@@ -310,7 +316,8 @@ def test_frame_filling_fog_bank_keeps_its_motion():
 
     # A detector that covers only part of the fog bank leaves moving fog as the
     # "background": its steady drift (or untrackable motion) is recognised and the
-    # step is skipped instead of aligning to the fog.
+    # step is skipped instead of aligning to the fog. The fog's motion is never
+    # stabilised away: the flow is closed by default, kept for a static mount.
     for v in (0.5, speed):
         frames, lags, _ = _fog_bank(rng, v)
         partial = np.zeros((T, H, W), bool)
@@ -318,6 +325,8 @@ def test_frame_filling_fog_bank_keeps_its_motion():
         X, meta = _extract(frames, partial, lags)
         assert not meta["stabilization"]["applied"]
         assert meta["stabilization"]["reason"] in ("background_moving", "unreliable_background")
+        assert np.all(X[:, FI["flow_valid"]] == 0.0)
+        X, meta = _extract(frames, partial, lags, FeatureConfig(require_stabilization=False))
         assert np.all(X[:, FI["flow_valid"]] == 1.0)
         np.testing.assert_allclose(X[:, FI["flow_u_mean"]], v / _roi_side(meta) / LAG_S, rtol=0.10)
 
@@ -335,7 +344,8 @@ def test_expanding_blob_has_positive_divergence_and_area_growth():
     frames, lags, masks = _blob_sequence(
         rng, lambda t: (96, 96), lambda t: (96, 96), obs_radius=r_obs, lag_radius=r_lag,
         obs_scale=lambda t: r_obs(t) / 14.0, lag_scale=lambda t: r_lag(t) / 14.0)
-    X, meta = _extract(frames, masks, lags)
+    # A static camera over an untextured background: nothing to stabilise against.
+    X, meta = _extract(frames, masks, lags, FeatureConfig(require_stabilization=False))
     ok = X[:, FI["flow_valid"]] == 1.0
     assert ok.sum() >= 10
     div = X[ok, FI["flow_divergence"]]

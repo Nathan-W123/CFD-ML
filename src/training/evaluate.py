@@ -591,7 +591,8 @@ def run_evaluation(fs: FeatureSet, cfg: Mapping[str, Any], artifact_dir: PathLik
         "abstain_margins": (expert.config.get("abstain") or {}).get("margins"),
         "calibration": {k: v for k, v in (expert.config.get("calibration") or {}).items()
                         if k in ("fit_source", "n_sequences", "n_groups", "insufficient_calibration_data",
-                                 "insufficient_categories", "temperature_fallback", "prevalence")},
+                                 "insufficient_categories", "temperature_fallback", "temperature_clipped",
+                                 "prevalence")},
         "test": test,
         "curves": test_curves,
         "validation_reference": {s: {op: compact(r["overall"]) for op, r in v.items()} for s, v in val.items()},

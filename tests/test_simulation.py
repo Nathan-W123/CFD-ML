@@ -93,8 +93,10 @@ def test_ambient_wind_profile_is_maintained_over_the_no_slip_floor(sign):
 def test_hot_plume_rises_and_leaves_through_the_top():
     cfg = _short(CFG, n_frames=12)
     p = _hot_plume(cfg)
-    p["smoke"]["onset_s"] = -100.0           # established plume (ignited 100 s before frame 0)
-    p["timing"]["spinup_s"] = 105.0
+    p["smoke"]["onset_s"] = -200.0           # established plume (ignited 200 s before frame 0): the
+    p["timing"]["spinup_s"] = 205.0          # starting-plume head has left the domain by then
+    # Fixed mixing, so the test does not depend on which sample _find returns.
+    p["mixing"].update(nu_m2s=2.3, smagorinsky_cs=0.15, diffusivity_m2s=1.0)
     res = run_scenario(p, cfg)
     assert res.validity["valid"], res.validity["reasons"]
     z = (np.arange(res.smoke.shape[1]) + 0.5) * res.dx
@@ -103,7 +105,7 @@ def test_hot_plume_rises_and_leaves_through_the_top():
     # The open top must not act as a lid: once the plume has reached it, smoke leaves
     # through the top about as fast as the source emits it (steady plume).
     nz, nx = res.smoke.shape[1:]
-    emission_rate = res.validity["budgets"]["smoke"]["sources"] / (105.0 + 55.0 - 5.0 + 5.0)
+    emission_rate = res.validity["budgets"]["smoke"]["sources"] / (200.0 + 55.0)   # onset to last frame
     top_rate = float((np.maximum(res.uz[-1][-1], 0.0) * res.smoke[-1][-1]).sum() * res.dx)
     assert top_rate > 0.5 * emission_rate
     # No mushrooming ceiling layer spanning the domain under the top boundary.
@@ -144,6 +146,29 @@ def test_established_fog_survives_and_patch_drifts_with_wind():
     assert cx[-1] > cx[0] + 20.0          # moved downwind (3 m/s for 25 s ~ 75 m)
 
 
+@pytest.mark.parametrize("regime_key,regime,category", [("fog_regime", "advected_fog_bank", "fog_only"),
+                                                         ("smoke_regime", "advected_smoke", "smoke_only")])
+def test_advected_front_enters_on_time_and_crosses_the_view(regime_key, regime, category):
+    """A front placed at 30 % of the view at the first frame is there, not already past the view.
+
+    With 4 m/s for an 80 s spin-up the front starts ~270 m upwind of the
+    domain: the inflow must wait for it instead of feeding the layer from t = 0.
+    """
+    cfg = _short(CFG, n_frames=12)
+    p = _find(category, regime_key, regime, cfg)
+    p["wind"].update(speed_ms=4.0, sign=-1.0, gust_fraction=0.0, flip=False, ramp_factor=1.0)
+    p["terrain"] = {"kind": "flat", "height_m": 0.0}
+    p["timing"]["spinup_s"] = 80.0
+    (p["fog"] if category == "fog_only" else p["smoke"])["front_frac"] = 0.3
+    res = run_scenario(p, cfg)
+    field = res.lwc if category == "fog_only" else res.smoke
+    thr = 0.02 if category == "fog_only" else 0.05 * float(field.max())
+    view = field[:, :, 6:-6]
+    cover = [float((view[t] > thr).any(axis=0).mean()) for t in range(view.shape[0])]
+    assert 0.15 < cover[0] < 0.7
+    assert cover[-1] > cover[0] + 0.25          # the front advances across the view
+
+
 def test_supersaturated_inflow_condenses_into_fog():
     cfg = _short(CFG, n_frames=6)
     p = _find("fog_only", "fog_regime", "fog_patch", cfg)
@@ -179,6 +204,14 @@ def test_context_is_class_independent():
         assert abs(spinups[c].mean() - spinups["fog_only"].mean()) < 8.0     # spin-up never depends on the class
         assert abs(terrain[c] - terrain["smoke_only"]) < 0.13
         assert speeds[c].max() <= 7.0
+    # An accelerating wind is context too: drawn alike for every class, never beyond the core range.
+    ramps = {c: np.array([sample_scenario(c, "train", i, CFG)["wind"]["ramp_factor"] for i in range(300)])
+             for c in CATEGORIES}
+    for c in CATEGORIES:
+        assert 0.03 < np.mean(ramps[c] > 1.0) < 0.2
+    for i in range(200):
+        w = sample_scenario(CATEGORIES[i % 4], "train", i, CFG)["wind"]
+        assert w["speed_ms"] * w["ramp_factor"] <= 7.0 + 1e-9
 
 
 def test_holdout_recipes_are_reachable_and_never_in_training():

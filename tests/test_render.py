@@ -626,6 +626,17 @@ def test_detect_candidate_masks_finds_moving_textured_blob(shake):
     assert (m & ~cv2.dilate(truth.astype(np.uint8).max(0), np.ones((15, 15), np.uint8)).astype(bool)).mean() < 0.01
 
 
+def test_detect_candidate_masks_accepts_every_extractor_input_type():
+    """The detector converts its input exactly like the feature extractor (float64 BGR, uint16, ...)."""
+    frames, _ = _moving_textured_blob()
+    ts = np.arange(len(frames)) * 5.0
+    ref = detect_candidate_masks(frames, ts)
+    bgr = np.repeat(frames[..., None], 3, axis=-1)
+    for variant in (frames.astype(np.float64) / 255.0, bgr.astype(np.float64) / 255.0, bgr,
+                    frames.astype(np.uint16) * 257):
+        np.testing.assert_array_equal(detect_candidate_masks(variant, ts), ref)
+
+
 def test_detect_candidate_masks_quiet_on_static_scene():
     frames, _ = _moving_textured_blob()
     static = np.repeat(frames[:1], 12, axis=0).astype(np.int16)

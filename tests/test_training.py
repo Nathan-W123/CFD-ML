@@ -242,7 +242,8 @@ def test_decision_rule_fitting():
     assert T == 1.0 and info["fallback"] and info["at_bound"] == "lower" and info["reason"] == "separable"
     z = rng.normal(size=2000) * 20                              # confident logits, labels unrelated to them
     T, info = M.fit_temperature(z, rng.random(2000) < 0.5)
-    assert T == 1.0 and info["at_bound"] == "upper" and info["reason"] == "optimum_at_upper_bound"
+    assert T == 5.0 and info["at_bound"] == "upper" and info["reason"] == "optimum_at_upper_bound"
+    assert info["clipped"] and not info["fallback"] and info["nll"] < info["nll_T1"]
     thr, info = M.threshold_max_f1([0.1, 0.2, 0.6, 0.7, 0.9], [0, 0, 1, 1, 1])
     assert 0.2 < thr < 0.6 and info["f1"] == pytest.approx(1.0)
     neg = np.array([1, 1, 1, 1, 0, 0], bool)
