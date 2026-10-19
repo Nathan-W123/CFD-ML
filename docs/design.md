@@ -876,3 +876,52 @@ native (lag frames passed to `features_from_frames` are ignored).
   share a split; groups stay camera ids. Real background images used for
   rendering (if any) must come from cameras disjoint from real
   validation/test cameras.
+
+## 13. Real-footage detector (`src/detector`, `scripts/embed_windows.py`, `scripts/train_detector.py`)
+
+The physics expert alone does not recognise real fog (section "Real
+footage" of the README), so the far-field detector that is evaluated on real
+footage puts an appearance (vision) expert next to it. One window is 12
+frames one minute apart, selected exactly as `extract_features.py` selects
+them.
+
+* **Vision.** A frozen CLIP ViT-B/32 image encoder (`openai/clip-vit-base-
+  patch32`), CPU only. Coarse crops: frames 0, 6 and 11, each as the whole
+  frame and a 2 x 3 tile grid (`clip.npz`, (F, 7, 512)). Fine crops: frames 0
+  and 11 as a 4 x 6 tile grid (`clip_fine.npz`, (2, 24, 512)), so a tile of a
+  1024-px frame is about the 224-px CLIP input and a plume a few dozen pixels
+  wide is still a few patches. Text prompts (8 per head) give similarity
+  features in the same space. The camera banner is blanked.
+* **Physics.** The motion expert's 12 x 14 window features, pooled over time
+  (feature group `motion`); used when model selection picks it.
+* **Weather.** Not an input. The fog windows were found through METAR fog
+  reports and the smoke windows through CAL FIRE incident reports, so a
+  weather input would partly learn how the windows were selected. A weather
+  prior has to be validated on windows not selected by weather.
+* **Fusion.** Each head (smoke, fog) is a standardiser plus an L2 logistic
+  regression on concatenated feature groups (`full`, `tiles`, `sims`,
+  `fine`, `motion`; `src/detector/features.py`). Smoke also has a tile head:
+  the same kind of model applied to every fine tile (`tile_instances`:
+  last-frame embedding, its change since frame 0, prompt similarities and
+  their change), every tile of a smoke window labelled smoke at fit time,
+  and the window scored by its best tile. A two-weight logistic stack
+  combines the window head's and the tile head's logits. All weights are
+  plain arrays (`detector.json` + `detector_weights.npz`); inference needs
+  numpy plus the CLIP encoder.
+* **Selection and thresholds.** Dev cameras only (every split but
+  `test_iid`). Feature groups and C by 5-fold cross-validation grouped by
+  camera mount (out-of-fold AUROC); the tile head's C the same way; the
+  stack on the out-of-fold logits, scored by a second grouped
+  cross-validation. Thresholds from out-of-fold probabilities: smoke
+  `deploy` lets at most 2.5 % of the dev fog windows (fog 1, smoke 0) raise
+  a smoke alarm (half the 5 % goal, as a margin for new cameras); `balanced`
+  is the maximum-Youden point. The `test_iid` cameras are evaluated once,
+  with `--final`.
+* **Reporting.** Pooled smoke AUROC mixes sets: a no-smoke window from a set
+  without smoke (the fog sets) is an easy negative, so the report also gives
+  the AUROC over smoke / no-smoke pairs from the same set ("within sets")
+  and each set's own AUROC. Intervals resample camera mounts.
+* **Labels.** FIgLib smoke labels come from the library (ignition time);
+  the HPWREN 2026 fog and smoke labels come from blind AI vision labelling
+  of contact sheets (two votes per sheet, a third where they disagree), not
+  from people.
