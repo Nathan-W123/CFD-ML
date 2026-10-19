@@ -1,0 +1,386 @@
+sheet_id,window_id,fog,smoke,quality,fog_type,fog_extent,n_votes,fog_votes,smoke_votes,quality_votes
+0025e2f55747,hpwrenfire-sojr-n-mobo-c-20260723-0837,0,0,ok,,,2,0 0,0 0,ok ok
+01181c407ae6,hpwrenfire-rndmsa-s-mobo-c-20261015-1305,0,0,ok,,,2,0 0,0 0,ok ok
+019f31e90444,hpwrenfire-pi-e-mobo-c-20260817-1256,0,0,ok,,,2,0 0,0 0,ok ok
+02145edd874b,hpwrenfire-stgo-e-mobo-c-20260825-1204,0,0,ok,,,2,0 0,0 0,ok ok
+02179baf983a,hpwrenfire-dwpgm-w-mobo-c-20261015-1511,0,0,ok,,,2,0 0,0 0,ok ok
+0304e9fcad94,hpwrenfire-69bravo-n-mobo-c-20260808-1820,0,0,ok,,,2,0 0,0 0,ok ok
+034258c34b1b,hpwrenfire-69bravo-n-mobo-c-20261011-1407,1,0,ok,,,2,1 1,0 0,ok ok
+04b7abfbce26,hpwrenfire-lp-w-mobo-c-20260807-1533,0,1,ok,,,2,0 0,1 1,ok ok
+04bf857aee6a,hpwrenfire-stgo-e-mobo-c-20261004-1222,0,0,ok,,,2,0 0,0 0,ok ok
+04cf32af2b6d,hpwrenfire-sclm-e-mobo-c-20261015-1445,0,1,ok,,,2,0 0,1 1,ok ok
+04dde23bb0e6,hpwrenfire-rdmrc-s-mobo-c-20260820-1036,0,0,ok,,,3,0 0 0,0 ? 0,ok ok ok
+050ad2a6d2c8,hpwrenfire-mpo-n-mobo-c-20260814-1256,0,1,ok,,,2,0 0,1 1,ok ok
+05aafbc2fe87,hpwrenfire-marconi-n-mobo-c-20260901-1216,0,0,ok,,,2,0 0,0 0,ok ok
+05c7f38c8799,hpwrenfire-blkrc-w-mobo-c-20261002-1623,0,0,ok,,,2,0 0,0 0,ok ok
+05cd74b3aa57,hpwrenfire-marion-w-mobo-c-20260802-1510,0,0,ok,,,2,0 0,0 0,ok ok
+067b513bcb9b,hpwrenfire-smer-tcs9-s-mobo-c-20260722-1025,0,1,ok,,,2,0 0,1 1,ok ok
+06a268837dcd,hpwrenfire-buff-w-mobo-c-20261016-1218,0,1,ok,,,2,0 0,1 1,ok ok
+06ac9f01ba48,hpwrenfire-cp-w-mobo-c-20260819-1529,0,1,ok,,,2,0 0,1 1,ok ok
+074b735586fa,hpwrenfire-smer-tcs9-w-mobo-c-20261006-1632,0,0,glare,,,2,0 0,0 0,glare glare
+07c96a135a55,hpwrenfire-mg-s-mobo-c-20260722-1519,0,1,ok,,,2,0 0,1 1,ok ok
+07e8fa782afc,hpwrenfire-dwpgm-n-mobo-c-20261011-1227,0,0,ok,,,2,0 0,0 0,ok ok
+08ce61bead37,hpwrenfire-wilson-w-mobo-c-20260808-1601,,,ok,,,3,0 0 ?,? ? ?,ok ok ok
+08ddcb5886a0,hpwrenfire-smer-tcs3-mobo-c-20260824-1813,0,0,ok,,,3,0 0 0,0 0 0,glare ok ok
+08fcf5ddd150,hpwrenfire-rndmsa-s-mobo-c-20261015-1445,0,1,ok,,,2,0 0,1 1,ok ok
+0917ab7f0185,hpwrenfire-rm-e-mobo-c-20260722-0825,0,0,ok,,,2,0 0,0 0,ok ok
+0a35f6abf445,hpwrenfire-rdmrc-n-mobo-c-20261002-1443,0,0,ok,,,2,0 0,0 0,ok ok
+0cc06c3262be,hpwrenfire-rm-e-mobo-c-20260722-1005,0,1,ok,,,2,0 0,1 1,ok ok
+0ce216ee7b83,hpwrenfire-blkrc-w-mobo-c-20260824-1813,0,,glare,,,3,0 0 0,? ? ?,glare glare glare
+0d237dc335ad,hpwrenfire-rdmrc-w-mobo-c-20260726-1538,0,1,ok,,,2,0 0,1 1,ok ok
+0fb6aafc0380,hpwrenfire-hp-n-mobo-c-20260820-1036,0,0,ok,,,2,0 0,0 0,ok ok
+107974822e1b,hpwrenfire-rdd-s-mobo-c-20260816-1345,0,0,ok,,,2,0 0,0 0,ok ok
+10fd3d1a8b87,hpwrenfire-dwpgm-n-mobo-c-20260808-1620,0,,ok,,,3,0 0 0,? ? ?,ok ok ok
+126642200a75,hpwrenfire-stgo-e-mobo-c-20260825-1344,0,1,ok,,,2,0 0,1 1,ok ok
+12d54b7afdd4,hpwrenfire-sedgwick-w-mobo-c-20260819-1617,0,0,ok,,,2,0 0,0 0,ok ok
+148f3cdc8033,hpwrenfire-wilson-n-mobo-c-20260901-1321,0,0,ok,,,3,0 0 0,0 ? 0,ok ok ok
+15594b6885d3,hpwrenfire-ch-s-mobo-c-20260816-1545,0,1,ok,,,2,0 0,1 1,ok ok
+15acdc79eda8,hpwrenfire-smer-tcs10-1-mobo-c-20260722-1005,,1,ok,,,3,? 0 0,? 1 1,ok ok ok
+17281321b093,hpwrenfire-rndmsa-n-mobo-c-20261004-1402,0,1,ok,,,2,0 0,1 1,ok ok
+17684ef0036c,hpwrenfire-marconi-n-mobo-c-20260905-1249,0,0,ok,,,2,0 0,0 0,ok ok
+17e036d52701,hpwrenfire-dwpgm-e-mobo-c-20260902-1530,0,0,ok,,,2,0 0,0 0,ok ok
+1833aa0ac413,hpwrenfire-stgo-w-mobo-c-20260914-1535,,0,ok,,,2,? ?,0 0,ok ok
+184df20b199a,hpwrenfire-chino-w-mobo-c-20260914-1535,0,0,ok,,,2,0 0,0 0,ok ok
+187a2bb7f85f,hpwrenfire-bm-s-mobo-c-20260722-1319,0,0,ok,,,2,0 0,0 0,ok ok
+1975ce813bf0,hpwrenfire-wilson-n-mobo-c-20260821-1342,0,0,ok,,,2,0 0,0 0,ok ok
+1abafab8f3d4,hpwrenfire-blkrc-w-mobo-c-20260824-1833,0,,glare,,,3,0 0 0,? ? 0,glare glare glare
+1b0490f058f9,hpwrenfire-cp-s-mobo-c-20260817-1436,0,1,ok,,,2,0 0,1 1,ok ok
+1b7e54eb04e9,hpwrenfire-pi-e-mobo-c-20260817-1456,0,1,ok,,,2,0 0,1 1,ok ok
+1bd4f8cd3839,hpwrenfire-rndmsa-n-mobo-c-20261004-1222,0,0,ok,,,2,0 0,0 0,ok ok
+1c17f4ca4cd9,hpwrenfire-sjh-w-mobo-c-20261016-1203,0,1,ok,,,2,0 0,1 1,ok ok
+1cbf2e9c468c,hpwrenfire-hp-s-mobo-c-20260731-1443,0,1,ok,,,2,0 0,1 1,ok ok
+1cce9aa978a7,hpwrenfire-wilson-n-mobo-c-20260901-1501,0,0,ok,,,2,0 0,0 0,ok ok
+1f44e2111c7d,hpwrenfire-cp-w-mobo-c-20260722-1319,,0,ok,,,2,1 ?,0 0,ok ok
+1fa416e7a6f9,hpwrenfire-69bravo-w-mobo-c-20261015-1651,0,0,glare,,,2,0 0,0 0,glare glare
+201b73e5f947,hpwrenfire-69bravo-e-mobo-c-20260902-1530,0,0,ok,,,2,0 0,0 0,ok ok
+202cbc62d7b0,hpwrenfire-69bravo-n-mobo-c-20261011-1227,,0,ok,,,2,? ?,0 0,ok ok
+20577f66cf75,hpwrenfire-rdmrc-w-mobo-c-20260814-1116,0,0,ok,,,2,0 0,0 0,ok ok
+20a49921e3e2,hpwrenfire-rndmsa-n-mobo-c-20260723-1355,0,1,ok,,,3,0 0 0,1 ? 1,ok ok ok
+21b55a05c218,hpwrenfire-marconi-n-mobo-c-20260905-1229,0,0,ok,,,2,0 0,0 0,ok ok
+238b76234b61,hpwrenfire-stgo-e-mobo-c-20261006-1029,0,0,ok,,,2,0 0,0 0,ok ok
+23bc6d196cec,hpwrenfire-buff-s-mobo-c-20261015-1445,0,1,ok,,,2,0 0,1 1,ok ok
+24c16b26fa76,hpwrenfire-marconi-n-mobo-c-20260825-1204,0,0,ok,,,2,0 0,0 0,ok ok
+257aa6d70149,hpwrenfire-smer-tcs8-mobo-c-20261006-1632,0,0,ok,,,3,0 0 0,0 0 0,glare ok ok
+26f517be3426,hpwrenfire-chino-n-mobo-c-20261015-1353,0,1,ok,,,2,0 0,1 1,ok ok
+27acf099c0f5,hpwrenfire-sedgwick-n-mobo-c-20260822-1207,0,0,ok,,,2,0 0,0 0,ok ok
+27e220b2b8ac,hpwrenfire-sm-e-mobo-c-20260807-1533,0,1,ok,,,2,0 0,1 1,ok ok
+2876e19f2e2e,hpwrenfire-dwpgm-w-mobo-c-20261015-1711,0,,glare,,,3,0 0 0,? ? 0,glare glare ok
+289754325630,hpwrenfire-wilson-s-mobo-c-20260914-1535,,,ok,,,3,? ? 0,0 ? ?,ok ok ok
+28a06f570131,hpwrenfire-marion-s-mobo-c-20260723-1037,0,0,ok,,,2,0 0,0 0,ok ok
+29a56f1c94eb,hpwrenfire-marconi-s-mobo-c-20261016-1218,0,1,ok,,,2,0 0,1 1,ok ok
+2a25ad9bc634,hpwrenfire-chino-n-mobo-c-20261015-1213,0,0,ok,,,2,0 0,0 0,ok ok
+2a2d6aa91d1a,hpwrenfire-blkrc-n-mobo-c-20260727-1612,0,0,ok,,,2,0 0,0 0,ok ok
+2a3e695c26dc,hpwrenfire-rdmrc-w-mobo-c-20261006-1029,0,0,ok,,,2,0 0,0 0,ok ok
+2a703e014b0c,hpwrenfire-buff-w-mobo-c-20261016-1358,,1,ok,,,3,? 0 ?,? 1 1,ok ok ok
+2aabfd9e5e32,hpwrenfire-wilson-w-mobo-c-20260808-1621,,,ok,,,3,? ? ?,1 ? ?,ok ok ok
+2ba6400cdcc3,hpwrenfire-chino-e-mobo-c-20260726-1459,0,1,ok,,,2,0 0,1 1,ok ok
+2bd053bf6cf9,hpwrenfire-smer-tcs3-mobo-c-20260824-1633,0,0,ok,,,2,0 0,0 0,ok ok
+2bf49fc76da8,hpwrenfire-chino-e-mobo-c-20260901-1416,0,0,ok,,,3,0 0 0,? 0 0,ok ok ok
+2c7eaef4bdae,hpwrenfire-cp-w-mobo-c-20260722-1459,,1,ok,,,2,1 ?,1 1,ok ok
+2e32be9c092c,hpwrenfire-marconi-n-mobo-c-20260726-1319,,0,ok,,,2,? 0,0 0,ok ok
+303091d05708,hpwrenfire-marconi-n-mobo-c-20260825-1344,0,,ok,,,3,0 0 0,? ? 1,ok ok ok
+306346d04290,hpwrenfire-cp-w-mobo-c-20260722-1519,0,1,ok,,,2,0 0,1 1,ok ok
+307ed73b8c08,hpwrenfire-marconi-s-mobo-c-20261016-1418,,1,ok,,,2,? 0,1 1,ok ok
+31a0b3b399fd,hpwrenfire-blkrc-w-mobo-c-20260824-1633,0,0,ok,,,2,0 0,0 0,ok ok
+31e585b79ba5,hpwrenfire-69bravo-e-mobo-c-20260808-1621,0,0,ok,,,2,0 0,0 0,ok ok
+3246b0196fff,hpwrenfire-chino-e-mobo-c-20260825-1404,0,0,ok,,,2,0 0,0 0,ok ok
+326f90e1e030,hpwrenfire-wilson-n-mobo-c-20260901-1521,0,0,ok,,,2,0 0,0 0,ok ok
+328ef9ee6530,hpwrenfire-69bravo-n-mobo-c-20261011-1427,,0,ok,,,2,? ?,0 0,ok ok
+331221f5a09f,hpwrenfire-starr-e-mobo-c-20260723-1215,0,0,ok,,,2,0 0,0 0,ok ok
+332c46916f23,hpwrenfire-dwpgm-w-mobo-c-20261015-1651,0,0,ok,,,3,0 0 0,0 0 0,glare ok ok
+3346673b3663,hpwrenfire-rdmrc-w-mobo-c-20260726-1558,,0,ok,,,2,0 ?,0 0,ok ok
+33bb83803783,hpwrenfire-bm-s-mobo-c-20260722-1519,0,1,ok,,,2,0 0,1 1,ok ok
+33fe18f62b65,hpwrenfire-sclm-s-mobo-c-20261016-1218,0,1,ok,,,2,0 0,1 1,ok ok
+34d32b1b0027,hpwrenfire-marconi-n-mobo-c-20260721-1202,0,0,ok,,,2,0 0,0 0,ok ok
+354474d4ba8e,hpwrenfire-mpo-n-mobo-c-20260814-1116,0,0,ok,,,2,0 0,0 0,ok ok
+359840ffc14d,hpwrenfire-marion-n-mobo-c-20260727-1612,0,0,ok,,,2,0 0,0 0,ok ok
+362391f55c7f,hpwrenfire-mg-n-mobo-c-20260731-1423,0,1,ok,,,2,0 0,1 1,ok ok
+3783d864bb0a,hpwrenfire-sojr-n-mobo-c-20260723-1037,0,0,ok,,,2,0 0,0 0,ok ok
+38c8fb61de3c,hpwrenfire-starr-s-mobo-c-20261016-1143,0,1,ok,,,2,0 0,1 1,ok ok
+395e9e80b7af,hpwrenfire-stgo-w-mobo-c-20260914-1515,,0,ok,,,2,? ?,0 0,ok ok
+3966b04c22c8,hpwrenfire-chino-e-mobo-c-20260825-1204,0,,ok,,,3,0 0 0,0 ? ?,ok ok ok
+398d1f27b515,hpwrenfire-69bravo-n-mobo-c-20260808-1620,,0,ok,,,2,1 ?,0 0,ok ok
+3a5bc46d7fb0,hpwrenfire-sjh-s-mobo-c-20261016-1218,0,1,ok,,,2,0 0,1 1,ok ok
+3ae531a78cdd,hpwrenfire-sclm-s-mobo-c-20261016-1418,0,1,ok,,,2,0 0,1 1,ok ok
+3b1f2e240f46,hpwrenfire-mpo-n-mobo-c-20260820-1236,0,1,ok,,,2,0 0,1 1,ok ok
+3b45e2720daa,hpwrenfire-starr-n-mobo-c-20260901-1216,0,0,ok,,,2,0 0,0 0,ok ok
+3cc7d81b821d,hpwrenfire-marconi-n-mobo-c-20260721-1342,0,0,ok,,,2,0 0,0 0,ok ok
+3e2faeac20aa,hpwrenfire-rm-n-mobo-c-20260726-1538,0,0,ok,,,2,0 0,0 0,ok ok
+3ee3ece47884,hpwrenfire-mpo-n-mobo-c-20260814-1316,0,1,ok,,,2,0 0,1 1,ok ok
+3feed72f70c3,hpwrenfire-wilson-n-mobo-c-20260731-1314,0,0,ok,,,2,0 0,0 0,ok ok
+41389660d9fa,hpwrenfire-wilson-w-mobo-c-20261011-1427,1,,ok,,,3,1 1 1,? 0 ?,ok ok ok
+414e070dff5e,hpwrenfire-stgo-e-mobo-c-20261006-1209,0,1,ok,,,2,0 0,1 1,ok ok
+421a0f300d7b,hpwrenfire-rndmsa-n-mobo-c-20260905-1049,0,0,ok,,,2,0 0,0 0,ok ok
+42656b971cc1,hpwrenfire-marconi-n-mobo-c-20260901-1416,0,0,ok,,,2,0 0,0 0,ok ok
+426cc7fa5d0e,hpwrenfire-chino-n-mobo-c-20260828-1430,0,0,ok,,,2,0 0,0 0,ok ok
+42ad7715b76a,hpwrenfire-mlo-s-mobo-c-20260817-1256,0,0,ok,,,2,0 0,0 0,ok ok
+43893925243e,hpwrenfire-chino-e-mobo-c-20260905-1249,0,,ok,,,3,0 0 0,? 1 ?,ok ok ok
+44b0bfb3d950,hpwrenfire-wilson-w-mobo-c-20260909-1717,,,ok,,,3,? ? ?,? ? ?,ok ok ok
+45ba852a9e11,hpwrenfire-chino-w-mobo-c-20260914-1335,0,0,ok,,,2,0 0,0 0,ok ok
+45c19dec4a3d,hpwrenfire-rdmrc-n-mobo-c-20260802-1650,0,1,ok,,,2,0 0,1 1,ok ok
+45c235a57672,hpwrenfire-wilson-e-mobo-c-20261015-1213,0,0,ok,,,2,0 0,0 0,ok ok
+46a9d509a59f,hpwrenfire-pi-w-mobo-c-20260807-1333,0,0,ok,,,2,0 0,0 0,ok ok
+47adbf662895,hpwrenfire-marion-n-mobo-c-20260727-1752,0,0,ok,,,2,0 0,0 0,ok ok
+48641c6b682a,hpwrenfire-wilson-e-mobo-c-20261015-1353,0,1,ok,,,2,0 0,1 1,ok ok
+492c1e6325a3,hpwrenfire-rdmrc-n-mobo-c-20261002-1643,0,0,ok,,,2,0 0,0 0,ok ok
+494b65af9dcb,hpwrenfire-marconi-n-mobo-c-20260905-1049,0,0,ok,,,2,0 0,0 0,ok ok
+49658dcba5f7,hpwrenfire-wilson-n-mobo-c-20260731-1114,0,0,ok,,,2,0 0,0 0,ok ok
+49e4210adfb7,hpwrenfire-rdmrc-n-mobo-c-20261002-1623,0,0,ok,,,2,0 0,0 0,ok ok
+4b10ead6f12a,hpwrenfire-stgo-e-mobo-c-20260723-1355,0,,ok,,,3,0 0 0,? ? ?,ok ok ok
+4b5f74ec16ac,hpwrenfire-sclm-n-mobo-c-20260902-1532,0,1,ok,,,2,0 0,1 1,ok ok
+4be77ec6e184,hpwrenfire-hp-s-mobo-c-20260731-1243,0,0,ok,,,2,0 0,0 0,ok ok
+4bef27f4211e,hpwrenfire-rndmsa-n-mobo-c-20260723-1215,0,0,ok,,,2,0 0,0 0,ok ok
+4bfa22228fba,hpwrenfire-wilson-e-mobo-c-20261015-1413,0,1,ok,,,2,0 0,1 1,ok ok
+4cd6da90776e,hpwrenfire-smer-tcs10-1-mobo-c-20260722-0825,0,0,ok,,,2,0 0,0 0,ok ok
+4d07657944a5,hpwrenfire-signal-n-mobo-c-20260914-1535,0,0,ok,,,2,0 0,0 0,ok ok
+4d8ba30656d7,hpwrenfire-rdmrc-w-mobo-c-20260824-1633,0,0,ok,,,2,0 0,0 0,ok ok
+4e4a786a80dd,hpwrenfire-cp-s-mobo-c-20260817-1456,0,1,ok,,,2,0 0,1 1,ok ok
+4e6dbd8c51a1,hpwrenfire-blkrc-w-mobo-c-20260802-1650,,1,ok,,,2,0 ?,1 1,ok ok
+4fdf72c9e978,hpwrenfire-sclm-n-mobo-c-20260902-1512,0,1,ok,,,2,0 0,1 1,ok ok
+510e3cdd237f,hpwrenfire-sjh-s-mobo-c-20261016-1418,0,1,ok,,,2,0 0,1 1,ok ok
+51ecc5d61b20,hpwrenfire-dwpgm-n-mobo-c-20260808-1800,0,,ok,,,3,0 0 0,? ? ?,ok ok ok
+53b96be3c49e,hpwrenfire-tdlln-n-mobo-c-20260816-1345,0,,ok,,,3,0 0 0,? ? ?,ok ok ok
+53bfd72924cc,hpwrenfire-rndmsa-n-mobo-c-20260723-1415,0,0,ok,,,2,0 0,0 0,ok ok
+5419f3c82ceb,hpwrenfire-stgo-e-mobo-c-20260721-1342,0,0,ok,,,2,0 0,0 0,ok ok
+549f5bf871ce,hpwrenfire-blkrc-w-mobo-c-20260831-1031,0,0,ok,,,2,0 0,0 0,ok ok
+55d4804650ae,hpwrenfire-stgo-e-mobo-c-20260905-1229,0,0,ok,,,2,0 0,0 0,ok ok
+56dcbecad822,hpwrenfire-blkrc-w-mobo-c-20260831-1231,0,1,ok,,,2,0 0,1 1,ok ok
+57b85109c0d5,hpwrenfire-chino-e-mobo-c-20260726-1319,0,0,ok,,,2,0 0,0 0,ok ok
+581b6f0f4bda,hpwrenfire-starr-n-mobo-c-20260726-1459,0,0,ok,,,2,0 0,0 0,ok ok
+58a9c1764410,hpwrenfire-stgo-e-mobo-c-20260825-1404,0,1,ok,,,3,0 0 0,1 ? 1,ok ok ok
+58cd1d282309,hpwrenfire-buff-w-mobo-c-20261016-1418,,1,ok,,,2,? ?,1 1,ok ok
+5a70675b453a,hpwrenfire-bh-w-mobo-c-20260722-1025,,1,ok,,,2,0 ?,1 1,ok ok
+5a7ba16ab8c8,hpwrenfire-rdmrc-e-mobo-c-20260723-1017,0,1,ok,,,2,0 0,1 1,ok ok
+5ad359754d1a,hpwrenfire-marconi-e-mobo-c-20260726-1538,0,0,ok,,,2,0 0,0 0,ok ok
+5c1434a33407,hpwrenfire-wilson-n-mobo-c-20260804-1338,0,0,ok,,,2,0 0,0 0,ok ok
+5c8cd0bab834,hpwrenfire-marconi-s-mobo-c-20261016-1358,0,1,ok,,,2,0 0,1 1,ok ok
+5c9a9a005d89,hpwrenfire-blkrc-s-mobo-c-20260814-1316,0,1,ok,,,2,0 0,1 1,ok ok
+5f6fae304322,hpwrenfire-hp-n-mobo-c-20260814-1316,0,1,ok,,,2,0 0,1 1,ok ok
+606ef3676b62,hpwrenfire-chino-e-mobo-c-20260726-1519,0,0,ok,,,2,0 0,0 0,ok ok
+61df230e7d79,hpwrenfire-sclm-n-mobo-c-20261016-1003,0,0,ok,,,2,0 0,0 0,ok ok
+624914776273,hpwrenfire-smer-tcs3-mobo-c-20260824-1833,0,0,ok,,,2,0 0,0 0,ok ok
+626960139f1b,hpwrenfire-signal-n-mobo-c-20260914-1515,0,0,ok,,,2,0 0,0 0,ok ok
+63242778a6d0,hpwrenfire-sclm-s-mobo-c-20261016-1358,0,1,ok,,,2,0 0,1 1,ok ok
+63877e8fe107,hpwrenfire-stgo-n-mobo-c-20260901-1416,0,0,ok,,,2,0 0,0 0,ok ok
+6396a2686548,hpwrenfire-rm-n-mobo-c-20260726-1358,0,0,ok,,,2,0 0,0 0,ok ok
+63cf23bb375f,hpwrenfire-cp-w-mobo-c-20260819-1549,,1,ok,,,2,? ?,1 1,ok ok
+6459afdbe16d,hpwrenfire-wilson-s-mobo-c-20260914-1335,0,0,ok,,,2,0 0,0 0,ok ok
+65501b482e54,hpwrenfire-bm-n-mobo-c-20260731-1243,0,0,ok,,,3,0 0 0,? 0 0,ok ok ok
+655d290800d6,hpwrenfire-sclm-e-mobo-c-20261015-1305,0,0,ok,,,2,0 0,0 0,ok ok
+659ad748c8e8,hpwrenfire-starr-n-mobo-c-20260901-1416,0,0,ok,,,2,0 0,0 0,ok ok
+65bb23982794,hpwrenfire-sedgwick-w-mobo-c-20260819-1817,,,glare,,,3,? ? ?,0 ? ?,glare glare glare
+6627b79e0a52,hpwrenfire-mp-s-mobo-c-20260817-1256,0,0,ok,,,2,0 0,0 0,ok ok
+668a712a97bf,hpwrenfire-smer-tcs9-s-mobo-c-20260722-1005,0,1,ok,,,2,0 0,1 1,ok ok
+6705c109e94f,hpwrenfire-bm-s-mobo-c-20260722-1459,0,1,ok,,,2,0 0,1 1,ok ok
+672ded151e99,hpwrenfire-dwpgm-n-mobo-c-20260808-1820,0,0,ok,,,2,0 0,0 0,ok ok
+68e5b069c867,hpwrenfire-lp-w-mobo-c-20260807-1513,0,1,ok,,,2,0 0,1 1,ok ok
+693256f8da36,hpwrenfire-69bravo-e-mobo-c-20260902-1730,0,0,ok,,,2,0 0,0 0,ok ok
+69aaa0efc8c0,hpwrenfire-chino-n-mobo-c-20261015-1413,0,1,ok,,,2,0 0,1 1,ok ok
+69f73ccbf1e8,hpwrenfire-om-n-mobo-c-20260807-1333,0,0,ok,,,2,0 0,0 0,ok ok
+6a7aea8f726c,hpwrenfire-chino-e-mobo-c-20261004-1422,0,1,ok,,,2,0 0,1 1,ok ok
+6b948a63e64e,hpwrenfire-mlo-s-mobo-c-20260817-1436,0,1,ok,,,2,0 0,1 1,ok ok
+6bbd627e2328,hpwrenfire-stgo-n-mobo-c-20260901-1216,0,0,ok,,,2,0 0,0 0,ok ok
+6cfb613a0a12,hpwrenfire-starr-s-mobo-c-20261016-1203,0,1,ok,,,2,0 0,1 1,ok ok
+6dad14973ab3,hpwrenfire-bh-w-mobo-c-20260722-1005,,1,ok,,,2,? 1,1 1,ok ok
+70a43de18662,hpwrenfire-marconi-n-mobo-c-20261004-1222,0,0,ok,,,2,0 0,0 0,ok ok
+722dffb28040,hpwrenfire-marion-w-mobo-c-20260802-1710,0,1,ok,,,2,0 0,1 1,ok ok
+72c8a8a8d45c,hpwrenfire-sclm-n-mobo-c-20260902-1332,0,0,ok,,,2,0 0,0 0,ok ok
+74d7d096db0f,hpwrenfire-chino-n-mobo-c-20260828-1450,0,0,ok,,,2,0 0,0 0,ok ok
+7730e74c7194,hpwrenfire-rndmsa-s-mobo-c-20261015-1505,0,1,ok,,,2,0 0,1 1,ok ok
+77ed8275533b,hpwrenfire-69bravo-e-mobo-c-20260902-1710,0,0,ok,,,2,0 0,0 0,ok ok
+78dc2ee1e23d,hpwrenfire-starr-s-mobo-c-20260902-1532,0,1,ok,,,2,0 0,1 1,ok ok
+78e5c069b96d,hpwrenfire-blkrc-s-mobo-c-20260814-1256,0,1,ok,,,2,0 0,1 1,ok ok
+7938594ee9f4,hpwrenfire-wilson-w-mobo-c-20261011-1407,1,,ok,,,3,1 1 1,? 0 ?,ok ok ok
+796720992c83,hpwrenfire-rndmsa-n-mobo-c-20260825-1404,0,,ok,,,3,0 0 0,? ? ?,ok ok ok
+7979588f4c39,hpwrenfire-marconi-n-mobo-c-20260723-1415,0,0,ok,,,2,0 0,0 0,ok ok
+79b72943c5d3,hpwrenfire-rdmrc-w-mobo-c-20260726-1358,0,0,ok,,,2,0 0,0 0,ok ok
+7a16fe040b4a,hpwrenfire-starr-s-mobo-c-20260902-1332,0,,ok,,,3,0 0 0,? ? ?,ok ok ok
+7b440cca9be8,hpwrenfire-blkrc-n-mobo-c-20260727-1812,0,,glare,,,3,0 0 0,0 ? ?,glare glare glare
+7bca86cfdaa6,hpwrenfire-dwpgm-e-mobo-c-20260902-1710,0,0,ok,,,2,0 0,0 0,ok ok
+7d16d12db576,hpwrenfire-rndmsa-n-mobo-c-20261006-1229,0,1,ok,,,2,0 0,1 1,ok ok
+7d72fc6b29b1,hpwrenfire-rndmsa-n-mobo-c-20260825-1344,0,,ok,,,3,0 0 0,? ? 1,ok ok ok
+818a8767db78,hpwrenfire-bm-n-mobo-c-20260731-1423,0,1,ok,,,2,0 0,1 1,ok ok
+825e2eaebcca,hpwrenfire-mpo-n-mobo-c-20260820-1036,0,0,ok,,,2,0 0,0 0,ok ok
+83d4ac207088,hpwrenfire-wilson-w-mobo-c-20261011-1227,1,,ok,,,3,1 1 1,? 0 ?,ok ok ok
+85bf354fc13d,hpwrenfire-stgo-n-mobo-c-20260726-1319,0,0,ok,,,2,0 0,0 0,ok ok
+8707eb2638d7,hpwrenfire-rdd-s-mobo-c-20260816-1545,0,0,ok,,,2,0 0,0 0,ok ok
+877e132b7f6e,hpwrenfire-pi-w-mobo-c-20260819-1529,,1,ok,,,2,0 ?,1 1,ok ok
+87c749ec429d,hpwrenfire-rdmrc-s-mobo-c-20260820-1236,0,1,ok,,,2,0 0,1 1,ok ok
+89d07286fee2,hpwrenfire-marconi-w-mobo-c-20261016-1203,0,1,ok,,,2,0 0,1 1,ok ok
+8ae8f2fee73f,hpwrenfire-pi-w-mobo-c-20260807-1513,,1,ok,,,3,? 0 0,? 1 1,ok ok ok
+8b35c72339ff,hpwrenfire-starr-n-mobo-c-20260726-1319,0,0,ok,,,2,0 0,0 0,ok ok
+8becf89e7ef0,hpwrenfire-stgo-e-mobo-c-20260723-1215,0,0,ok,,,2,0 0,0 0,ok ok
+8c2a157365e1,hpwrenfire-69bravo-w-mobo-c-20261015-1711,0,1,glare,,,2,0 0,1 1,glare glare
+8c2b59632ac5,hpwrenfire-marconi-w-mobo-c-20261016-1143,0,1,ok,,,2,0 0,1 1,ok ok
+8d64206864ac,hpwrenfire-mp-s-mobo-c-20260817-1456,0,1,ok,,,2,0 0,1 1,ok ok
+8dd7c95c0708,hpwrenfire-marconi-s-mobo-c-20261015-1505,0,1,ok,,,2,0 0,1 1,ok ok
+8de01c245dcf,hpwrenfire-marconi-n-mobo-c-20261004-1402,0,0,ok,,,2,0 0,0 0,ok ok
+8e005585c8c2,hpwrenfire-buff-s-mobo-c-20261015-1505,0,1,ok,,,2,0 0,1 1,ok ok
+8fe47c661efe,hpwrenfire-hp-s-mobo-c-20260731-1423,0,1,ok,,,2,0 0,1 1,ok ok
+90d28eb2f1b8,hpwrenfire-dwpgm-n-mobo-c-20260808-1332,0,0,ok,,,2,0 0,0 0,ok ok
+9286cb98f455,hpwrenfire-rdmrc-n-mobo-c-20260831-1231,0,0,ok,,,2,0 0,0 0,ok ok
+9379826c8797,hpwrenfire-starr-e-mobo-c-20260723-1355,0,,ok,,,3,0 0 0,0 ? ?,ok ok ok
+93941ffbd34c,hpwrenfire-mlo-s-mobo-c-20260817-1456,0,1,ok,,,2,0 0,1 1,ok ok
+93dfce13a721,hpwrenfire-smer-tcs10-1-mobo-c-20260722-1025,0,1,ok,,,2,0 0,1 1,ok ok
+9419b2671473,hpwrenfire-sjh-w-mobo-c-20261016-1003,0,0,ok,,,2,0 0,0 0,ok ok
+95ae42fff024,hpwrenfire-dwpgm-n-mobo-c-20260808-1312,0,0,ok,,,2,0 0,0 0,ok ok
+963d71d4fdb1,hpwrenfire-stgo-e-mobo-c-20260905-1249,0,,ok,,,3,0 0 0,? ? ?,ok ok ok
+96defac4bf78,hpwrenfire-rndmsa-n-mobo-c-20260721-1342,0,0,ok,,,2,0 0,0 0,ok ok
+9890a250325f,hpwrenfire-wilson-n-mobo-c-20260821-1522,0,0,ok,,,2,0 0,0 0,ok ok
+9911cab58bc9,hpwrenfire-mpo-n-mobo-c-20260820-1216,0,1,ok,,,2,0 0,1 1,ok ok
+99a4b86e43ba,hpwrenfire-rndmsa-n-mobo-c-20260721-1202,0,0,ok,,,2,0 0,0 0,ok ok
+9ab6aa3cb968,hpwrenfire-stgo-e-mobo-c-20261004-1422,0,1,ok,,,2,0 0,1 1,ok ok
+9afcb6954a28,hpwrenfire-ch-s-mobo-c-20260816-1345,0,0,ok,,,2,0 0,0 0,ok ok
+9b89cd8595c7,hpwrenfire-marion-s-mobo-c-20260723-0837,0,0,ok,,,2,0 0,0 0,ok ok
+9c8aa475f891,hpwrenfire-ms-n-mobo-c-20260816-1545,0,0,ok,,,2,0 0,0 0,ok ok
+9e36b06615e8,hpwrenfire-rndmsa-n-mobo-c-20260825-1204,0,0,ok,,,2,0 0,0 0,ok ok
+9ef787d6e1e7,hpwrenfire-cp-w-mobo-c-20260819-1349,0,0,ok,,,2,0 0,0 0,ok ok
+9f3c4ae6e099,hpwrenfire-marion-s-mobo-c-20260723-1017,0,,ok,,,3,0 0 0,1 0 ?,ok ok ok
+9fcd43b0ef3e,hpwrenfire-69bravo-e-mobo-c-20260808-1421,0,0,ok,,,2,0 0,0 0,ok ok
+9fcd57dde7fe,hpwrenfire-marconi-n-mobo-c-20260723-1215,0,0,ok,,,3,0 0 0,? 0 0,ok ok ok
+a02e2eb22060,hpwrenfire-wilson-n-mobo-c-20260804-1158,0,0,ok,,,2,0 0,0 0,ok ok
+a079dd161dd3,hpwrenfire-dwpgm-n-mobo-c-20261011-1407,,0,ok,,,2,? 0,0 0,ok ok
+a102b62e7775,hpwrenfire-hp-n-mobo-c-20260820-1236,0,1,ok,,,2,0 0,1 1,ok ok
+a112c9de4bc5,hpwrenfire-69bravo-e-mobo-c-20260808-1601,0,0,ok,,,2,0 0,0 0,ok ok
+a2fb6755fcce,hpwrenfire-lp-w-mobo-c-20260807-1333,0,0,ok,,,2,0 0,0 0,ok ok
+a31a22560ba6,hpwrenfire-blkrc-w-mobo-c-20261002-1643,0,,ok,,,3,0 0 0,? 1 ?,ok ok ok
+a3232c1301fa,hpwrenfire-rdmrc-w-mobo-c-20260824-1813,0,,glare,,,3,0 0 0,? ? 0,glare glare ok
+a3d25139d769,hpwrenfire-marconi-w-mobo-c-20260902-1512,0,1,ok,,,2,0 0,1 1,ok ok
+a48da95ffe17,hpwrenfire-chino-e-mobo-c-20260901-1356,0,1,ok,,,2,0 0,1 1,ok ok
+a4c56b9994c1,hpwrenfire-rndmsa-n-mobo-c-20261006-1209,0,1,ok,,,2,0 0,1 1,ok ok
+a4d622056676,hpwrenfire-starr-n-mobo-c-20260726-1519,0,0,ok,,,2,0 0,0 0,ok ok
+a658a40649f7,hpwrenfire-69bravo-n-mobo-c-20260808-1312,0,0,ok,,,2,0 0,0 0,ok ok
+a6ffdd9c00f7,hpwrenfire-bi-e-mobo-c-20260731-1443,0,1,ok,,,2,0 0,1 1,ok ok
+a7ec044c0d0d,hpwrenfire-mg-n-mobo-c-20260731-1443,0,1,ok,,,2,0 0,1 1,ok ok
+a94545517c2e,hpwrenfire-69bravo-w-mobo-c-20261015-1511,,0,ok,,,2,0 ?,0 0,ok ok
+a95fa854e94c,hpwrenfire-cp-s-mobo-c-20260817-1256,0,0,ok,,,2,0 0,0 0,ok ok
+ab20da3b67af,hpwrenfire-rdmrc-n-mobo-c-20260831-1031,0,0,ok,,,2,0 0,0 0,ok ok
+acf921236b07,hpwrenfire-rdmrc-n-mobo-c-20260831-1211,0,0,ok,,,2,0 0,0 0,ok ok
+ad0adb867611,hpwrenfire-pi-w-mobo-c-20260819-1549,,1,ok,,,2,0 ?,1 1,ok ok
+ad0db75f1c9f,hpwrenfire-stgo-e-mobo-c-20260723-1415,0,0,ok,,,3,0 0 0,? 0 0,ok ok ok
+ad986eeb13d3,hpwrenfire-wilson-n-mobo-c-20260804-1358,0,0,ok,,,2,0 0,0 0,ok ok
+ae58fa5c309c,hpwrenfire-sclm-n-mobo-c-20261016-1203,0,0,ok,,,3,0 0 0,0 ? 0,ok ok ok
+afb2275c92c9,hpwrenfire-wilson-w-mobo-c-20260909-1657,0,1,ok,,,2,0 0,1 1,ok ok
+b0145e23a29f,hpwrenfire-mg-s-mobo-c-20260722-1319,0,0,ok,,,2,0 0,0 0,ok ok
+b053d992415d,hpwrenfire-starr-s-mobo-c-20260902-1512,0,1,ok,,,2,0 0,1 1,ok ok
+b1c5e9019a3a,hpwrenfire-stgo-e-mobo-c-20261006-1229,0,1,ok,,,2,0 0,1 1,ok ok
+b1ec1e30f4ad,hpwrenfire-stgo-e-mobo-c-20260905-1049,0,0,ok,,,2,0 0,0 0,ok ok
+b2149d3e4022,hpwrenfire-buff-e-mobo-c-20261006-1632,0,0,ok,,,2,0 0,0 0,ok ok
+b449e43ef2cf,hpwrenfire-marconi-n-mobo-c-20260723-1355,0,0,ok,,,2,0 0,0 0,ok ok
+b4e5c3ff06ad,hpwrenfire-buff-s-mobo-c-20261015-1305,0,0,ok,,,2,0 0,0 0,ok ok
+b5011b05c926,hpwrenfire-sojr-n-mobo-c-20260723-1017,0,0,ok,,,2,0 0,0 0,ok ok
+b5fc8da98712,hpwrenfire-blkrc-w-mobo-c-20261006-1029,0,0,ok,,,2,0 0,0 0,ok ok
+b68f406970da,hpwrenfire-om-n-mobo-c-20260819-1549,0,1,ok,,,2,0 0,1 1,ok ok
+b76c11d3bc3b,hpwrenfire-blkrc-w-mobo-c-20260831-1211,0,1,ok,,,2,0 0,1 1,ok ok
+b7cce056bcf2,hpwrenfire-lp-n-mobo-c-20260819-1349,0,0,ok,,,2,0 0,0 0,ok ok
+b871baf6f967,hpwrenfire-mg-s-mobo-c-20260722-1459,0,1,ok,,,2,0 0,1 1,ok ok
+b8acfc5b09bc,hpwrenfire-lp-n-mobo-c-20260819-1529,0,1,ok,,,2,0 0,1 1,ok ok
+b8fc20a5ac7e,hpwrenfire-69bravo-n-mobo-c-20260808-1132,0,0,ok,,,2,0 0,0 0,ok ok
+ba81ce354b11,hpwrenfire-wilson-w-mobo-c-20260808-1421,0,0,ok,,,2,0 0,0 0,ok ok
+bad788ac8700,hpwrenfire-stgo-w-mobo-c-20260914-1335,0,0,ok,,,2,0 0,0 0,ok ok
+bb2e7c07f162,hpwrenfire-rm-n-mobo-c-20260726-1558,0,0,ok,,,2,0 0,0 0,ok ok
+bbfdd61eeff3,hpwrenfire-blkrc-w-mobo-c-20261002-1443,0,0,ok,,,2,0 0,0 0,ok ok
+bf4dd8cbfe57,hpwrenfire-chino-e-mobo-c-20260905-1049,0,0,ok,,,2,0 0,0 0,ok ok
+c00573694ee2,hpwrenfire-dwpgm-e-mobo-c-20260808-1621,0,0,ok,,,2,0 0,0 0,ok ok
+c16918ac76d5,hpwrenfire-om-n-mobo-c-20260807-1513,0,1,ok,,,2,0 0,1 1,ok ok
+c247fe7e3e46,hpwrenfire-stgo-e-mobo-c-20261004-1402,0,1,ok,,,2,0 0,1 1,ok ok
+c2f8540e8b78,hpwrenfire-rdmrc-w-mobo-c-20261006-1209,0,1,ok,,,2,0 0,1 1,ok ok
+c3a5cf28889c,hpwrenfire-pi-w-mobo-c-20260819-1349,0,0,ok,,,3,0 0 0,0 ? 0,ok ok ok
+c3dafebeb2a5,hpwrenfire-hp-n-mobo-c-20260820-1216,0,1,ok,,,2,0 0,1 1,ok ok
+c3de1545c15c,hpwrenfire-marconi-s-mobo-c-20261015-1445,0,1,ok,,,2,0 0,1 1,ok ok
+c49012cb7607,hpwrenfire-stgo-e-mobo-c-20260721-1202,0,0,ok,,,2,0 0,0 0,ok ok
+c5c276764c56,hpwrenfire-sclm-e-mobo-c-20261015-1505,0,1,ok,,,2,0 0,1 1,ok ok
+c6241fec8238,hpwrenfire-pi-e-mobo-c-20260817-1436,0,1,ok,,,2,0 0,1 1,ok ok
+c67940d51070,hpwrenfire-om-n-mobo-c-20260819-1349,0,0,ok,,,2,0 0,0 0,ok ok
+c759b7bff812,hpwrenfire-69bravo-n-mobo-c-20260808-1332,0,0,ok,,,2,0 0,0 0,ok ok
+c7c245833a89,hpwrenfire-hp-n-mobo-c-20260814-1256,0,1,ok,,,2,0 0,1 1,ok ok
+c8095f5004ce,hpwrenfire-chino-n-mobo-c-20260828-1250,0,0,ok,,,2,0 0,0 0,ok ok
+c86115fcbc47,hpwrenfire-rndmsa-n-mobo-c-20260905-1249,0,1,ok,,,2,0 0,1 1,ok ok
+c87eb863729c,hpwrenfire-rdmrc-w-mobo-c-20260824-1833,0,,glare,,,3,0 0 0,? ? ?,glare glare glare
+c8d8e91a5754,hpwrenfire-dwpgm-n-mobo-c-20260808-1132,0,0,ok,,,2,0 0,0 0,ok ok
+c90bcb9de61b,hpwrenfire-69bravo-n-mobo-c-20260808-1800,0,1,ok,,,2,0 0,1 1,ok ok
+c9105f15e01f,hpwrenfire-sclm-n-mobo-c-20261016-1143,0,0,ok,,,3,0 0 0,0 ? 0,ok ok ok
+c974d81bf5ae,hpwrenfire-wilson-s-mobo-c-20260914-1515,0,1,ok,,,3,0 0 0,1 ? 1,ok ok ok
+c9820102f7fe,hpwrenfire-hp-n-mobo-c-20260814-1116,0,0,ok,,,2,0 0,0 0,ok ok
+ca28ab2cb4ec,hpwrenfire-bi-e-mobo-c-20260731-1243,,,ok,,,3,? ? ?,? 0 ?,ok ok ok
+ca6e9447089e,hpwrenfire-stgo-n-mobo-c-20260726-1519,0,,ok,,,3,0 0 0,? 0 ?,ok ok ok
+ca932dad2ce7,hpwrenfire-starr-n-mobo-c-20260901-1356,0,0,ok,,,2,0 0,0 0,ok ok
+cae2c953f1c7,hpwrenfire-rndmsa-n-mobo-c-20261006-1029,0,0,ok,,,2,0 0,0 0,ok ok
+cdad9065e23c,hpwrenfire-marconi-s-mobo-c-20261015-1305,0,0,ok,,,2,0 0,0 0,ok ok
+cf0eb063309b,hpwrenfire-blkrc-w-mobo-c-20261006-1209,0,1,ok,,,2,0 0,1 1,ok ok
+cf37937dc500,hpwrenfire-wilson-n-mobo-c-20260821-1542,0,0,ok,,,2,0 0,0 0,ok ok
+cf4e7438d0c6,hpwrenfire-mp-s-mobo-c-20260817-1436,0,1,ok,,,2,0 0,1 1,ok ok
+cf7290d29a3d,hpwrenfire-chino-e-mobo-c-20260901-1216,0,0,ok,,,2,0 0,0 0,ok ok
+d00c8537415e,hpwrenfire-stgo-n-mobo-c-20260726-1459,0,1,ok,,,3,0 0 0,1 ? 1,ok ok ok
+d03f9d528f2e,hpwrenfire-lp-n-mobo-c-20260819-1549,0,1,ok,,,2,0 0,1 1,ok ok
+d041e43972fe,hpwrenfire-signal-n-mobo-c-20260914-1335,0,0,ok,,,2,0 0,0 0,ok ok
+d06a63b42d52,hpwrenfire-rdmrc-n-mobo-c-20260802-1510,0,0,ok,,,2,0 0,0 0,ok ok
+d08373ba84d4,hpwrenfire-rndmsa-e-mobo-c-20261006-1632,0,0,ok,,,2,0 0,0 0,ok ok
+d09fe50a5acd,hpwrenfire-dwpgm-e-mobo-c-20260808-1421,0,0,ok,,,2,0 0,0 0,ok ok
+d2099a2da2da,hpwrenfire-dwpgm-e-mobo-c-20260808-1601,0,0,ok,,,3,0 0 0,? 0 0,ok ok ok
+d44ce8beefe7,hpwrenfire-blkrc-w-mobo-c-20261006-1229,0,1,ok,,,2,0 0,1 1,ok ok
+d62801ab9e13,hpwrenfire-wilson-w-mobo-c-20260808-1620,0,,ok,,,3,0 0 0,? ? 1,ok ok ok
+d6688ed24080,hpwrenfire-ms-n-mobo-c-20260816-1345,0,0,ok,,,2,0 0,0 0,ok ok
+d740ca30e0c9,hpwrenfire-chino-e-mobo-c-20260905-1229,0,1,ok,,,2,0 0,1 1,ok ok
+d83b301ffdb1,hpwrenfire-bi-e-mobo-c-20260731-1423,0,1,ok,,,2,0 0,1 1,ok ok
+da4458b3c0f5,hpwrenfire-chino-e-mobo-c-20261004-1402,0,1,ok,,,2,0 0,1 1,ok ok
+da63d9edd418,hpwrenfire-tdlln-n-mobo-c-20260816-1525,0,1,ok,,,2,0 0,1 1,ok ok
+dab7ad7226d2,hpwrenfire-marconi-n-mobo-c-20260901-1356,0,0,ok,,,2,0 0,0 0,ok ok
+dbead988b04a,hpwrenfire-om-n-mobo-c-20260819-1529,0,1,ok,,,2,0 0,1 1,ok ok
+de9322483bf1,hpwrenfire-sedgwick-w-mobo-c-20260819-1757,,,glare,,,3,0 ? 0,0 ? ?,glare glare glare
+dea916a10271,hpwrenfire-rdmrc-w-mobo-c-20260814-1316,0,1,ok,,,2,0 0,1 1,ok ok
+df133f6c9c5c,hpwrenfire-bm-n-mobo-c-20260731-1443,0,1,ok,,,2,0 0,1 1,ok ok
+df907289dee1,hpwrenfire-blkrc-n-mobo-c-20260727-1752,0,,glare,,,3,0 0 0,0 ? ?,ok glare glare
+e081a2a25335,hpwrenfire-marconi-n-mobo-c-20260726-1519,0,0,ok,,,2,0 0,0 0,ok ok
+e1bc28413d89,hpwrenfire-wilson-w-mobo-c-20260808-1820,,0,glare,,,3,? ? 0,0 ? 0,glare glare ok
+e2ac1700f222,hpwrenfire-marconi-w-mobo-c-20260902-1332,0,0,ok,,,2,0 0,0 0,ok ok
+e377d6715b12,hpwrenfire-blkrc-s-mobo-c-20260814-1116,0,0,ok,,,2,0 0,0 0,ok ok
+e499c1d147e1,hpwrenfire-bh-n-mobo-c-20260820-1036,0,0,ok,,,2,0 0,0 0,ok ok
+e5fb3fe1b0e7,hpwrenfire-sedgwick-n-mobo-c-20260822-1027,0,0,ok,,,2,0 0,0 0,ok ok
+e6674733f50c,hpwrenfire-rm-e-mobo-c-20260722-1025,0,1,ok,,,2,0 0,1 1,ok ok
+e6aa601325ba,hpwrenfire-marion-n-mobo-c-20260727-1812,0,0,ok,,,2,0 0,0 0,ok ok
+e707de4e0f18,hpwrenfire-wilson-n-mobo-c-20260731-1254,0,0,ok,,,2,0 0,0 0,ok ok
+e74550807a03,hpwrenfire-sm-e-mobo-c-20260807-1513,0,1,ok,,,2,0 0,1 1,ok ok
+e7b8f59a6551,hpwrenfire-sm-e-mobo-c-20260807-1333,0,0,ok,,,2,0 0,0 0,ok ok
+e8da1fc720ec,hpwrenfire-rdmrc-w-mobo-c-20260814-1256,0,1,ok,,,2,0 0,1 1,ok ok
+ea7a80e86ead,hpwrenfire-sedgwick-n-mobo-c-20260822-1227,0,0,ok,,,2,0 0,0 0,ok ok
+eb29e4140ff6,hpwrenfire-rndmsa-n-mobo-c-20261004-1422,0,1,ok,,,2,0 0,1 1,ok ok
+edbb40c43082,hpwrenfire-bh-n-mobo-c-20260820-1216,0,1,ok,,,2,0 0,1 1,ok ok
+edc40d0f3cf6,hpwrenfire-starr-e-mobo-c-20260723-1415,0,0,ok,,,2,0 0,0 0,ok ok
+edea8f2cee77,hpwrenfire-rndmsa-n-mobo-c-20260905-1229,0,1,ok,,,2,0 0,1 1,ok ok
+ef1548cb3f71,hpwrenfire-rndmsa-n-mobo-c-20260721-1402,0,1,ok,,,2,0 0,1 1,ok ok
+ef1cb1f8961c,hpwrenfire-rdmrc-w-mobo-c-20261006-1229,0,,ok,,,3,0 0 0,? ? ?,ok ok ok
+ef22ec803eeb,hpwrenfire-bh-n-mobo-c-20260820-1236,0,1,ok,,,2,0 0,1 1,ok ok
+ef5d51d2005e,hpwrenfire-rdmrc-n-mobo-c-20260802-1710,0,1,ok,,,2,0 0,1 1,ok ok
+f0115e625796,hpwrenfire-blkrc-w-mobo-c-20260802-1510,0,0,ok,,,2,0 0,0 0,ok ok
+f0a4329d9b19,hpwrenfire-marconi-n-mobo-c-20260721-1402,0,0,ok,,,2,0 0,0 0,ok ok
+f109b5b1cab9,hpwrenfire-mg-n-mobo-c-20260731-1243,0,0,ok,,,2,0 0,0 0,ok ok
+f1c89e643a39,hpwrenfire-sjh-w-mobo-c-20261016-1143,0,1,ok,,,2,0 0,1 1,ok ok
+f2b41c9606cf,hpwrenfire-marconi-n-mobo-c-20260825-1404,0,,ok,,,3,0 0 0,? 0 ?,ok ok ok
+f2c5bef19196,hpwrenfire-rdd-s-mobo-c-20260816-1525,0,0,ok,,,2,0 0,0 0,ok ok
+f38dfcf5d087,hpwrenfire-starr-s-mobo-c-20261016-1003,0,0,ok,,,2,0 0,0 0,ok ok
+f3e5be1c4a68,hpwrenfire-rdmrc-e-mobo-c-20260723-1037,0,1,ok,,,2,0 0,1 1,ok ok
+f4093c805bf8,hpwrenfire-sjh-s-mobo-c-20261016-1358,,1,ok,,,2,? 0,1 1,ok ok
+f51f194affd0,hpwrenfire-rdmrc-e-mobo-c-20260723-0837,0,0,ok,,,2,0 0,0 0,ok ok
+f58b8e969ade,hpwrenfire-dwpgm-n-mobo-c-20261011-1427,0,0,ok,,,2,0 0,0 0,ok ok
+f5e0f35a116f,hpwrenfire-ch-s-mobo-c-20260816-1525,0,1,ok,,,2,0 0,1 1,ok ok
+f64c38e1302f,hpwrenfire-stgo-e-mobo-c-20260721-1402,0,,ok,,,3,0 0 0,1 ? 0,ok ok ok
+f6cb0c578dff,hpwrenfire-marconi-n-mobo-c-20260726-1459,0,0,obstructed,,,2,0 0,0 0,obstructed obstructed
+f6e255853fa1,hpwrenfire-marconi-w-mobo-c-20261016-1003,0,0,ok,,,2,0 0,0 0,ok ok
+f8b83639ab7b,hpwrenfire-wilson-w-mobo-c-20260909-1517,0,0,ok,,,2,0 0,0 0,ok ok
+f8d8e7805604,hpwrenfire-rdmrc-s-mobo-c-20260820-1216,0,1,ok,,,2,0 0,1 1,ok ok
+f93b97f12047,hpwrenfire-marconi-e-mobo-c-20260726-1358,0,0,ok,,,2,0 0,0 0,ok ok
+f9a2d64d5391,hpwrenfire-marconi-w-mobo-c-20260902-1532,0,1,ok,,,2,0 0,1 1,ok ok
+fa687ca968de,hpwrenfire-stgo-n-mobo-c-20260901-1356,0,0,ok,,,2,0 0,0 0,ok ok
+fb7aa248af6d,hpwrenfire-tdlln-n-mobo-c-20260816-1545,0,1,ok,,,2,0 0,1 1,ok ok
+fb7d59067e36,hpwrenfire-om-n-mobo-c-20260807-1533,0,1,ok,,,2,0 0,1 1,ok ok
+fb8280e12fa0,hpwrenfire-marconi-e-mobo-c-20260726-1558,0,0,ok,,,2,0 0,0 0,ok ok
+fbd096e219b0,hpwrenfire-chino-e-mobo-c-20260825-1344,0,1,ok,,,2,0 0,1 1,ok ok
+fc2193fb5e15,hpwrenfire-chino-w-mobo-c-20260914-1515,0,0,ok,,,3,0 0 0,0 ? 0,ok ok ok
+fc3b6b7b6513,hpwrenfire-marion-w-mobo-c-20260802-1650,0,1,ok,,,2,0 0,1 1,ok ok
+fc59b85b4cc1,hpwrenfire-blkrc-w-mobo-c-20260802-1710,,1,ok,,,2,? 0,1 1,ok ok
+fd43437dd021,hpwrenfire-bh-w-mobo-c-20260722-0825,,0,ok,,,2,1 ?,0 0,ok ok
+fdddb644cfe6,hpwrenfire-chino-e-mobo-c-20261004-1222,0,0,ok,,,2,0 0,0 0,ok ok
+fee78cf8b7ec,hpwrenfire-marconi-n-mobo-c-20261004-1422,0,1,ok,,,2,0 0,1 1,ok ok
+fee85e754f3c,hpwrenfire-ms-n-mobo-c-20260816-1525,0,0,ok,,,2,0 0,0 0,ok ok
+ffac00ce423c,hpwrenfire-pi-w-mobo-c-20260807-1533,0,1,ok,,,2,0 0,1 1,ok ok
