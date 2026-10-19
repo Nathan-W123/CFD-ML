@@ -1,0 +1,414 @@
+{
+  "artifacts": "artifacts_far",
+  "features": "data/real/hpwren_fog/features.npz",
+  "labels": {
+    "agreement": {
+      "fog": {
+        "": 61,
+        "0": 144,
+        "1": 152
+      },
+      "quality_ok": 305,
+      "rounds_1_2": {
+        "both_definite": 276,
+        "fog_agreement": 0.9927536231884058,
+        "fog_cohen_kappa": 0.9855064853226907,
+        "sheets": 357
+      },
+      "sheets": 357,
+      "smoke": {
+        "": 16,
+        "0": 341,
+        "1": 0
+      }
+    },
+    "fog": {
+      "0": 144,
+      "1": 152,
+      "unknown": 61
+    },
+    "fog_extent": {
+      "large": 45,
+      "medium": 27,
+      "small": 80
+    },
+    "fog_type": {
+      "bank": 4,
+      "below": 100,
+      "enveloping": 38,
+      "low_cloud_on_terrain": 9,
+      "patches": 1
+    },
+    "metar_vs_visual": {
+      "clear->0": 123,
+      "clear->1": 20,
+      "clear->unknown": 35,
+      "fog->0": 21,
+      "fog->1": 132,
+      "fog->unknown": 26
+    },
+    "quality": {
+      "glare": 47,
+      "obstructed": 5,
+      "ok": 305
+    },
+    "smoke": {
+      "0": 341,
+      "unknown": 16
+    },
+    "windows_labelled": 357
+  },
+  "not_a_deployment_estimate": true,
+  "smoke_vs_fog_cross_set": {
+    "all": {
+      "auroc_smoke_figlib_smoke_vs_hpwren_clear": 0.4565678148639567,
+      "auroc_smoke_figlib_smoke_vs_hpwren_fog": 0.5534437302913859,
+      "n_figlib_smoke": 443,
+      "n_hpwren_clear": 131,
+      "n_hpwren_fog": 131,
+      "p_smoke_median_figlib_smoke": 0.5331869750273592
+    },
+    "confounded": true,
+    "test_iid": {
+      "auroc_smoke_figlib_smoke_vs_hpwren_clear": 0.46374458874458874,
+      "auroc_smoke_figlib_smoke_vs_hpwren_fog": 0.5573593073593074,
+      "n_figlib_smoke": 88,
+      "n_hpwren_clear": 21,
+      "n_hpwren_fog": 21,
+      "p_smoke_median_figlib_smoke": 0.5458150305271758
+    }
+  },
+  "status": "zero_shot_real_fog",
+  "subsets": {
+    "all": {
+      "auroc_ci": {
+        "fog": {
+          "hi": 0.4318277461344674,
+          "lo": 0.27942020850737953,
+          "n_valid": 1000
+        },
+        "smoke_fog_vs_clear": {
+          "hi": 0.4586072564203093,
+          "lo": 0.30601293331595886,
+          "n_valid": 1000
+        }
+      },
+      "auroc_fog": 0.352252199755259,
+      "auroc_fog_seeds": {
+        "mean": 0.3863022745372258,
+        "sd": 0.029541740621936378,
+        "values": [
+          0.4015500262222481,
+          0.352252199755259,
+          0.4051045976341705
+        ]
+      },
+      "auroc_smoke_fog_vs_clear": 0.3822038342753919,
+      "by_fog_type": {
+        "bank": {
+          "auroc_vs_clear": 0.2099236641221374,
+          "fog_yes_balanced": 1,
+          "n": 4,
+          "p_fog_median": 0.37958831171158774,
+          "smoke_yes_balanced": 1,
+          "valid_input": 0.5
+        },
+        "below": {
+          "auroc_vs_clear": 0.4538686268966167,
+          "fog_yes_balanced": 25,
+          "n": 81,
+          "p_fog_median": 0.5132116998068709,
+          "smoke_yes_balanced": 14,
+          "valid_input": 0.43209876543209874
+        },
+        "enveloping": {
+          "auroc_vs_clear": 0.07273112807463952,
+          "fog_yes_balanced": 1,
+          "n": 36,
+          "p_fog_median": 0.3178146829201251,
+          "smoke_yes_balanced": 1,
+          "valid_input": 0.16666666666666666
+        },
+        "low_cloud_on_terrain": {
+          "auroc_vs_clear": 0.6530958439355385,
+          "fog_yes_balanced": 6,
+          "n": 9,
+          "p_fog_median": 0.5550012362079737,
+          "smoke_yes_balanced": 3,
+          "valid_input": 0.6666666666666666
+        },
+        "patches": {
+          "auroc_vs_clear": 0.04580152671755725,
+          "fog_yes_balanced": 0,
+          "n": 1,
+          "p_fog_median": 0.3684086493177038,
+          "smoke_yes_balanced": 0,
+          "valid_input": 1.0
+        }
+      },
+      "cameras": 88,
+      "n": 262,
+      "n_clear": 131,
+      "n_fog": 131,
+      "ops": {
+        "balanced": {
+          "clear": {
+            "abstain_reasons": {
+              "few_valid_flow_frames": 57,
+              "few_valid_mask_frames": 1,
+              "fog_near_threshold": 18,
+              "smoke_near_threshold": 42
+            },
+            "fog": {
+              "abstain": 75,
+              "no": 0,
+              "yes": 56
+            },
+            "n": 131,
+            "smoke": {
+              "abstain": 99,
+              "no": 8,
+              "yes": 24
+            }
+          },
+          "false_smoke_on_clear": 0.183206106870229,
+          "false_smoke_on_fog": 0.1450381679389313,
+          "false_smoke_on_fog_decided": 0.6551724137931034,
+          "fog": {
+            "abstain_reasons": {
+              "few_valid_flow_frames": 81,
+              "few_valid_mask_frames": 20,
+              "fog_near_threshold": 14,
+              "smoke_near_threshold": 21
+            },
+            "fog": {
+              "abstain": 95,
+              "no": 3,
+              "yes": 33
+            },
+            "n": 131,
+            "smoke": {
+              "abstain": 102,
+              "no": 10,
+              "yes": 19
+            }
+          },
+          "fog_false_alarm_decided": 1.0,
+          "fog_recall_decided": 0.9166666666666666
+        },
+        "low_false_alarm": {
+          "clear": {
+            "abstain_reasons": {
+              "few_valid_flow_frames": 57,
+              "few_valid_mask_frames": 1,
+              "fog_near_threshold": 18,
+              "smoke_near_threshold": 34
+            },
+            "fog": {
+              "abstain": 75,
+              "no": 0,
+              "yes": 56
+            },
+            "n": 131,
+            "smoke": {
+              "abstain": 91,
+              "no": 40,
+              "yes": 0
+            }
+          },
+          "false_smoke_on_clear": 0.0,
+          "false_smoke_on_fog": 0.0,
+          "false_smoke_on_fog_decided": 0.0,
+          "fog": {
+            "abstain_reasons": {
+              "few_valid_flow_frames": 81,
+              "few_valid_mask_frames": 20,
+              "fog_near_threshold": 14,
+              "smoke_near_threshold": 28
+            },
+            "fog": {
+              "abstain": 95,
+              "no": 3,
+              "yes": 33
+            },
+            "n": 131,
+            "smoke": {
+              "abstain": 109,
+              "no": 22,
+              "yes": 0
+            }
+          },
+          "fog_false_alarm_decided": 1.0,
+          "fog_recall_decided": 0.9166666666666666
+        }
+      },
+      "p_fog_median": {
+        "clear": 0.5296099733932111,
+        "fog": 0.4753176741832748
+      },
+      "p_smoke_median": {
+        "clear": 0.5309244375394818,
+        "fog": 0.5009743006821937
+      },
+      "valid_input": {
+        "clear": 0.5648854961832062,
+        "fog": 0.3816793893129771
+      }
+    },
+    "test_iid": {
+      "auroc_ci": {
+        "fog": {
+          "hi": 0.6235320855614973,
+          "lo": 0.24055137844611527,
+          "n_valid": 1000
+        },
+        "smoke_fog_vs_clear": {
+          "hi": 0.5531919642857143,
+          "lo": 0.20737956487956488,
+          "n_valid": 1000
+        }
+      },
+      "auroc_fog": 0.4331065759637188,
+      "auroc_fog_seeds": {
+        "mean": 0.436885865457294,
+        "sd": 0.017318880177459705,
+        "values": [
+          0.4217687074829932,
+          0.4331065759637188,
+          0.4557823129251701
+        ]
+      },
+      "auroc_smoke_fog_vs_clear": 0.3900226757369615,
+      "by_fog_type": {
+        "below": {
+          "auroc_vs_clear": 0.5850340136054422,
+          "fog_yes_balanced": 4,
+          "n": 7,
+          "p_fog_median": 0.5358375534410345,
+          "smoke_yes_balanced": 3,
+          "valid_input": 0.5714285714285714
+        },
+        "enveloping": {
+          "auroc_vs_clear": 0.02976190476190476,
+          "fog_yes_balanced": 0,
+          "n": 8,
+          "p_fog_median": 0.3306806607806889,
+          "smoke_yes_balanced": 0,
+          "valid_input": 0.125
+        },
+        "low_cloud_on_terrain": {
+          "auroc_vs_clear": 0.7936507936507936,
+          "fog_yes_balanced": 5,
+          "n": 6,
+          "p_fog_median": 0.5760824579199656,
+          "smoke_yes_balanced": 2,
+          "valid_input": 0.8333333333333334
+        }
+      },
+      "cameras": 16,
+      "n": 42,
+      "n_clear": 21,
+      "n_fog": 21,
+      "ops": {
+        "balanced": {
+          "clear": {
+            "abstain_reasons": {
+              "few_valid_flow_frames": 12,
+              "fog_near_threshold": 1,
+              "smoke_near_threshold": 5
+            },
+            "fog": {
+              "abstain": 13,
+              "no": 0,
+              "yes": 8
+            },
+            "n": 21,
+            "smoke": {
+              "abstain": 17,
+              "no": 1,
+              "yes": 3
+            }
+          },
+          "false_smoke_on_clear": 0.14285714285714285,
+          "false_smoke_on_fog": 0.23809523809523808,
+          "false_smoke_on_fog_decided": 0.8333333333333334,
+          "fog": {
+            "abstain_reasons": {
+              "few_valid_flow_frames": 11,
+              "few_valid_mask_frames": 3,
+              "smoke_near_threshold": 4
+            },
+            "fog": {
+              "abstain": 11,
+              "no": 1,
+              "yes": 9
+            },
+            "n": 21,
+            "smoke": {
+              "abstain": 15,
+              "no": 1,
+              "yes": 5
+            }
+          },
+          "fog_false_alarm_decided": 1.0,
+          "fog_recall_decided": 0.9
+        },
+        "low_false_alarm": {
+          "clear": {
+            "abstain_reasons": {
+              "few_valid_flow_frames": 12,
+              "fog_near_threshold": 1,
+              "smoke_near_threshold": 5
+            },
+            "fog": {
+              "abstain": 13,
+              "no": 0,
+              "yes": 8
+            },
+            "n": 21,
+            "smoke": {
+              "abstain": 17,
+              "no": 4,
+              "yes": 0
+            }
+          },
+          "false_smoke_on_clear": 0.0,
+          "false_smoke_on_fog": 0.0,
+          "false_smoke_on_fog_decided": 0.0,
+          "fog": {
+            "abstain_reasons": {
+              "few_valid_flow_frames": 11,
+              "few_valid_mask_frames": 3,
+              "smoke_near_threshold": 7
+            },
+            "fog": {
+              "abstain": 11,
+              "no": 1,
+              "yes": 9
+            },
+            "n": 21,
+            "smoke": {
+              "abstain": 18,
+              "no": 3,
+              "yes": 0
+            }
+          },
+          "fog_false_alarm_decided": 1.0,
+          "fog_recall_decided": 0.9
+        }
+      },
+      "p_fog_median": {
+        "clear": 0.5144795525159435,
+        "fog": 0.4885389723937487
+      },
+      "p_smoke_median": {
+        "clear": 0.524514478509597,
+        "fog": 0.513949480369536
+      },
+      "valid_input": {
+        "clear": 0.42857142857142855,
+        "fog": 0.47619047619047616
+      }
+    }
+  }
+}

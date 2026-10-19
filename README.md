@@ -6,10 +6,10 @@ and look-alikes, and producing a 16-dimensional motion embedding for a
 multimodal wildfire detector. Two camera profiles: near field (a 320 m
 scene, frames 5 s apart with 1 s lag pairs, for surveillance video) and far
 field (a 3.2 km scene, one frame per minute, for wildfire camera networks
-such as HPWREN and AlertWildfire). Pretrained on synthetic data only; on
-real one-frame-per-minute wildfire camera footage (HPWREN FIgLib, smoke
-labels only) it separates smoke from smoke-free windows only weakly
-(AUROC 0.61).**
+such as HPWREN and AlertWildfire). Pretrained on synthetic data only. On
+real one-frame-per-minute wildfire camera footage it separates smoke from
+smoke-free windows only weakly (AUROC 0.61), and it does not recognise real
+fog: real fog windows score lower on fog than clear mornings (AUROC 0.35).**
 
 The physics expert is one of four parts of a larger system (vision, physics,
 weather, fusion). It sees only motion features measured from camera frames:
@@ -18,18 +18,25 @@ how stable the region's base is. It never sees the simulated velocity,
 pressure or concentration fields; the simulator only renders camera-like
 frames, and real footage goes through the same feature extractor.
 
-> **Status: synthetic pretraining, one partial real-data test.** The
-> far-field model was tested on real wildfire camera footage (HPWREN FIgLib,
-> 880 windows from 137 cameras) for smoke only, because FIgLib does not
-> annotate fog. Zero-shot on cameras it has never seen it reaches smoke
-> AUROC 0.61 ± 0.02 (three seeds), slightly above what it reaches on its
-> own synthetic test sets (0.56 ± 0.01 on test_iid, 0.59 ± 0.01 on
-> test_ood). Training the same network on the real footage, from
-> scratch or by fine-tuning the pretrained model, does no better, and the
-> synthetic thresholds do not transfer. The near-field model has only a
-> five-window sanity check on real video. No labelled real footage with fog
-> was available, so nothing here shows that the model reduces fog false
-> alarms on real cameras.
+> **Status: tested on real footage; the CFD-pretrained physics does not
+> transfer to real fog.** The far-field model was tested on real wildfire
+> camera footage at its timing (one frame per minute):
+>
+> * **Smoke, HPWREN FIgLib** (880 windows, 137 cameras): smoke AUROC
+>   0.61 ± 0.02 zero-shot on unseen cameras (three seeds). That is slightly
+>   above its synthetic test sets (0.56 ± 0.01 on test_iid, 0.59 ± 0.01 on
+>   test_ood).
+> * **Fog, HPWREN archive** (262 labelled 2026 mornings, 88 cameras): built
+>   for this project, because no public footage at this timing carries fog
+>   labels. The model does not recognise real fog: fog AUROC 0.35
+>   [0.28, 0.43], below chance. Fog does not raise its smoke score: smoke
+>   alarms come on 15 % of fog windows and 18 % of clear ones (balanced
+>   point), and on none of either at the low-false-alarm default.
+>
+> Training on the real footage from scratch learns fog better (AUROC
+> 0.59 ± 0.15) than the pretrained model, fine-tuned or not. The near-field
+> model has only a five-window sanity check on real video. The fog labels
+> come from AI vision labellers, not people.
 
 ## Results (engine v2)
 
@@ -37,7 +44,8 @@ Full reports: near field [`reports/results.md`](reports/results.md) (from
 [`reports/evaluation.json`](reports/evaluation.json)); far field
 [`reports/far/results.md`](reports/far/results.md) (from
 [`reports/far/evaluation.json`](reports/far/evaluation.json), including the
-FIgLib Stage B section). Data QA, CFD-oracle diagnostics, image statistics,
+real-footage Stage B section); the real fog test in
+[`reports/far/real_fog_hpwren.md`](reports/far/real_fog_hpwren.md). Data QA, CFD-oracle diagnostics, image statistics,
 zero-shot reports and benchmarks sit next to them; figures in
 `reports/figures/` and `reports/figures_far/`; the engine v1 reports are
 archived in [`reports/v1/`](reports/v1). Single numbers are for the exported
@@ -48,8 +56,10 @@ training seeds.
 ### Real footage
 
 **HPWREN FIgLib, far field, smoke only**
-([`reports/far/results.md`](reports/far/results.md#real-footage-stage-b-test_iid-split-camera-disjoint),
+([`reports/far/stage_b_figlib_only.json`](reports/far/stage_b_figlib_only.json),
 [`reports/far/real_zero_shot_figlib.md`](reports/far/real_zero_shot_figlib.md)).
+The table below is the Stage B run on FIgLib alone. `evaluation.json` now
+holds the combined FIgLib + HPWREN fog run (below).
 Imagery courtesy of HPWREN (https://www.hpwren.ucsd.edu/). 229 fire
 sequences from 137 cameras, one frame per minute. Each sequence gives up
 to two 12-frame windows entirely before the first visible plume (smoke 0)
@@ -77,10 +87,11 @@ built-in fallback detector, as there is no vision model yet.
   raises no false alarm (0 of 117) and finds 3 of 129. It abstains on
   78 % of the windows: 43 % have fewer than two valid flow frames and 23 %
   fewer than three valid masks.
-* **No real low-false-alarm point.** B and D recalibrate on the real
-  `val_calib` split, but without fog labels there are no fog_only clips to
-  fit the low-false-alarm threshold on, so it equals the balanced one. This
-  is recorded in their `model_config.yaml` and in the report.
+* **No real low-false-alarm point from FIgLib alone.** B and D recalibrate
+  on the real `val_calib` split, but without fog labels there are no
+  fog_only clips to fit the low-false-alarm threshold on, so it equals the
+  balanced one. This is recorded in their `model_config.yaml` and in the
+  report. Adding the HPWREN fog windows (below) fixes this.
 * **Why so little.** Single motion features carry little on FIgLib: the
   best univariate smoke AUROC is 0.57 (vorticity, flow spread, mask
   validity). Smoke at ignition is small and distant, and the smoke-free
@@ -89,6 +100,86 @@ built-in fallback detector, as there is no vision model yet.
 * **The stretch fix holds up on real data.** The model trained before
   the far-field stretch fix (below) does no better on FIgLib: 0.593 against
   0.609 on the test cameras (three-seed means).
+
+**HPWREN fog, far field: the real fog test**
+([`reports/far/real_fog_hpwren.md`](reports/far/real_fog_hpwren.md),
+[`reports/far/real_fog_hpwren_boxes.md`](reports/far/real_fog_hpwren_boxes.md);
+built with [`scripts/prepare_hpwren_fog.py`](scripts/prepare_hpwren_fog.py)).
+No public footage at one frame per minute carries fog labels, so this set
+was built from the HPWREN camera archive, which keeps every frame for about
+three months.
+
+* **Candidates.** Airport METARs proposed 400 morning windows from
+  20 July to 18 October 2026: 200 fog mornings (an airport inside the
+  camera's view reported fog, low visibility or a ceiling at or below
+  1000 ft) and 200 clear mornings at the same cameras and times.
+* **Labels.** The 357 windows that downloaded were labelled from the frames:
+  blind contact sheets with the camera banner blanked, two independent votes
+  per sheet and a third on 91 sheets. The first two votes agree on fog for
+  99 % of the sheets both decided (Cohen's kappa 0.99). The labellers are
+  AI vision runs of one model, so this measures consistency, not verified
+  accuracy; a human spot check is still to do. The METARs are a rough
+  proxy: 74 % of fog candidates show visible fog and 11 % of clear ones do.
+* **Usable set.** 262 windows (131 fog, 131 clear, 88 cameras; 21 + 21 on
+  the test cameras). The rest had sun glare, an archive placeholder, or an
+  undecided label. No window shows smoke. The fog is mostly a fog or
+  stratus sea below the camera (100 of 152), the camera inside fog (38), or
+  low cloud on ridges (9).
+
+| zero-shot, all 262 windows | fog AUROC | smoke alarms on fog windows / on clear windows (balanced) | at the low-false-alarm default |
+|---|---|---|---|
+| built-in fallback masks | 0.35 [0.28, 0.43] (seeds 0.39 ± 0.03) | 19 / 131 (15 %), 24 / 131 (18 %) | 0 and 0 (22 and 40 decided) |
+| boxes around the fog or look-alike | 0.27 [0.20, 0.34] (seeds 0.27 ± 0.04) | 78 / 127 (61 %), 83 / 126 (66 %) | 0 on fog; abstains on 125 of 127 |
+
+* **The model does not recognise real fog.** It ranks fog windows below
+  clear ones. On the windows it decides, its fog head says "fog" almost
+  everywhere: 33 of 36 fog windows and 56 of 56 clear ones.
+* **It abstains on the camera inside fog.** Only 17 % of those windows have
+  valid input, and the median P(fog) there is 0.32.
+* **Fog does not trigger smoke alarms more than clear mornings do.** The
+  smoke score is, if anything, lower on fog (AUROC 0.38 of P(smoke) for fog
+  against clear). At the default low-false-alarm point no window raises a
+  smoke alarm.
+* **Why built-in masks miss fog.** The fallback detector finds change against
+  the window's median frame, so a fog sea lying still for 11 minutes is
+  never a candidate. Valid input is 38 % on fog windows against 56 % on
+  clear ones.
+* **Boxes give the model the fog region, and it fails differently.** With a
+  box around the fog (or, on clear mornings, around the most fog- or
+  smoke-like region), every region scores about 0.64 for fog and 0.62 for
+  smoke whatever it contains.
+* **The physics runs backwards.** Region area points the right way (fog
+  boxes are larger, AUROC 0.76), but boundary roughness (0.23) and anchor
+  stability (0.14) run opposite to simulated fog (0.61 and 0.58). Real fog
+  seas lie still; the simulated fog banks form, advect and dissipate. Part
+  of this is how the boxes were drawn (four per window, interpolated), so
+  the box test is not clean either.
+* **Smoke against fog across datasets.** P(smoke) ranks FIgLib smoke windows
+  above HPWREN fog windows with AUROC 0.55 (built-in masks). The two sets
+  differ in year and time of day, so this is only indicative.
+
+**Stage B with real smoke and real fog**
+([`reports/far/results.md`](reports/far/results.md#real-footage-stage-b-test_iid-split-camera-disjoint)).
+FIgLib (smoke labels) and the HPWREN fog set (fog labels) were merged,
+camera-disjoint by mount, with built-in masks. Training, calibration and
+thresholds use the real splits. The test cameras give 213 windows from 41
+cameras: 212 with a smoke label and 42 with a fog label (21 fog, 21 clear).
+
+| test cameras | smoke AUROC | fog AUROC | false smoke on the 21 fog windows, low-false-alarm point |
+|---|---|---|---|
+| C: CFD-pretrained, zero-shot | 0.57 [0.51, 0.64] (seeds 0.570 ± 0.012) | 0.43 [0.25, 0.63] (0.437 ± 0.017) | 2 / 21 |
+| B: same network, real data only | 0.61 [0.53, 0.69] (0.590 ± 0.020) | 0.76 [0.60, 0.90] (0.587 ± 0.152) | 0 / 21 |
+| D: C fine-tuned on real data (lr 1e-4) | 0.55 [0.48, 0.63] (0.551 ± 0.002) | 0.44 [0.24, 0.66] (0.422 ± 0.020) | 1 / 21 |
+
+* **The real low-false-alarm threshold now exists.** It is fitted on the
+  real `val_calib` fog windows, but there are only 14 of them, and the test
+  has 21: these rates are very uncertain.
+* **Pretraining does not help on real fog.** Training from scratch on about
+  600 real training windows learns fog better than the CFD-pretrained model, but
+  unstably across seeds. Fine-tuning at the planned learning rate barely
+  moves the pretrained model.
+* **The models mostly abstain.** B and D, recalibrated on real data, abstain
+  on 81-100 % of the test windows for smoke, at either operating point.
 
 **FIRESENSE, near field**
 ([`reports/real_zero_shot_firesense.md`](reports/real_zero_shot_firesense.md)).
@@ -603,11 +694,43 @@ the timing from the profile instead of `--artifacts`.
 downloaded by a registered user (labels in
 `configs/real/mivia_smoke_labels.csv`).
 
+The HPWREN fog set (far field). The archive keeps about three months, so the
+same windows can only be downloaded while they are retained. The window
+list with its METAR evidence, the votes, the labels and the boxes are kept
+in `configs/real/`:
+
+```bash
+python scripts/prepare_hpwren_fog.py select --out data/real/hpwren_fog --start 2026-07-20 --end 2026-10-18 \
+    --n-fog 200 --n-clear 200
+python scripts/prepare_hpwren_fog.py download --out data/real/hpwren_fog     # 12 frames per window + blind sheets
+# blind labelling of data/real/hpwren_fog/_sheets/ with configs/real/hpwren_fog_labeling_guide.md
+#   -> configs/real/hpwren_fog_votes.csv (two votes per sheet, a third where they disagree)
+python scripts/prepare_hpwren_fog.py consolidate --out data/real/hpwren_fog \
+    --votes configs/real/hpwren_fog_votes.csv --labels configs/real/hpwren_fog_labels.csv
+python scripts/prepare_hpwren_fog.py manifest --out data/real/hpwren_fog --labels configs/real/hpwren_fog_labels.csv
+python scripts/extract_features.py --real-manifest data/real/hpwren_fog/real.csv --artifacts artifacts_far \
+    --out data/real/hpwren_fog/features.npz
+python scripts/report_real_fog.py --features data/real/hpwren_fog/features.npz --hpwren-dir data/real/hpwren_fog \
+    --labels configs/real/hpwren_fog_labels.csv --artifacts artifacts_far --figlib data/real/figlib/features.npz \
+    --out reports/far/real_fog_hpwren.json
+# region level: boxes drawn on grid sheets (configs/real/hpwren_fog_boxes.csv), kept where the box target
+# matches the label (fog box on a fog window, look-alike box on a clear one), turned into per-frame masks
+python scripts/region_boxes.py sheets --manifest data/real/hpwren_fog/real.csv --artifacts artifacts_far \
+    --out data/real/boxes/sheets
+python scripts/region_boxes.py masks --manifest data/real/hpwren_fog/real.csv --sheets-dir data/real/boxes/sheets \
+    --boxes data/real/hpwren_fog/boxes_consistent.csv --out-manifest data/real/hpwren_fog/real_boxes.csv
+python scripts/extract_features.py --real-manifest data/real/hpwren_fog/real_boxes.csv --artifacts artifacts_far \
+    --out data/real/hpwren_fog/features_boxes.npz
+python scripts/report_real_fog.py --features data/real/hpwren_fog/features_boxes.npz ... \
+    --out reports/far/real_fog_hpwren_boxes.json
+```
+
 ### Stage B, real footage
 
-Run for the far-field model on FIgLib, smoke only (results above;
-`reports/far/evaluation.json` has `"real": {"status": "partial"}` with fog
-`"no_labels"`). Not run for the near-field model:
+Run for the far-field model on FIgLib plus the HPWREN fog set (results
+above; `reports/far/evaluation.json` has `"real": {"status": "complete"}`;
+the earlier FIgLib-only run, fog `"no_labels"`, is kept in
+`reports/far/stage_b_figlib_only.json`). Not run for the near-field model:
 `reports/evaluation.json` keeps `"real": {"status": "pending"}` and
 experiments B and D `null`, because no labelled real surveillance video
 with compatible frame timing was available. Labels are handled per label:
@@ -622,11 +745,13 @@ python scripts/extract_features.py --real-manifest real.csv --artifacts artifact
 python scripts/evaluate_physics.py --features data/synthetic/features.npz --artifacts artifacts \
     --reports reports --real data/real/features.npz     # trains B (scratch) and D (fine-tune), evaluates B, C, D
 
-# far field on FIgLib (smoke-only labels; features extracted as above with --artifacts artifacts_far);
+# far field: FIgLib (smoke labels) + HPWREN fog set (fog labels), merged with a leakage check;
 # without --features the synthetic sections of the existing evaluation.json are kept
-# (this produced the Stage B section of reports/far/evaluation.json; B and D go to runs/real_figlib)
+# (this produced the Stage B section of reports/far/evaluation.json; B and D go to runs/real_far_combined)
+python scripts/merge_features.py --out data/real/far_combined/features.npz \
+    data/real/figlib/features.npz data/real/hpwren_fog/features.npz
 python scripts/evaluate_physics.py --artifacts artifacts_far --reports reports/far \
-    --real data/real/figlib/features.npz --real-out runs/real_figlib
+    --real data/real/far_combined/features.npz --real-out runs/real_far_combined
 ```
 
 Splits are camera-disjoint (group = camera id; FIgLib assigns them per
@@ -646,7 +771,8 @@ one on its own.
 ```
 configs/      simulation.yaml (near-field profile: CFD, scenarios, rendering, dataset),
               simulation_far.yaml (far-field one-frame-per-minute profile), training.yaml,
-              real/mivia_smoke_labels.csv (per-video MIVIA labels)
+              real/mivia_smoke_labels.csv (per-video MIVIA labels),
+              real/hpwren_fog_* (fog set: candidates, labelling guide, votes, labels, boxes)
 src/cfd/      lbm, scalars, thermo, smoke, fog, scenarios, scenario_util, simulation, validation, results
 src/data/     render, masks, features, feature_spec, normalization, dataset, pipeline, visualize
 src/models/   physics_gru
@@ -654,9 +780,11 @@ src/training/ train, evaluate, metrics, baselines, audit
 src/inference/predict (no training dependencies)
 scripts/      generate_dataset, qa_dataset, extract_features, train_physics, evaluate_physics,
               oracle_diagnostic, benchmark_cpu, summarize_results, image_stats,
-              prepare_firesense, prepare_figlib, prepare_mivia, evaluate_real_zero_shot
+              prepare_firesense, prepare_figlib, prepare_mivia, prepare_hpwren_fog, region_boxes,
+              merge_features, evaluate_real_zero_shot, report_real_fog
 tests/        test_lbm, test_scalars, test_simulation, test_render, test_features, test_pipeline,
-              test_model, test_training, test_image_stats, test_prepare_figlib
+              test_model, test_training, test_image_stats, test_prepare_figlib,
+              test_prepare_hpwren_fog, test_region_boxes
 docs/         spec.md (requirements), design.md (interface contract and design decisions)
 artifacts/    exported near-field model (encoder, classifier, normaliser, config, evaluation);
               the far-field model goes to artifacts_far/

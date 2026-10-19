@@ -2,7 +2,7 @@
 
 > Synthetic evaluation only: these numbers measure how well the motion signal of simulated, rendered sequences is learned and how robust it is to simulated nuisances. They are not real-world accuracy and do not show that the model reduces fog-related false alarms on real cameras.
 
-**Real-world status: partial.** Evaluated labels: smoke; fog n/a (no_labels).
+**Real-world status: complete.** 
 
 ## Data
 
@@ -220,29 +220,23 @@ Mean ± sd over the 3 training seeds (balanced point):
 
 ## Real footage (Stage B, test_iid split, camera-disjoint)
 
-Status: **partial**; evaluated labels: smoke.
-* fog: no_labels (no known fog targets on the real test_iid split (fog not annotated: NaN = unknown); fog metrics are null, not 0); its metrics are n/a, not 0.
-* test_iid: 171 windows, 46 videos, 35 cameras; known labels: fog 0, smoke 171.
+Status: **complete**; evaluated labels: smoke, fog.
+* test_iid: 213 windows, 88 videos, 41 cameras; known labels: fog 42, smoke 212.
 
 | model | operating point | smoke AUROC | fog AUROC | smoke F1 | fog F1 | false smoke on fog_only | ECE smoke / fog | abstain smoke / fog |
 |---|---|---|---|---|---|---|---|---|
-| C: CFD-pretrained, zero-shot | balanced | 0.596 [0.52, 0.67] | n/a | 0.601 | n/a | n/a | 0.095 / n/a | 71.3 % / n/a |
-| C: CFD-pretrained, zero-shot | low_false_alarm | 0.596 [0.52, 0.67] | n/a | 0.206 | n/a | n/a | 0.095 / n/a | 74.9 % / n/a |
-| B: real data, from scratch | balanced | 0.569 [0.49, 0.66] | n/a | 0.513 | n/a | n/a | 0.074 / n/a | 60.8 % / n/a |
-| B: real data, from scratch | low_false_alarm | 0.569 [0.49, 0.66] | n/a | 0.513 | n/a | n/a | 0.074 / n/a | 60.8 % / n/a |
-| D: CFD-pretrained, fine-tuned | balanced | 0.580 [0.50, 0.66] | n/a | 0.613 | n/a | n/a | 0.092 / n/a | 63.7 % / n/a |
-| D: CFD-pretrained, fine-tuned | low_false_alarm | 0.580 [0.50, 0.66] | n/a | 0.613 | n/a | n/a | 0.092 / n/a | 63.7 % / n/a |
+| C: CFD-pretrained, zero-shot | balanced | 0.571 [0.51, 0.64] | 0.433 [0.25, 0.63] | 0.539 | 0.510 | 47.6 % | 0.125 / 0.211 | 72.2 % / 57.1 % |
+| C: CFD-pretrained, zero-shot | low_false_alarm | 0.571 [0.51, 0.64] | 0.433 [0.25, 0.63] | 0.198 | 0.510 | 9.5 % | 0.125 / 0.211 | 76.4 % / 57.1 % |
+| B: real data, from scratch | balanced | 0.612 [0.53, 0.69] | 0.762 [0.60, 0.90] | 0.554 | 0.667 | 61.9 % | 0.123 / 0.173 | 94.8 % / 66.7 % |
+| B: real data, from scratch | low_false_alarm | 0.612 [0.53, 0.69] | 0.762 [0.60, 0.90] | 0.085 | 0.667 | 0.0 % | 0.123 / 0.173 | 80.7 % / 66.7 % |
+| D: CFD-pretrained, fine-tuned | balanced | 0.553 [0.48, 0.63] | 0.444 [0.24, 0.66] | 0.574 | 0.667 | 95.2 % | 0.113 / 0.230 | 100.0 % / 81.0 % |
+| D: CFD-pretrained, fine-tuned | low_false_alarm | 0.553 [0.48, 0.63] | 0.444 [0.24, 0.66] | 0.082 | 0.667 | 4.8 % | 0.113 / 0.230 | 100.0 % / 81.0 % |
 
 Over the training seeds (balanced point):
 
-* C: CFD-pretrained, zero-shot: smoke AUROC 0.609 ± 0.022 (mean ± sd over 3 seeds)
-* B: real data, from scratch: smoke AUROC 0.579 ± 0.020 (mean ± sd over 3 seeds)
-* D: CFD-pretrained, fine-tuned: smoke AUROC 0.582 ± 0.001 (mean ± sd over 3 seeds)
-
-Thresholds:
-
-* B: real data, from scratch, smoke: low_false_alarm threshold not fitted as such: no fog_only sequences with both labels known: the threshold equals the balanced one.
-* D: CFD-pretrained, fine-tuned, smoke: low_false_alarm threshold not fitted as such: no fog_only sequences with both labels known: the threshold equals the balanced one.
+* C: CFD-pretrained, zero-shot: smoke AUROC 0.570 ± 0.012, fog AUROC 0.437 ± 0.017 (mean ± sd over 3 seeds)
+* B: real data, from scratch: smoke AUROC 0.590 ± 0.020, fog AUROC 0.587 ± 0.152 (mean ± sd over 3 seeds)
+* D: CFD-pretrained, fine-tuned: smoke AUROC 0.551 ± 0.002, fog AUROC 0.422 ± 0.020 (mean ± sd over 3 seeds)
 
 ## Robustness (re-renders of the test_iid simulations, balanced point)
 

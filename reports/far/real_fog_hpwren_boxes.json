@@ -1,0 +1,401 @@
+{
+  "artifacts": "artifacts_far",
+  "features": "data/real/hpwren_fog/features_boxes.npz",
+  "labels": {
+    "agreement": {
+      "fog": {
+        "": 61,
+        "0": 144,
+        "1": 152
+      },
+      "quality_ok": 305,
+      "rounds_1_2": {
+        "both_definite": 276,
+        "fog_agreement": 0.9927536231884058,
+        "fog_cohen_kappa": 0.9855064853226907,
+        "sheets": 357
+      },
+      "sheets": 357,
+      "smoke": {
+        "": 16,
+        "0": 341,
+        "1": 0
+      }
+    },
+    "fog": {
+      "0": 144,
+      "1": 152,
+      "unknown": 61
+    },
+    "fog_extent": {
+      "large": 45,
+      "medium": 27,
+      "small": 80
+    },
+    "fog_type": {
+      "bank": 4,
+      "below": 100,
+      "enveloping": 38,
+      "low_cloud_on_terrain": 9,
+      "patches": 1
+    },
+    "metar_vs_visual": {
+      "clear->0": 123,
+      "clear->1": 20,
+      "clear->unknown": 35,
+      "fog->0": 21,
+      "fog->1": 132,
+      "fog->unknown": 26
+    },
+    "quality": {
+      "glare": 47,
+      "obstructed": 5,
+      "ok": 305
+    },
+    "smoke": {
+      "0": 341,
+      "unknown": 16
+    },
+    "windows_labelled": 357
+  },
+  "not_a_deployment_estimate": true,
+  "smoke_vs_fog_cross_set": {
+    "all": {
+      "auroc_smoke_figlib_smoke_vs_hpwren_clear": 0.060303128023218314,
+      "auroc_smoke_figlib_smoke_vs_hpwren_fog": 0.25591439896198076,
+      "n_figlib_smoke": 443,
+      "n_hpwren_clear": 126,
+      "n_hpwren_fog": 127,
+      "p_smoke_median_figlib_smoke": 0.5331869750273592
+    },
+    "confounded": true,
+    "test_iid": {
+      "auroc_smoke_figlib_smoke_vs_hpwren_clear": 0.05562200956937799,
+      "auroc_smoke_figlib_smoke_vs_hpwren_fog": 0.35858585858585856,
+      "n_figlib_smoke": 88,
+      "n_hpwren_clear": 19,
+      "n_hpwren_fog": 18,
+      "p_smoke_median_figlib_smoke": 0.5458150305271758
+    }
+  },
+  "status": "zero_shot_real_fog",
+  "subsets": {
+    "all": {
+      "auroc_ci": {
+        "fog": {
+          "hi": 0.3418669077513932,
+          "lo": 0.2015710377631857,
+          "n_valid": 1000
+        },
+        "smoke_fog_vs_clear": {
+          "hi": 0.29569840069233927,
+          "lo": 0.16671817713607798,
+          "n_valid": 1000
+        }
+      },
+      "auroc_fog": 0.26693538307711534,
+      "auroc_fog_seeds": {
+        "mean": 0.2706432529267175,
+        "sd": 0.041494264142064786,
+        "values": [
+          0.31386701662292216,
+          0.26693538307711534,
+          0.23112735908011497
+        ]
+      },
+      "auroc_smoke_fog_vs_clear": 0.22794025746781651,
+      "by_fog_type": {
+        "bank": {
+          "auroc_vs_clear": 0.498015873015873,
+          "fog_yes_balanced": 4,
+          "n": 4,
+          "p_fog_median": 0.6502765405063213,
+          "smoke_yes_balanced": 4,
+          "valid_input": 1.0
+        },
+        "below": {
+          "auroc_vs_clear": 0.3496584287723528,
+          "fog_yes_balanced": 66,
+          "n": 79,
+          "p_fog_median": 0.6445402041288746,
+          "smoke_yes_balanced": 65,
+          "valid_input": 0.8354430379746836
+        },
+        "enveloping": {
+          "auroc_vs_clear": 0.01984126984126984,
+          "fog_yes_balanced": 2,
+          "n": 36,
+          "p_fog_median": 0.5522171787947704,
+          "smoke_yes_balanced": 2,
+          "valid_input": 0.05555555555555555
+        },
+        "low_cloud_on_terrain": {
+          "auroc_vs_clear": 0.5102040816326531,
+          "fog_yes_balanced": 7,
+          "n": 7,
+          "p_fog_median": 0.6517495183429407,
+          "smoke_yes_balanced": 7,
+          "valid_input": 1.0
+        },
+        "patches": {
+          "auroc_vs_clear": 0.0,
+          "fog_yes_balanced": 0,
+          "n": 1,
+          "p_fog_median": 0.3567640341853813,
+          "smoke_yes_balanced": 0,
+          "valid_input": 1.0
+        }
+      },
+      "cameras": 88,
+      "n": 253,
+      "n_clear": 126,
+      "n_fog": 127,
+      "ops": {
+        "balanced": {
+          "clear": {
+            "abstain_reasons": {
+              "few_valid_flow_frames": 43
+            },
+            "fog": {
+              "abstain": 43,
+              "no": 0,
+              "yes": 83
+            },
+            "n": 126,
+            "smoke": {
+              "abstain": 43,
+              "no": 0,
+              "yes": 83
+            }
+          },
+          "false_smoke_on_clear": 0.6587301587301587,
+          "false_smoke_on_fog": 0.6141732283464567,
+          "false_smoke_on_fog_decided": 0.9873417721518988,
+          "fog": {
+            "abstain_reasons": {
+              "few_valid_flow_frames": 47,
+              "fog_near_threshold": 1,
+              "smoke_near_threshold": 1
+            },
+            "fog": {
+              "abstain": 48,
+              "no": 0,
+              "yes": 79
+            },
+            "n": 127,
+            "smoke": {
+              "abstain": 48,
+              "no": 1,
+              "yes": 78
+            }
+          },
+          "fog_false_alarm_decided": 1.0,
+          "fog_recall_decided": 1.0
+        },
+        "low_false_alarm": {
+          "clear": {
+            "abstain_reasons": {
+              "few_valid_flow_frames": 43,
+              "smoke_near_threshold": 82
+            },
+            "fog": {
+              "abstain": 43,
+              "no": 0,
+              "yes": 83
+            },
+            "n": 126,
+            "smoke": {
+              "abstain": 125,
+              "no": 0,
+              "yes": 1
+            }
+          },
+          "false_smoke_on_clear": 0.007936507936507936,
+          "false_smoke_on_fog": 0.0,
+          "false_smoke_on_fog_decided": 0.0,
+          "fog": {
+            "abstain_reasons": {
+              "few_valid_flow_frames": 47,
+              "fog_near_threshold": 1,
+              "smoke_near_threshold": 78
+            },
+            "fog": {
+              "abstain": 48,
+              "no": 0,
+              "yes": 79
+            },
+            "n": 127,
+            "smoke": {
+              "abstain": 125,
+              "no": 2,
+              "yes": 0
+            }
+          },
+          "fog_false_alarm_decided": 1.0,
+          "fog_recall_decided": 1.0
+        }
+      },
+      "p_fog_median": {
+        "clear": 0.6506791444768002,
+        "fog": 0.6374889879898298
+      },
+      "p_smoke_median": {
+        "clear": 0.6321933474246944,
+        "fog": 0.6205779845511605
+      },
+      "valid_input": {
+        "clear": 0.6587301587301587,
+        "fog": 0.6299212598425197
+      }
+    },
+    "test_iid": {
+      "auroc_ci": {
+        "fog": {
+          "hi": 0.29703373252134857,
+          "lo": 0.029370915032679742,
+          "n_valid": 1000
+        },
+        "smoke_fog_vs_clear": {
+          "hi": 0.2502467105263156,
+          "lo": 0.0,
+          "n_valid": 1000
+        }
+      },
+      "auroc_fog": 0.1695906432748538,
+      "auroc_fog_seeds": {
+        "mean": 0.14619883040935674,
+        "sd": 0.02879782982981317,
+        "values": [
+          0.15497076023391812,
+          0.1695906432748538,
+          0.11403508771929824
+        ]
+      },
+      "auroc_smoke_fog_vs_clear": 0.08187134502923976,
+      "by_fog_type": {
+        "below": {
+          "auroc_vs_clear": 0.18421052631578946,
+          "fog_yes_balanced": 6,
+          "n": 6,
+          "p_fog_median": 0.6301040513006932,
+          "smoke_yes_balanced": 6,
+          "valid_input": 1.0
+        },
+        "enveloping": {
+          "auroc_vs_clear": 0.0,
+          "fog_yes_balanced": 0,
+          "n": 8,
+          "p_fog_median": 0.5522171787947704,
+          "smoke_yes_balanced": 0,
+          "valid_input": 0.0
+        },
+        "low_cloud_on_terrain": {
+          "auroc_vs_clear": 0.4868421052631579,
+          "fog_yes_balanced": 4,
+          "n": 4,
+          "p_fog_median": 0.6494214343419327,
+          "smoke_yes_balanced": 4,
+          "valid_input": 1.0
+        }
+      },
+      "cameras": 16,
+      "n": 37,
+      "n_clear": 19,
+      "n_fog": 18,
+      "ops": {
+        "balanced": {
+          "clear": {
+            "abstain_reasons": {
+              "few_valid_flow_frames": 7
+            },
+            "fog": {
+              "abstain": 7,
+              "no": 0,
+              "yes": 12
+            },
+            "n": 19,
+            "smoke": {
+              "abstain": 7,
+              "no": 0,
+              "yes": 12
+            }
+          },
+          "false_smoke_on_clear": 0.631578947368421,
+          "false_smoke_on_fog": 0.5555555555555556,
+          "false_smoke_on_fog_decided": 1.0,
+          "fog": {
+            "abstain_reasons": {
+              "few_valid_flow_frames": 8
+            },
+            "fog": {
+              "abstain": 8,
+              "no": 0,
+              "yes": 10
+            },
+            "n": 18,
+            "smoke": {
+              "abstain": 8,
+              "no": 0,
+              "yes": 10
+            }
+          },
+          "fog_false_alarm_decided": 1.0,
+          "fog_recall_decided": 1.0
+        },
+        "low_false_alarm": {
+          "clear": {
+            "abstain_reasons": {
+              "few_valid_flow_frames": 7,
+              "smoke_near_threshold": 12
+            },
+            "fog": {
+              "abstain": 7,
+              "no": 0,
+              "yes": 12
+            },
+            "n": 19,
+            "smoke": {
+              "abstain": 19,
+              "no": 0,
+              "yes": 0
+            }
+          },
+          "false_smoke_on_clear": 0.0,
+          "false_smoke_on_fog": 0.0,
+          "false_smoke_on_fog_decided": null,
+          "fog": {
+            "abstain_reasons": {
+              "few_valid_flow_frames": 8,
+              "smoke_near_threshold": 10
+            },
+            "fog": {
+              "abstain": 8,
+              "no": 0,
+              "yes": 10
+            },
+            "n": 18,
+            "smoke": {
+              "abstain": 18,
+              "no": 0,
+              "yes": 0
+            }
+          },
+          "fog_false_alarm_decided": 1.0,
+          "fog_recall_decided": 1.0
+        }
+      },
+      "p_fog_median": {
+        "clear": 0.6532821632594185,
+        "fog": 0.6144317453890471
+      },
+      "p_smoke_median": {
+        "clear": 0.6357294002431186,
+        "fog": 0.5922200737628753
+      },
+      "valid_input": {
+        "clear": 0.631578947368421,
+        "fog": 0.5555555555555556
+      }
+    }
+  }
+}
