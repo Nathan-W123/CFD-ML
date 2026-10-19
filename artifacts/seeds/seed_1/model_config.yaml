@@ -1,0 +1,311 @@
+artifact_format_version: 1
+model:
+  input_dim: 14
+  seq_len: 12
+  hidden_size: 32
+  num_layers: 1
+  embedding_dim: 16
+  dropout: 0.1
+  output_names:
+  - smoke
+  - fog
+feature_names:
+- flow_u_mean
+- flow_v_mean
+- flow_u_std
+- flow_v_std
+- flow_divergence
+- flow_vorticity_abs
+- region_area
+- area_growth
+- centroid_dx
+- centroid_dz
+- boundary_roughness
+- anchor_stability
+- mask_valid
+- flow_valid
+preprocessing:
+  n_steps: 12
+  n_features: 14
+  feature_names:
+  - flow_u_mean
+  - flow_v_mean
+  - flow_u_std
+  - flow_v_std
+  - flow_divergence
+  - flow_vorticity_abs
+  - region_area
+  - area_growth
+  - centroid_dx
+  - centroid_dz
+  - boundary_roughness
+  - anchor_stability
+  - mask_valid
+  - flow_valid
+  feature_gates:
+  - flow
+  - flow
+  - flow
+  - flow
+  - flow
+  - flow
+  - mask
+  - mask_pair
+  - mask_pair
+  - mask_pair
+  - mask
+  - mask_pair
+  - none
+  - none
+  validity_flags:
+  - mask_valid
+  - flow_valid
+  normalizer_file: feature_normalizer.json
+  normalizer_fit_split: train
+  normalizer_clip: 5.0
+  closed_gate_value: 0.0
+  feature_config:
+    expected_interval_s: 5.0
+    flow_lag_s: 1.0
+  feature_timing_source:
+    expected_interval_s: train_feature_meta
+    flow_lag_s: train_feature_meta
+  training_flow_modes:
+    lag: 1800
+  training_roi_scale_range:
+  - 1.5008934006813157
+  - 2.4995258451948583
+  training_data_source: synthetic
+  training_mask_sources:
+    bbox: 379
+    degraded: 859
+    detector: 562
+files:
+  encoder: physics_encoder.pt
+  classifier: physics_classifier.pt
+  normalizer: feature_normalizer.json
+  config: model_config.yaml
+torch_version: 2.14.1+cpu
+temperatures:
+  smoke: 1.8511383757210145
+  fog: 1.3625842069446183
+thresholds:
+  balanced:
+    smoke:
+      logit: -0.029170215439413106
+      prob: 0.4927079631998826
+    fog:
+      logit: -0.05504444588273155
+      prob: 0.4862423620325627
+  low_false_alarm:
+    smoke:
+      logit: 0.7233920966241467
+      prob: 0.6733535420645961
+    fog:
+      logit: -0.05504444588273155
+      prob: 0.4862423620325627
+abstain:
+  margins:
+    balanced:
+      smoke: 0.25
+      fog: 0.32323716295226046
+    low_false_alarm:
+      smoke: 0.541586025990382
+      fog: 0.32323716295226046
+  margin_space: calibrated_logit
+  input_validity:
+    min_mask_frames: 3
+    min_flow_frames: 2
+    max_clip_fraction: 0.2
+    incompatible_frame_interval: true
+calibration:
+  fit_source: synthetic_val_calib
+  split: val_calib
+  weighting: per_simulation
+  n_sequences: 453
+  n_groups: 151
+  groups_per_category:
+    smoke_only: 37
+    fog_only: 38
+    neither: 38
+    both: 38
+  min_groups_per_category: 20
+  insufficient_calibration_data: false
+  insufficient_categories: []
+  prevalence:
+    smoke:
+      per_sequence: 0.49668875336647034
+      per_simulation: 0.4966887417218543
+    fog:
+      per_sequence: 0.503311276435852
+      per_simulation: 0.5033112582781457
+  temperature_fit:
+    smoke:
+      bounds:
+      - 0.5
+      - 5.0
+      fitted_T: 1.8511383757210145
+      at_bound: null
+      fallback: false
+      reason: null
+      nll_T1: 0.6883038661809151
+      nll: 0.6787247005542321
+    fog:
+      bounds:
+      - 0.5
+      - 5.0
+      fitted_T: 1.3625842069446183
+      at_bound: null
+      fallback: false
+      reason: null
+      nll_T1: 0.6503680046810054
+      nll: 0.6449168930115251
+  temperature_fallback:
+    smoke: null
+    fog: null
+  temperature_clipped:
+    smoke: null
+    fog: null
+  threshold_fit:
+    balanced:
+      smoke:
+        criterion: max_youden_j
+        youden_j: 0.15619883040935795
+        tpr: 0.5377777777777782
+        fpr: 0.3815789473684203
+        precision: 0.58173076923077
+        recall: 0.5377777777777782
+      fog:
+        criterion: max_youden_j
+        youden_j: 0.28374269005847974
+        tpr: 0.7192982456140351
+        fpr: 0.43555555555555536
+        precision: 0.6259541984732825
+        recall: 0.7192982456140351
+    low_false_alarm:
+      smoke:
+        criterion: false_smoke_on_fog_only<=0.05
+        rate: 0.043859649122807334
+        n_negatives: 114
+        constraint_active: true
+      fog:
+        criterion: same_as_balanced
+  abstain_fit:
+    balanced:
+      smoke:
+        abstain_rate: 0.5143487858719649
+        confident_error: 0.3954545454545486
+        error_without_abstention: 0.4216335540838866
+        target_reached: false
+        floor: 0.25
+        target_error: 0.05
+        max_rate: 0.3
+      fog:
+        abstain_rate: 0.29801324503311305
+        confident_error: 0.34276729559748564
+        error_without_abstention: 0.357615894039736
+        target_reached: false
+        floor: 0.25
+        target_error: 0.05
+        max_rate: 0.3
+    low_false_alarm:
+      smoke:
+        abstain_rate: 0.28256070640176634
+        confident_error: 0.446153846153847
+        error_without_abstention: 0.4944812362030909
+        target_reached: false
+        floor: 0.25
+        target_error: 0.05
+        max_rate: 0.3
+      fog:
+        abstain_rate: 0.29801324503311305
+        confident_error: 0.34276729559748564
+        error_without_abstention: 0.357615894039736
+        target_reached: false
+        floor: 0.25
+        target_error: 0.05
+        max_rate: 0.3
+operating_points:
+- balanced
+- low_false_alarm
+fit:
+  stage: A_cfd_pretraining
+  experiment: C
+  seed: 1
+  seeds:
+  - 0
+  - 1
+  - 2
+  exported_seed: 0
+  is_exported_model: false
+  selection: lowest val_select loss (early-stopping split) among seeds
+  val_select_loss_per_seed:
+    '0': 0.6686250567436218
+    '1': 0.6701498627662659
+    '2': 0.6686874628067017
+  best_epoch: 14
+  epochs_run: 21
+  stopped_early: true
+  pos_weight: null
+  balance: none
+  training:
+    lr: 0.001
+    max_epochs: 50
+    patience: 7
+    batch_size: 64
+    weight_decay: 0.0001
+    grad_clip_norm: 1.0
+    freeze_encoder_epochs: 0
+    seed: 1
+    loss: bce_with_logits
+    optimizer: adamw
+  normalizer_fit: train split only
+  data_source: synthetic
+  data_counts:
+    test_iid:
+      sequences: 295
+      groups: 148
+      originals: 148
+      per_category:
+        smoke_only: 73
+        fog_only: 74
+        neither: 74
+        both: 74
+    test_ood:
+      sequences: 398
+      groups: 199
+      originals: 199
+      per_category:
+        smoke_only: 100
+        fog_only: 100
+        neither: 100
+        both: 98
+    train:
+      sequences: 1800
+      groups: 600
+      originals: 600
+      per_category:
+        smoke_only: 450
+        fog_only: 450
+        neither: 450
+        both: 450
+    val_calib:
+      sequences: 453
+      groups: 151
+      originals: 151
+      per_category:
+        smoke_only: 111
+        fog_only: 114
+        neither: 114
+        both: 114
+    val_select:
+      sequences: 300
+      groups: 100
+      originals: 100
+      per_category:
+        smoke_only: 75
+        fog_only: 75
+        neither: 75
+        both: 75
+  torch_threads: 1
+  init: random

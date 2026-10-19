@@ -1,0 +1,4 @@
+seed,best_epoch,epochs_run,stopped_early,best_val_select_loss,train_seconds,temperature_smoke,temperature_fog,exported
+0,19,26,True,0.668625,6.49,1.5197535368530184,1.5164496792937228,True
+1,14,21,True,0.670150,3.19,1.8511383757210145,1.3625842069446183,False
+2,17,24,True,0.668687,3.87,1.901927804592405,1.4811745943027355,False

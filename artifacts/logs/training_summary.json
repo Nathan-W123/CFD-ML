@@ -1,0 +1,182 @@
+{
+  "abstain_margins": {
+    "balanced": {
+      "fog": 0.3023353190136098,
+      "smoke": 0.25
+    },
+    "low_false_alarm": {
+      "fog": 0.3023353190136098,
+      "smoke": 0.547560829673711
+    }
+  },
+  "artifacts": {
+    "classifier": "artifacts/physics_classifier.pt",
+    "config": "artifacts/model_config.yaml",
+    "encoder": "artifacts/physics_encoder.pt",
+    "normalizer": "artifacts/feature_normalizer.json"
+  },
+  "calibration": {
+    "temperatures": {
+      "fog": 1.5164496792937228,
+      "smoke": 1.5197535368530184
+    },
+    "thresholds": {
+      "balanced": {
+        "fog": {
+          "logit": -0.08633390895991697,
+          "prob": 0.47842991889138975
+        },
+        "smoke": {
+          "logit": -0.043383780491726635,
+          "prob": 0.4891557557004273
+        }
+      },
+      "low_false_alarm": {
+        "fog": {
+          "logit": -0.08633390895991697,
+          "prob": 0.47842991889138975
+        },
+        "smoke": {
+          "logit": 0.7341351016290499,
+          "prob": 0.6757120354372478
+        }
+      }
+    }
+  },
+  "data_counts": {
+    "test_iid": {
+      "groups": 148,
+      "originals": 148,
+      "per_category": {
+        "both": 74,
+        "fog_only": 74,
+        "neither": 74,
+        "smoke_only": 73
+      },
+      "sequences": 295
+    },
+    "test_ood": {
+      "groups": 199,
+      "originals": 199,
+      "per_category": {
+        "both": 98,
+        "fog_only": 100,
+        "neither": 100,
+        "smoke_only": 100
+      },
+      "sequences": 398
+    },
+    "train": {
+      "groups": 600,
+      "originals": 600,
+      "per_category": {
+        "both": 450,
+        "fog_only": 450,
+        "neither": 450,
+        "smoke_only": 450
+      },
+      "sequences": 1800
+    },
+    "val_calib": {
+      "groups": 151,
+      "originals": 151,
+      "per_category": {
+        "both": 114,
+        "fog_only": 114,
+        "neither": 114,
+        "smoke_only": 111
+      },
+      "sequences": 453
+    },
+    "val_select": {
+      "groups": 100,
+      "originals": 100,
+      "per_category": {
+        "both": 75,
+        "fog_only": 75,
+        "neither": 75,
+        "smoke_only": 75
+      },
+      "sequences": 300
+    }
+  },
+  "data_source": "synthetic",
+  "experiment": "C",
+  "exported_seed": 0,
+  "insufficient_calibration_data": false,
+  "provenance": {
+    "init": "random"
+  },
+  "seed_artifacts": {
+    "0": "artifacts/seeds/seed_0",
+    "1": "artifacts/seeds/seed_1",
+    "2": "artifacts/seeds/seed_2"
+  },
+  "seeds": {
+    "0": {
+      "balance": "none",
+      "best_epoch": 19,
+      "best_val_select_loss": 0.6686250567436218,
+      "epochs_run": 26,
+      "pos_weight": null,
+      "settings": {
+        "batch_size": 64,
+        "freeze_encoder_epochs": 0,
+        "grad_clip_norm": 1.0,
+        "loss": "bce_with_logits",
+        "lr": 0.001,
+        "max_epochs": 50,
+        "optimizer": "adamw",
+        "patience": 7,
+        "seed": 0,
+        "weight_decay": 0.0001
+      },
+      "stopped_early": true,
+      "train_seconds": 6.486342221000086
+    },
+    "1": {
+      "balance": "none",
+      "best_epoch": 14,
+      "best_val_select_loss": 0.6701498627662659,
+      "epochs_run": 21,
+      "pos_weight": null,
+      "settings": {
+        "batch_size": 64,
+        "freeze_encoder_epochs": 0,
+        "grad_clip_norm": 1.0,
+        "loss": "bce_with_logits",
+        "lr": 0.001,
+        "max_epochs": 50,
+        "optimizer": "adamw",
+        "patience": 7,
+        "seed": 1,
+        "weight_decay": 0.0001
+      },
+      "stopped_early": true,
+      "train_seconds": 3.1939581750000343
+    },
+    "2": {
+      "balance": "none",
+      "best_epoch": 17,
+      "best_val_select_loss": 0.6686874628067017,
+      "epochs_run": 24,
+      "pos_weight": null,
+      "settings": {
+        "batch_size": 64,
+        "freeze_encoder_epochs": 0,
+        "grad_clip_norm": 1.0,
+        "loss": "bce_with_logits",
+        "lr": 0.001,
+        "max_epochs": 50,
+        "optimizer": "adamw",
+        "patience": 7,
+        "seed": 2,
+        "weight_decay": 0.0001
+      },
+      "stopped_early": true,
+      "train_seconds": 3.8704686809999203
+    }
+  },
+  "stage": "A_cfd_pretraining",
+  "training_curves": "artifacts/logs/training_curves.png"
+}
