@@ -19,7 +19,10 @@ Per head (smoke, fog), on the dev rows with a known label:
 
 1. model selection: every candidate feature-group set x C (inverse L2
    strength) is scored by 5-fold cross-validation grouped by camera mount
-   (out-of-fold AUROC); the best is refitted on all dev rows;
+   (out-of-fold AUROC within sets, i.e. over smoke / no-smoke pairs of the
+   same set, so easy negatives of another set cannot drive the choice;
+   --select-on pooled for the pooled AUROC); the best is refitted on all
+   dev rows;
    for smoke, when every row has fine embeddings, also a tile head (one
    model applied to every fine tile, the window scored by its best tile; its
    C by the same grouped cross-validation) and a stack, a logistic
@@ -70,8 +73,9 @@ GROUP_SETS = {"fog": (("full",), ("sims",), ("full", "sims"), ("full", "tiles", 
               "smoke": (("tiles",), ("sims",), ("tiles", "sims"), ("full", "tiles", "sims"),
                         ("tiles", "sims", "motion"), ("full", "tiles", "sims", "motion"),
                         ("full", "tiles", "sims", "fine"), ("full", "tiles", "sims", "fine", "motion"))}
-C_GRID = (0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1.0)
+C_GRID = (0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1.0)
 TILE_C_GRID = (0.0001, 0.0003, 0.001, 0.003)
+SELECT_ON = "within"            # model selection maximises the within-set AUROC (set by --select-on)
 STACK_C = 1.0
 GOALS = {"fog_auroc": 0.90, "smoke_auroc": 0.85, "max_false_smoke_on_fog": 0.05, "min_smoke_recall": 0.50}
 
@@ -165,21 +169,29 @@ def fit_stack(Z, y):
     return {"coef": [float(c) for c in coef], "intercept": float(h.intercept - np.sum(coef * h.mean))}
 
 
+def cv_scores(z, y, sets):
+    """Pooled and within-set out-of-fold AUROC, and the one model selection maximises (SELECT_ON)."""
+    pooled, within = M.auroc(z, y), within_sets_auroc(np.asarray(z), np.asarray(y), np.asarray(sets))
+    crit = within if (SELECT_ON == "within" and within is not None) else pooled
+    return {"cv_auroc": pooled, "cv_auroc_within_sets": within}, crit
+
+
 def select(rows, head, T):
     """(best config, all scores, out-of-fold logits of the best) for one head on dev rows."""
     y = np.array([r[head] for r in rows])
     g = np.array([r["mount"] for r in rows])
+    sets = np.array([r["set"] for r in rows])
     scores, best = [], None
     for groups, C in itertools.product(GROUP_SETS[head], C_GRID):
         X = _features(rows, T, groups)
         if X is None:
             continue
         oof = grouped_oof(X, y, g, C)
-        auc = M.auroc(oof, y)
-        scores.append({"groups": list(groups), "C": C, "cv_auroc": auc})
-        if best is None or auc > best[0]:
-            best = (auc, groups, C, oof)
-    return {"groups": list(best[1]), "C": best[2], "cv_auroc": best[0]}, scores, best[3]
+        sc, crit = cv_scores(oof, y, sets)
+        scores.append({"groups": list(groups), "C": C, **sc})
+        if best is None or crit > best[0]:
+            best = (crit, groups, C, oof, sc)
+    return {"groups": list(best[1]), "C": best[2], **best[4]}, scores, best[3]
 
 
 def deploy_threshold(p_fog, max_rate):
@@ -258,8 +270,12 @@ def main(argv=None) -> int:
     ap.add_argument("--deploy-false-smoke", type=float, default=0.025,
                     help="share of the dev fog windows allowed to raise a smoke alarm at the deploy threshold")
     ap.add_argument("--n-boot", type=int, default=1000)
+    ap.add_argument("--select-on", choices=("within", "pooled"), default="within",
+                    help="out-of-fold AUROC that model selection maximises: within sets (default) or pooled")
     ap.add_argument("--final", action="store_true", help="evaluate on the held-out test_iid cameras (once)")
     args = ap.parse_args(argv)
+    global SELECT_ON
+    SELECT_ON = args.select_on
 
     rows = load_sets(args.sets)
     dev = [r for r in rows if r["split"] != "test_iid"]
@@ -278,23 +294,24 @@ def main(argv=None) -> int:
         if head == "smoke" and fine is not None:
             # tile head on the fine tiles, then the stack of the two heads' out-of-fold logits
             g = np.array([r["mount"] for r in hr])
+            sets = np.array([r["set"] for r in hr])
             TF = tile_instances(fine, T[head])
             tscores, tbest = [], None
             for C in TILE_C_GRID:
                 zt = grouped_oof_tile(TF, y, g, C)
-                auc = M.auroc(zt, y)
-                tscores.append({"C": C, "cv_auroc": auc})
-                if tbest is None or auc > tbest[0]:
-                    tbest = (auc, C, zt)
+                sc, crit = cv_scores(zt, y, sets)
+                tscores.append({"C": C, **sc})
+                if tbest is None or crit > tbest[0]:
+                    tbest = (crit, C, zt, sc)
             Z = np.stack([oof_z, tbest[2]], 1)
             oof_s = np.zeros(len(y))
             for tr, te in _folds(len(y), g):
                 oof_s[te] = stack_logit(fit_stack(Z[tr], y[tr]), [Z[te, 0], Z[te, 1]])
             tile_heads[head] = fit_tile_head(TF, y, tbest[1])
             stacks[head] = fit_stack(Z, y)
-            selection[head]["tile"] = {"C": tbest[1], "cv_auroc": tbest[0], "scores": tscores}
-            selection[head]["stacked"] = {"cv_auroc": M.auroc(oof_s, y), "stack": stacks[head]}
-            print(f"{head}: tile head C {tbest[1]} CV AUROC {tbest[0]:.3f}; stacked {M.auroc(oof_s, y):.3f}",
+            selection[head]["tile"] = {"C": tbest[1], **tbest[3], "scores": tscores}
+            selection[head]["stacked"] = {**cv_scores(oof_s, y, sets)[0], "stack": stacks[head]}
+            print(f"{head}: tile head C {tbest[1]} CV {tbest[3]}; stacked {selection[head]['stacked']}",
                   file=sys.stderr)
             oof_z = oof_s
         oof_p = _sigmoid(oof_z)
@@ -355,14 +372,18 @@ def render(rep) -> str:
          "cameras. Imagery courtesy of HPWREN (https://www.hpwren.ucsd.edu/).", "",
          "Goals: fog AUROC >= 0.90; smoke AUROC >= 0.85; at the deploy point at most 5 % false smoke on fog "
          "windows while detecting at least 50 % of the smoke windows.", "",
-         "| head | selected feature groups | C | CV AUROC (dev) | dev windows |", "|---|---|---|---|---|"]
+         "| head | selected feature groups | C | CV AUROC pooled | CV AUROC within sets | dev windows |",
+         "|---|---|---|---|---|---|"]
     for h, s in rep["selection"].items():
         b = s["best"]
-        L.append(f"| {h} | {', '.join(b['groups'])} | {b['C']} | {_f(b['cv_auroc'])} | {s['n_dev']} |")
+        L.append(f"| {h} | {', '.join(b['groups'])} | {b['C']} | {_f(b['cv_auroc'])} "
+                 f"| {_f(b.get('cv_auroc_within_sets'))} | {s['n_dev']} |")
         if "tile" in s:
-            L.append(f"| {h}: tile head | fine tiles, best tile | {s['tile']['C']} | {_f(s['tile']['cv_auroc'])} "
-                     f"| {s['n_dev']} |")
-            L.append(f"| {h}: stacked (deployed) | head + tile head | | {_f(s['stacked']['cv_auroc'])} | {s['n_dev']} |")
+            t, st = s["tile"], s["stacked"]
+            L.append(f"| {h}: tile head | fine tiles, best tile | {t['C']} | {_f(t['cv_auroc'])} "
+                     f"| {_f(t.get('cv_auroc_within_sets'))} | {s['n_dev']} |")
+            L.append(f"| {h}: stacked (deployed) | head + tile head | | {_f(st['cv_auroc'])} "
+                     f"| {_f(st.get('cv_auroc_within_sets'))} | {s['n_dev']} |")
     L += ["", f"Thresholds: smoke deploy {rep['thresholds']['smoke']['deploy']:.3f}, smoke balanced "
           f"{rep['thresholds']['smoke']['balanced']:.3f}, fog balanced {rep['thresholds']['fog']['balanced']:.3f}.", ""]
     for key, title in (("dev_cv", "Dev cameras, out-of-fold (cross-validated)"), ("test", "Held-out test cameras")):
