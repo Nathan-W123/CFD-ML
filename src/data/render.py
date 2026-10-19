@@ -221,7 +221,8 @@ def sample_render_params(rng: np.random.Generator, cfg: Dict[str, Any], hints: O
     tex = r["texture"]
     p["texture"] = {"gain": _u(rng, tex["gain"]),
                     "wavelengths_m": [float(tex["wavelengths_m"][0]), float(tex["wavelengths_m"][1])],
-                    "seed": _seed(rng)}
+                    "seed": _seed(rng),
+                    "shading": _u(rng, tex.get("shading", [0.0, 0.0]))}
     # Background: procedural unless a real image is drawn AND available.
     bg = r["background"]
     want_real = float(rng.random()) >= float(bg.get("procedural_prob", 1.0))
@@ -849,6 +850,12 @@ def _composite_frame(L: Dict[str, List[Any]], f: int, rp: Mapping[str, Any], sca
             num += np.float32(rp["aerosol_brightness"][COMPONENTS[j]]) * t
         alpha = 1.0 - np.exp(-tot)
         A = num / np.maximum(tot, np.float32(1e-12))
+        # Self-shadowing: the 3D structure of dense smoke or fog makes its brightness vary
+        # with the same advected texture, so even an opaque region shows moving structure
+        # (with radiance alone, saturated regions were flat and optical flow read ~0 there).
+        sh = float(rp["texture"].get("shading", 0.0))
+        if sh > 0.0:
+            A = np.clip(A * (1.0 + np.float32(sh) * np.clip(L["noise"][f], -2.5, 2.5)), 0.0, 1.0)
     Bc = B
     a_cloud = None
     contrast = None

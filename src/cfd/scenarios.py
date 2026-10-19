@@ -48,7 +48,7 @@ from src.cfd.scenario_util import (
 )
 from src.cfd.simulation import SimulationSpec, SimulationUnstable, run_simulation
 from src.cfd.smoke import (
-    dust_component, required_spinup, sample_dust, sample_smoke, smoke_component, smoke_wind_range,
+    dust_component, sample_dust, sample_smoke, smoke_component, smoke_wind_range,
 )
 from src.constants import CATEGORIES, CATEGORY_INDEX, CATEGORY_LABELS, FOG_REGIMES, SMOKE_REGIMES
 from src.utils.runtime import child_rng, derive_seed
@@ -256,7 +256,6 @@ def sample_scenario(category: str, split: str, index: int, cfg: Dict[str, Any], 
         regime = "+".join(r for r in (smoke_regime, fog_regime) if r)
     if fog is not None and fog["regime"] == "fog_dissipating" and fog["mechanism"] == "wind_ramp":
         context["wind"]["ramp_factor"] = fog["ramp_factor"]
-    context["timing"]["spinup_s"] = max(context["timing"]["spinup_s"], required_spinup(smoke))
     return {
         "sim_id": sim_id_for(split, category, index, attempt),
         "category": category,

@@ -172,8 +172,11 @@ def test_context_is_class_independent():
               for c in CATEGORIES}
     terrain = {c: np.mean([sample_scenario(c, "train", i, CFG)["terrain"]["kind"] != "flat" for i in range(150)])
                for c in CATEGORIES}
+    spinups = {c: np.array([sample_scenario(c, "train", i, CFG)["timing"]["spinup_s"] for i in range(150)])
+               for c in CATEGORIES}
     for c in CATEGORIES:
         assert abs(speeds[c].mean() - speeds["smoke_only"].mean()) < 0.6
+        assert abs(spinups[c].mean() - spinups["fog_only"].mean()) < 8.0     # spin-up never depends on the class
         assert abs(terrain[c] - terrain["smoke_only"]) < 0.13
         assert speeds[c].max() <= 7.0
 

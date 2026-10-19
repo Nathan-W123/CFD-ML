@@ -98,11 +98,14 @@ def sample_smoke(regime: str, rng: np.random.Generator, cfg: Dict[str, Any], con
         # 1 s optical-flow lag sees it, the 5 s observation spacing aliases it.
         flicker=sample_noise_spec(rng, (0.6 * math.sqrt(width) / 1.5, 2.0 * math.sqrt(width) / 1.5)),
     )
-    # Onset relative to the first frame: mostly established plumes, some ignitions in view.
-    if rng.random() < 0.75:
-        onset = uniform(rng, (-110.0, -20.0))
+    # Onset relative to the first frame, inside the (class-independent) spin-up: mostly
+    # established plumes, some ignitions in view. The spin-up is never lengthened for
+    # smoke; doing so made spin-up predict the smoke label (folded AUC 0.74 in the audit).
+    spin = float(context["timing"]["spinup_s"])
+    if rng.random() < 0.75 and spin > 25.0:
+        onset = uniform(rng, (-(spin - 5.0), -20.0))
     else:
-        onset = uniform(rng, (-20.0, 25.0))
+        onset = uniform(rng, (-min(20.0, spin - 5.0), 25.0))
     out["onset_s"] = onset
     out["offset_s"] = uniform(rng, (15.0, 50.0)) if rng.random() < 0.15 else None
     if regime == "pulsing":
@@ -119,13 +122,6 @@ def sample_smoke(regime: str, rng: np.random.Generator, cfg: Dict[str, Any], con
         }
     out["first_frame_s"] = first
     return out
-
-
-def required_spinup(smoke: Dict[str, Any]) -> float:
-    """Pre-roll needed so the source has been burning for -onset seconds at the first frame."""
-    if smoke is None or smoke.get("regime") == "advected_smoke":
-        return 0.0
-    return max(0.0, -float(smoke["onset_s"])) + 5.0
 
 
 def heating_rate(buoyancy_flux: float, n_cells: int, dx: float, theta0: float = 288.0) -> float:

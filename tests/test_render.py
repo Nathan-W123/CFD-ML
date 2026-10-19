@@ -368,8 +368,10 @@ def test_masks_follow_the_shaken_frames():
     # The blob moves steadily; the residual centroid jitter is the camera shake.
     c = _steady_centroids(blob, u)
     assert (c - c.mean(axis=0)).std() > 1.5
-    # Without shake the masks are steady.
-    still = render_sequence(smoke_blob_sim(u=u, peak=1.0), _params(12, _clean()), np.random.default_rng(3))
+    # Without shake (and without texture, which moves the mask edges) the masks are steady.
+    still = render_sequence(smoke_blob_sim(u=u, peak=1.0),
+                            _params(12, _clean(texture={"gain": [0.0, 0.0], "shading": [0.0, 0.0]})),
+                            np.random.default_rng(3))
     c2 = _steady_centroids(still, u)
     assert (c2 - c2.mean(axis=0)).std() < 0.5
 

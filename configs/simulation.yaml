@@ -20,7 +20,7 @@ time:
   frame_interval_s: 5.0     # 12 observations span 55 s (~60 s window)
   flow_lag_s: 1.0           # each observation also gets a frame this much earlier, for optical flow
   precursor_s: 30.0         # source-free spin-up of the ambient flow before anything is switched on
-  spinup_s: [10.0, 60.0]    # extra random pre-roll before the first frame
+  spinup_s: [10.0, 120.0]   # random pre-roll before the first frame, the same for every class
 
 lbm:
   sponge_width_cells: 6     # absorbing layer at the left, right and top boundaries
@@ -91,7 +91,7 @@ scenarios:
     theta_ground_k: [272.0, 300.0]
     lapse_dtheta_dz: [-0.002, 0.03]    # K/m; > 0 stable
     relative_humidity_dry: [0.3, 0.7]  # non-fog categories (no unlabelled condensate)
-    spinup_s: [10.0, 60.0]
+    spinup_s: [10.0, 120.0]            # class-independent; smoke onset is placed inside it
   smoke:
     source_x_frac: [0.1, 0.9]          # across the camera view
     source_width_m: [10.0, 25.0]       # at least two cells
@@ -140,7 +140,8 @@ render:
                                          # aerosol body (90th percentile of occupied pixels), see render.py
   background_haze_opacity: [0.02, 0.2]   # background haze, any category
   texture:
-    gain: [0.15, 0.6]                    # relative optical-depth modulation, class-independent
+    gain: [0.3, 0.9]                     # relative optical-depth modulation, class-independent
+    shading: [0.1, 0.3]                  # relative aerosol-brightness modulation (self-shadowing)
     wavelengths_m: [3.0, 40.0]           # octaves of the advected noise pattern
   background:
     procedural_prob: 0.85                # else a real image from data/backgrounds/ (with a camera manifest)
