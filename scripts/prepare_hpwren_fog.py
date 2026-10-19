@@ -100,6 +100,7 @@ import argparse
 import csv
 import datetime as dt
 import hashlib
+import http.client
 import io
 import json
 import math
@@ -164,8 +165,8 @@ def _get(url: str, timeout: float = 60.0, retries: int = 3) -> bytes:
             if exc.code < 500:
                 raise
             last = exc
-        except (urllib.error.URLError, TimeoutError, ConnectionError) as exc:
-            last = exc
+        except (urllib.error.URLError, TimeoutError, ConnectionError, http.client.HTTPException) as exc:
+            last = exc                              # HTTPException: e.g. IncompleteRead, a body cut off mid-transfer
         time.sleep(2.0 ** attempt)
     raise last
 
