@@ -1,0 +1,400 @@
+{
+  "artifacts": "artifacts",
+  "calibration_source": "synthetic_val_calib",
+  "counts": {
+    "cameras": 5,
+    "mask_sources": {
+      "fallback_detector": 9
+    },
+    "videos": 5,
+    "windows": 9
+  },
+  "description": "FIRESENSE smoke videos (CERTH / Bilkent, Zenodo record 836749, CC BY 4.0): 13 smoke and 9 non-smoke clips. Only clips of at least 56 s fit the 12 x 5 s window with 1 s lag frames: 4 smoke videos (a building fire, a handheld smoke-grenade clip, an indoor warehouse with detector outlines burned into the video, a courtyard CCTV bucket fire) and 1 non-smoke video (bushes and a fence, fixed camera). No clip contains fog, so fog is only tested for false alarms. Masks come from the built-in fallback detector (none are provided). Scenes are close-range smoke, not long-range wildfire camera views.",
+  "name": "firesense",
+  "not_a_real_world_accuracy_estimate": true,
+  "operating_points": {
+    "balanced": {
+      "abstain_reasons": {
+        "few_valid_flow_frames": 3,
+        "fog_near_threshold": 2,
+        "smoke_near_threshold": 3
+      },
+      "abstained_any": 6,
+      "fog": {
+        "correct_rejections": 2,
+        "detected": 0,
+        "false_alarms": 2,
+        "missed": 0,
+        "negative_windows": 9,
+        "negatives_decided": 4,
+        "positive_windows": 0,
+        "positives_decided": 0
+      },
+      "smoke": {
+        "correct_rejections": 1,
+        "detected": 2,
+        "false_alarms": 0,
+        "missed": 0,
+        "negative_windows": 2,
+        "negatives_decided": 1,
+        "positive_windows": 7,
+        "positives_decided": 2
+      }
+    },
+    "low_false_alarm": {
+      "abstain_reasons": {
+        "few_valid_flow_frames": 3,
+        "fog_near_threshold": 2,
+        "smoke_near_threshold": 2
+      },
+      "abstained_any": 7,
+      "fog": {
+        "correct_rejections": 2,
+        "detected": 0,
+        "false_alarms": 2,
+        "missed": 0,
+        "negative_windows": 9,
+        "negatives_decided": 4,
+        "positive_windows": 0,
+        "positives_decided": 0
+      },
+      "smoke": {
+        "correct_rejections": 1,
+        "detected": 0,
+        "false_alarms": 0,
+        "missed": 3,
+        "negative_windows": 2,
+        "negatives_decided": 1,
+        "positive_windows": 7,
+        "positives_decided": 3
+      }
+    }
+  },
+  "ranking_balanced_probs": {
+    "fog": {
+      "auroc_windows": null,
+      "cameras_neg": 5,
+      "cameras_pos": 0,
+      "n_neg": 9,
+      "n_pos": 0
+    },
+    "smoke": {
+      "auroc_windows": 1.0,
+      "cameras_neg": 1,
+      "cameras_pos": 4,
+      "n_neg": 2,
+      "n_pos": 7
+    }
+  },
+  "stage_b": "not run (no training or recalibration on real data); evaluation.json real status unchanged",
+  "status": "zero_shot_sanity_check",
+  "windows": [
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": []
+      },
+      "camera": "firesense_testneg04",
+      "decisions": {
+        "balanced": {
+          "fog": 0,
+          "smoke": 0
+        },
+        "low_false_alarm": {
+          "fog": 0,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": 0,
+        "smoke": 0
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3678185487729329,
+        "smoke": 0.41327670066195143
+      },
+      "stabilization": "applied",
+      "valid_flow_frames": 3,
+      "valid_mask_frames": 8,
+      "video": "testneg04",
+      "window": "testneg04-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "firesense_testneg04",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": 0,
+        "smoke": 0
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.3253818275498518,
+        "smoke": 0.3552721830402158
+      },
+      "stabilization": "applied",
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 6,
+      "video": "testneg04",
+      "window": "testneg04-w1"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold",
+          "fog_near_threshold"
+        ],
+        "low_false_alarm": [
+          "fog_near_threshold"
+        ]
+      },
+      "camera": "firesense_testpos02",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": 0,
+        "smoke": 1
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5353092621925152,
+        "smoke": 0.5423444573723541
+      },
+      "stabilization": "applied",
+      "valid_flow_frames": 9,
+      "valid_mask_frames": 12,
+      "video": "testpos02",
+      "window": "testpos02-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "firesense_testpos04",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": 0,
+        "smoke": 1
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.6237866224112698,
+        "smoke": 0.48922506904791385
+      },
+      "stabilization": "unreliable_background",
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 12,
+      "video": "testpos04",
+      "window": "testpos04-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "few_valid_flow_frames"
+        ],
+        "low_false_alarm": [
+          "few_valid_flow_frames"
+        ]
+      },
+      "camera": "firesense_testpos04",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": 0,
+        "smoke": 1
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.5528587962870106,
+        "smoke": 0.44655968989363465
+      },
+      "stabilization": "unreliable_background",
+      "valid_flow_frames": 0,
+      "valid_mask_frames": 12,
+      "video": "testpos04",
+      "window": "testpos04-w1"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold",
+          "fog_near_threshold"
+        ],
+        "low_false_alarm": [
+          "fog_near_threshold"
+        ]
+      },
+      "camera": "firesense_testpos05",
+      "decisions": {
+        "balanced": {
+          "fog": -1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": -1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": 0,
+        "smoke": 1
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.4413650620192102,
+        "smoke": 0.4717000672871217
+      },
+      "stabilization": "applied",
+      "valid_flow_frames": 12,
+      "valid_mask_frames": 12,
+      "video": "testpos05",
+      "window": "testpos05-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "firesense_testpos05",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": 0,
+        "smoke": 1
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.7007872327332235,
+        "smoke": 0.6307324330431827
+      },
+      "stabilization": "applied",
+      "valid_flow_frames": 12,
+      "valid_mask_frames": 12,
+      "video": "testpos05",
+      "window": "testpos05-w1"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [
+          "smoke_near_threshold"
+        ],
+        "low_false_alarm": []
+      },
+      "camera": "firesense_cctv_courtyard",
+      "decisions": {
+        "balanced": {
+          "fog": 1,
+          "smoke": -1
+        },
+        "low_false_alarm": {
+          "fog": 1,
+          "smoke": 0
+        }
+      },
+      "labels": {
+        "fog": 0,
+        "smoke": 1
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.7030307908199049,
+        "smoke": 0.5169448977525846
+      },
+      "stabilization": "applied",
+      "valid_flow_frames": 12,
+      "valid_mask_frames": 12,
+      "video": "testpos07",
+      "window": "testpos07-w0"
+    },
+    {
+      "abstain_reasons": {
+        "balanced": [],
+        "low_false_alarm": [
+          "smoke_near_threshold"
+        ]
+      },
+      "camera": "firesense_cctv_courtyard",
+      "decisions": {
+        "balanced": {
+          "fog": 0,
+          "smoke": 1
+        },
+        "low_false_alarm": {
+          "fog": 0,
+          "smoke": -1
+        }
+      },
+      "labels": {
+        "fog": 0,
+        "smoke": 1
+      },
+      "mask_source": "fallback_detector",
+      "probs": {
+        "fog": 0.25680852944242616,
+        "smoke": 0.7248796714854443
+      },
+      "stabilization": "applied",
+      "valid_flow_frames": 12,
+      "valid_mask_frames": 12,
+      "video": "testpos07",
+      "window": "testpos07-w1"
+    }
+  ]
+}

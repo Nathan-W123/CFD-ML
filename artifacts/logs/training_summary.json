@@ -1,12 +1,12 @@
 {
   "abstain_margins": {
     "balanced": {
-      "fog": 0.3023353190136098,
+      "fog": 0.5841010517724066,
       "smoke": 0.25
     },
     "low_false_alarm": {
-      "fog": 0.3023353190136098,
-      "smoke": 0.547560829673711
+      "fog": 0.5841010517724066,
+      "smoke": 0.25
     }
   },
   "artifacts": {
@@ -17,46 +17,57 @@
   },
   "calibration": {
     "temperatures": {
-      "fog": 1.5164496792937228,
-      "smoke": 1.5197535368530184
+      "fog": 1.1406620386478228,
+      "smoke": 1.5672607817039848
     },
     "thresholds": {
       "balanced": {
         "fog": {
-          "logit": -0.08633390895991697,
-          "prob": 0.47842991889138975
+          "logit": 0.04271996921804032,
+          "prob": 0.5106783683558145
         },
         "smoke": {
-          "logit": -0.043383780491726635,
-          "prob": 0.4891557557004273
+          "logit": -0.10910968281087355,
+          "prob": 0.4727496084189363
         }
       },
       "low_false_alarm": {
         "fog": {
-          "logit": -0.08633390895991697,
-          "prob": 0.47842991889138975
+          "logit": 0.04271996921804032,
+          "prob": 0.5106783683558145
         },
         "smoke": {
-          "logit": 0.7341351016290499,
-          "prob": 0.6757120354372478
+          "logit": 0.5166448288614558,
+          "prob": 0.6263628809877998
         }
       }
     }
   },
+  "category_support": {
+    "status": "applicable"
+  },
   "data_counts": {
     "test_iid": {
       "groups": 148,
+      "known_labels": {
+        "fog": 296,
+        "smoke": 296
+      },
       "originals": 148,
       "per_category": {
         "both": 74,
         "fog_only": 74,
         "neither": 74,
-        "smoke_only": 73
+        "smoke_only": 74
       },
-      "sequences": 295
+      "sequences": 296
     },
     "test_ood": {
       "groups": 199,
+      "known_labels": {
+        "fog": 398,
+        "smoke": 398
+      },
       "originals": 199,
       "per_category": {
         "both": 98,
@@ -68,6 +79,10 @@
     },
     "train": {
       "groups": 600,
+      "known_labels": {
+        "fog": 1800,
+        "smoke": 1800
+      },
       "originals": 600,
       "per_category": {
         "both": 450,
@@ -79,6 +94,10 @@
     },
     "val_calib": {
       "groups": 151,
+      "known_labels": {
+        "fog": 453,
+        "smoke": 453
+      },
       "originals": 151,
       "per_category": {
         "both": 114,
@@ -90,6 +109,10 @@
     },
     "val_select": {
       "groups": 100,
+      "known_labels": {
+        "fog": 300,
+        "smoke": 300
+      },
       "originals": 100,
       "per_category": {
         "both": 75,
@@ -102,8 +125,26 @@
   },
   "data_source": "synthetic",
   "experiment": "C",
-  "exported_seed": 0,
+  "exported_seed": 1,
   "insufficient_calibration_data": false,
+  "label_support": {
+    "fog": {
+      "calibration": "fitted",
+      "n_known": 453,
+      "n_pos": 228,
+      "n_unknown": 0,
+      "reason": null,
+      "sufficient": true
+    },
+    "smoke": {
+      "calibration": "fitted",
+      "n_known": 453,
+      "n_pos": 225,
+      "n_unknown": 0,
+      "reason": null,
+      "sufficient": true
+    }
+  },
   "provenance": {
     "init": "random"
   },
@@ -115,15 +156,19 @@
   "seeds": {
     "0": {
       "balance": "none",
-      "best_epoch": 19,
-      "best_val_select_loss": 0.6686250567436218,
-      "epochs_run": 26,
+      "best_epoch": 9,
+      "best_val_select_loss": 0.6768093109130859,
+      "epochs_run": 16,
       "pos_weight": null,
       "settings": {
         "batch_size": 64,
         "freeze_encoder_epochs": 0,
         "grad_clip_norm": 1.0,
-        "loss": "bce_with_logits",
+        "known_train_targets": {
+          "fog": 1800,
+          "smoke": 1800
+        },
+        "loss": "bce_with_logits_masked_unknown",
         "lr": 0.001,
         "max_epochs": 50,
         "optimizer": "adamw",
@@ -132,19 +177,23 @@
         "weight_decay": 0.0001
       },
       "stopped_early": true,
-      "train_seconds": 4.02855932500006
+      "train_seconds": 3.4198107000011078
     },
     "1": {
       "balance": "none",
-      "best_epoch": 14,
-      "best_val_select_loss": 0.6701498627662659,
-      "epochs_run": 21,
+      "best_epoch": 10,
+      "best_val_select_loss": 0.6750677227973938,
+      "epochs_run": 17,
       "pos_weight": null,
       "settings": {
         "batch_size": 64,
         "freeze_encoder_epochs": 0,
         "grad_clip_norm": 1.0,
-        "loss": "bce_with_logits",
+        "known_train_targets": {
+          "fog": 1800,
+          "smoke": 1800
+        },
+        "loss": "bce_with_logits_masked_unknown",
         "lr": 0.001,
         "max_epochs": 50,
         "optimizer": "adamw",
@@ -153,19 +202,23 @@
         "weight_decay": 0.0001
       },
       "stopped_early": true,
-      "train_seconds": 3.3351221589991837
+      "train_seconds": 2.9135324679991754
     },
     "2": {
       "balance": "none",
-      "best_epoch": 17,
-      "best_val_select_loss": 0.6686874628067017,
-      "epochs_run": 24,
+      "best_epoch": 16,
+      "best_val_select_loss": 0.6801686882972717,
+      "epochs_run": 23,
       "pos_weight": null,
       "settings": {
         "batch_size": 64,
         "freeze_encoder_epochs": 0,
         "grad_clip_norm": 1.0,
-        "loss": "bce_with_logits",
+        "known_train_targets": {
+          "fog": 1800,
+          "smoke": 1800
+        },
+        "loss": "bce_with_logits_masked_unknown",
         "lr": 0.001,
         "max_epochs": 50,
         "optimizer": "adamw",
@@ -174,9 +227,10 @@
         "weight_decay": 0.0001
       },
       "stopped_early": true,
-      "train_seconds": 3.7629300049993617
+      "train_seconds": 3.94207224999991
     }
   },
   "stage": "A_cfd_pretraining",
-  "training_curves": "artifacts/logs/training_curves.png"
+  "training_curves": "artifacts/logs/training_curves.png",
+  "untrained_labels": []
 }
