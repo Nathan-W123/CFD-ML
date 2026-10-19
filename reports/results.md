@@ -2,33 +2,34 @@
 
 > Synthetic evaluation only: these numbers measure how well the motion signal of simulated, rendered sequences is learned and how robust it is to simulated nuisances. They are not real-world accuracy and do not show that the model reduces fog-related false alarms on real cameras.
 
-**Real-world status: pending.** No labelled real surveillance footage with compatible frame timing (12 observations ~5 s apart, each with a frame ~1 s earlier) was available; real-world validation is pending.
+**Real-world status: pending.** No labelled real surveillance footage with frame timing compatible with the model (its exported observation interval and flow lag, e.g. 12 observations ~5 s apart each with a frame ~1 s earlier for the near-field profile) was available; real-world validation is pending.
 
 ## Data
 
 | split | sequences | simulations | per category (sequences) |
 |---|---|---|---|
-| test_iid | 295 | 148 | both 74, fog_only 74, neither 74, smoke_only 73 |
+| test_iid | 296 | 148 | both 74, fog_only 74, neither 74, smoke_only 74 |
 | test_ood | 398 | 199 | both 98, fog_only 100, neither 100, smoke_only 100 |
 | train | 1800 | 600 | both 450, fog_only 450, neither 450, smoke_only 450 |
 | val_calib | 453 | 151 | both 114, fog_only 114, neither 114, smoke_only 111 |
 | val_select | 300 | 100 | both 75, fog_only 75, neither 75, smoke_only 75 |
 
-Generation: simulations accepted 1198, simulation attempts rejected 29, render retries 130, sequences 3246, slots without valid simulation 0.
+Generation: simulations accepted 1198, simulation attempts rejected 28, render retries 130, sequences 3247, slots without valid simulation 0.
 
 ## Data QA (qa_dataset.py, train split, 1800 sequences)
 
 | category | n | mask valid steps | flow valid steps |
 |---|---|---|---|
-| both | 450 | 87.6 % | 49.9 % |
-| fog_only | 450 | 82.9 % | 48.1 % |
-| neither | 450 | 67.4 % | 35.5 % |
-| smoke_only | 450 | 78.8 % | 57.0 % |
+| both | 450 | 87.0 % | 47.9 % |
+| fog_only | 450 | 82.8 % | 47.7 % |
+| neither | 450 | 62.3 % | 37.1 % |
+| smoke_only | 450 | 79.3 % | 56.1 % |
 
-Optical flow vs CFD velocity (163 sequences): horizontal correlation 0.848, sign agreement where the CFD moves 94.0 %; vertical correlation 0.548, sign agreement where the CFD moves 76.9 %.
+Optical flow vs CFD velocity (158 sequences): horizontal correlation 0.832, sign agreement where the CFD moves 91.8 %; vertical correlation 0.409, sign agreement where the CFD moves 78.4 %.
 
 Validity flags / parameters with folded univariate AUROC above 0.6:
-* validity flag mask_valid predicts fog (AUC 0.613)
+* validity flag mask_valid predicts smoke (AUC 0.600)
+* validity flag mask_valid predicts fog (AUC 0.639)
 
 ## Headline: experiment C (CFD-pretrained GRU) against baselines
 
@@ -36,184 +37,187 @@ AUROC is threshold-free; F1, false smoke on fog_only and abstention use the oper
 
 | model | split | operating point | smoke AUROC | fog AUROC | smoke F1 | fog F1 | false smoke on fog_only | ECE smoke / fog | abstain (any) |
 |---|---|---|---|---|---|---|---|---|---|
-| C: GRU (exported seed) | test_iid | balanced | 0.642 | 0.687 | 0.567 | 0.660 | 45.9 % | 0.067 / 0.073 | 72.2 % |
-| C: GRU (exported seed) | test_iid | low_false_alarm | 0.642 | 0.687 | 0.204 | 0.660 | 4.1 % | 0.067 / 0.073 | 74.9 % |
-| C: GRU (exported seed) | test_ood | balanced | 0.638 | 0.646 | 0.615 | 0.632 | 52.0 % | 0.054 / 0.071 | 70.6 % |
-| C: GRU (exported seed) | test_ood | low_false_alarm | 0.638 | 0.646 | 0.331 | 0.632 | 12.0 % | 0.054 / 0.071 | 78.1 % |
-| A: motion-cue heuristic | test_iid | balanced | 0.560 | 0.487 | 0.502 | 0.639 | 44.6 % | 0.054 / 0.060 | 0.0 % |
-| A: motion-cue heuristic | test_iid | low_false_alarm | 0.560 | 0.487 | 0.039 | 0.639 | 1.4 % | 0.054 / 0.060 | 0.0 % |
-| A: motion-cue heuristic | test_ood | balanced | 0.491 | 0.500 | 0.480 | 0.619 | 46.0 % | 0.059 / 0.100 | 0.0 % |
-| A: motion-cue heuristic | test_ood | low_false_alarm | 0.491 | 0.500 | 0.020 | 0.619 | 1.0 % | 0.059 / 0.100 | 0.0 % |
-| pooled logistic (14 x mean/std) | test_iid | balanced | 0.622 | 0.731 | 0.585 | 0.686 | 67.6 % | 0.096 / 0.058 | 0.0 % |
-| pooled logistic (14 x mean/std) | test_iid | low_false_alarm | 0.622 | 0.731 | 0.170 | 0.686 | 4.1 % | 0.096 / 0.058 | 0.0 % |
-| pooled logistic (14 x mean/std) | test_ood | balanced | 0.614 | 0.637 | 0.621 | 0.608 | 65.0 % | 0.073 / 0.079 | 0.0 % |
-| pooled logistic (14 x mean/std) | test_ood | low_false_alarm | 0.614 | 0.637 | 0.349 | 0.608 | 18.0 % | 0.073 / 0.079 | 0.0 % |
+| C: GRU (exported seed) | test_iid | balanced | 0.595 | 0.747 | 0.595 | 0.720 | 77.0 % | 0.083 / 0.068 | 75.0 % |
+| C: GRU (exported seed) | test_iid | low_false_alarm | 0.595 | 0.747 | 0.186 | 0.720 | 4.1 % | 0.083 / 0.068 | 62.2 % |
+| C: GRU (exported seed) | test_ood | balanced | 0.641 | 0.692 | 0.655 | 0.635 | 70.0 % | 0.034 / 0.076 | 71.4 % |
+| C: GRU (exported seed) | test_ood | low_false_alarm | 0.641 | 0.692 | 0.380 | 0.635 | 18.0 % | 0.034 / 0.076 | 69.3 % |
+| A: motion-cue heuristic | test_iid | balanced | 0.574 | 0.500 | 0.613 | 0.612 | 63.5 % | 0.099 / 0.095 | 0.0 % |
+| A: motion-cue heuristic | test_iid | low_false_alarm | 0.574 | 0.500 | 0.000 | 0.612 | 1.4 % | 0.099 / 0.095 | 0.0 % |
+| A: motion-cue heuristic | test_ood | balanced | 0.545 | 0.508 | 0.556 | 0.600 | 54.0 % | 0.093 / 0.058 | 0.0 % |
+| A: motion-cue heuristic | test_ood | low_false_alarm | 0.545 | 0.508 | 0.000 | 0.600 | 1.0 % | 0.093 / 0.058 | 0.0 % |
+| pooled logistic (14 x mean/std) | test_iid | balanced | 0.597 | 0.732 | 0.624 | 0.653 | 70.3 % | 0.081 / 0.048 | 0.0 % |
+| pooled logistic (14 x mean/std) | test_iid | low_false_alarm | 0.597 | 0.732 | 0.087 | 0.653 | 4.1 % | 0.081 / 0.048 | 0.0 % |
+| pooled logistic (14 x mean/std) | test_ood | balanced | 0.621 | 0.691 | 0.634 | 0.616 | 70.0 % | 0.071 / 0.073 | 0.0 % |
+| pooled logistic (14 x mean/std) | test_ood | low_false_alarm | 0.621 | 0.691 | 0.326 | 0.616 | 14.0 % | 0.071 / 0.073 | 0.0 % |
 
-C temperatures: fog T = 1.516, smoke T = 1.520. C false smoke on the fog_only clips it does not abstain on: test_iid balanced 75.9 % (22/29); test_iid low_false_alarm 0.0 % (0/24); test_ood balanced 77.3 % (34/44); test_ood low_false_alarm 0.0 % (0/31).
+C temperatures: fog T = 1.141, smoke T = 1.567. C false smoke on the fog_only clips it does not abstain on: test_iid balanced 76.2 % (16/21); test_iid low_false_alarm 0.0 % (0/37); test_ood balanced 92.0 % (46/50); test_ood low_false_alarm 12.2 % (5/41).
 
 Mean ± sd over the 3 training seeds (balanced point):
 
 | split | smoke AUROC | fog AUROC | false smoke on fog_only | smoke ECE | fog ECE |
 |---|---|---|---|---|---|
-| test_iid | 0.638 ± 0.007 | 0.699 ± 0.013 | 39.2 ± 5.9 % | 0.063 ± 0.007 | 0.068 ± 0.005 |
-| test_ood | 0.637 ± 0.010 | 0.653 ± 0.010 | 50.7 ± 3.2 % | 0.048 ± 0.012 | 0.068 ± 0.004 |
+| test_iid | 0.590 ± 0.020 | 0.724 ± 0.020 | 64.0 ± 17.1 % | 0.078 ± 0.012 | 0.057 ± 0.022 |
+| test_ood | 0.624 ± 0.016 | 0.694 ± 0.005 | 66.0 ± 5.3 % | 0.062 ± 0.025 | 0.065 ± 0.010 |
 
 95 % grouped-bootstrap intervals (resampling simulations), exported model:
 
 | split | operating point | smoke AUROC | fog AUROC | false smoke on fog_only |
 |---|---|---|---|---|
-| test_iid | balanced | 0.642 [0.57, 0.71] | 0.687 [0.62, 0.76] | 45.9 % [36, 57] |
-| test_iid | low_false_alarm | 0.642 [0.57, 0.71] | 0.687 [0.62, 0.76] | 4.1 % [0, 9] |
-| test_ood | balanced | 0.638 [0.58, 0.70] | 0.646 [0.57, 0.70] | 52.0 % [41, 64] |
-| test_ood | low_false_alarm | 0.638 [0.58, 0.70] | 0.646 [0.57, 0.70] | 12.0 % [5, 20] |
+| test_iid | balanced | 0.595 [0.53, 0.66] | 0.747 [0.68, 0.81] | 77.0 % [67, 86] |
+| test_iid | low_false_alarm | 0.595 [0.53, 0.66] | 0.747 [0.68, 0.81] | 4.1 % [0, 9] |
+| test_ood | balanced | 0.641 [0.58, 0.71] | 0.692 [0.63, 0.75] | 70.0 % [59, 80] |
+| test_ood | low_false_alarm | 0.641 [0.58, 0.71] | 0.692 [0.63, 0.75] | 18.0 % [10, 26] |
 
 ### C on test_iid by category (balanced point)
 
 | category | n | smoke recall | fog recall | smoke AUROC | fog AUROC | false smoke on fog_only | abstain |
 |---|---|---|---|---|---|---|---|
-| both | 74 | 0.541 | 0.716 | n/a | n/a | n/a | 74.3 % |
-| fog_only | 74 | n/a | 0.730 | n/a | n/a | 45.9 % | 70.3 % |
-| neither | 74 | n/a | n/a | n/a | n/a | n/a | 78.4 % |
-| smoke_only | 73 | 0.548 | n/a | n/a | n/a | n/a | 65.8 % |
+| both | 74 | 0.784 | 0.757 | n/a | n/a | n/a | 78.4 % |
+| fog_only | 74 | n/a | 0.770 | n/a | n/a | 77.0 % | 82.4 % |
+| neither | 74 | n/a | n/a | n/a | n/a | n/a | 75.7 % |
+| smoke_only | 74 | 0.595 | n/a | n/a | n/a | n/a | 63.5 % |
 
 ### C on test_iid by regime (balanced point)
 
 | regime | n | smoke recall | fog recall | smoke AUROC | fog AUROC | false smoke on fog_only | abstain |
 |---|---|---|---|---|---|---|---|
-| advected_fog_bank | 20 | n/a | 0.700 | n/a | n/a | 45.0 % | 80.0 % |
-| advected_smoke | 12 | 0.333 | n/a | n/a | n/a | n/a | 100.0 % |
-| advected_smoke+advected_fog_bank | 2 | 0.000 | 1.000 | n/a | n/a | n/a | 100.0 % |
-| advected_smoke+fog_dissipating | 6 | 0.333 | 1.000 | n/a | n/a | n/a | 83.3 % |
-| advected_smoke+fog_patch | 2 | 0.500 | 0.500 | n/a | n/a | n/a | 50.0 % |
-| advected_smoke+steam_fog | 2 | 0.500 | 0.500 | n/a | n/a | n/a | 100.0 % |
-| camera_artifact | 2 | n/a | n/a | n/a | n/a | n/a | 100.0 % |
-| crosswind | 6 | 0.500 | n/a | n/a | n/a | n/a | 83.3 % |
-| crosswind+advected_fog_bank | 6 | 0.167 | 0.500 | n/a | n/a | n/a | 83.3 % |
-| crosswind+fog_dissipating | 6 | 0.167 | 0.833 | n/a | n/a | n/a | 83.3 % |
-| distant_cloud | 2 | n/a | n/a | n/a | n/a | n/a | 100.0 % |
-| dust_burst | 30 | n/a | n/a | n/a | n/a | n/a | 56.7 % |
-| fog_dissipating | 16 | n/a | 0.938 | n/a | n/a | 43.8 % | 81.2 % |
-| fog_patch | 20 | n/a | 0.600 | n/a | n/a | 45.0 % | 65.0 % |
-| haze_drift | 38 | n/a | n/a | n/a | n/a | n/a | 94.7 % |
-| hot_plume | 18 | 0.667 | n/a | n/a | n/a | n/a | 55.6 % |
-| hot_plume+fog_dissipating | 2 | 1.000 | 1.000 | n/a | n/a | n/a | 100.0 % |
-| hot_plume+fog_patch | 4 | 1.000 | 0.500 | n/a | n/a | n/a | 25.0 % |
-| hot_plume+radiation_fog | 2 | 0.500 | 0.500 | n/a | n/a | n/a | 50.0 % |
-| hot_plume+steam_fog | 4 | 0.500 | 0.250 | n/a | n/a | n/a | 75.0 % |
-| illumination_change | 2 | n/a | n/a | n/a | n/a | n/a | 50.0 % |
-| pulsing | 25 | 0.520 | n/a | n/a | n/a | n/a | 48.0 % |
-| pulsing+advected_fog_bank | 6 | 0.333 | 1.000 | n/a | n/a | n/a | 66.7 % |
+| advected_fog_bank | 20 | n/a | 0.900 | n/a | n/a | 90.0 % | 85.0 % |
+| advected_smoke | 12 | 0.750 | n/a | n/a | n/a | n/a | 91.7 % |
+| advected_smoke+advected_fog_bank | 2 | 1.000 | 1.000 | n/a | n/a | n/a | 100.0 % |
+| advected_smoke+fog_dissipating | 6 | 0.500 | 1.000 | n/a | n/a | n/a | 100.0 % |
+| advected_smoke+fog_patch | 2 | 0.500 | 0.500 | n/a | n/a | n/a | 100.0 % |
+| advected_smoke+steam_fog | 2 | 1.000 | 1.000 | n/a | n/a | n/a | 100.0 % |
+| camera_artifact | 10 | n/a | n/a | n/a | n/a | n/a | 90.0 % |
+| crosswind | 6 | 1.000 | n/a | n/a | n/a | n/a | 66.7 % |
+| crosswind+advected_fog_bank | 6 | 0.667 | 1.000 | n/a | n/a | n/a | 100.0 % |
+| crosswind+fog_dissipating | 6 | 0.667 | 1.000 | n/a | n/a | n/a | 100.0 % |
+| distant_cloud | 6 | n/a | n/a | n/a | n/a | n/a | 83.3 % |
+| dust_burst | 18 | n/a | n/a | n/a | n/a | n/a | 44.4 % |
+| fog_dissipating | 16 | n/a | 0.875 | n/a | n/a | 87.5 % | 75.0 % |
+| fog_patch | 20 | n/a | 0.650 | n/a | n/a | 65.0 % | 80.0 % |
+| haze_drift | 26 | n/a | n/a | n/a | n/a | n/a | 96.2 % |
+| hot_plume | 18 | 0.611 | n/a | n/a | n/a | n/a | 66.7 % |
+| hot_plume+fog_dissipating | 2 | 1.000 | 1.000 | n/a | n/a | n/a | 50.0 % |
+| hot_plume+fog_patch | 4 | 0.750 | 0.500 | n/a | n/a | n/a | 50.0 % |
+| hot_plume+radiation_fog | 2 | 1.000 | 0.000 | n/a | n/a | n/a | 0.0 % |
+| hot_plume+steam_fog | 4 | 0.750 | 0.250 | n/a | n/a | n/a | 75.0 % |
+| illumination_change | 14 | n/a | n/a | n/a | n/a | n/a | 64.3 % |
+| pulsing | 26 | 0.346 | n/a | n/a | n/a | n/a | 46.2 % |
+| pulsing+advected_fog_bank | 6 | 0.833 | 1.000 | n/a | n/a | n/a | 83.3 % |
 | pulsing+fog_dissipating | 6 | 0.833 | 0.833 | n/a | n/a | n/a | 83.3 % |
-| pulsing+fog_patch | 4 | 0.500 | 0.250 | n/a | n/a | n/a | 75.0 % |
-| pulsing+steam_fog | 2 | 1.000 | 1.000 | n/a | n/a | n/a | 50.0 % |
-| radiation_fog | 8 | n/a | 1.000 | n/a | n/a | 37.5 % | 100.0 % |
-| smoldering | 12 | 0.667 | n/a | n/a | n/a | n/a | 75.0 % |
-| smoldering+advected_fog_bank | 10 | 0.700 | 0.800 | n/a | n/a | n/a | 80.0 % |
+| pulsing+fog_patch | 4 | 0.750 | 0.250 | n/a | n/a | n/a | 75.0 % |
+| pulsing+steam_fog | 2 | 0.500 | 0.500 | n/a | n/a | n/a | 100.0 % |
+| radiation_fog | 8 | n/a | 0.875 | n/a | n/a | 62.5 % | 100.0 % |
+| smoldering | 12 | 0.750 | n/a | n/a | n/a | n/a | 66.7 % |
+| smoldering+advected_fog_bank | 10 | 1.000 | 0.900 | n/a | n/a | n/a | 80.0 % |
 | smoldering+fog_dissipating | 2 | 1.000 | 1.000 | n/a | n/a | n/a | 0.0 % |
-| smoldering+fog_patch | 8 | 0.625 | 0.625 | n/a | n/a | n/a | 87.5 % |
-| steam_fog | 8 | n/a | 0.500 | n/a | n/a | 75.0 % | 12.5 % |
-| terrain_fog | 2 | n/a | 0.500 | n/a | n/a | 0.0 % | 50.0 % |
+| smoldering+fog_patch | 8 | 0.750 | 0.500 | n/a | n/a | n/a | 62.5 % |
+| steam_fog | 8 | n/a | 0.500 | n/a | n/a | 75.0 % | 75.0 % |
+| terrain_fog | 2 | n/a | 0.500 | n/a | n/a | 50.0 % | 100.0 % |
 
 ### C on test_iid by mask_source (balanced point)
 
 | mask_source | n | smoke recall | fog recall | smoke AUROC | fog AUROC | false smoke on fog_only | abstain |
 |---|---|---|---|---|---|---|---|
-| bbox | 62 | 0.629 | 0.690 | 0.711 | 0.770 | 21.4 % | 66.1 % |
-| degraded | 140 | 0.522 | 0.779 | 0.571 | 0.685 | 61.1 % | 72.1 % |
-| detector | 93 | 0.512 | 0.667 | 0.680 | 0.657 | 37.5 % | 76.3 % |
+| bbox | 62 | 0.657 | 0.897 | 0.608 | 0.844 | 78.6 % | 71.0 % |
+| degraded | 140 | 0.710 | 0.721 | 0.580 | 0.733 | 80.6 % | 72.9 % |
+| detector | 94 | 0.682 | 0.745 | 0.617 | 0.715 | 70.8 % | 80.9 % |
 
 ### C on test_iid by wind_bin (balanced point)
 
 | wind_bin | n | smoke recall | fog recall | smoke AUROC | fog AUROC | false smoke on fog_only | abstain |
 |---|---|---|---|---|---|---|---|
-| 0.0-1.5 | 64 | 0.529 | 0.600 | 0.695 | 0.599 | 37.5 % | 67.2 % |
-| 1.5-3.0 | 74 | 0.605 | 0.679 | 0.707 | 0.622 | 44.4 % | 74.3 % |
-| 3.0-4.5 | 64 | 0.692 | 0.844 | 0.669 | 0.705 | 45.0 % | 76.6 % |
-| 4.5-6.0 | 57 | 0.414 | 0.714 | 0.521 | 0.798 | 57.1 % | 71.9 % |
-| 6.0-7.5 | 36 | 0.450 | 0.850 | 0.566 | 0.825 | 50.0 % | 69.4 % |
+| 0.0-1.5 | 64 | 0.618 | 0.575 | 0.558 | 0.595 | 62.5 % | 71.9 % |
+| 1.5-3.0 | 74 | 0.632 | 0.750 | 0.633 | 0.727 | 77.8 % | 81.1 % |
+| 3.0-4.5 | 64 | 0.692 | 0.844 | 0.613 | 0.810 | 85.0 % | 78.1 % |
+| 4.5-6.0 | 58 | 0.733 | 0.893 | 0.517 | 0.831 | 92.9 % | 69.0 % |
+| 6.0-7.5 | 36 | 0.850 | 0.850 | 0.681 | 0.884 | 50.0 % | 72.2 % |
 
 ### C on test_ood by category (balanced point)
 
 | category | n | smoke recall | fog recall | smoke AUROC | fog AUROC | false smoke on fog_only | abstain |
 |---|---|---|---|---|---|---|---|
-| both | 98 | 0.602 | 0.663 | n/a | n/a | n/a | 68.4 % |
-| fog_only | 100 | n/a | 0.640 | n/a | n/a | 52.0 % | 70.0 % |
-| neither | 100 | n/a | n/a | n/a | n/a | n/a | 83.0 % |
-| smoke_only | 100 | 0.650 | n/a | n/a | n/a | n/a | 61.0 % |
+| both | 98 | 0.827 | 0.633 | n/a | n/a | n/a | 77.6 % |
+| fog_only | 100 | n/a | 0.630 | n/a | n/a | 70.0 % | 72.0 % |
+| neither | 100 | n/a | n/a | n/a | n/a | n/a | 73.0 % |
+| smoke_only | 100 | 0.720 | n/a | n/a | n/a | n/a | 63.0 % |
 
 ### C on test_ood by holdout_tag (balanced point)
 
 | holdout_tag | n | smoke recall | fog recall | smoke AUROC | fog AUROC | false smoke on fog_only | abstain |
 |---|---|---|---|---|---|---|---|
-| elevated_source | 200 | 0.650 | 0.640 | 0.628 | 0.666 | 60.0 % | 67.5 % |
-| fast_wind | 198 | 0.602 | 0.663 | 0.653 | 0.629 | 44.0 % | 73.7 % |
+| elevated_source | 200 | 0.760 | 0.600 | 0.628 | 0.705 | 74.0 % | 65.0 % |
+| fast_wind | 198 | 0.786 | 0.663 | 0.660 | 0.682 | 66.0 % | 77.8 % |
 
 ### C on test_ood by regime (balanced point)
 
 | regime | n | smoke recall | fog recall | smoke AUROC | fog AUROC | false smoke on fog_only | abstain |
 |---|---|---|---|---|---|---|---|
-| advected_fog_bank | 30 | n/a | 0.767 | n/a | n/a | 60.0 % | 66.7 % |
-| advected_smoke | 18 | 0.611 | n/a | n/a | n/a | n/a | 77.8 % |
-| advected_smoke+advected_fog_bank | 2 | 0.000 | 0.000 | n/a | n/a | n/a | 100.0 % |
-| advected_smoke+fog_patch | 2 | 0.500 | 0.500 | n/a | n/a | n/a | 100.0 % |
-| advected_smoke+steam_fog | 2 | 0.500 | 1.000 | n/a | n/a | n/a | 100.0 % |
-| crosswind | 18 | 0.556 | n/a | n/a | n/a | n/a | 55.6 % |
-| crosswind+advected_fog_bank | 10 | 0.800 | 0.700 | n/a | n/a | n/a | 60.0 % |
+| advected_fog_bank | 30 | n/a | 0.767 | n/a | n/a | 76.7 % | 80.0 % |
+| advected_smoke | 18 | 0.722 | n/a | n/a | n/a | n/a | 83.3 % |
+| advected_smoke+advected_fog_bank | 2 | 0.500 | 0.000 | n/a | n/a | n/a | 50.0 % |
+| advected_smoke+fog_patch | 2 | 0.500 | 1.000 | n/a | n/a | n/a | 100.0 % |
+| advected_smoke+steam_fog | 2 | 1.000 | 1.000 | n/a | n/a | n/a | 100.0 % |
+| camera_artifact | 20 | n/a | n/a | n/a | n/a | n/a | 75.0 % |
+| crosswind | 18 | 0.833 | n/a | n/a | n/a | n/a | 38.9 % |
+| crosswind+advected_fog_bank | 10 | 1.000 | 0.700 | n/a | n/a | n/a | 80.0 % |
 | crosswind+fog_patch | 2 | 1.000 | 1.000 | n/a | n/a | n/a | 50.0 % |
-| dust_burst | 42 | n/a | n/a | n/a | n/a | n/a | 83.3 % |
-| fog_dissipating | 32 | n/a | 0.719 | n/a | n/a | 37.5 % | 81.2 % |
-| fog_patch | 20 | n/a | 0.400 | n/a | n/a | 55.0 % | 55.0 % |
-| haze_drift | 56 | n/a | n/a | n/a | n/a | n/a | 83.9 % |
-| hot_plume | 28 | 0.857 | n/a | n/a | n/a | n/a | 53.6 % |
-| hot_plume+advected_fog_bank | 16 | 0.688 | 0.625 | n/a | n/a | n/a | 68.8 % |
-| hot_plume+fog_dissipating | 2 | 1.000 | 1.000 | n/a | n/a | n/a | 50.0 % |
-| hot_plume+fog_patch | 6 | 0.333 | 0.833 | n/a | n/a | n/a | 66.7 % |
+| distant_cloud | 10 | n/a | n/a | n/a | n/a | n/a | 80.0 % |
+| dust_burst | 24 | n/a | n/a | n/a | n/a | n/a | 66.7 % |
+| fog_dissipating | 32 | n/a | 0.688 | n/a | n/a | 62.5 % | 84.4 % |
+| fog_patch | 20 | n/a | 0.450 | n/a | n/a | 65.0 % | 60.0 % |
+| haze_drift | 36 | n/a | n/a | n/a | n/a | n/a | 75.0 % |
+| hot_plume | 28 | 0.821 | n/a | n/a | n/a | n/a | 50.0 % |
+| hot_plume+advected_fog_bank | 16 | 0.688 | 0.500 | n/a | n/a | n/a | 75.0 % |
+| hot_plume+fog_dissipating | 2 | 1.000 | 1.000 | n/a | n/a | n/a | 100.0 % |
+| hot_plume+fog_patch | 6 | 0.667 | 0.833 | n/a | n/a | n/a | 100.0 % |
 | hot_plume+radiation_fog | 2 | 0.000 | 1.000 | n/a | n/a | n/a | 100.0 % |
-| illumination_change | 2 | n/a | n/a | n/a | n/a | n/a | 50.0 % |
-| pulsing | 18 | 0.444 | n/a | n/a | n/a | n/a | 61.1 % |
-| pulsing+advected_fog_bank | 10 | 0.700 | 0.600 | n/a | n/a | n/a | 70.0 % |
-| pulsing+fog_dissipating | 4 | 0.500 | 0.750 | n/a | n/a | n/a | 100.0 % |
-| pulsing+fog_patch | 4 | 0.750 | 0.500 | n/a | n/a | n/a | 50.0 % |
-| pulsing+radiation_fog | 4 | 1.000 | 0.750 | n/a | n/a | n/a | 50.0 % |
-| radiation_fog | 12 | n/a | 0.750 | n/a | n/a | 58.3 % | 75.0 % |
-| smoldering | 18 | 0.667 | n/a | n/a | n/a | n/a | 61.1 % |
-| smoldering+advected_fog_bank | 8 | 0.375 | 0.375 | n/a | n/a | n/a | 75.0 % |
-| smoldering+fog_dissipating | 10 | 0.600 | 0.800 | n/a | n/a | n/a | 90.0 % |
-| smoldering+fog_patch | 10 | 0.500 | 0.700 | n/a | n/a | n/a | 40.0 % |
-| smoldering+radiation_fog | 2 | 0.000 | 0.500 | n/a | n/a | n/a | 100.0 % |
-| smoldering+steam_fog | 2 | 1.000 | 0.500 | n/a | n/a | n/a | 0.0 % |
-| steam_fog | 6 | n/a | 0.167 | n/a | n/a | 66.7 % | 66.7 % |
+| illumination_change | 10 | n/a | n/a | n/a | n/a | n/a | 70.0 % |
+| pulsing | 18 | 0.444 | n/a | n/a | n/a | n/a | 72.2 % |
+| pulsing+advected_fog_bank | 10 | 0.900 | 0.600 | n/a | n/a | n/a | 80.0 % |
+| pulsing+fog_dissipating | 4 | 1.000 | 0.750 | n/a | n/a | n/a | 50.0 % |
+| pulsing+fog_patch | 4 | 1.000 | 0.250 | n/a | n/a | n/a | 50.0 % |
+| pulsing+radiation_fog | 4 | 1.000 | 0.750 | n/a | n/a | n/a | 25.0 % |
+| radiation_fog | 12 | n/a | 0.667 | n/a | n/a | 91.7 % | 58.3 % |
+| smoldering | 18 | 0.722 | n/a | n/a | n/a | n/a | 77.8 % |
+| smoldering+advected_fog_bank | 8 | 0.875 | 0.500 | n/a | n/a | n/a | 87.5 % |
+| smoldering+fog_dissipating | 10 | 0.900 | 0.600 | n/a | n/a | n/a | 90.0 % |
+| smoldering+fog_patch | 10 | 0.900 | 0.700 | n/a | n/a | n/a | 80.0 % |
+| smoldering+radiation_fog | 2 | 0.000 | 1.000 | n/a | n/a | n/a | 100.0 % |
+| smoldering+steam_fog | 2 | 1.000 | 0.000 | n/a | n/a | n/a | 50.0 % |
+| steam_fog | 6 | n/a | 0.167 | n/a | n/a | 50.0 % | 33.3 % |
 
 ### C on test_ood by mask_source (balanced point)
 
 | mask_source | n | smoke recall | fog recall | smoke AUROC | fog AUROC | false smoke on fog_only | abstain |
 |---|---|---|---|---|---|---|---|
-| bbox | 84 | 0.610 | 0.641 | 0.673 | 0.660 | 33.3 % | 73.8 % |
-| degraded | 189 | 0.685 | 0.724 | 0.609 | 0.664 | 68.0 % | 67.2 % |
-| detector | 125 | 0.559 | 0.541 | 0.674 | 0.600 | 37.5 % | 73.6 % |
+| bbox | 84 | 0.707 | 0.718 | 0.680 | 0.782 | 44.4 % | 70.2 % |
+| degraded | 189 | 0.809 | 0.694 | 0.594 | 0.694 | 88.0 % | 71.4 % |
+| detector | 125 | 0.765 | 0.475 | 0.683 | 0.618 | 56.2 % | 72.0 % |
 
 ### C on test_ood by wind_bin (balanced point)
 
 | wind_bin | n | smoke recall | fog recall | smoke AUROC | fog AUROC | false smoke on fog_only | abstain |
 |---|---|---|---|---|---|---|---|
-| 0.0-1.5 | 58 | 0.500 | 0.667 | 0.458 | 0.586 | 62.5 % | 67.2 % |
-| 1.5-3.0 | 50 | 0.500 | 0.842 | 0.462 | 0.658 | 60.0 % | 66.0 % |
-| 3.0-4.5 | 42 | 0.808 | 0.375 | 0.712 | 0.647 | 62.5 % | 69.0 % |
-| 4.5-6.0 | 32 | 0.667 | 0.500 | 0.823 | 0.770 | 0.0 % | 71.9 % |
-| 6.0-7.5 | 80 | 0.675 | 0.643 | 0.723 | 0.705 | 55.6 % | 75.0 % |
-| 7.5-9.0 | 136 | 0.586 | 0.641 | 0.628 | 0.554 | 41.7 % | 71.3 % |
+| 0.0-1.5 | 58 | 0.556 | 0.583 | 0.479 | 0.667 | 68.8 % | 70.7 % |
+| 1.5-3.0 | 50 | 0.750 | 0.789 | 0.460 | 0.553 | 85.0 % | 64.0 % |
+| 3.0-4.5 | 42 | 0.846 | 0.562 | 0.624 | 0.710 | 75.0 % | 59.5 % |
+| 4.5-6.0 | 32 | 0.792 | 0.286 | 0.807 | 0.659 | 0.0 % | 78.1 % |
+| 6.0-7.5 | 80 | 0.800 | 0.571 | 0.738 | 0.726 | 77.8 % | 67.5 % |
+| 7.5-9.0 | 136 | 0.786 | 0.667 | 0.633 | 0.629 | 61.1 % | 78.7 % |
 
 ## Robustness (re-renders of the test_iid simulations, balanced point)
 
 | suite | n | smoke AUROC | fog AUROC | false smoke on fog_only | abstain | Δ smoke AUROC | Δ fog AUROC |
 |---|---|---|---|---|---|---|---|
-| bbox_masks | 147 | 0.613 | 0.662 | 32.4 % | 75.5 % | -0.054 | -0.026 |
-| detector_masks | 147 | 0.712 | 0.680 | 45.9 % | 72.1 % | 0.045 | -0.008 |
-| nominal | 147 | 0.668 | 0.688 | 40.5 % | 72.8 % | n/a | n/a |
-| occlusion_heavy | 145 | 0.562 | 0.742 | 51.4 % | 67.6 % | -0.105 | 0.054 |
-| render_shift | 147 | 0.572 | 0.625 | 21.6 % | 100.0 % | -0.096 | -0.063 |
-| shake_heavy | 148 | 0.565 | 0.666 | 43.2 % | 81.8 % | -0.103 | -0.022 |
-| zoom_out | 143 | 0.628 | 0.676 | 54.1 % | 70.6 % | -0.040 | -0.012 |
+| bbox_masks | 148 | 0.648 | 0.709 | 54.1 % | 75.0 % | -0.012 | -0.003 |
+| detector_masks | 147 | 0.702 | 0.698 | 67.6 % | 76.9 % | 0.042 | -0.014 |
+| nominal | 147 | 0.660 | 0.712 | 75.7 % | 74.8 % | n/a | n/a |
+| occlusion_heavy | 147 | 0.607 | 0.736 | 70.3 % | 70.1 % | -0.053 | 0.025 |
+| render_shift | 147 | 0.648 | 0.609 | 48.6 % | 100.0 % | -0.011 | -0.103 |
+| sgs_off | 148 | 0.641 | 0.650 | 64.9 % | 85.1 % | -0.019 | -0.061 |
+| shake_heavy | 148 | 0.520 | 0.753 | 75.7 % | 85.1 % | -0.140 | 0.042 |
+| zoom_out | 144 | 0.684 | 0.722 | 67.6 % | 76.4 % | 0.024 | 0.011 |
 
 ## Leave-one-regime-out (seed 0, evaluated on test_iid)
 
@@ -221,64 +225,28 @@ For a held-out regime positive for a label: recall and AUROC of its sequences ag
 
 | held-out regime | n | smoke | fog |
 |---|---|---|---|
-| advected_fog_bank | 44 | accuracy 0.455 | recall 0.614, AUROC 0.610 |
-| advected_smoke | 24 | recall 0.417, AUROC 0.523 | accuracy 0.625 |
-| camera_artifact | 2 | FPR 0.000, AUROC 0.964 | FPR 0.000, AUROC 0.811 |
-| crosswind | 18 | recall 0.278, AUROC 0.521 | accuracy 0.556 |
-| distant_cloud | 2 | FPR 0.500, AUROC 0.565 | FPR 1.000, AUROC 0.608 |
-| dust_burst | 30 | FPR 0.600, AUROC 0.461 | FPR 0.233, AUROC 0.700 |
-| fog_dissipating | 38 | accuracy 0.474 | recall 0.605, AUROC 0.744 |
-| fog_patch | 38 | accuracy 0.474 | recall 0.395, AUROC 0.493 |
-| haze_drift | 38 | FPR 0.711, AUROC 0.537 | FPR 0.816, AUROC 0.398 |
-| hot_plume | 30 | recall 0.700, AUROC 0.694 | accuracy 0.500 |
-| illumination_change | 2 | FPR 0.000, AUROC 0.711 | FPR 0.500, AUROC 0.645 |
-| pulsing | 43 | recall 0.326, AUROC 0.582 | accuracy 0.581 |
-| radiation_fog | 10 | accuracy 0.900 | recall 0.800, AUROC 0.721 |
-| smoldering | 32 | recall 0.594, AUROC 0.616 | accuracy 0.656 |
-| steam_fog | 16 | accuracy 0.438 | recall 0.438, AUROC 0.478 |
-| terrain_fog | 2 | FPR 0.000, AUROC 0.912 | recall 0.500, AUROC 0.408 |
+| advected_fog_bank | 44 | accuracy 0.409 | recall 0.909, AUROC 0.772 |
+| advected_smoke | 24 | recall 0.167, AUROC 0.516 | accuracy 0.500 |
+| camera_artifact | 10 | FPR 0.400, AUROC 0.668 | FPR 0.400, AUROC 0.724 |
+| crosswind | 18 | recall 1.000, AUROC 0.602 | accuracy 0.778 |
+| distant_cloud | 6 | FPR 0.667, AUROC 0.479 | FPR 0.167, AUROC 0.761 |
+| dust_burst | 18 | FPR 0.444, AUROC 0.561 | FPR 0.056, AUROC 0.838 |
+| fog_dissipating | 38 | accuracy 0.500 | recall 0.868, AUROC 0.788 |
+| fog_patch | 38 | accuracy 0.553 | recall 0.342, AUROC 0.550 |
+| haze_drift | 26 | FPR 0.731, AUROC 0.471 | FPR 0.923, AUROC 0.386 |
+| hot_plume | 30 | recall 0.400, AUROC 0.587 | accuracy 0.433 |
+| illumination_change | 14 | FPR 0.071, AUROC 0.799 | FPR 0.500, AUROC 0.798 |
+| pulsing | 44 | recall 0.636, AUROC 0.521 | accuracy 0.841 |
+| radiation_fog | 10 | accuracy 0.500 | recall 0.700, AUROC 0.673 |
+| smoldering | 32 | recall 0.844, AUROC 0.611 | accuracy 0.594 |
+| steam_fog | 16 | accuracy 0.438 | recall 0.375, AUROC 0.491 |
+| terrain_fog | 2 | FPR 0.000, AUROC 0.895 | recall 0.500, AUROC 0.466 |
 
 ## Shortcut audit
 
 Overall flag: **True**.
-* flags-only probe above threshold: fog@pooled_held_out=0.6029
-* Flags-only probe (validity flags alone), pooled held-out AUROC: fog 0.603, smoke 0.562
-* Highest context / render parameter AUROCs for fog (folded, threshold 0.6): wind_speed_ms 0.523, diffusivity_m2s 0.520, lapse_dtheta_dz 0.520, render_view_x_frac 0.519
+* flags-only probe above threshold: fog@pooled_held_out=0.6564
+* Flags-only probe (validity flags alone), pooled held-out AUROC: fog 0.656, smoke 0.551
+* Highest context / render parameter AUROCs for fog (folded, threshold 0.6): wind_speed_ms 0.523, diffusivity_m2s 0.520, lapse_dtheta_dz 0.520, render_view_x_frac 0.520
 * Highest context / render parameter AUROCs for smoke (folded, threshold 0.6): wind_sign 0.529, hint_fp_boost 0.526, render_fp_boost 0.526, nu_m2s 0.524
-
-## Synthetic transfer proxy (NOT real-world evidence)
-
-Separately generated synthetic simulations (different base seed) rendered with detector / box masks and shifted rendering; re-split by simulation. Not real footage.
-
-| model | smoke AUROC | fog AUROC | false smoke on fog_only (balanced) |
-|---|---|---|---|
-| C_zero_shot | 0.566 [0.46, 0.67] | 0.704 [0.62, 0.78] | 30.3 % |
-| B_scratch | 0.596 [0.48, 0.71] | 0.609 [0.51, 0.70] | 24.2 % |
-| D_finetuned | 0.586 [0.47, 0.69] | 0.674 [0.59, 0.75] | 36.4 % |
-
-## CFD-oracle diagnostic (oracle features are never model inputs)
-
-CFD-oracle diagnostic. Oracle features are computed from the CFD fields (exact velocities, region from the optical depth at the nominal line of sight) and are never model inputs; they bound what a perfect measurement of the same motion representation could achieve. Synthetic data only.
-
-Pooled logistic regression on per-feature time mean and std, test AUROC [95 % CI]:
-
-| features | label | oracle test_iid | camera test_iid | oracle test_ood | camera test_ood |
-|---|---|---|---|---|---|
-| all | smoke | 0.783 [0.71, 0.85] | 0.600 [0.53, 0.67] | 0.745 [0.67, 0.81] | 0.590 [0.53, 0.65] |
-| all | fog | 0.751 [0.67, 0.83] | 0.728 [0.67, 0.79] | 0.663 [0.59, 0.73] | 0.636 [0.57, 0.69] |
-| region | smoke | 0.715 [0.63, 0.80] | 0.615 [0.55, 0.68] | 0.734 [0.66, 0.80] | 0.526 [0.46, 0.59] |
-| region | fog | 0.727 [0.65, 0.81] | 0.733 [0.68, 0.79] | 0.768 [0.70, 0.84] | 0.680 [0.62, 0.74] |
-| velocity | smoke | 0.744 [0.66, 0.82] | 0.552 [0.48, 0.62] | 0.707 [0.63, 0.77] | 0.603 [0.54, 0.67] |
-| velocity | fog | 0.628 [0.54, 0.72] | 0.625 [0.55, 0.69] | 0.488 [0.41, 0.57] | 0.567 [0.51, 0.63] |
-
-## CPU benchmark (one core)
-
-| Stage | Single-core time |
-|---|---|
-| CFD simulation (accepted, incl. precursor) | 5.6 s/sim (637 sims/h) |
-| Render 12 + 12 lag frames | 142 ms |
-| Feature extraction (12 x 14) | 58 ms |
-| GRU training epoch (1800 sequences) | 0.17 s |
-| Inference, one sequence (features -> probabilities) | 0.92 ms |
-| Inference, batch of 256 | 3.0 ms |
 
