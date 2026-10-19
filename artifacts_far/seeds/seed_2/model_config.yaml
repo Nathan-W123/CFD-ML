@@ -91,9 +91,9 @@ preprocessing:
   - 2.4993300897615485
   training_data_source: synthetic
   training_mask_sources:
-    bbox: 378
-    degraded: 895
-    detector: 526
+    bbox: 377
+    degraded: 899
+    detector: 523
 files:
   encoder: physics_encoder.pt
   classifier: physics_classifier.pt
@@ -101,31 +101,31 @@ files:
   config: model_config.yaml
 torch_version: 2.14.1+cpu
 temperatures:
-  smoke: 1.302184007463163
-  fog: 1.0171066485966869
+  smoke: 1.0866099037775139
+  fog: 0.9881863968868545
 thresholds:
   balanced:
     smoke:
-      logit: 0.08420688729421645
-      prob: 0.5210392911756098
+      logit: -0.011668061008801066
+      prob: 0.49708301784177394
     fog:
-      logit: 0.03461642673150517
-      prob: 0.5086532426039124
+      logit: 0.06348954667006236
+      prob: 0.5158670571190447
   low_false_alarm:
     smoke:
-      logit: 0.5544823819758513
-      prob: 0.6351749112607663
+      logit: 0.603472466165021
+      prob: 0.6464503493456231
     fog:
-      logit: 0.03461642673150517
-      prob: 0.5086532426039124
+      logit: 0.06348954667006236
+      prob: 0.5158670571190447
 abstain:
   margins:
     balanced:
       smoke: 0.25
-      fog: 0.2579319641750826
+      fog: 0.2545826808967516
     low_false_alarm:
-      smoke: 0.3188461857014406
-      fog: 0.2579319641750826
+      smoke: 0.36602863107592276
+      fog: 0.2545826808967516
   margin_space: calibrated_logit
   input_validity:
     min_mask_frames: 3
@@ -160,22 +160,22 @@ calibration:
       bounds:
       - 0.5
       - 5.0
-      fitted_T: 1.302184007463163
+      fitted_T: 1.0866099037775139
       at_bound: null
       fallback: false
       reason: null
-      nll_T1: 0.6814229258481538
-      nll: 0.6802947731579655
+      nll_T1: 0.6785477264626035
+      nll: 0.6784410852191884
     fog:
       bounds:
       - 0.5
       - 5.0
-      fitted_T: 1.0171066485966869
+      fitted_T: 0.9881863968868545
       at_bound: null
       fallback: false
       reason: null
-      nll_T1: 0.6600938731016164
-      nll: 0.6600847661985146
+      nll_T1: 0.6650329963980559
+      nll: 0.6650292591165528
   temperature_fallback:
     smoke: null
     fog: null
@@ -187,19 +187,19 @@ calibration:
       smoke:
         criterion: max_youden_j
         n_known: 456
-        youden_j: 0.15789473684210642
-        tpr: 0.5526315789473689
-        fpr: 0.3947368421052625
-        precision: 0.5833333333333339
-        recall: 0.5526315789473689
+        youden_j: 0.16666666666666763
+        tpr: 0.5921052631578952
+        fpr: 0.4254385964912276
+        precision: 0.5818965517241385
+        recall: 0.5921052631578952
       fog:
         criterion: max_youden_j
         n_known: 456
-        youden_j: 0.25000000000000044
-        tpr: 0.6973684210526317
-        fpr: 0.4473684210526313
-        precision: 0.6091954022988507
-        recall: 0.6973684210526317
+        youden_j: 0.22368421052631637
+        tpr: 0.6754385964912284
+        fpr: 0.451754385964912
+        precision: 0.5992217898832687
+        recall: 0.6754385964912284
     low_false_alarm:
       smoke:
         criterion: false_smoke_on_fog_only<=0.05
@@ -212,34 +212,34 @@ calibration:
   abstain_fit:
     balanced:
       smoke:
-        abstain_rate: 0.519736842105263
-        confident_error: 0.3881278538812813
-        error_without_abstention: 0.4210526315789486
+        abstain_rate: 0.45394736842105343
+        confident_error: 0.39357429718875836
+        error_without_abstention: 0.41666666666666796
         target_reached: false
         floor: 0.25
         target_error: 0.05
         max_rate: 0.3
       fog:
-        abstain_rate: 0.291666666666667
-        confident_error: 0.34674922600619346
-        error_without_abstention: 0.375000000000001
+        abstain_rate: 0.28508771929824595
+        confident_error: 0.36503067484662743
+        error_without_abstention: 0.3881578947368432
         target_reached: false
         floor: 0.25
         target_error: 0.05
         max_rate: 0.3
     low_false_alarm:
       smoke:
-        abstain_rate: 0.28947368421052666
-        confident_error: 0.4506172839506181
-        error_without_abstention: 0.48464912280701794
+        abstain_rate: 0.29824561403508815
+        confident_error: 0.462500000000001
+        error_without_abstention: 0.4758771929824567
         target_reached: false
         floor: 0.25
         target_error: 0.05
         max_rate: 0.3
       fog:
-        abstain_rate: 0.291666666666667
-        confident_error: 0.34674922600619346
-        error_without_abstention: 0.375000000000001
+        abstain_rate: 0.28508771929824595
+        confident_error: 0.36503067484662743
+        error_without_abstention: 0.3881578947368432
         target_reached: false
         floor: 0.25
         target_error: 0.05
@@ -271,15 +271,15 @@ fit:
   - 0
   - 1
   - 2
-  exported_seed: 2
-  is_exported_model: true
+  exported_seed: 1
+  is_exported_model: false
   selection: lowest val_select loss (early-stopping split) among seeds
   val_select_loss_per_seed:
-    '0': 0.658427357673645
-    '1': 0.6587780714035034
-    '2': 0.6570835113525391
-  best_epoch: 6
-  epochs_run: 13
+    '0': 0.6662459373474121
+    '1': 0.6582605838775635
+    '2': 0.6621291041374207
+  best_epoch: 4
+  epochs_run: 11
   stopped_early: true
   pos_weight: null
   balance: none

@@ -1,12 +1,12 @@
 {
   "abstain_margins": {
     "balanced": {
-      "fog": 0.2579319641750826,
+      "fog": 0.28351617834010256,
       "smoke": 0.25
     },
     "low_false_alarm": {
-      "fog": 0.2579319641750826,
-      "smoke": 0.3188461857014406
+      "fog": 0.28351617834010256,
+      "smoke": 0.25
     }
   },
   "artifacts": {
@@ -17,28 +17,28 @@
   },
   "calibration": {
     "temperatures": {
-      "fog": 1.0171066485966869,
-      "smoke": 1.302184007463163
+      "fog": 1.0760985863574684,
+      "smoke": 1.2283091119792917
     },
     "thresholds": {
       "balanced": {
         "fog": {
-          "logit": 0.03461642673150517,
-          "prob": 0.5086532426039124
+          "logit": -0.3152507290875355,
+          "prob": 0.42183361559626964
         },
         "smoke": {
-          "logit": 0.08420688729421645,
-          "prob": 0.5210392911756098
+          "logit": 0.0594078036563365,
+          "prob": 0.514847584388542
         }
       },
       "low_false_alarm": {
         "fog": {
-          "logit": 0.03461642673150517,
-          "prob": 0.5086532426039124
+          "logit": -0.3152507290875355,
+          "prob": 0.42183361559626964
         },
         "smoke": {
-          "logit": 0.5544823819758513,
-          "prob": 0.6351749112607663
+          "logit": 0.45128521573279773,
+          "prob": 0.6109447620184074
         }
       }
     }
@@ -125,7 +125,7 @@
   },
   "data_source": "synthetic",
   "experiment": "C",
-  "exported_seed": 2,
+  "exported_seed": 1,
   "insufficient_calibration_data": false,
   "label_support": {
     "fog": {
@@ -156,9 +156,9 @@
   "seeds": {
     "0": {
       "balance": "none",
-      "best_epoch": 15,
-      "best_val_select_loss": 0.658427357673645,
-      "epochs_run": 22,
+      "best_epoch": 9,
+      "best_val_select_loss": 0.6662459373474121,
+      "epochs_run": 16,
       "pos_weight": null,
       "settings": {
         "batch_size": 64,
@@ -177,12 +177,12 @@
         "weight_decay": 0.0001
       },
       "stopped_early": true,
-      "train_seconds": 3.7071784510008
+      "train_seconds": 2.5920823129999917
     },
     "1": {
       "balance": "none",
       "best_epoch": 4,
-      "best_val_select_loss": 0.6587780714035034,
+      "best_val_select_loss": 0.6582605838775635,
       "epochs_run": 11,
       "pos_weight": null,
       "settings": {
@@ -202,13 +202,13 @@
         "weight_decay": 0.0001
       },
       "stopped_early": true,
-      "train_seconds": 1.7134059110030648
+      "train_seconds": 1.7431117490014003
     },
     "2": {
       "balance": "none",
-      "best_epoch": 6,
-      "best_val_select_loss": 0.6570835113525391,
-      "epochs_run": 13,
+      "best_epoch": 4,
+      "best_val_select_loss": 0.6621291041374207,
+      "epochs_run": 11,
       "pos_weight": null,
       "settings": {
         "batch_size": 64,
@@ -227,7 +227,7 @@
         "weight_decay": 0.0001
       },
       "stopped_early": true,
-      "train_seconds": 1.9051793439975881
+      "train_seconds": 1.8934814989988809
     }
   },
   "stage": "A_cfd_pretraining",
