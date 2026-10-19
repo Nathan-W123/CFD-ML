@@ -250,8 +250,12 @@ def main(argv=None):
         L.append("")
 
     if args.benchmark and Path(args.benchmark).exists():
-        bm = json.loads(Path(args.benchmark).read_text())
-        L += ["## CPU benchmark", "", "```", json.dumps(bm, indent=2)[:3000], "```", ""]
+        table = Path(args.benchmark).with_suffix(".md")   # benchmark_cpu.py writes both
+        if table.exists():
+            L += ["## CPU benchmark (one core)", "", table.read_text().strip(), ""]
+        else:
+            bm = json.loads(Path(args.benchmark).read_text())
+            L += ["## CPU benchmark (one core)", "", "```", json.dumps(bm, indent=2)[:3000], "```", ""]
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)

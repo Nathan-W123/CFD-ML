@@ -21,7 +21,110 @@ frames, and real footage goes through the same feature extractor.
 > pretrained-vs-scratch comparison are implemented (see [Stage B](#stage-b-real-footage))
 > and are pending labelled surveillance video.
 
-RESULTS_PLACEHOLDER
+## Results (synthetic only)
+
+Full tables: [`reports/results.md`](reports/results.md) (generated from
+[`reports/evaluation.json`](reports/evaluation.json)); data quality:
+[`reports/qa_full.json`](reports/qa_full.json); CFD-oracle diagnostic:
+[`reports/oracle_diagnostic.md`](reports/oracle_diagnostic.md); figures in
+`reports/` and `reports/figures/` (example sequences per category and regime).
+
+**Data.** 1198 accepted simulations (29 attempts rejected by the numerical
+and label-support checks and re-drawn: 5 % of both-class and 3.5 % of
+fog-only attempts, under 1 % of the rest) rendered into 3246 sequences: train 1800 (600 simulations), val_select
+300, val_calib 453, test_iid 295 (148 simulations), test_ood 398 (199
+simulations: wind 7-9 m/s, sources on 45-80 m hills), plus 1024 robustness
+re-renders of the test_iid simulations.
+
+**Experiment C, the CFD-pretrained GRU** (exported seed 0; 95 % intervals
+from a bootstrap over simulations; mean ± sd over the three seeds in
+`reports/results.md`):
+
+| | smoke AUROC | fog AUROC | false smoke on fog_only, balanced / low-false-alarm | ECE smoke / fog |
+|---|---|---|---|---|
+| test_iid | 0.64 [0.57, 0.71] | 0.69 [0.62, 0.76] | 46 % / 4 % [0, 9] | 0.07 / 0.07 |
+| test_ood (held-out recipes) | 0.64 [0.58, 0.70] | 0.65 [0.57, 0.70] | 52 % / 12 % [5, 20] | 0.05 / 0.07 |
+| A: motion-cue heuristic, test_iid | 0.56 | 0.49 | 45 % / 1 % | |
+| pooled logistic (14 features x mean/std), test_iid | 0.62 | 0.73 | 68 % / 4 % | |
+
+Seeds agree closely (smoke 0.638 ± 0.007, fog 0.699 ± 0.013 on test_iid).
+The low-false-alarm point holds its 5 % target on in-distribution data but
+not on the held-out recipes (12 %). The model abstains on 72 % of test
+clips: 32 % because fewer than two frames have measurable flow (mostly
+fog, haze and both-class scenes whose background cannot be stabilised), the
+rest because the calibrated logit is within the margin of the threshold.
+Accuracy on the clips it does decide is 0.61 (smoke) and 0.69 (fog).
+
+**What this says.** The camera-level motion features carry a weak but real
+signal: the GRU beats the fixed-form motion-cue heuristic (A) clearly, is
+on par with a time-pooled logistic regression (better on smoke, worse on
+fog in distribution), largely keeps its ranking on the held-out wind and
+terrain recipes, and is well calibrated. It is not a stand-alone smoke detector;
+it is a calibrated, abstaining input for the fusion model.
+
+**Where the signal is lost (CFD-oracle diagnostic, never a model input).**
+The same twelve features computed from the CFD fields reach smoke AUROC
+0.78 [0.71, 0.85] on test_iid against 0.60 for the camera features with the
+same classifier; the loss is mostly in the optical-flow group (0.74 vs
+0.55: the region-mean vertical motion that separates smoke from drifting
+aerosol is of order 0.1 m/s here, close to the optical-flow noise floor at
+this image resolution). For fog the camera keeps almost all of it (0.73 vs 0.75),
+mainly through region geometry. Optical flow tracks the CFD velocity of the
+candidate region with correlation 0.85 (horizontal) and 0.55 (vertical).
+
+**Robustness and generalisation** (re-renders of test_iid; leave-one-
+regime-out on test_iid):
+
+* Heavy occlusion, heavy shake and degraded imaging cost about 0.10 smoke
+  AUROC each; fog AUROC moves by less than 0.07. Under the strongest
+  imaging shift (noise, JPEG 12-25, low contrast) background stabilisation
+  fails its quality check and the model abstains on every clip rather than
+  reading camera motion as aerosol motion.
+* Detector-like masks do not hurt (smoke 0.71, fog 0.68); box masks cost
+  0.05 smoke AUROC.
+* Unseen regimes are the weak point: held out of training, drifting haze
+  is called fog 82 % of the time, steam fog is found 44 % of the time
+  (AUROC 0.48) and crosswind smoke 28 % of the time; hot plumes (recall
+  0.70) and dissipating fog (AUROC 0.74) transfer best.
+
+**Shortcut audit.** No context or render parameter predicts a label (all
+folded AUROCs at most 0.53). The validity flags alone predict fog with
+AUROC 0.60 (threshold 0.6, flagged): fog scenes more often have a valid
+mask and less often a stabilisable background. This is a real property of
+fog footage, but it is carried by the flags rather than by motion and is
+reported, not hidden.
+
+**Synthetic transfer proxy (not real-world evidence).** On a separately
+seeded synthetic set rendered with detector / box masks and harsher
+imaging (240 simulations, re-split by simulation), the pretrained model
+zero-shot (fog 0.70, smoke 0.57) and fine-tuned at lr 1e-4 (fog 0.67 ±
+0.00, smoke 0.58 ± 0.00 over seeds) beat training from scratch on fog
+(0.60 ± 0.01) and tie on smoke (0.57 ± 0.06), with overlapping intervals
+on 48 test simulations. This only shows the Stage B code path works on a
+domain shift the simulator itself produces.
+
+**Real-world status: pending.** Experiments B (real data from scratch) and
+D (CFD-pretrained, fine-tuned on real data) are `null` in
+`evaluation.json`: no labelled surveillance video with compatible frame
+timing was available. Nothing here measures real-world accuracy or shows
+a reduction of fog false alarms on real cameras.
+
+**Single-core CPU cost** ([`reports/benchmark_cpu.md`](reports/benchmark_cpu.md);
+every library pinned to one thread):
+
+| Stage | Time |
+|---|---|
+| CFD simulation, accepted, incl. 30 s precursor | 5.6 s mean (about 640 per hour) |
+| Render 12 + 12 lag frames (192 x 192) | 142 ms |
+| Feature extraction (12 x 14) | 58 ms |
+| GRU training epoch, 1800 sequences | 0.17 s (5202 parameters) |
+| Inference, one sequence (features to decisions) | 0.9 ms |
+
+The time step starts at the specified 0.1 s and is halved when the
+expected peak speed would push the lattice Mach number past its limit:
+25 % of the accepted simulations ran at 0.1 s, 44 % at 0.05 s and 31 % at
+0.025 s (strong wind and hot plumes on 5 m cells); the physical frame
+times are the same for all of them.
 
 ## How it fits together
 
@@ -156,9 +259,15 @@ python scripts/summarize_results.py --evaluation reports/evaluation.json \
 ```
 
 The synthetic proxy set (`--proxy`) is a small, separately seeded dataset
-rendered with detector / box masks and harsher imaging (see
-`reports/results.md` for the exact command); it is used only for the
-pretrained-vs-scratch transfer proxy and is not real-world evidence.
+rendered with detector / box masks and harsher imaging; it is used only for
+the pretrained-vs-scratch transfer proxy and is not real-world evidence:
+
+```bash
+python scripts/generate_dataset.py --out data/synthetic_proxy --n-per-category 60 --ood-per-category 0 \
+    --set seed=20270301 --set 'render.masks.source_probs={detector: 0.7, bbox: 0.3}' \
+    --set 'render.noise_sigma=[0.03, 0.06]' --set 'render.jpeg_quality=[20, 60]' --set render.jpeg_prob=0.9 \
+    --set 'render.contrast=[0.45, 0.9]' --set 'render.global_haze=[0.2, 0.45]' --workers 4
+```
 
 ### Inference
 
