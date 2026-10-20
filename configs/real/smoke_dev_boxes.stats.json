@@ -1,0 +1,15 @@
+{
+ "windows": 653,
+ "sheets_in_index": 653,
+ "unknown_sheets": 0,
+ "target": {
+  "smoke": 542,
+  "none": 111
+ },
+ "confidence": {
+  "high": 271,
+  "medium": 134,
+  "low": 137
+ },
+ "visible_at_minute_11": 533
+}
