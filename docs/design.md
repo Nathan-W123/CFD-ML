@@ -940,4 +940,25 @@ reference; the stacks are fitted with fog windows weighted 3; a fog veto
 withholds smoke alarms at P(fog) >= 0.95; the deploy threshold keeps v1's
 80 % dev recall (never above 2.5 % of dev fog windows). It improved every dev
 number but not the test cameras at matched recall (README, "Detector v2
-attempt"), so v1 stays the default.
+attempt"), so v1 stayed the default.
+
+v3 (`artifacts_detector_v3/`, the default) keeps v2's inputs and changes how
+the tile-type heads learn. Smoke boxes drawn by an AI labeller on the dev
+smoke windows become tile labels (`src/detector/boxes.py`: a tile is 1 when it
+and the minute-11 box overlap by at least a quarter of the smaller of the two,
+or when it holds at least half as much of the box as the tile holding most of
+it and at least a tenth of the box; 0 when it does not touch the box grown by
+0.02 of the frame; otherwise ignored; every tile of a smoke-free window is 0;
+smoke windows without a usable box are left out of the tile-type heads), so
+`fit_tile_head` fits tiles on their own labels instead of the window's. A
+reference tile head applies the same kind of model to each tile's frame 11
+and its change since the reference frame (`ref_instances`), and its window
+logit (`tileref`) joins the stacks that use the reference. The zoom crops of
+every set were cut from the tiles the v1 tile head ranked highest, so the
+detector stores that head as its `zoom_selector` and `select_zoom_tiles` uses
+it, not the retrained tile head. The dev data add 484 ordinary daytime
+windows as hard negatives. The test protocol adds a fresh test set (unused
+FIgLib sequences and ordinary daytime windows on the test mounts) scored once
+for v1, v2 and v3 together (`scripts/score_detector.py`, paired camera
+bootstrap), with targets fixed before scoring
+(`configs/real/detector_v3_eval_rules.json`).

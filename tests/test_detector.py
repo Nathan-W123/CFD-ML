@@ -378,11 +378,12 @@ def test_train_detector_boxes_and_score_detector(tmp_path, monkeypatch):
     monkeypatch.setattr(SD, "TD", TD)
     srep = tmp_path / "score.json"
     assert SD.main(["--detector", f"a={sel_dir}", "--detector", f"b={out}", "--report", str(srep),
-                    "--n-boot", "10", "--matched-recall", "0.8"] + specs) == 0
+                    "--n-boot", "10", "--matched-recall", "0.8", "--matched-false-alarm", "0.1"] + specs) == 0
     sc = json.loads(srep.read_text())
     assert set(sc["results"]) == {"a", "b"} and "b-a" in sc["paired"]
     assert sc["results"]["b"]["smoke_auroc"] == pytest.approx(doc["test"]["smoke_auroc"])
     assert sc["matched_recall"]["a"]["0.80"]["false_alarm_no_smoke"] is not None
+    assert sc["matched_false_alarm"]["b"]["0.10"]["false_alarm_no_smoke"] <= 0.1
     pv = sc["paired"]["b-a"]["value"]
     assert pv["smoke_auroc_within_sets"] == pytest.approx(sc["results"]["b"]["smoke_auroc_within_sets"]
                                                           - sc["results"]["a"]["smoke_auroc_within_sets"])

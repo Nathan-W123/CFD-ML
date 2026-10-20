@@ -16,7 +16,9 @@ alarms on smoke-free windows, overall and per set, and the smoke recall) get
 a paired camera bootstrap: the same resampled cameras for both detectors.
 --matched-recall r adds the false-alarm rates of each detector at the
 threshold that catches r of these windows' smoke (descriptive: that
-threshold is read off the scored windows themselves).
+threshold is read off the scored windows themselves); --matched-false-alarm f
+adds the smoke recall, overall and per set, at the threshold where f of the
+smoke-free windows alarm (also descriptive).
 """
 
 import _bootstrap  # noqa: F401
@@ -168,6 +170,11 @@ def render(rep) -> str:
             if v:
                 L.append(f"* {n} at {float(r):.0%} recall on these windows (descriptive): alarms on smoke-free "
                          f"{_pct(v['false_alarm_no_smoke'])}; " + ", ".join(f"{k} {_pct(x)}" for k, x in v["per_set"].items()))
+    for n in names:
+        mf = rep.get("matched_false_alarm", {}).get(n) or {}
+        if any(mf.values()):
+            L.append(f"* {n}, smoke caught at a matched false-alarm rate (descriptive): " + "; ".join(
+                f"{_pct(v['false_alarm_no_smoke'])} alarms: {_pct(v['smoke_recall'])}" for v in mf.values() if v))
     for pair, d in rep.get("paired", {}).items():
         L += ["", f"## Paired differences {pair} (same windows, same resampled cameras)", "", "| | difference | 95 % |",
               "|---|---|---|"]
@@ -180,6 +187,21 @@ def render(rep) -> str:
     return "\n".join(L) + "\n"
 
 
+def matched_false_alarm(p_s, p_f, thr, rows, f):
+    """Smoke recall (overall, per set) at the threshold where at most f of the smoke-free windows alarm."""
+    y = np.array([x["smoke"] for x in rows])
+    sets = np.array([x["set"] for x in rows])
+    q = _alarm(p_s, p_f, thr)
+    neg = np.sort(q[y == 0])[::-1]
+    if not len(neg) or not np.any(y == 1):
+        return None
+    t = TD.deploy_threshold(neg, f)
+    pos = y == 1
+    return {"threshold": float(t), "false_alarm_no_smoke": float(np.mean(q[y == 0] >= t)),
+            "smoke_recall": float(np.mean(q[pos] >= t)),
+            "per_set": {s: float(np.mean(q[pos & (sets == s)] >= t)) for s in sorted(set(sets[pos].tolist()))}}
+
+
 def main(argv=None) -> int:
     warnings.filterwarnings("ignore")
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
@@ -188,6 +210,7 @@ def main(argv=None) -> int:
     ap.add_argument("--report", required=True)
     ap.add_argument("--all-splits", action="store_true", help="score every window, not only test_iid")
     ap.add_argument("--matched-recall", type=float, action="append", default=[])
+    ap.add_argument("--matched-false-alarm", type=float, action="append", default=[])
     ap.add_argument("--n-boot", type=int, default=1000)
     args = ap.parse_args(argv)
     rows = TD.load_sets(args.sets)
@@ -196,7 +219,7 @@ def main(argv=None) -> int:
     dets = [(spec.split("=", 1)[0], Detector.load(spec.split("=", 1)[1])) for spec in args.detector]
     cams = np.array([r["mount"] for r in rows])
     rep = {"status": "detector_scores", "sets": args.sets, "detectors": dict(s.split("=", 1) for s in args.detector),
-           "results": {}, "paired": {}, "matched_recall": {}}
+           "results": {}, "paired": {}, "matched_recall": {}, "matched_false_alarm": {}}
     probs = {}
     for name, det in dets:
         p_s, p_f, used = score(det, rows)
@@ -209,6 +232,8 @@ def main(argv=None) -> int:
         res["thresholds"] = thr
         rep["results"][name] = res
         rep["matched_recall"][name] = {f"{r:.2f}": matched_recall(p_s, p_f, thr, rows, r) for r in args.matched_recall}
+        rep["matched_false_alarm"][name] = {f"{f:.2f}": matched_false_alarm(p_s, p_f, thr, rows, f)
+                                            for f in args.matched_false_alarm}
         print(f"{name}: within-set smoke AUROC {res['smoke_auroc_within_sets']}, false alarms "
               f"{res['false_alarm_no_smoke']}, recall {res['smoke_recall']}", file=sys.stderr)
     base = dets[0][0]
