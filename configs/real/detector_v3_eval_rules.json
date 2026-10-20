@@ -24,5 +24,10 @@
   },
   "verdict": "7/10 if both primary targets and all secondary checks are met; the paired v3 - v1 differences on the fresh test (camera bootstrap) are reported whether or not they exclude zero"
  },
- "caveats": "AI labels on the background windows and AI boxes are not human-checked; FIgLib labels come from the ignition time, so a window right after ignition can show no smoke yet; 18-21 test cameras make camera-level intervals wide"
+ "caveats": "AI labels on the background windows and AI boxes are not human-checked; FIgLib labels come from the ignition time, so a window right after ignition can show no smoke yet; 18-21 test cameras make camera-level intervals wide",
+ "revisions": [
+  "2026-10-20, after dev cross-validation and before any v3 model was scored on any test camera, chosen variant: (d) box-supervised tile and zoom heads (boxes of every confidence: 'low' and 'medium' minimum compared on dev, low equal or better), without positive/negative balancing ((c) tied (b) on dev within-set AUROC, 0.855 both, so the simpler (b)), plus the reference tile head (each fine tile's frame 11 and change since the reference frame, box-supervised); v2's stack configurations with 'tileref' added to those that use the reference; window and fog heads selected as before (now on the dev sets plus hpwren_bg); zoom crops still chosen by the v1 tile head (stored as the detector's zoom selector). Also compared on dev and not adopted (no gain beyond noise): a wider tile-head C grid (0.01, 0.03; never chosen), four leaner stack designs (0.864-0.868 vs 0.865 without hpwren_bg).",
+  "Dev out-of-fold (v3dev experiment, window head fixed at v2's selection, dev sets plus hpwren_bg, deploy at 80 % dev recall): (a) v2 recipe + hpwren_bg: within-set smoke AUROC 0.837, FIgLib 0.796, alarms on dev fog 1.9 %, on all smoke-free 15.2 %, on FIgLib pre-ignition 55 %, on background 9 %; (d) chosen: 0.870, 0.832, 1.2 %, 9.5 %, 34 %, 6 %. The dev numbers of the chosen variant are optimistic by the selection among about ten variants.",
+  "Box rule fixed after an independent code review, before the dev comparison above: a box spread over several tiles, none holding a quarter of it, labels the tiles holding most of it (it had left such windows unlabelled; 4 of 401 medium/high-confidence boxes)."
+ ]
 }
