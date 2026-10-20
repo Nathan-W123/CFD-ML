@@ -1,0 +1,58 @@
+{
+ "written": "2026-10-20, before any v2 model was scored on the test cameras",
+ "purpose": "Detector v2 goals: fewer smoke false alarms on clear scenes and on fog, higher AUROC on tiny early smoke (FIgLib), without losing fog AUROC or clear/large-smoke AUROC (2026 HPWREN fire days).",
+ "candidate": {
+  "smoke": "window head (selected feature groups, C) + tile head (4x6 tiles) + zoom head (full-resolution 2x2 quarters of the top-4 tiles) + prompt-contrast change scores (frame 0 -> 11) + reference scores (frame 11 vs the same camera 14 min before frame 0), combined by a logistic stack; fallback stacks without the reference and/or zoom inputs for windows that lack them",
+  "fog": "unchanged from v1 (same data, same selection: identical head)",
+  "stack_configs": [
+   [
+    "head",
+    "tile",
+    "zoom",
+    "chg_max",
+    "chg_rz",
+    "ref_max",
+    "ref_rz"
+   ],
+   [
+    "head",
+    "tile",
+    "zoom",
+    "chg_max",
+    "chg_rz"
+   ],
+   [
+    "head",
+    "tile",
+    "chg_max",
+    "chg_rz",
+    "ref_max",
+    "ref_rz"
+   ],
+   [
+    "head",
+    "tile",
+    "chg_max",
+    "chg_rz"
+   ]
+  ],
+  "inputs_dropped_on_dev": [
+   "fog logit as a linear stack input (no gain)",
+   "same-camera baseline 40 min before the first plume (gap differs by label)",
+   "region proposals",
+   "embedding differences to a reference",
+   "DINOv2",
+   "set-balanced weights"
+  ]
+ },
+ "selection": "dev cameras only: camera-mount grouped 5-fold CV, within-set AUROC; zoom tiles of dev windows chosen by out-of-fold tile heads, of test windows by the tile head refitted on all dev windows",
+ "operating_points": {
+  "deploy": "the highest threshold that still catches 80 % of the dev smoke windows (out-of-fold; v1's deploy recall), or the fog limit's threshold if that is higher (at most 2.5 % of dev fog windows alarm); so v2's gain shows as fewer false alarms at v1's recall",
+  "strict": "at most 5 % of all dev smoke-free windows alarm",
+  "fog_veto": "a smoke alarm is withheld when P(fog) >= 0.95 (chosen on dev out-of-fold: vetoes 0.3 % of dev smoke windows)"
+ },
+ "primary_comparisons": "paired, on the same test windows, v2 vs the v1 stack (window + tile heads) under the same operating rules: FIgLib smoke AUROC; at the deploy point false alarms on all smoke-free windows, on FIgLib pre-ignition windows, on fire-day clear windows and on fog windows; smoke recall at the strict point",
+ "non_inferiority": "fog AUROC unchanged (same head); smoke AUROC on each 2026 fire-day set not lower than v1 by more than 0.02",
+ "test_use": "v2 is scored on the test cameras once; the v1 stack is re-scored on them only under these same rules, for the paired comparison",
+ "caveats": "small test: FIgLib differences below about 0.035 AUROC and one fog window (about 2 %) are within noise"
+}

@@ -2,17 +2,23 @@
 
     D=data/real; SETS=""
     for n in figlib hpwren_fog hpwren_fog2 hpwren_smoke hpwren_smoke2; do
-        SETS="$SETS --set $n:$D/$n/real.csv:$D/$n/clip.npz:$D/$n/features.npz:$D/$n/clip_fine.npz"; done
-    python scripts/train_detector.py $SETS --out artifacts_detector --report reports/far/detector.json [--final]
+        SETS="$SETS --set $n:$D/$n/real.csv:$D/$n/clip.npz:$D/$n/features.npz:$D/$n/clip_fine.npz"
+        SETS="$SETS:$D/$n/clip_zoom.npz:$D/$n/clip_ref.npz"; done
+    python scripts/train_detector.py $SETS --deploy-recall 0.8 --fog-veto 0.95 \\
+        --out artifacts_detector --report reports/far/detector.json [--final]
 
-Data: every --set is name:manifest:clip_npz[:features_npz[:fine_npz]]. A
-row's labels come from its manifest (smoke / fog: 0, 1 or empty = unknown),
-its appearance from the CLIP embeddings (scripts/embed_windows.py; fine_npz:
-the 4 x 6 tiles of frames 0 and 11, --grid 4x6 --frames 0,11 --no-full), its
-motion (optional feature group "motion") from the extractor's FeatureSet
-(seq_id <window_id>-w0). Splits come from the manifests (camera-mount based in
-prepare_figlib.py and prepare_hpwren_fog.py, so one camera is in one split
-across sets); "dev" is every split but test_iid.
+Data: every --set is name:manifest:clip_npz[:features_npz[:fine_npz[:zoom_npz
+[:ref_npz]]]]. A row's labels come from its manifest (smoke / fog: 0, 1 or
+empty = unknown), its appearance from the CLIP embeddings
+(scripts/embed_windows.py; fine_npz: the 4 x 6 tiles of frames 0 and 11,
+--grid 4x6 --frames 0,11 --no-full; zoom_npz: full-resolution quarters of
+the top-4 tiles, scripts/zoom_windows.py; ref_npz: the same camera 14 min
+before frame 0, scripts/reference_frames.py), its motion (optional feature
+group "motion") from the extractor's FeatureSet (seq_id <window_id>-w0).
+Windows without zoom crops or a reference frame use a fallback stack.
+Splits come from the manifests (camera-mount based in prepare_figlib.py and
+prepare_hpwren_fog.py, so one camera is in one split across sets); "dev" is
+every split but test_iid.
 
 Per head (smoke, fog), on the dev rows with a known label:
 
@@ -24,19 +30,28 @@ Per head (smoke, fog), on the dev rows with a known label:
    dev rows;
    for smoke, when every row has fine embeddings, also a tile head (one
    model applied to every fine tile, the window scored by its best tile; its
-   C by the same grouped cross-validation) and a stack, a logistic
-   regression on the two heads' out-of-fold logits, whose own out-of-fold
-   predictions (a second grouped cross-validation) are the head's;
+   C by the same grouped cross-validation), a zoom head (the same on the
+   zoom crops), and stacks (STACK_CONFIGS: logistic regressions on the
+   heads' out-of-fold logits plus the change and reference scores of
+   src/detector/features.py, the first whose inputs a window has), whose
+   own out-of-fold predictions (a second grouped cross-validation) are the
+   head's; the v1 stack (window + tile heads) is fitted and reported too;
 2. thresholds from the out-of-fold predictions of the chosen configuration
    (never from the refitted model's own training predictions): "balanced"
-   (maximum Youden J) for both heads; for smoke also "deploy", the lowest
+   (maximum Youden J) for both heads; for smoke also "deploy": the lowest
    threshold at which at most --deploy-false-smoke (2.5 %) of the dev fog
-   windows (fog 1, smoke 0) raise a smoke alarm: half the goal's 5 %, a
+   windows (fog 1, smoke 0) raise a smoke alarm, or, with --deploy-recall r
+   (v2: 0.8, v1's deploy recall), the highest threshold that still catches
+   r of the dev smoke windows if that is higher, so a better model spends
+   its gain on fewer false alarms rather than on more recall (without it,
+   v1's rule: the fog limit alone). The fog limit is half the goal's 5 %, a
    margin for new cameras (the dev estimate is out-of-fold, but a test set of
    about 50 fog windows moves the rate by 2 % per window); for smoke also
    "strict", at which at most --strict-false-alarm (5 %) of all dev no-smoke
    windows raise an alarm (the deploy point budgets fog windows only, and
-   clear scenes minutes before a fire are harder).
+   clear scenes minutes before a fire are harder); with --fog-veto u, a
+   smoke alarm is withheld when the out-of-fold P(fog) is at least u, for
+   the thresholds and in every reported rate.
 
 Reported: the cross-validated dev results, and with --final the held-out
 test cameras (scored with the one refitted model; nothing is fitted or
@@ -66,7 +81,7 @@ from prepare_figlib import camera_mount  # noqa: E402
 
 from src.data.dataset import FeatureSet  # noqa: E402
 from src.detector.features import MODEL_ID, PROMPTS, text_embeddings, window_features  # noqa: E402
-from src.detector.features import tile_instances  # noqa: E402
+from src.detector.features import change_scores, reference_scores, tile_instances, zoom_instances  # noqa: E402
 from src.detector.model import Detector, fit_head, fit_tile_head, stack_logit, tile_logit  # noqa: E402
 from src.training import metrics as M  # noqa: E402
 from src.training.baselines import pooled_features  # noqa: E402
@@ -101,6 +116,13 @@ def load_sets(specs):
         if len(parts) > 4 and parts[4]:
             zf = np.load(parts[4])
             fine = {str(w): e for w, e in zip(zf["window_id"], zf["emb"])}
+        zoom, ref = {}, {}
+        if len(parts) > 5 and parts[5]:
+            zz = np.load(parts[5])
+            zoom = {str(w): e for w, e in zip(zz["window_id"], zz["emb"])}
+        if len(parts) > 6 and parts[6]:
+            zr = np.load(parts[6])
+            ref = {str(w): e for w, e in zip(zr["window_id"], zr["fine"])}
         motion = {}
         if feats:
             fs = FeatureSet.load(feats)
@@ -115,7 +137,9 @@ def load_sets(specs):
                              "mount": camera_mount(r["camera_id"]), "split": r["split"],
                              "smoke": _label(r.get("smoke")), "fog": _label(r.get("fog")),
                              "emb": emb[wid].astype(np.float32), "motion": motion.get(f"{wid}-w0"),
-                             "fine": fine[wid].astype(np.float32) if wid in fine else None})
+                             "fine": fine[wid].astype(np.float32) if wid in fine else None,
+                             "zoom": zoom[wid].astype(np.float32) if wid in zoom else None,
+                             "ref": ref[wid].astype(np.float32) if wid in ref else None})
     return rows
 
 
@@ -226,7 +250,7 @@ def within_sets_auroc(p, y, sets):
     return num / den if den else None
 
 
-def metrics_block(p_smoke, p_fog, rows, thr, n_boot=1000, thr_strict=None):
+def metrics_block(p_smoke, p_fog, rows, thr, n_boot=1000, thr_strict=None, p_veto=None, veto=None):
     """AUROCs; at the deploy point (thr) false smoke on fog, false alarms on every no-smoke window and smoke
     recall, and the same at the strict point (thr_strict) if given; camera-bootstrap intervals."""
     ys = np.array([r["smoke"] for r in rows])
@@ -236,11 +260,13 @@ def metrics_block(p_smoke, p_fog, rows, thr, n_boot=1000, thr_strict=None):
     fog_win = (yf == 1) & (ys == 0)
     smk = ~np.isnan(ys)
     fgk = ~np.isnan(yf)
+    vetoed = (np.asarray(p_veto) >= veto) if (p_veto is not None and veto is not None) else np.zeros(len(rows), bool)
+    p_alarm = np.where(vetoed, -1.0, p_smoke)            # a vetoed window never raises a smoke alarm
 
     def stats(idx):
         idx = np.asarray(idx)
         s, f, fw, ys_, yf_ = smk[idx], fgk[idx], fog_win[idx], ys[idx], yf[idx]
-        ps, pf = p_smoke[idx], p_fog[idx]
+        ps, pf, pa = p_smoke[idx], p_fog[idx], p_alarm[idx]
         pos = s & (ys_ == 1)
         neg = s & (ys_ == 0)
         out = {"smoke_auroc": M.auroc(ps[s], ys_[s]) if s.any() else None,
@@ -250,9 +276,9 @@ def metrics_block(p_smoke, p_fog, rows, thr, n_boot=1000, thr_strict=None):
         for suffix, t in (("", thr), ("_strict", thr_strict)):
             if t is None:
                 continue
-            out[f"false_smoke_on_fog{suffix}"] = float(np.mean(ps[fw] >= t)) if fw.any() else None
-            out[f"false_alarm_no_smoke{suffix}"] = float(np.mean(ps[neg] >= t)) if neg.any() else None
-            out[f"smoke_recall{suffix}"] = float(np.mean(ps[pos] >= t)) if pos.any() else None
+            out[f"false_smoke_on_fog{suffix}"] = float(np.mean(pa[fw] >= t)) if fw.any() else None
+            out[f"false_alarm_no_smoke{suffix}"] = float(np.mean(pa[neg] >= t)) if neg.any() else None
+            out[f"smoke_recall{suffix}"] = float(np.mean(pa[pos] >= t)) if pos.any() else None
         return out
 
     out = stats(np.arange(len(rows)))
@@ -275,6 +301,64 @@ def goal_checks(res):
                              and res["smoke_recall"] >= GOALS["min_smoke_recall"])}
 
 
+STACK_CONFIGS = (("head", "tile", "zoom", "chg_max", "chg_rz", "ref_max", "ref_rz"),
+                 ("head", "tile", "zoom", "chg_max", "chg_rz"),
+                 ("head", "tile", "chg_max", "chg_rz", "ref_max", "ref_rz"),
+                 ("head", "tile", "chg_max", "chg_rz"))
+
+
+def fit_stacks(inputs, y, g, configs):
+    """Stacks for each input configuration (rows with every input present), the out-of-fold stacked logit of
+    every row from the first configuration it has all inputs for (NaN = missing input), and per row the
+    configuration used."""
+    stacks, oof = [], np.full(len(y), np.nan)
+    used = np.array([""] * len(y), dtype=object)
+    for cfg in configs:
+        if any(k not in inputs for k in cfg):
+            continue
+        Z = np.stack([inputs[k] for k in cfg], 1)
+        ok = ~np.isnan(Z).any(1)
+        if ok.sum() < 50 or len(set(y[ok].tolist())) < 2:
+            continue
+        stacks.append({"inputs": list(cfg), **fit_stack(Z[ok], y[ok])})
+        todo = ok & np.isnan(oof)
+        used[todo] = "+".join(cfg)
+        for tr, te in _folds(len(y), g):
+            tr, te = tr[ok[tr]], te[todo[te]]
+            if len(te):
+                st = fit_stack(Z[tr], y[tr])
+                oof[te] = Z[te] @ np.asarray(st["coef"]) + st["intercept"]
+    return stacks, oof, used
+
+
+def oof_fog_veto(dev, Tf, fog_best, g_all):
+    """Out-of-fold P(fog) for every dev row (folds by camera mount; fog head fitted on the fog-labelled rows of
+    the other folds), the input of the fog veto."""
+    X = _features(dev, Tf, fog_best["groups"])
+    yf = np.array([r["fog"] for r in dev])
+    out = np.zeros(len(dev))
+    for tr, te in _folds(len(dev), g_all):
+        tr = tr[~np.isnan(yf[tr])]
+        out[te] = fit_head(X[tr], yf[tr], (), fog_best["C"]).proba(X[te])
+    return out
+
+
+def smoke_thresholds(p, y, fog_win, veto_mask, args):
+    """deploy, strict and balanced thresholds on out-of-fold probabilities after the fog veto."""
+    q = np.where(veto_mask, -1.0, p)                   # a vetoed window never alarms
+    thr = {"balanced": youden(p, y)}
+    deploy = deploy_threshold(q[fog_win], args.deploy_false_smoke)
+    if args.deploy_recall is not None:
+        pos = np.sort(q[y == 1])[::-1]
+        k = int(np.ceil(args.deploy_recall * len(pos))) - 1
+        deploy = max(deploy, float(pos[max(k, 0)]))
+    thr["deploy"] = deploy
+    thr["strict"] = deploy_threshold(q[y == 0], args.strict_false_alarm)
+    if args.fog_veto is not None:
+        thr["fog_veto"] = float(args.fog_veto)
+    return thr
+
+
 def main(argv=None) -> int:
     warnings.filterwarnings("ignore")
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
@@ -283,8 +367,12 @@ def main(argv=None) -> int:
     ap.add_argument("--report", required=True)
     ap.add_argument("--deploy-false-smoke", type=float, default=0.025,
                     help="share of the dev fog windows allowed to raise a smoke alarm at the deploy threshold")
+    ap.add_argument("--deploy-recall", type=float, default=None,
+                    help="dev smoke recall the deploy threshold keeps (never above the fog limit); none: fog only")
     ap.add_argument("--strict-false-alarm", type=float, default=0.05,
                     help="share of all dev no-smoke windows allowed to raise a smoke alarm at the strict threshold")
+    ap.add_argument("--fog-veto", type=float, default=None,
+                    help="withhold a smoke alarm when P(fog) is at least this (none: no veto)")
     ap.add_argument("--n-boot", type=int, default=1000)
     ap.add_argument("--select-on", choices=("within", "pooled"), default="within",
                     help="out-of-fold AUROC that model selection maximises: within sets (default) or pooled")
@@ -298,8 +386,9 @@ def main(argv=None) -> int:
     test = [r for r in rows if r["split"] == "test_iid"]
     T = {h: text_embeddings(PROMPTS[h]) for h in ("smoke", "fog")}
     heads, thresholds, selection, oof = {}, {}, {}, {}
-    tile_heads, stacks = {}, {}
-    for head in ("smoke", "fog"):
+    tile_heads, zoom_heads, stacks = {}, {}, {}
+    oof_v1 = None
+    for head in ("fog", "smoke"):
         hr = [r for r in dev if not np.isnan(r[head])]
         best, scores, oof_z = select(hr, head, T[head])
         selection[head] = {"best": best, "scores": scores, "n_dev": len(hr)}
@@ -308,61 +397,130 @@ def main(argv=None) -> int:
         heads[head] = fit_head(X, y, best["groups"], best["C"])
         fine = _stack_rows(hr, "fine")
         if head == "smoke" and fine is not None:
-            # tile head on the fine tiles, then the stack of the two heads' out-of-fold logits
             g = np.array([r["mount"] for r in hr])
             sets = np.array([r["set"] for r in hr])
+
+            def side_head(TI, kind, m):
+                """C of a tile-type head by grouped CV on rows m; out-of-fold logits (NaN outside m)."""
+                best_side = None
+                side_scores = []
+                for C in TILE_C_GRID:
+                    zt = grouped_oof_tile(TI, y[m], g[m], C)
+                    sc, crit = cv_scores(zt, y[m], sets[m])
+                    side_scores.append({"C": C, **sc})
+                    if best_side is None or crit > best_side[0]:
+                        best_side = (crit, C, zt, sc)
+                full = np.full(len(y), np.nan)
+                full[m] = best_side[2]
+                selection[head][kind] = {"C": best_side[1], **best_side[3], "n": int(m.sum()), "scores": side_scores}
+                print(f"{head}: {kind} head C {best_side[1]} on {int(m.sum())} windows, CV {best_side[3]}",
+                      file=sys.stderr)
+                return best_side[1], full
+
             TF = tile_instances(fine, T[head])
-            tscores, tbest = [], None
-            for C in TILE_C_GRID:
-                zt = grouped_oof_tile(TF, y, g, C)
-                sc, crit = cv_scores(zt, y, sets)
-                tscores.append({"C": C, **sc})
-                if tbest is None or crit > tbest[0]:
-                    tbest = (crit, C, zt, sc)
-            Z = np.stack([oof_z, tbest[2]], 1)
-            oof_s = np.zeros(len(y))
-            for tr, te in _folds(len(y), g):
-                oof_s[te] = stack_logit(fit_stack(Z[tr], y[tr]), [Z[te, 0], Z[te, 1]])
-            tile_heads[head] = fit_tile_head(TF, y, tbest[1])
-            stacks[head] = fit_stack(Z, y)
-            selection[head]["tile"] = {"C": tbest[1], **tbest[3], "scores": tscores}
-            selection[head]["stacked"] = {**cv_scores(oof_s, y, sets)[0], "stack": stacks[head]}
-            print(f"{head}: tile head C {tbest[1]} CV {tbest[3]}; stacked {selection[head]['stacked']}",
-                  file=sys.stderr)
+            C_tile, z_tile = side_head(TF, "tile", np.ones(len(y), bool))
+            tile_heads[head] = fit_tile_head(TF, y, C_tile)
+            inputs = {"head": oof_z, "tile": z_tile}
+            c = change_scores(fine, T[head])
+            inputs["chg_max"], inputs["chg_rz"] = c[:, 0], c[:, 1]
+            has_zoom = np.array([r["zoom"] is not None for r in hr])
+            if has_zoom.any():
+                TZ = zoom_instances(np.stack([r["zoom"] for r in hr if r["zoom"] is not None]), T[head])
+                C_zoom, inputs["zoom"] = side_head(TZ, "zoom", has_zoom)
+                zoom_heads[head] = fit_tile_head(TZ, y[has_zoom], C_zoom)
+            if any(r["ref"] is not None for r in hr):
+                rs = np.full((len(hr), 2), np.nan)
+                has = np.array([r["ref"] is not None for r in hr])
+                rs[has] = reference_scores(fine[has], np.stack([r["ref"] for r in hr if r["ref"] is not None]),
+                                           T[head])
+                inputs["ref_max"], inputs["ref_rz"] = rs[:, 0], rs[:, 1]
+            # v1: window head + tile head only (kept for the paired comparison)
+            st_v1, oof_v1, _ = fit_stacks(inputs, y, g, (("head", "tile"),))
+            stacks[head], oof_s, used = fit_stacks(inputs, y, g, STACK_CONFIGS)
+            selection[head]["stacked_v1"] = {**cv_scores(oof_v1, y, sets)[0], "stack": st_v1[0]}
+            selection[head]["stacked"] = {**cv_scores(oof_s, y, sets)[0], "stacks": stacks[head],
+                                          "rows_per_stack": {k: int(np.sum(used == k)) for k in sorted(set(used))}}
+            print(f"{head}: stacked v1 {selection[head]['stacked_v1']['cv_auroc_within_sets']:.3f} within sets, "
+                  f"v2 {selection[head]['stacked']['cv_auroc_within_sets']:.3f}", file=sys.stderr)
             oof_z = oof_s
         oof_p = _sigmoid(oof_z)
-        thresholds[head] = {"balanced": youden(oof_p, y)}
-        if head == "smoke":
+        if head == "fog":
+            thresholds[head] = {"balanced": youden(oof_p, y)}
+        else:
+            g_all = np.array([r["mount"] for r in dev])
+            pv_all = oof_fog_veto(dev, T["fog"], selection["fog"]["best"], g_all)
+            pv = dict(zip([r["window_id"] for r in dev], pv_all))
+            veto = (np.array([pv[r["window_id"]] for r in hr]) >= args.fog_veto) if args.fog_veto is not None \
+                else np.zeros(len(hr), bool)
             fog_win = np.array([(r["fog"] == 1) and (r["smoke"] == 0) for r in hr])
-            thresholds[head]["deploy"] = deploy_threshold(oof_p[fog_win], args.deploy_false_smoke)
-            thresholds[head]["strict"] = deploy_threshold(oof_p[y == 0], args.strict_false_alarm)
+            thresholds[head] = smoke_thresholds(oof_p, y, fog_win, veto, args)
+            if oof_v1 is not None:
+                thr_v1 = smoke_thresholds(_sigmoid(oof_v1), y, fog_win, veto, args)
+                oof["smoke_v1"] = dict(zip([r["window_id"] for r in hr], _sigmoid(oof_v1)))
         oof[head] = {r["window_id"]: p for r, p in zip(hr, oof_p)}
         print(f"{head}: best {best} on {len(hr)} dev windows", file=sys.stderr)
     det = Detector(heads=heads, text=T, thresholds=thresholds,
                    info={"model_id": MODEL_ID, "sets": args.sets, "deploy_false_smoke": args.deploy_false_smoke,
+                         "deploy_recall": args.deploy_recall, "strict_false_alarm": args.strict_false_alarm,
+                         "fog_veto": args.fog_veto,
                          "selection": {h: selection[h]["best"] for h in selection},
-                         "tile_heads": {h: selection[h]["tile"]["C"] for h in tile_heads}},
-                   tile_heads=tile_heads, stacks=stacks)
+                         "tile_heads": {h: selection[h]["tile"]["C"] for h in tile_heads},
+                         "zoom_heads": {h: selection[h]["zoom"]["C"] for h in zoom_heads}},
+                   tile_heads=tile_heads, stacks=stacks, zoom_heads=zoom_heads)
     det.save(args.out)
 
     # Cross-validated dev results: each window's out-of-fold probability for each head it has a label for
     dev_s = np.array([oof["smoke"].get(r["window_id"], np.nan) for r in dev])
     dev_f = np.array([oof["fog"].get(r["window_id"], np.nan) for r in dev])
+    dev_v = pv_all if args.fog_veto is not None else None
     report = {"status": "detector", "goals": GOALS, "selection": selection, "thresholds": thresholds,
+              "rules": {"deploy_false_smoke": args.deploy_false_smoke, "deploy_recall": args.deploy_recall,
+                        "strict_false_alarm": args.strict_false_alarm, "fog_veto": args.fog_veto,
+                        "select_on": args.select_on},
               "dev_cv": metrics_block(np.nan_to_num(dev_s, nan=0.0), np.nan_to_num(dev_f, nan=0.0), dev,
-                                      thresholds["smoke"]["deploy"], args.n_boot, thresholds["smoke"]["strict"])}
+                                      thresholds["smoke"]["deploy"], args.n_boot, thresholds["smoke"]["strict"],
+                                      dev_v, args.fog_veto)}
     report["dev_cv"]["goal_met"] = goal_checks(report["dev_cv"])
+    if "smoke_v1" in oof:
+        dev_s1 = np.array([oof["smoke_v1"].get(r["window_id"], np.nan) for r in dev])
+        report["thresholds_v1_stack"] = thr_v1
+        report["dev_cv_v1_stack"] = metrics_block(np.nan_to_num(dev_s1, nan=0.0), np.nan_to_num(dev_f, nan=0.0),
+                                                  dev, thr_v1["deploy"], args.n_boot, thr_v1["strict"], dev_v,
+                                                  args.fog_veto)
     if args.final:
-        E = np.stack([r["emb"] for r in test])
-        mot = fine = None
-        if any("motion" in heads[h].groups for h in heads):
-            mot = np.stack([r["motion"] for r in test])
-        if tile_heads or any("fine" in heads[h].groups for h in heads):
-            fine = np.stack([r["fine"] for r in test])
-        p = det.proba(E, mot, fine)
-        report["test"] = metrics_block(p["smoke"], p["fog"], test, thresholds["smoke"]["deploy"], args.n_boot,
-                                       thresholds["smoke"]["strict"])
+        p_s, p_f, used = np.zeros(len(test)), np.zeros(len(test)), []
+        mot_needed = any("motion" in heads[h].groups for h in heads)
+        groups = {}
+        for i, r in enumerate(test):
+            key = (r["fine"] is not None, r.get("zoom") is not None, r.get("ref") is not None)
+            groups.setdefault(key, []).append(i)
+        for (has_fine, has_zoom, has_ref), idx in groups.items():
+            rs = [test[i] for i in idx]
+            E = np.stack([r["emb"] for r in rs])
+            mot = np.stack([r["motion"] for r in rs]) if mot_needed else None
+            fine = np.stack([r["fine"] for r in rs]) if has_fine else None
+            zoom = np.stack([r["zoom"] for r in rs]) if has_zoom else None
+            ref = np.stack([r["ref"] for r in rs]) if has_ref else None
+            p = det.proba(E, mot, fine, zoom, ref)
+            p_s[idx], p_f[idx] = p["smoke"], p["fog"]
+            avail = det.stack_inputs("smoke", E[:1], None if mot is None else mot[:1],
+                                     None if fine is None else fine[:1], None if zoom is None else zoom[:1],
+                                     None if ref is None else ref[:1])
+            used.append({"stack": det.stack_used("smoke", avail), "windows": len(idx)})
+        report["test_stacks_used"] = used
+        report["test"] = metrics_block(p_s, p_f, test, thresholds["smoke"]["deploy"], args.n_boot,
+                                       thresholds["smoke"]["strict"], p_f if args.fog_veto is not None else None,
+                                       args.fog_veto)
         report["test"]["goal_met"] = goal_checks(report["test"])
+        if "smoke_v1" in oof:
+            det_v1 = Detector(heads=heads, text=T, thresholds={"smoke": thr_v1, "fog": thresholds["fog"]},
+                              tile_heads=tile_heads, stacks={"smoke": st_v1})
+            fine_t = np.stack([r["fine"] for r in test])
+            mot_t = np.stack([r["motion"] for r in test]) if mot_needed else None
+            p1 = det_v1.proba(np.stack([r["emb"] for r in test]), mot_t, fine_t)
+            report["test_v1_stack"] = metrics_block(p1["smoke"], p1["fog"], test, thr_v1["deploy"], args.n_boot,
+                                                    thr_v1["strict"], p1["fog"] if args.fog_veto is not None
+                                                    else None, args.fog_veto)
     write_json(Path(args.report), report)
     Path(args.report).with_suffix(".md").write_text(render(report), encoding="utf-8")
     print(json.dumps({k: {kk: report[k][kk] for kk in ("smoke_auroc", "fog_auroc", "false_smoke_on_fog",

@@ -158,7 +158,7 @@ def test_train_detector_tile_head_and_stack(tmp_path, monkeypatch):
     splits = ["train", "train", "val_select", "val_calib", "test_iid"]
     specs = []
     for name, smoke_rule, fog_rule in (("fig", lambda k: k % 2, lambda k: None), ("hpf", lambda k: 0, lambda k: k % 2)):
-        rows, ids, embs, fines = [], [], [], []
+        rows, ids, embs, fines, zooms, refs = [], [], [], [], [], []
         for c in range(10):
             for k in range(8):
                 s, f = smoke_rule(k), fog_rule(k)
@@ -168,10 +168,14 @@ def test_train_detector_tile_head_and_stack(tmp_path, monkeypatch):
                 ids.append(wid)
                 embs.append(_windows(rng, 1, [0], [f or 0])[0])     # the coarse crops see no smoke
                 fe = rng.normal(0, 1, (2, 24, D))
+                zm = rng.normal(0, 1, (2, 16, D))
                 if s == 1:
                     t0 = (c * 7 + k) % 18
                     fe[1, t0:t0 + 6, 0] += 6.0                   # a plume over 6 fine tiles, last frame
+                    zm[1, :6, 0] += 6.0                          # and in the zoom crops of the top tiles
                 fines.append(_unit(fe).astype(np.float32))
+                zooms.append(_unit(zm).astype(np.float32))
+                refs.append(_unit(rng.normal(0, 1, (24, D))).astype(np.float32))
         man = tmp_path / f"{name}.csv"
         with open(man, "w", newline="") as fh:
             w = csv.DictWriter(fh, fieldnames=list(rows[0]))
@@ -179,22 +183,36 @@ def test_train_detector_tile_head_and_stack(tmp_path, monkeypatch):
             w.writerows(rows)
         np.savez(tmp_path / f"{name}.npz", window_id=np.array(ids), emb=np.stack(embs))
         np.savez(tmp_path / f"{name}_fine.npz", window_id=np.array(ids), emb=np.stack(fines))
-        specs += ["--set", f"{name}:{man}:{tmp_path / f'{name}.npz'}::{tmp_path / f'{name}_fine.npz'}"]
+        np.savez(tmp_path / f"{name}_zoom.npz", window_id=np.array(ids), emb=np.stack(zooms))
+        keep = slice(8, None)                                    # the first camera has no reference frames
+        np.savez(tmp_path / f"{name}_ref.npz", window_id=np.array(ids)[keep], fine=np.stack(refs)[keep],
+                 emb=np.zeros((len(ids) - 8, 7, D), np.float32))
+        specs += ["--set", f"{name}:{man}:{tmp_path / f'{name}.npz'}::{tmp_path / f'{name}_fine.npz'}:"
+                           f"{tmp_path / f'{name}_zoom.npz'}:{tmp_path / f'{name}_ref.npz'}"]
     out, rep = tmp_path / "det", tmp_path / "rep.json"
-    assert TD.main(specs + ["--out", str(out), "--report", str(rep), "--final", "--n-boot", "10"]) == 0
+    assert TD.main(specs + ["--out", str(out), "--report", str(rep), "--final", "--n-boot", "10",
+                            "--deploy-recall", "0.8", "--fog-veto", "0.95"]) == 0
     doc = json.loads(rep.read_text())
     sel = doc["selection"]["smoke"]
-    assert sel["tile"]["cv_auroc"] > 0.9 and sel["stacked"]["cv_auroc"] > 0.9
+    assert sel["tile"]["cv_auroc"] > 0.9 and sel["zoom"]["cv_auroc"] > 0.9 and sel["stacked"]["cv_auroc"] > 0.9
+    assert sel["stacked"]["rows_per_stack"]["head+tile+zoom+chg_max+chg_rz"] == 16      # dev rows without a ref
+    assert doc["thresholds"]["smoke"]["fog_veto"] == 0.95 and "dev_cv_v1_stack" in doc and "test_v1_stack" in doc
+    assert doc["dev_cv"]["smoke_recall"] >= 0.8 - 1e-9
+    assert {tuple(u["stack"]) for u in doc["test_stacks_used"]} == {
+        ("head", "tile", "zoom", "chg_max", "chg_rz", "ref_max", "ref_rz")}
     assert doc["test"]["smoke_auroc"] > 0.9
     assert doc["dev_cv"]["smoke_auroc_within_sets"] == pytest.approx(doc["dev_cv"]["per_set"]["fig"]["smoke_auroc"])
     det = Detector.load(out)
-    assert set(det.tile_heads) == {"smoke"} and len(det.stacks["smoke"]["coef"]) == 2
+    assert set(det.tile_heads) == {"smoke"} and set(det.zoom_heads) == {"smoke"}
+    assert [st["inputs"][-1] for st in det.stacks["smoke"]] == ["ref_rz", "chg_rz", "ref_rz", "chg_rz"]
     E = np.stack([_windows(rng, 1, [0], [0])[0]] * 2)
     fe = _unit(rng.normal(0, 1, (2, 2, 24, D))).astype(np.float32)
     with pytest.raises(ValueError):
         det.proba(E)                                         # the tile head needs the fine embeddings
     fe[1, 1, 5:11, 0] += 6.0
     fe[1] = _unit(fe[1])
-    p = det.proba(E, fine=fe)["smoke"]
+    p = det.proba(E, fine=fe)["smoke"]                     # fallback stack: no zoom, no reference
     assert p[1] > p[0]
+    assert det.stack_used("smoke", det.stack_inputs("smoke", E, fine=fe)) == ["head", "tile", "chg_max", "chg_rz"]
+    assert det.select_zoom_tiles(fe, 4).shape == (2, 4)
     assert "tile head" in rep.with_suffix(".md").read_text()

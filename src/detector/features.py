@@ -31,7 +31,19 @@ Feature groups (names used in the detector config):
 
 tile_instances gives the same fine tiles one by one ([last, last - first,
 prompt similarities last, their change], (N, 24, 2 D + 2 P)) for the tile
-(multiple-instance) smoke head, which scores a window by its highest tile.
+(multiple-instance) smoke head, which scores a window by its highest tile;
+zoom_instances does the same for the full-resolution zoom crops (frames 0
+and 11, 2 x 2 quarters of the window's top tiles: scripts/zoom_windows.py).
+
+Scalar stack inputs (no fitting), from the smoke prompts' contrast per fine
+tile, s = mean similarity to the smoke prompts (the first SMOKE_POSITIVE of
+PROMPTS["smoke"]) minus mean similarity to the others:
+
+* change_scores: c = s(frame 11) - s(frame 0) per tile; the window's max over
+  tiles and its robust z ((max - median) / MAD);
+* reference_scores: r = s(frame 11) - s(reference) per tile, the reference
+  being the same camera 14 min before frame 0 (scripts/reference_frames.py);
+  max and robust z.
 """
 
 from typing import Dict, Iterable, Optional, Sequence
@@ -91,6 +103,7 @@ def group_features(E: np.ndarray, T: np.ndarray, group: str) -> np.ndarray:
 
 FINE_TILES = 24                     # 4 x 6
 FINE_TOP = 3
+SMOKE_POSITIVE = 3                  # PROMPTS["smoke"][:3] describe smoke, the rest look-alikes
 
 
 def _check_fine(Fe: np.ndarray) -> np.ndarray:
@@ -119,11 +132,55 @@ def fine_features(Fe: np.ndarray, T: np.ndarray) -> np.ndarray:
                            d.max(1), np.abs(d).mean(1), Fe[:, 1].max(1)], 1)
 
 
-def tile_instances(Fe: np.ndarray, T: np.ndarray) -> np.ndarray:
-    """The fine tiles as instances of the tile smoke head: (N, 24, 2 D + 2 P)."""
-    Fe = _check_fine(Fe)
+def _instances(Fe: np.ndarray, T: np.ndarray) -> np.ndarray:
     S = np.einsum("nftd,pd->nftp", Fe, np.asarray(T, np.float32)) * 100.0
     return np.concatenate([Fe[:, 1], Fe[:, 1] - Fe[:, 0], S[:, 1], S[:, 1] - S[:, 0]], -1).astype(np.float32)
+
+
+def tile_instances(Fe: np.ndarray, T: np.ndarray) -> np.ndarray:
+    """The fine tiles as instances of the tile smoke head: (N, 24, 2 D + 2 P)."""
+    return _instances(_check_fine(Fe), T)
+
+
+def zoom_instances(Z: np.ndarray, T: np.ndarray) -> np.ndarray:
+    """The zoom crops (N, 2, K, D) as instances of the zoom smoke head: (N, K, 2 D + 2 P)."""
+    Z = np.asarray(Z, dtype=np.float32)
+    if Z.ndim == 3:
+        Z = Z[None]
+    if Z.ndim != 4 or Z.shape[1] != 2:
+        raise ValueError(f"zoom embeddings must be (N, 2, K, D) or (2, K, D), got {Z.shape}")
+    return _instances(Z, T)
+
+
+def _contrast(X: np.ndarray, T: np.ndarray) -> np.ndarray:
+    """Smoke-prompt contrast of embeddings X (..., D): mean similarity to the smoke prompts minus the others'."""
+    S = np.einsum("...d,pd->...p", np.asarray(X, np.float32), np.asarray(T, np.float32)) * 100.0
+    return S[..., :SMOKE_POSITIVE].mean(-1) - S[..., SMOKE_POSITIVE:].mean(-1)
+
+
+def _max_and_robust_z(c: np.ndarray) -> np.ndarray:
+    mx = c.max(1)
+    med = np.median(c, 1)
+    mad = np.median(np.abs(c - med[:, None]), 1) + 1e-3
+    return np.stack([mx, (mx - med) / mad], 1).astype(np.float32)
+
+
+def change_scores(Fe: np.ndarray, T: np.ndarray) -> np.ndarray:
+    """(N, 2): max over fine tiles of the contrast change from frame 0 to frame 11, and its robust z."""
+    Fe = _check_fine(Fe)
+    c = _contrast(Fe, T)
+    return _max_and_robust_z(c[:, 1] - c[:, 0])
+
+
+def reference_scores(Fe: np.ndarray, Fref: np.ndarray, T: np.ndarray) -> np.ndarray:
+    """(N, 2): max over fine tiles of the contrast of frame 11 minus the reference frame's (N, 24, D), robust z."""
+    Fe = _check_fine(Fe)
+    Fref = np.asarray(Fref, np.float32)
+    if Fref.ndim == 2:
+        Fref = Fref[None]
+    if Fref.shape[:2] != (len(Fe), FINE_TILES):
+        raise ValueError(f"reference fine embeddings must be (N, {FINE_TILES}, D), got {Fref.shape}")
+    return _max_and_robust_z(_contrast(Fe[:, 1], T) - _contrast(Fref, T))
 
 
 def window_features(E: np.ndarray, T: np.ndarray, groups: Sequence[str],
