@@ -928,3 +928,16 @@ them.
   the HPWREN 2026 fog and smoke labels come from blind AI vision labelling
   of contact sheets (two votes per sheet, a third where either was unsure or
   they disagree), not from people.
+
+v2 (`artifacts_detector_v2/`, not the default) adds stack inputs: a zoom
+head on full-resolution 2 x 2 quarters of each window's top-4 fine tiles
+(tiles chosen by the tile head: out-of-fold for dev windows, the refitted
+head for test windows), the smoke-prompt contrast change within the window
+and against one frame of the same camera 14 minutes before frame 0 (a fixed
+lag for every window and label), and the fog-prompt contrast at the
+most-changed tiles; fallback stacks cover windows without zoom crops or a
+reference; the stacks are fitted with fog windows weighted 3; a fog veto
+withholds smoke alarms at P(fog) >= 0.95; the deploy threshold keeps v1's
+80 % dev recall (never above 2.5 % of dev fog windows). It improved every dev
+number but not the test cameras at matched recall (README, "Detector v2
+attempt"), so v1 stays the default.

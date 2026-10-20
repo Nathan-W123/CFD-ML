@@ -1,0 +1,203 @@
+{
+ "format_version": 3,
+ "heads": {
+  "fog": {
+   "intercept": -2.5089045405817667,
+   "groups": [
+    "full",
+    "sims"
+   ],
+   "C": 0.01,
+   "n_features": 584
+  },
+  "smoke": {
+   "intercept": -1.37201874551861,
+   "groups": [
+    "full",
+    "tiles",
+    "sims",
+    "fine"
+   ],
+   "C": 0.003,
+   "n_features": 4196
+  }
+ },
+ "thresholds": {
+  "fog": {
+   "balanced": 0.24273344406359304
+  },
+  "smoke": {
+   "balanced": 0.28153844303458764,
+   "deploy": 0.26858938477279115,
+   "strict": 0.5297482953053075,
+   "fog_veto": 0.95
+  }
+ },
+ "info": {
+  "model_id": "openai/clip-vit-base-patch32",
+  "sets": [
+   "figlib:data/real/figlib/real.csv:data/real/figlib/clip.npz:data/real/figlib/features.npz:data/real/figlib/clip_fine.npz:data/real/figlib/clip_zoom.npz:data/real/figlib/clip_ref.npz",
+   "hpwren_fog:data/real/hpwren_fog/real.csv:data/real/hpwren_fog/clip.npz:data/real/hpwren_fog/features.npz:data/real/hpwren_fog/clip_fine.npz:data/real/hpwren_fog/clip_zoom.npz:data/real/hpwren_fog/clip_ref.npz",
+   "hpwren_fog2:data/real/hpwren_fog2/real.csv:data/real/hpwren_fog2/clip.npz:data/real/hpwren_fog2/features.npz:data/real/hpwren_fog2/clip_fine.npz:data/real/hpwren_fog2/clip_zoom.npz:data/real/hpwren_fog2/clip_ref.npz",
+   "hpwren_smoke:data/real/hpwren_smoke/real.csv:data/real/hpwren_smoke/clip.npz:data/real/hpwren_smoke/features.npz:data/real/hpwren_smoke/clip_fine.npz:data/real/hpwren_smoke/clip_zoom.npz:data/real/hpwren_smoke/clip_ref.npz",
+   "hpwren_smoke2:data/real/hpwren_smoke2/real.csv:data/real/hpwren_smoke2/clip.npz:data/real/hpwren_smoke2/features.npz:data/real/hpwren_smoke2/clip_fine.npz:data/real/hpwren_smoke2/clip_zoom.npz:data/real/hpwren_smoke2/clip_ref.npz"
+  ],
+  "deploy_false_smoke": 0.025,
+  "deploy_recall": 0.8,
+  "strict_false_alarm": 0.05,
+  "fog_veto": 0.95,
+  "stack_fog_weight": 3.0,
+  "selection": {
+   "fog": {
+    "groups": [
+     "full",
+     "sims"
+    ],
+    "C": 0.01,
+    "cv_auroc": 0.9772050515121303,
+    "cv_auroc_within_sets": 0.945389246857505,
+    "cv_auroc_per_set": {
+     "hpwren_fog": 0.9346280991735537,
+     "hpwren_fog2": 0.9488631488631488,
+     "hpwren_smoke": 0.9777777777777777
+    }
+   },
+   "smoke": {
+    "groups": [
+     "full",
+     "tiles",
+     "sims",
+     "fine"
+    ],
+    "C": 0.003,
+    "cv_auroc": 0.8883342425298009,
+    "cv_auroc_within_sets": 0.8041052785760825,
+    "cv_auroc_per_set": {
+     "figlib": 0.7560913503620593,
+     "hpwren_smoke": 0.8930424754949068,
+     "hpwren_smoke2": 0.8853165589143224
+    }
+   }
+  },
+  "tile_heads": {
+   "smoke": 0.0003
+  },
+  "zoom_heads": {
+   "smoke": 0.0001
+  }
+ },
+ "tile_heads": {
+  "smoke": {
+   "intercept": -0.8586314043271742,
+   "C": 0.0003,
+   "n_features": 1040
+  }
+ },
+ "zoom_heads": {
+  "smoke": {
+   "intercept": -0.8390949096260084,
+   "C": 0.0001,
+   "n_features": 1040
+  }
+ },
+ "stacks": {
+  "smoke": [
+   {
+    "inputs": [
+     "head",
+     "tile",
+     "zoom",
+     "chg_max",
+     "chg_rz",
+     "ref_max",
+     "ref_rz",
+     "fog_chg",
+     "fogd_chg",
+     "fog_ref",
+     "fogd_ref"
+    ],
+    "coef": [
+     0.5969722082943272,
+     0.40689391696308247,
+     1.0868596103935237,
+     0.19270949080898137,
+     -0.02463934568357051,
+     0.05922076742856013,
+     0.06970844320434821,
+     -0.04584659972152717,
+     0.21375949733374705,
+     -0.3224883650270644,
+     0.4213640218433606
+    ],
+    "intercept": -1.3824055399094628
+   },
+   {
+    "inputs": [
+     "head",
+     "tile",
+     "zoom",
+     "chg_max",
+     "chg_rz",
+     "fog_chg",
+     "fogd_chg"
+    ],
+    "coef": [
+     0.6001861284495025,
+     0.44375250628241936,
+     1.18065319461124,
+     0.18588084440530248,
+     0.01715738389797146,
+     -0.17616805185261503,
+     0.3702311741598482
+    ],
+    "intercept": -1.1737197626702476
+   },
+   {
+    "inputs": [
+     "head",
+     "tile",
+     "chg_max",
+     "chg_rz",
+     "ref_max",
+     "ref_rz",
+     "fog_chg",
+     "fogd_chg",
+     "fog_ref",
+     "fogd_ref"
+    ],
+    "coef": [
+     0.6754625090041356,
+     0.9351304888126298,
+     0.16654156255616467,
+     -0.014068319753278087,
+     0.1493851886887365,
+     0.07618642019186002,
+     -0.01605151839240713,
+     0.17795989011675495,
+     -0.3340989576279555,
+     0.4915382332387396
+    ],
+    "intercept": -1.448021607398378
+   },
+   {
+    "inputs": [
+     "head",
+     "tile",
+     "chg_max",
+     "chg_rz",
+     "fog_chg",
+     "fogd_chg"
+    ],
+    "coef": [
+     0.678327438281364,
+     1.0626232458425942,
+     0.2187466913691261,
+     0.031476835686878944,
+     -0.1458023319205076,
+     0.3479926112005084
+    ],
+    "intercept": -1.1624121840498105
+   }
+  ]
+ }
+}

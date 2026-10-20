@@ -1,0 +1,73 @@
+{
+ "note": "Descriptive comparison on the held-out test cameras, after v2 was scored once under the frozen rules: both models' smoke-alarm rates when each threshold is set on the test windows themselves to catch the same share of smoke (fog veto 0.95 for both). Nothing was fitted or chosen from it.",
+ "by_recall": {
+  "0.70": {
+   "v1": {
+    "all_smoke_free": 0.13114754098360656,
+    "fog": 0.018518518518518517,
+    "figlib_pre_ignition": 0.3373493975903614,
+    "fire_day_clear": 0.1
+   },
+   "v2": {
+    "all_smoke_free": 0.17049180327868851,
+    "fog": 0.018518518518518517,
+    "figlib_pre_ignition": 0.40963855421686746,
+    "fire_day_clear": 0.15454545454545454
+   }
+  },
+  "0.75": {
+   "v1": {
+    "all_smoke_free": 0.19672131147540983,
+    "fog": 0.018518518518518517,
+    "figlib_pre_ignition": 0.4939759036144578,
+    "fire_day_clear": 0.16363636363636364
+   },
+   "v2": {
+    "all_smoke_free": 0.1901639344262295,
+    "fog": 0.037037037037037035,
+    "figlib_pre_ignition": 0.4457831325301205,
+    "fire_day_clear": 0.17272727272727273
+   }
+  },
+  "0.80": {
+   "v1": {
+    "all_smoke_free": 0.26557377049180325,
+    "fog": 0.037037037037037035,
+    "figlib_pre_ignition": 0.6506024096385542,
+    "fire_day_clear": 0.22727272727272727
+   },
+   "v2": {
+    "all_smoke_free": 0.2721311475409836,
+    "fog": 0.037037037037037035,
+    "figlib_pre_ignition": 0.6144578313253012,
+    "fire_day_clear": 0.2727272727272727
+   }
+  }
+ },
+ "v2_minus_v1_camera_bootstrap": {
+  "all_smoke_free_at_80": {
+   "median": 0.006590232992421771,
+   "ci95": [
+    -0.09482506845147547,
+    0.0936727688787185
+   ],
+   "n": 1000
+  },
+  "fog_at_80": {
+   "median": 0.0,
+   "ci95": [
+    -0.0386111111111111,
+    0.04920081967213113
+   ],
+   "n": 1000
+  },
+  "within_set_auroc": {
+   "median": 0.009917160903676614,
+   "ci95": [
+    -0.025126998758476952,
+    0.051251750246730836
+   ],
+   "n": 1000
+  }
+ }
+}
