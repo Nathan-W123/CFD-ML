@@ -253,7 +253,7 @@ def test_train_detector_tile_head_and_stack(tmp_path, monkeypatch):
         "head", "tile", "chg_max", "chg_rz", "fog_chg", "fogd_chg"]
     assert det.select_zoom_tiles(fe, 4).shape == (2, 4)
     md = rep.with_suffix(".md").read_text()
-    assert "tile head" in md and "zoom head" in md and "v2 against the v1 stack" in md
+    assert "tile head" in md and "zoom head" in md and "Deployed stack against the v1 stack" in md
 
 
 def test_box_region_and_instance_labels(tmp_path):
@@ -353,7 +353,8 @@ def test_train_detector_boxes_and_score_detector(tmp_path, monkeypatch):
     out, rep = tmp_path / "det", tmp_path / "rep.json"
     assert TD.main(specs + ["--out", str(sel_dir), "--report", str(tmp_path / "sel.json"), "--n-boot", "5"]) == 0
     assert TD.main(specs + ["--out", str(out), "--report", str(rep), "--final", "--n-boot", "10",
-                            "--boxes", str(boxes), "--box-balance", "--zoom-selector", str(sel_dir)]) == 0
+                            "--boxes", str(boxes), "--box-balance", "--zoom-selector", str(sel_dir),
+                            "--ref-tile-head"]) == 0
     doc = json.loads(rep.read_text())
     sel = doc["selection"]["smoke"]
     n_smoke = sel["box_labels"]["smoke_windows"]
@@ -363,8 +364,12 @@ def test_train_detector_boxes_and_score_detector(tmp_path, monkeypatch):
     assert sel["box_labels_zoom"]["positive_tiles"] == 4 * (n_smoke - 1)   # the plume tile's 4 quarters
     assert sel["tile"]["cv_auroc"] > 0.9 and doc["test"]["smoke_auroc"] > 0.9
     assert doc["rules"]["box_balance"] is True and doc["rules"]["boxes"] == [str(boxes)]
+    assert sel["tileref"]["n"] == 128 - 16 and sel["tileref"]["cv_auroc"] > 0.9    # rows with a reference
     det = Detector.load(out)
     assert np.allclose(det.zoom_selector["smoke"].coef, Detector.load(sel_dir).tile_heads["smoke"].coef)
+    assert set(det.ref_tile_heads) == {"smoke"} and det.stacks["smoke"][0]["inputs"][-1] == "tileref"
+    assert "tileref" not in det.stacks["smoke"][1]["inputs"]                       # the no-reference fallback
+    assert "reference frame, best tile (box labels)" in rep.with_suffix(".md").read_text()
     import importlib
 
     SD = importlib.import_module("score_detector")

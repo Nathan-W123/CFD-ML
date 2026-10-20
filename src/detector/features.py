@@ -150,6 +150,18 @@ def tile_instances(Fe: np.ndarray, T: np.ndarray) -> np.ndarray:
     return _instances(_check_fine(Fe), T)
 
 
+def ref_instances(Fe: np.ndarray, Fref: np.ndarray, T: np.ndarray) -> np.ndarray:
+    """The fine tiles against the reference frame as instances of the reference tile head: frame 11 and its
+    change since the reference frame (N, 24, D), (N, 24, 2 D + 2 P)."""
+    Fe = _check_fine(Fe)
+    Fref = np.asarray(Fref, np.float32)
+    if Fref.ndim == 2:
+        Fref = Fref[None]
+    if Fref.shape[:2] != (len(Fe), FINE_TILES):
+        raise ValueError(f"reference fine embeddings must be (N, {FINE_TILES}, D), got {Fref.shape}")
+    return _instances(np.stack([Fref, Fe[:, 1]], 1), T)
+
+
 def zoom_instances(Z: np.ndarray, T: np.ndarray) -> np.ndarray:
     """The zoom crops (N, 2, K, D) as instances of the zoom smoke head: (N, K, 2 D + 2 P)."""
     Z = np.asarray(Z, dtype=np.float32)

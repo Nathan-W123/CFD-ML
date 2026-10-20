@@ -82,8 +82,8 @@ from prepare_figlib import camera_mount  # noqa: E402
 from src.data.dataset import FeatureSet  # noqa: E402
 from src.detector.boxes import fine_regions, instance_labels, load_boxes, zoom_regions  # noqa: E402
 from src.detector.features import MODEL_ID, PROMPTS, text_embeddings, window_features  # noqa: E402
-from src.detector.features import (change_scores, fog_tile_scores, reference_scores, tile_instances,  # noqa: E402
-                                   zoom_instances)
+from src.detector.features import (change_scores, fog_tile_scores, ref_instances, reference_scores,  # noqa: E402
+                                   tile_instances, zoom_instances)
 from src.detector.model import Detector, fit_head, fit_tile_head, stack_logit, tile_logit  # noqa: E402
 from src.training import metrics as M  # noqa: E402
 from src.training.baselines import pooled_features  # noqa: E402
@@ -402,6 +402,9 @@ def main(argv=None) -> int:
                     help="a tile is positive when it and the box overlap by this share of the smaller of the two")
     ap.add_argument("--box-balance", action="store_true",
                     help="positive tiles together weigh as much as negative ones in the box-supervised heads")
+    ap.add_argument("--ref-tile-head", action="store_true",
+                    help="also a tile head on each fine tile's change since the reference frame (stack input "
+                         "'tileref' in the stacks that use the reference)")
     ap.add_argument("--zoom-selector",
                     help="detector whose tile head selected the stored zoom tiles (kept as the zoom selector)")
     ap.add_argument("--final", action="store_true", help="evaluate on the held-out test_iid cameras (once)")
@@ -418,7 +421,7 @@ def main(argv=None) -> int:
     test = [r for r in rows if r["split"] == "test_iid"]
     T = {h: text_embeddings(PROMPTS[h]) for h in ("smoke", "fog")}
     heads, thresholds, selection, oof = {}, {}, {}, {}
-    tile_heads, zoom_heads, stacks = {}, {}, {}
+    tile_heads, zoom_heads, stacks, ref_tile_heads = {}, {}, {}, {}
     oof_v1, smoke_inputs = None, {}
     for head in ("fog", "smoke"):
         hr = [r for r in dev if not np.isnan(r[head])]
@@ -486,13 +489,21 @@ def main(argv=None) -> int:
                 rs[has] = reference_scores(fine[has], refs, T[head])
                 inputs["ref_max"], inputs["ref_rz"] = rs[:, 0], rs[:, 1]
                 fs[has] = fog_tile_scores(fine[has], refs, T[head], T["fog"])
+                if args.ref_tile_head:
+                    TR = ref_instances(fine[has], refs, T[head])
+                    inst_r = None if inst is None else (inst[0][has], inst[1][has])
+                    C_ref, inputs["tileref"] = side_head(TR, "tileref", has, inst_r)
+                    ref_tile_heads[head] = fit_tile_head(TR, y[has], C_ref, *(inst_r or (None, None)),
+                                                         balance=args.box_balance)
             inputs["fog_chg"], inputs["fogd_chg"] = fs[:, 0], fs[:, 1]
             if has.any():
                 inputs["fog_ref"], inputs["fogd_ref"] = fs[:, 2], fs[:, 3]
             # v1: window head + tile head only (kept for the paired comparison)
             st_v1, oof_v1, _ = fit_stacks(inputs, y, g, (("head", "tile"),))
             fog_neg = np.array([(r["fog"] == 1) and (r["smoke"] == 0) for r in hr])
-            stacks[head], oof_s, used = fit_stacks(inputs, y, g, STACK_CONFIGS,
+            configs = tuple(c + ("tileref",) if (args.ref_tile_head and "ref_max" in c) else c
+                            for c in STACK_CONFIGS)
+            stacks[head], oof_s, used = fit_stacks(inputs, y, g, configs,
                                                    np.where(fog_neg, args.stack_fog_weight, 1.0))
             smoke_inputs = {"window_id": np.array([r["window_id"] for r in hr]), **{k: np.asarray(v, np.float64)
                                                                                     for k, v in inputs.items()}}
@@ -527,11 +538,12 @@ def main(argv=None) -> int:
                          "fog_veto": args.fog_veto, "stack_fog_weight": args.stack_fog_weight,
                          "boxes": args.boxes, "box_min_confidence": args.box_min_confidence,
                          "box_pos_frac": args.box_pos_frac, "box_balance": args.box_balance,
-                         "zoom_selector": args.zoom_selector,
+                         "zoom_selector": args.zoom_selector, "ref_tile_head": args.ref_tile_head,
                          "selection": {h: selection[h]["best"] for h in selection},
                          "tile_heads": {h: selection[h]["tile"]["C"] for h in tile_heads},
                          "zoom_heads": {h: selection[h]["zoom"]["C"] for h in zoom_heads}},
-                   tile_heads=tile_heads, stacks=stacks, zoom_heads=zoom_heads, zoom_selector=zoom_selector)
+                   tile_heads=tile_heads, stacks=stacks, zoom_heads=zoom_heads, zoom_selector=zoom_selector,
+                   ref_tile_heads=ref_tile_heads)
     det.save(args.out)
 
     # Cross-validated dev results: each window's out-of-fold probability for each head it has a label for
@@ -543,7 +555,8 @@ def main(argv=None) -> int:
                         "strict_false_alarm": args.strict_false_alarm, "fog_veto": args.fog_veto,
                         "stack_fog_weight": args.stack_fog_weight, "select_on": args.select_on,
                         "boxes": args.boxes, "box_min_confidence": args.box_min_confidence,
-                        "box_pos_frac": args.box_pos_frac, "box_balance": args.box_balance},
+                        "box_pos_frac": args.box_pos_frac, "box_balance": args.box_balance,
+                        "ref_tile_head": args.ref_tile_head},
               "dev_cv": metrics_block(np.nan_to_num(dev_s, nan=0.0), np.nan_to_num(dev_f, nan=0.0), dev,
                                       thresholds["smoke"]["deploy"], args.n_boot, thresholds["smoke"]["strict"],
                                       dev_v, args.fog_veto)}
@@ -630,7 +643,10 @@ def render(rep) -> str:
         b = s["best"]
         L.append(f"| {h} | {', '.join(b['groups'])} | {b['C']} | {_f(b['cv_auroc'])} "
                  f"| {_f(b.get('cv_auroc_within_sets'))} | {s['n_dev']} |")
-        for kind, label in (("tile", "fine tiles, best tile"), ("zoom", "full-resolution zoom crops, best crop")):
+        boxed = " (box labels)" if rep.get("rules", {}).get("boxes") else ""
+        for kind, label in (("tile", f"fine tiles, best tile{boxed}"),
+                            ("zoom", f"full-resolution zoom crops, best crop{boxed}"),
+                            ("tileref", f"fine tiles against the reference frame, best tile{boxed}")):
             if kind in s:
                 t = s[kind]
                 L.append(f"| {h}: {kind} head | {label} | {t['C']} | {_f(t['cv_auroc'])} "
@@ -652,9 +668,14 @@ def render(rep) -> str:
     if rep.get("rules"):
         L += ["Rules: " + ", ".join(f"{k} {v}" for k, v in rep["rules"].items()) + ".", ""]
     if "dev_cv_v1_stack" in rep:
-        L += ["## v2 against the v1 stack (window + tile heads), same operating rules", "",
-              "| | dev v1 | dev v2 | test v1 | test v2 |", "|---|---|---|---|---|"]
+        L += ["## Deployed stack against the v1 stack (window + tile heads), same operating rules", "",
+              "| | dev, v1 stack | dev, deployed | test, v1 stack | test, deployed |", "|---|---|---|---|---|"]
         cols = [rep.get("dev_cv_v1_stack"), rep.get("dev_cv"), rep.get("test_v1_stack"), rep.get("test")]
+        set_names = sorted({sn for c in cols if c for sn in c.get("per_set", {})})
+        smoke_sets = [sn for sn in set_names if any(c and c["per_set"].get(sn, {}).get("smoke_auroc") is not None
+                                                    for c in cols)]
+        neg_sets = [sn for sn in set_names if any(c and c["per_set"].get(sn, {}).get("false_alarm_no_smoke")
+                                                  is not None for c in cols)]
 
         def row(label, get, fmt="{:.3f}"):
             vals = []
@@ -666,13 +687,13 @@ def render(rep) -> str:
             L.append(f"| {label} | " + " | ".join(vals) + " |")
 
         row("smoke AUROC within sets", lambda c: c["smoke_auroc_within_sets"])
-        for sname in ("figlib", "hpwren_smoke", "hpwren_smoke2"):
+        for sname in smoke_sets:
             row(f"smoke AUROC, {sname}", lambda c, sname=sname: c["per_set"][sname]["smoke_auroc"])
         row("fog AUROC", lambda c: c["fog_auroc"])
         row("deploy: smoke recall", lambda c: c["smoke_recall"], "{:.1%}")
         row("deploy: alarms on fog windows", lambda c: c["false_smoke_on_fog"], "{:.1%}")
         row("deploy: alarms on all smoke-free windows", lambda c: c["false_alarm_no_smoke"], "{:.1%}")
-        for sname in ("figlib", "hpwren_smoke", "hpwren_smoke2"):
+        for sname in neg_sets:
             row(f"deploy: alarms on smoke-free windows, {sname}",
                 lambda c, sname=sname: c["per_set"][sname]["false_alarm_no_smoke"], "{:.1%}")
         row("strict: smoke recall", lambda c: c["smoke_recall_strict"], "{:.1%}")

@@ -5,8 +5,10 @@ stored as plain numbers (detector.json + detector_weights.npz), so inference
 needs numpy only (the CLIP embeddings come from scripts/embed_windows.py or
 src.detector.features). A head may also have a tile head: the same kind of
 model applied to each fine tile (src.detector.features.tile_instances), the
-window scored by its highest tile, and a zoom head: the same on the
-full-resolution quarters of the window's top tiles (zoom_instances). The
+window scored by its highest tile, a zoom head: the same on the
+full-resolution quarters of the window's top tiles (zoom_instances), and
+(v3, optional) a reference tile head: the same on each tile's change since a
+frame of the same camera 14 min before the window (ref_instances). The
 head's logit, its tile and zoom heads' logits and scalar scores (the smoke
 prompts' contrast change within the window and against a reference frame of
 the same camera 14 min earlier, and how fog-like the most-changed tiles are:
@@ -42,8 +44,8 @@ from typing import Dict, Optional, Sequence
 
 import numpy as np
 
-from src.detector.features import (change_scores, fog_tile_scores, reference_scores, tile_instances,
-                                   window_features, zoom_instances)
+from src.detector.features import (change_scores, fog_tile_scores, ref_instances, reference_scores,
+                                   tile_instances, window_features, zoom_instances)
 
 FORMAT_VERSION = 4
 
@@ -97,7 +99,7 @@ def stack_logit(stack: Dict, logits: Sequence[np.ndarray]) -> np.ndarray:
 
 
 STACK_INPUTS = ("head", "tile", "zoom", "chg_max", "chg_rz", "ref_max", "ref_rz",
-                "fog_chg", "fogd_chg", "fog_ref", "fogd_ref")
+                "fog_chg", "fogd_chg", "fog_ref", "fogd_ref", "tileref")
 
 
 def fit_head(X: np.ndarray, y: np.ndarray, groups: Sequence[str], C: float,
@@ -127,6 +129,7 @@ class Detector:
     stacks: Dict[str, list] = field(default_factory=dict)             # head -> [{"inputs", "coef", "intercept"}, ...]
     zoom_heads: Dict[str, LinearHead] = field(default_factory=dict)   # head -> zoom head (full-resolution crops)
     zoom_selector: Dict[str, LinearHead] = field(default_factory=dict)  # head -> tile head choosing the zoom tiles
+    ref_tile_heads: Dict[str, LinearHead] = field(default_factory=dict)  # head -> tile head against the reference
 
     def features(self, head: str, E: np.ndarray, motion: Optional[np.ndarray] = None,
                  fine: Optional[np.ndarray] = None) -> np.ndarray:
@@ -153,6 +156,8 @@ class Detector:
             if ref is not None:
                 r = reference_scores(fine, ref, T)
                 out["ref_max"], out["ref_rz"] = r[:, 0], r[:, 1]
+                if head in self.ref_tile_heads:
+                    out["tileref"] = tile_logit(self.ref_tile_heads[head], ref_instances(fine, ref, T))
             if "fog" in self.text:
                 f = fog_tile_scores(fine, ref, T, self.text["fog"])
                 out["fog_chg"], out["fogd_chg"] = f[:, 0], f[:, 1]
@@ -216,7 +221,7 @@ class Detector:
             doc["heads"][h] = {"intercept": hd.intercept, "groups": list(hd.groups), "C": hd.C,
                                "n_features": int(len(hd.coef))}
         for kind, heads in (("tile", self.tile_heads), ("zoom", self.zoom_heads),
-                            ("zoom_selector", self.zoom_selector)):
+                            ("zoom_selector", self.zoom_selector), ("ref_tile", self.ref_tile_heads)):
             doc[f"{kind}_heads"] = {}
             for h, hd in heads.items():
                 for k in ("mean", "scale", "coef"):
@@ -240,7 +245,7 @@ class Detector:
             heads[h] = LinearHead(mean=w[f"{h}.mean"], scale=w[f"{h}.scale"], coef=w[f"{h}.coef"],
                                   intercept=float(hd["intercept"]), groups=hd["groups"], C=float(hd["C"]))
             text[h] = w[f"{h}.text"]
-        side = {"tile": {}, "zoom": {}, "zoom_selector": {}}
+        side = {"tile": {}, "zoom": {}, "zoom_selector": {}, "ref_tile": {}}
         for kind in side:
             for h, hd in doc.get(f"{kind}_heads", {}).items():
                 side[kind][h] = LinearHead(mean=w[f"{kind}.{h}.mean"], scale=w[f"{kind}.{h}.scale"],
@@ -252,4 +257,4 @@ class Detector:
                 stacks[h] = [{"inputs": ["head", "tile"], **hd["stack"]}]
         return cls(heads=heads, text=text, thresholds=doc["thresholds"], info=doc.get("info", {}),
                    tile_heads=side["tile"], stacks=stacks, zoom_heads=side["zoom"],
-                   zoom_selector=side["zoom_selector"])
+                   zoom_selector=side["zoom_selector"], ref_tile_heads=side["ref_tile"])
