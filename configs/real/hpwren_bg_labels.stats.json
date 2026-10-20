@@ -1,0 +1,21 @@
+{
+  "fog": {
+    "": 45,
+    "0": 427,
+    "1": 39
+  },
+  "quality_ok": 493,
+  "rounds_1_2": {
+    "both_definite": 497,
+    "label": "smoke",
+    "sheets": 511,
+    "smoke_agreement": 1.0,
+    "smoke_cohen_kappa": 1.0
+  },
+  "sheets": 511,
+  "smoke": {
+    "": 9,
+    "0": 501,
+    "1": 1
+  }
+}
