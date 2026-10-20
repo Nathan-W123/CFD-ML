@@ -43,7 +43,14 @@ PROMPTS["smoke"]) minus mean similarity to the others:
   tiles and its robust z ((max - median) / MAD);
 * reference_scores: r = s(frame 11) - s(reference) per tile, the reference
   being the same camera 14 min before frame 0 (scripts/reference_frames.py);
-  max and robust z.
+  max and robust z;
+* fog_tile_scores: how fog-like the tile that changed most is (the fog
+  prompts' contrast, the first FOG_POSITIVE of PROMPTS["fog"] against the
+  others, in frame 11 minus its median over the tiles) and how much its fog
+  contrast changed, for the tile of the largest change within the window and
+  for the tile of the largest change against the reference (NaN without a
+  reference): a moving fog layer changes too, and this lets the stack tell it
+  from smoke.
 """
 
 from typing import Dict, Iterable, Optional, Sequence
@@ -104,6 +111,7 @@ def group_features(E: np.ndarray, T: np.ndarray, group: str) -> np.ndarray:
 FINE_TILES = 24                     # 4 x 6
 FINE_TOP = 3
 SMOKE_POSITIVE = 3                  # PROMPTS["smoke"][:3] describe smoke, the rest look-alikes
+FOG_POSITIVE = 4                    # PROMPTS["fog"][:4] describe fog, the rest clear views and smoke
 
 
 def _check_fine(Fe: np.ndarray) -> np.ndarray:
@@ -152,10 +160,10 @@ def zoom_instances(Z: np.ndarray, T: np.ndarray) -> np.ndarray:
     return _instances(Z, T)
 
 
-def _contrast(X: np.ndarray, T: np.ndarray) -> np.ndarray:
-    """Smoke-prompt contrast of embeddings X (..., D): mean similarity to the smoke prompts minus the others'."""
+def _contrast(X: np.ndarray, T: np.ndarray, k: int = SMOKE_POSITIVE) -> np.ndarray:
+    """Prompt contrast of embeddings X (..., D): mean similarity to the first k prompts minus the others'."""
     S = np.einsum("...d,pd->...p", np.asarray(X, np.float32), np.asarray(T, np.float32)) * 100.0
-    return S[..., :SMOKE_POSITIVE].mean(-1) - S[..., SMOKE_POSITIVE:].mean(-1)
+    return S[..., :k].mean(-1) - S[..., k:].mean(-1)
 
 
 def _max_and_robust_z(c: np.ndarray) -> np.ndarray:
@@ -200,3 +208,27 @@ def window_features(E: np.ndarray, T: np.ndarray, groups: Sequence[str],
         else:
             parts.append(group_features(E, T, g))
     return np.concatenate(parts, 1).astype(np.float32)
+
+
+def fog_tile_scores(Fe: np.ndarray, Fref: Optional[np.ndarray], Ts: np.ndarray, Tf: np.ndarray) -> np.ndarray:
+    """(N, 4): fog contrast (frame 11, minus its median over tiles) and fog-contrast change at the fine tile of
+    the largest smoke-contrast change within the window, then the same at the tile of the largest change against
+    the reference (Ts, Tf: smoke and fog prompt embeddings; NaN for windows without a reference)."""
+    Fe = _check_fine(Fe)
+    n = len(Fe)
+    rows = np.arange(n)
+    cs = _contrast(Fe, Ts)                                   # N, 2, 24
+    fc = _contrast(Fe, Tf, FOG_POSITIVE)
+    level = fc[:, 1] - np.median(fc[:, 1], 1, keepdims=True)
+    am = (cs[:, 1] - cs[:, 0]).argmax(1)
+    out = np.full((n, 4), np.nan, np.float32)
+    out[:, 0] = level[rows, am]
+    out[:, 1] = (fc[:, 1] - fc[:, 0])[rows, am]
+    if Fref is not None:
+        Fref = np.asarray(Fref, np.float32)
+        if Fref.ndim == 2:
+            Fref = Fref[None]
+        amr = (cs[:, 1] - _contrast(Fref, Ts)).argmax(1)
+        out[:, 2] = level[rows, amr]
+        out[:, 3] = (fc[:, 1] - _contrast(Fref, Tf, FOG_POSITIVE))[rows, amr]
+    return out

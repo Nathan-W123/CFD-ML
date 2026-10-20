@@ -9,8 +9,9 @@ window scored by its highest tile, and a zoom head: the same on the
 full-resolution quarters of the window's top tiles (zoom_instances). The
 head's logit, its tile and zoom heads' logits and scalar scores (the smoke
 prompts' contrast change within the window and against a reference frame of
-the same camera 14 min earlier: change_scores, reference_scores) are
-combined by a small logistic "stack". A head keeps several stacks, the first
+the same camera 14 min earlier, and how fog-like the most-changed tiles are:
+change_scores, reference_scores, fog_tile_scores) are combined by a small
+logistic "stack". A head keeps several stacks, the first
 one whose inputs are all available is used (a window without a reference
 frame or zoom crops falls back to a stack without them). Thresholds are
 probabilities on the head's (stacked) output:
@@ -35,8 +36,8 @@ from typing import Dict, Optional, Sequence
 
 import numpy as np
 
-from src.detector.features import (change_scores, reference_scores, tile_instances, window_features,
-                                   zoom_instances)
+from src.detector.features import (change_scores, fog_tile_scores, reference_scores, tile_instances,
+                                   window_features, zoom_instances)
 
 FORMAT_VERSION = 3
 
@@ -74,7 +75,8 @@ def stack_logit(stack: Dict, logits: Sequence[np.ndarray]) -> np.ndarray:
     return np.stack(logits, 1) @ np.asarray(stack["coef"], np.float64) + float(stack["intercept"])
 
 
-STACK_INPUTS = ("head", "tile", "zoom", "chg_max", "chg_rz", "ref_max", "ref_rz")
+STACK_INPUTS = ("head", "tile", "zoom", "chg_max", "chg_rz", "ref_max", "ref_rz",
+                "fog_chg", "fogd_chg", "fog_ref", "fogd_ref")
 
 
 def fit_head(X: np.ndarray, y: np.ndarray, groups: Sequence[str], C: float,
@@ -127,6 +129,11 @@ class Detector:
             if ref is not None:
                 r = reference_scores(fine, ref, T)
                 out["ref_max"], out["ref_rz"] = r[:, 0], r[:, 1]
+            if "fog" in self.text:
+                f = fog_tile_scores(fine, ref, T, self.text["fog"])
+                out["fog_chg"], out["fogd_chg"] = f[:, 0], f[:, 1]
+                if ref is not None:
+                    out["fog_ref"], out["fogd_ref"] = f[:, 2], f[:, 3]
         if zoom is not None and head in self.zoom_heads:
             out["zoom"] = tile_logit(self.zoom_heads[head], zoom_instances(zoom, T))
         return out

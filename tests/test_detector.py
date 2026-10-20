@@ -127,6 +127,23 @@ def test_train_detector_end_to_end(tmp_path, monkeypatch):
     assert "Held-out test cameras" in rep.with_suffix(".md").read_text()
 
 
+def test_fog_tile_and_change_scores():
+    from src.detector.features import change_scores, fog_tile_scores, reference_scores
+
+    rng = np.random.default_rng(5)
+    Ts, Tf = _unit(rng.normal(0, 1, (8, D))), _unit(rng.normal(0, 1, (8, D)))
+    fe = _unit(rng.normal(0, 1, (3, 2, 24, D))).astype(np.float32)
+    ref = _unit(rng.normal(0, 1, (3, 24, D))).astype(np.float32)
+    assert change_scores(fe, Ts).shape == (3, 2) and reference_scores(fe, ref, Ts).shape == (3, 2)
+    f = fog_tile_scores(fe, None, Ts, Tf)
+    assert f.shape == (3, 4) and np.isnan(f[:, 2:]).all() and np.isfinite(f[:, :2]).all()
+    g = fog_tile_scores(fe, ref, Ts, Tf)
+    np.testing.assert_allclose(g[:, :2], f[:, :2]) and np.testing.assert_equal(np.isfinite(g).all(), True)
+    fe2 = fe.copy()
+    fe2[0, 1, 7] = _unit(fe2[0, 1, 7] + 5 * Ts[:3].mean(0))          # tile 7 becomes smoke-like in frame 11
+    assert change_scores(fe2, Ts)[0, 0] > change_scores(fe, Ts)[0, 0]
+
+
 def test_embed_crops_grid_and_normalisation():
     import embed_windows as EW
 
@@ -191,20 +208,22 @@ def test_train_detector_tile_head_and_stack(tmp_path, monkeypatch):
                            f"{tmp_path / f'{name}_zoom.npz'}:{tmp_path / f'{name}_ref.npz'}"]
     out, rep = tmp_path / "det", tmp_path / "rep.json"
     assert TD.main(specs + ["--out", str(out), "--report", str(rep), "--final", "--n-boot", "10",
-                            "--deploy-recall", "0.8", "--fog-veto", "0.95"]) == 0
+                            "--deploy-recall", "0.8", "--fog-veto", "0.95", "--stack-fog-weight", "3"]) == 0
     doc = json.loads(rep.read_text())
     sel = doc["selection"]["smoke"]
     assert sel["tile"]["cv_auroc"] > 0.9 and sel["zoom"]["cv_auroc"] > 0.9 and sel["stacked"]["cv_auroc"] > 0.9
-    assert sel["stacked"]["rows_per_stack"]["head+tile+zoom+chg_max+chg_rz"] == 16      # dev rows without a ref
+    assert sel["stacked"]["rows_per_stack"]["head+tile+zoom+chg_max+chg_rz+fog_chg+fogd_chg"] == 16   # no ref
     assert doc["thresholds"]["smoke"]["fog_veto"] == 0.95 and "dev_cv_v1_stack" in doc and "test_v1_stack" in doc
     assert doc["dev_cv"]["smoke_recall"] >= 0.8 - 1e-9
     assert {tuple(u["stack"]) for u in doc["test_stacks_used"]} == {
-        ("head", "tile", "zoom", "chg_max", "chg_rz", "ref_max", "ref_rz")}
+        ("head", "tile", "zoom", "chg_max", "chg_rz", "ref_max", "ref_rz", "fog_chg", "fogd_chg", "fog_ref",
+         "fogd_ref")}
+    assert doc["rules"]["stack_fog_weight"] == 3.0
     assert doc["test"]["smoke_auroc"] > 0.9
     assert doc["dev_cv"]["smoke_auroc_within_sets"] == pytest.approx(doc["dev_cv"]["per_set"]["fig"]["smoke_auroc"])
     det = Detector.load(out)
     assert set(det.tile_heads) == {"smoke"} and set(det.zoom_heads) == {"smoke"}
-    assert [st["inputs"][-1] for st in det.stacks["smoke"]] == ["ref_rz", "chg_rz", "ref_rz", "chg_rz"]
+    assert [st["inputs"][-1] for st in det.stacks["smoke"]] == ["fogd_ref", "fogd_chg", "fogd_ref", "fogd_chg"]
     E = np.stack([_windows(rng, 1, [0], [0])[0]] * 2)
     fe = _unit(rng.normal(0, 1, (2, 2, 24, D))).astype(np.float32)
     with pytest.raises(ValueError):
@@ -213,6 +232,8 @@ def test_train_detector_tile_head_and_stack(tmp_path, monkeypatch):
     fe[1] = _unit(fe[1])
     p = det.proba(E, fine=fe)["smoke"]                     # fallback stack: no zoom, no reference
     assert p[1] > p[0]
-    assert det.stack_used("smoke", det.stack_inputs("smoke", E, fine=fe)) == ["head", "tile", "chg_max", "chg_rz"]
+    assert det.stack_used("smoke", det.stack_inputs("smoke", E, fine=fe)) == [
+        "head", "tile", "chg_max", "chg_rz", "fog_chg", "fogd_chg"]
     assert det.select_zoom_tiles(fe, 4).shape == (2, 4)
-    assert "tile head" in rep.with_suffix(".md").read_text()
+    md = rep.with_suffix(".md").read_text()
+    assert "tile head" in md and "zoom head" in md and "v2 against the v1 stack" in md

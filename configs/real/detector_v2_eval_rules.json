@@ -2,7 +2,7 @@
  "written": "2026-10-20, before any v2 model was scored on the test cameras",
  "purpose": "Detector v2 goals: fewer smoke false alarms on clear scenes and on fog, higher AUROC on tiny early smoke (FIgLib), without losing fog AUROC or clear/large-smoke AUROC (2026 HPWREN fire days).",
  "candidate": {
-  "smoke": "window head (selected feature groups, C) + tile head (4x6 tiles) + zoom head (full-resolution 2x2 quarters of the top-4 tiles) + prompt-contrast change scores (frame 0 -> 11) + reference scores (frame 11 vs the same camera 14 min before frame 0), combined by a logistic stack; fallback stacks without the reference and/or zoom inputs for windows that lack them",
+  "smoke": "window head (selected feature groups, C) + tile head (4x6 tiles) + zoom head (full-resolution 2x2 quarters of the top-4 tiles) + prompt-contrast change scores (frame 0 -> 11) + reference scores (frame 11 vs the same camera 14 min before frame 0), combined by a logistic stack; fallback stacks without the reference and/or zoom inputs for windows that lack them; plus the fog-likeness of the most-changed tiles (fog_tile_scores) as stack inputs, the stacks fitted with fog windows weighted 3",
   "fog": "unchanged from v1 (same data, same selection: identical head)",
   "stack_configs": [
    [
@@ -12,14 +12,20 @@
     "chg_max",
     "chg_rz",
     "ref_max",
-    "ref_rz"
+    "ref_rz",
+    "fog_chg",
+    "fogd_chg",
+    "fog_ref",
+    "fogd_ref"
    ],
    [
     "head",
     "tile",
     "zoom",
     "chg_max",
-    "chg_rz"
+    "chg_rz",
+    "fog_chg",
+    "fogd_chg"
    ],
    [
     "head",
@@ -27,13 +33,19 @@
     "chg_max",
     "chg_rz",
     "ref_max",
-    "ref_rz"
+    "ref_rz",
+    "fog_chg",
+    "fogd_chg",
+    "fog_ref",
+    "fogd_ref"
    ],
    [
     "head",
     "tile",
     "chg_max",
-    "chg_rz"
+    "chg_rz",
+    "fog_chg",
+    "fogd_chg"
    ]
   ],
   "inputs_dropped_on_dev": [
@@ -49,10 +61,15 @@
  "operating_points": {
   "deploy": "the highest threshold that still catches 80 % of the dev smoke windows (out-of-fold; v1's deploy recall), or the fog limit's threshold if that is higher (at most 2.5 % of dev fog windows alarm); so v2's gain shows as fewer false alarms at v1's recall",
   "strict": "at most 5 % of all dev smoke-free windows alarm",
-  "fog_veto": "a smoke alarm is withheld when P(fog) >= 0.95 (chosen on dev out-of-fold: vetoes 0.3 % of dev smoke windows)"
+  "fog_veto": "a smoke alarm is withheld when P(fog) >= 0.95 (chosen on dev out-of-fold: vetoes 0.3 % of dev smoke windows)",
+  "stack_fog_weight": 3
  },
  "primary_comparisons": "paired, on the same test windows, v2 vs the v1 stack (window + tile heads) under the same operating rules: FIgLib smoke AUROC; at the deploy point false alarms on all smoke-free windows, on FIgLib pre-ignition windows, on fire-day clear windows and on fog windows; smoke recall at the strict point",
  "non_inferiority": "fog AUROC unchanged (same head); smoke AUROC on each 2026 fire-day set not lower than v1 by more than 0.02",
  "test_use": "v2 is scored on the test cameras once; the v1 stack is re-scored on them only under these same rules, for the paired comparison",
- "caveats": "small test: FIgLib differences below about 0.035 AUROC and one fog window (about 2 %) are within noise"
+ "caveats": "small test: FIgLib differences below about 0.035 AUROC and one fog window (about 2 %) are within noise",
+ "secondary_audit": "All 437 FIgLib pre-ignition windows (dev and test) are labelled blind for any smoke in view (configs/real/figlib_audit_labeling_guide.md; two AI votes per sheet, a third where either is unsure or they disagree). Primary results keep the library labels. A secondary analysis reports the clear-scene false-alarm rates for v1 and v2 with the windows the audit calls smoke (smoke 1) left out; windows it calls unknown stay in.",
+ "revisions": [
+  "2026-10-20, after the v2 dev cross-validation and before any v2 test scoring: at the matched 80 % dev recall the first v2 raised 4.1 % of the dev fog windows (v1 2.1 %), mostly small fog layers below the camera whose change over the window or against the reference looked like new smoke. About ten stack variants were compared on the dev out-of-fold inputs; the fog-likeness of the changed tiles plus a fog weight of 3 in the stack fit gave 1.4 % fog and 15.3 % clear-scene alarms at 80 % recall (v1 2.1 % and 20.5 %), within-set AUROC 0.838. Chosen on dev only; the dev numbers of the chosen variant are optimistic by the selection."
+ ]
 }
