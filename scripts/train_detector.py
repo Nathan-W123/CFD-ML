@@ -80,6 +80,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from prepare_figlib import camera_mount  # noqa: E402
 
 from src.data.dataset import FeatureSet  # noqa: E402
+from src.detector.boxes import fine_regions, instance_labels, load_boxes, zoom_regions  # noqa: E402
 from src.detector.features import MODEL_ID, PROMPTS, text_embeddings, window_features  # noqa: E402
 from src.detector.features import (change_scores, fog_tile_scores, reference_scores, tile_instances,  # noqa: E402
                                    zoom_instances)
@@ -117,10 +118,12 @@ def load_sets(specs):
         if len(parts) > 4 and parts[4]:
             zf = np.load(parts[4])
             fine = {str(w): e for w, e in zip(zf["window_id"], zf["emb"])}
-        zoom, ref = {}, {}
+        zoom, zoom_tiles, ref = {}, {}, {}
         if len(parts) > 5 and parts[5]:
             zz = np.load(parts[5])
             zoom = {str(w): e for w, e in zip(zz["window_id"], zz["emb"])}
+            if "tiles" in zz.files:
+                zoom_tiles = {str(w): [int(t) for t in ts] for w, ts in zip(zz["window_id"], zz["tiles"])}
         if len(parts) > 6 and parts[6]:
             zr = np.load(parts[6])
             ref = {str(w): e for w, e in zip(zr["window_id"], zr["fine"])}
@@ -140,6 +143,7 @@ def load_sets(specs):
                              "emb": emb[wid].astype(np.float32), "motion": motion.get(f"{wid}-w0"),
                              "fine": fine[wid].astype(np.float32) if wid in fine else None,
                              "zoom": zoom[wid].astype(np.float32) if wid in zoom else None,
+                             "zoom_tiles": zoom_tiles.get(wid),
                              "ref": ref[wid].astype(np.float32) if wid in ref else None})
     return rows
 
@@ -182,12 +186,22 @@ def grouped_oof(X, y, groups, C, n_splits=5):
     return oof
 
 
-def grouped_oof_tile(TF, y, groups, C, n_splits=5):
-    """Out-of-fold window logits of a tile head (its best tile)."""
+def grouped_oof_tile(TF, y, groups, C, n_splits=5, inst=None, balance=False):
+    """Out-of-fold window logits of a tile head (its best tile); inst: instance labels and weights (Y, W)."""
     oof = np.zeros(len(y))
     for tr, te in _folds(len(y), groups, n_splits):
-        oof[te] = tile_logit(fit_tile_head(TF[tr], y[tr], C), TF[te])
+        Y, W = (None, None) if inst is None else (inst[0][tr], inst[1][tr])
+        oof[te] = tile_logit(fit_tile_head(TF[tr], y[tr], C, Y, W, balance), TF[te])
     return oof
+
+
+def box_summary(inst, y):
+    """How many windows and tiles the box labels use (smoke windows without a usable box are left out)."""
+    Y, W = inst
+    used = W.sum(1) > 0
+    return {"smoke_windows": int(np.sum(y == 1)), "smoke_windows_boxed": int(np.sum(used & (y == 1))),
+            "positive_tiles": int(np.sum((Y == 1) & (W > 0))), "negative_tiles": int(np.sum((Y == 0) & (W > 0))),
+            "ignored_tiles_in_boxed_windows": int(np.sum((W == 0) & used[:, None]))}
 
 
 def fit_stack(Z, y, sample_weight=None):
@@ -381,6 +395,15 @@ def main(argv=None) -> int:
     ap.add_argument("--n-boot", type=int, default=1000)
     ap.add_argument("--select-on", choices=("within", "pooled"), default="within",
                     help="out-of-fold AUROC that model selection maximises: within sets (default) or pooled")
+    ap.add_argument("--boxes", action="append", default=[],
+                    help="smoke box CSV (scripts/box_labels.py): tile and zoom heads fitted on instance labels")
+    ap.add_argument("--box-min-confidence", choices=("low", "medium", "high"), default="medium")
+    ap.add_argument("--box-pos-frac", type=float, default=0.25,
+                    help="a tile is positive when it and the box overlap by this share of the smaller of the two")
+    ap.add_argument("--box-balance", action="store_true",
+                    help="positive tiles together weigh as much as negative ones in the box-supervised heads")
+    ap.add_argument("--zoom-selector",
+                    help="detector whose tile head selected the stored zoom tiles (kept as the zoom selector)")
     ap.add_argument("--final", action="store_true", help="evaluate on the held-out test_iid cameras (once)")
     ap.add_argument("--save-oof", help="also write the dev out-of-fold probabilities and stack inputs (.npz)")
     args = ap.parse_args(argv)
@@ -388,6 +411,9 @@ def main(argv=None) -> int:
     SELECT_ON = args.select_on
 
     rows = load_sets(args.sets)
+    boxes = {}
+    for path in args.boxes:
+        boxes.update(load_boxes(path))
     dev = [r for r in rows if r["split"] != "test_iid"]
     test = [r for r in rows if r["split"] == "test_iid"]
     T = {h: text_embeddings(PROMPTS[h]) for h in ("smoke", "fog")}
@@ -406,12 +432,13 @@ def main(argv=None) -> int:
             g = np.array([r["mount"] for r in hr])
             sets = np.array([r["set"] for r in hr])
 
-            def side_head(TI, kind, m):
-                """C of a tile-type head by grouped CV on rows m; out-of-fold logits (NaN outside m)."""
+            def side_head(TI, kind, m, inst=None):
+                """C of a tile-type head by grouped CV on rows m (inst: instance labels of those rows);
+                out-of-fold logits (NaN outside m)."""
                 best_side = None
                 side_scores = []
                 for C in TILE_C_GRID:
-                    zt = grouped_oof_tile(TI, y[m], g[m], C)
+                    zt = grouped_oof_tile(TI, y[m], g[m], C, inst=inst, balance=args.box_balance)
                     sc, crit = cv_scores(zt, y[m], sets[m])
                     side_scores.append({"C": C, **sc})
                     if best_side is None or crit > best_side[0]:
@@ -424,16 +451,33 @@ def main(argv=None) -> int:
                 return best_side[1], full
 
             TF = tile_instances(fine, T[head])
-            C_tile, z_tile = side_head(TF, "tile", np.ones(len(y), bool))
-            tile_heads[head] = fit_tile_head(TF, y, C_tile)
+            wids = [r["window_id"] for r in hr]
+            box_kw = {"min_confidence": args.box_min_confidence, "pos_frac": args.box_pos_frac}
+            inst = None
+            if boxes:
+                regions = fine_regions()
+                inst = instance_labels(wids, y, boxes, lambda i: regions, **box_kw)
+                selection[head]["box_labels"] = box_summary(inst, y)
+            C_tile, z_tile = side_head(TF, "tile", np.ones(len(y), bool), inst)
+            tile_heads[head] = fit_tile_head(TF, y, C_tile, *(inst or (None, None)), balance=args.box_balance)
             inputs = {"head": oof_z, "tile": z_tile}
             c = change_scores(fine, T[head])
             inputs["chg_max"], inputs["chg_rz"] = c[:, 0], c[:, 1]
             has_zoom = np.array([r["zoom"] is not None for r in hr])
             if has_zoom.any():
                 TZ = zoom_instances(np.stack([r["zoom"] for r in hr if r["zoom"] is not None]), T[head])
-                C_zoom, inputs["zoom"] = side_head(TZ, "zoom", has_zoom)
-                zoom_heads[head] = fit_tile_head(TZ, y[has_zoom], C_zoom)
+                inst_z = None
+                if boxes:
+                    zr = [r for r in hr if r["zoom"] is not None]
+                    if any(r["zoom_tiles"] is None for r in zr):
+                        raise SystemExit("--boxes needs the zoom tiles of every zoom row (the 'tiles' array of "
+                                         "scripts/zoom_windows.py's output)")
+                    inst_z = instance_labels([r["window_id"] for r in zr], y[has_zoom], boxes,
+                                             lambda i: zoom_regions(zr[i]["zoom_tiles"]), **box_kw)
+                    selection[head]["box_labels_zoom"] = box_summary(inst_z, y[has_zoom])
+                C_zoom, inputs["zoom"] = side_head(TZ, "zoom", has_zoom, inst_z)
+                zoom_heads[head] = fit_tile_head(TZ, y[has_zoom], C_zoom, *(inst_z or (None, None)),
+                                                 balance=args.box_balance)
             has = np.array([r["ref"] is not None for r in hr])
             fs = fog_tile_scores(fine, None, T[head], T["fog"])
             if has.any():
@@ -474,14 +518,20 @@ def main(argv=None) -> int:
                 oof["smoke_v1"] = dict(zip([r["window_id"] for r in hr], _sigmoid(oof_v1)))
         oof[head] = {r["window_id"]: p for r, p in zip(hr, oof_p)}
         print(f"{head}: best {best} on {len(hr)} dev windows", file=sys.stderr)
+    zoom_selector = {}
+    if args.zoom_selector and zoom_heads:
+        zoom_selector = {h: Detector.load(args.zoom_selector).tile_heads[h] for h in zoom_heads}
     det = Detector(heads=heads, text=T, thresholds=thresholds,
                    info={"model_id": MODEL_ID, "sets": args.sets, "deploy_false_smoke": args.deploy_false_smoke,
                          "deploy_recall": args.deploy_recall, "strict_false_alarm": args.strict_false_alarm,
                          "fog_veto": args.fog_veto, "stack_fog_weight": args.stack_fog_weight,
+                         "boxes": args.boxes, "box_min_confidence": args.box_min_confidence,
+                         "box_pos_frac": args.box_pos_frac, "box_balance": args.box_balance,
+                         "zoom_selector": args.zoom_selector,
                          "selection": {h: selection[h]["best"] for h in selection},
                          "tile_heads": {h: selection[h]["tile"]["C"] for h in tile_heads},
                          "zoom_heads": {h: selection[h]["zoom"]["C"] for h in zoom_heads}},
-                   tile_heads=tile_heads, stacks=stacks, zoom_heads=zoom_heads)
+                   tile_heads=tile_heads, stacks=stacks, zoom_heads=zoom_heads, zoom_selector=zoom_selector)
     det.save(args.out)
 
     # Cross-validated dev results: each window's out-of-fold probability for each head it has a label for
@@ -491,7 +541,9 @@ def main(argv=None) -> int:
     report = {"status": "detector", "goals": GOALS, "selection": selection, "thresholds": thresholds,
               "rules": {"deploy_false_smoke": args.deploy_false_smoke, "deploy_recall": args.deploy_recall,
                         "strict_false_alarm": args.strict_false_alarm, "fog_veto": args.fog_veto,
-                        "stack_fog_weight": args.stack_fog_weight, "select_on": args.select_on},
+                        "stack_fog_weight": args.stack_fog_weight, "select_on": args.select_on,
+                        "boxes": args.boxes, "box_min_confidence": args.box_min_confidence,
+                        "box_pos_frac": args.box_pos_frac, "box_balance": args.box_balance},
               "dev_cv": metrics_block(np.nan_to_num(dev_s, nan=0.0), np.nan_to_num(dev_f, nan=0.0), dev,
                                       thresholds["smoke"]["deploy"], args.n_boot, thresholds["smoke"]["strict"],
                                       dev_v, args.fog_veto)}

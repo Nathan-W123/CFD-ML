@@ -11,7 +11,13 @@ head's logit, its tile and zoom heads' logits and scalar scores (the smoke
 prompts' contrast change within the window and against a reference frame of
 the same camera 14 min earlier, and how fog-like the most-changed tiles are:
 change_scores, reference_scores, fog_tile_scores) are combined by a small
-logistic "stack". A head keeps several stacks, the first
+logistic "stack". A tile or zoom head is fitted either with every tile of a
+window taking the window's label (v1, v2) or, with smoke boxes (v3), on
+instance labels: tiles on the box 1, tiles away from it and every tile of a
+smoke-free window 0 (src.detector.boxes). The zoom crops are always cut from
+the tiles a fixed "zoom selector" ranks highest (v3: the v1 tile head, the
+head the stored crops were selected with), so a retrained tile head does not
+change which crops a deployed camera embeds. A head keeps several stacks, the first
 one whose inputs are all available is used (a window without a reference
 frame or zoom crops falls back to a stack without them). Thresholds are
 probabilities on the head's (stacked) output:
@@ -39,7 +45,7 @@ import numpy as np
 from src.detector.features import (change_scores, fog_tile_scores, reference_scores, tile_instances,
                                    window_features, zoom_instances)
 
-FORMAT_VERSION = 3
+FORMAT_VERSION = 4
 
 
 @dataclass
@@ -65,10 +71,25 @@ def tile_logit(head: LinearHead, TF: np.ndarray) -> np.ndarray:
     return head.logit(TF.reshape(-1, TF.shape[-1])).reshape(TF.shape[0], TF.shape[1]).max(1)
 
 
-def fit_tile_head(TF: np.ndarray, y: np.ndarray, C: float) -> LinearHead:
-    """A tile head: every tile of a window takes the window's label (the simplest multiple-instance fit)."""
+def fit_tile_head(TF: np.ndarray, y: np.ndarray, C: float, inst_y: Optional[np.ndarray] = None,
+                  inst_w: Optional[np.ndarray] = None, balance: bool = False) -> LinearHead:
+    """A tile head on TF (N, K, d). Without instance labels every tile of a window takes the window's label y
+    (the simplest multiple-instance fit); with inst_y and inst_w ((N, K): label and weight per tile, weight 0 =
+    not used) the tiles are fitted on their own labels. balance: the positive tiles together weigh as much as
+    the negative ones."""
     TF = np.asarray(TF)
-    return fit_head(TF.reshape(-1, TF.shape[-1]), np.repeat(np.asarray(y), TF.shape[1]), ("tiles_fine",), C)
+    X = TF.reshape(-1, TF.shape[-1])
+    if inst_y is None:
+        Y, W = np.repeat(np.asarray(y, np.float64), TF.shape[1]), np.ones(len(X))
+    else:
+        Y, W = np.asarray(inst_y, np.float64).reshape(-1), np.asarray(inst_w, np.float64).reshape(-1)
+    keep = W > 0
+    X, Y, W = X[keep], Y[keep], W[keep]
+    if balance:
+        pos = Y == 1
+        W = np.where(pos, W * W[~pos].sum() / max(W[pos].sum(), 1e-12), W)
+        W = W * len(W) / W.sum()
+    return fit_head(X, Y, ("tiles_fine",), C, sample_weight=None if np.all(W == 1) else W)
 
 
 def stack_logit(stack: Dict, logits: Sequence[np.ndarray]) -> np.ndarray:
@@ -105,15 +126,18 @@ class Detector:
     tile_heads: Dict[str, LinearHead] = field(default_factory=dict)   # head -> tile head (fine tiles)
     stacks: Dict[str, list] = field(default_factory=dict)             # head -> [{"inputs", "coef", "intercept"}, ...]
     zoom_heads: Dict[str, LinearHead] = field(default_factory=dict)   # head -> zoom head (full-resolution crops)
+    zoom_selector: Dict[str, LinearHead] = field(default_factory=dict)  # head -> tile head choosing the zoom tiles
 
     def features(self, head: str, E: np.ndarray, motion: Optional[np.ndarray] = None,
                  fine: Optional[np.ndarray] = None) -> np.ndarray:
         return window_features(E, self.text[head], self.heads[head].groups, motion, fine)
 
     def select_zoom_tiles(self, fine: np.ndarray, k: int = 4, head: str = "smoke") -> np.ndarray:
-        """(N, k): the fine tiles the tile head ranks highest, the tiles scripts/zoom_windows.py zooms into."""
+        """(N, k): the fine tiles the zoom selector (if none: the tile head) ranks highest, the tiles
+        scripts/zoom_windows.py zooms into."""
         TF = tile_instances(fine, self.text[head])
-        L = self.tile_heads[head].logit(TF.reshape(-1, TF.shape[-1])).reshape(TF.shape[0], TF.shape[1])
+        sel = self.zoom_selector.get(head) or self.tile_heads[head]
+        L = sel.logit(TF.reshape(-1, TF.shape[-1])).reshape(TF.shape[0], TF.shape[1])
         return np.argsort(-L, axis=1)[:, :k]
 
     def stack_inputs(self, head: str, E: np.ndarray, motion: Optional[np.ndarray] = None,
@@ -191,7 +215,8 @@ class Detector:
             arrays[f"{h}.text"] = self.text[h]
             doc["heads"][h] = {"intercept": hd.intercept, "groups": list(hd.groups), "C": hd.C,
                                "n_features": int(len(hd.coef))}
-        for kind, heads in (("tile", self.tile_heads), ("zoom", self.zoom_heads)):
+        for kind, heads in (("tile", self.tile_heads), ("zoom", self.zoom_heads),
+                            ("zoom_selector", self.zoom_selector)):
             doc[f"{kind}_heads"] = {}
             for h, hd in heads.items():
                 for k in ("mean", "scale", "coef"):
@@ -215,7 +240,7 @@ class Detector:
             heads[h] = LinearHead(mean=w[f"{h}.mean"], scale=w[f"{h}.scale"], coef=w[f"{h}.coef"],
                                   intercept=float(hd["intercept"]), groups=hd["groups"], C=float(hd["C"]))
             text[h] = w[f"{h}.text"]
-        side = {"tile": {}, "zoom": {}}
+        side = {"tile": {}, "zoom": {}, "zoom_selector": {}}
         for kind in side:
             for h, hd in doc.get(f"{kind}_heads", {}).items():
                 side[kind][h] = LinearHead(mean=w[f"{kind}.{h}.mean"], scale=w[f"{kind}.{h}.scale"],
@@ -226,4 +251,5 @@ class Detector:
             if "stack" in hd and h not in stacks:
                 stacks[h] = [{"inputs": ["head", "tile"], **hd["stack"]}]
         return cls(heads=heads, text=text, thresholds=doc["thresholds"], info=doc.get("info", {}),
-                   tile_heads=side["tile"], stacks=stacks, zoom_heads=side["zoom"])
+                   tile_heads=side["tile"], stacks=stacks, zoom_heads=side["zoom"],
+                   zoom_selector=side["zoom_selector"])

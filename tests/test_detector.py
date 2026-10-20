@@ -162,18 +162,12 @@ def test_embed_crops_grid_and_normalisation():
     np.testing.assert_allclose(dino[-1].mean(axis=(1, 2)), (1.0 - EW.IMAGENET_MEAN) / EW.IMAGENET_STD, atol=2e-3)
 
 
-def test_train_detector_tile_head_and_stack(tmp_path, monkeypatch):
-    import importlib
-
-    sys.modules.pop("train_detector", None)
-    TD = importlib.import_module("train_detector")
-    rng = np.random.default_rng(3)
-    monkeypatch.setattr(TD, "text_embeddings", lambda prompts: _unit(rng.normal(0, 1, (len(prompts), D))))
-    monkeypatch.setattr(TD, "GROUP_SETS", {"fog": (("full",),), "smoke": (("full",), ("full", "fine"))})
-    monkeypatch.setattr(TD, "C_GRID", (0.1,))
-    monkeypatch.setattr(TD, "TILE_C_GRID", (0.01, 0.1))
+def _toy_tile_sets(tmp_path, rng, zoom_tiles=False):
+    """Two toy sets with fine, zoom and reference embeddings: "fig" (smoke in every other window, a plume over 6
+    fine tiles of the last frame and the first 6 zoom crops) and "hpf" (fog only). Returns the --set specs and
+    {window_id: first plume tile}."""
     splits = ["train", "train", "val_select", "val_calib", "test_iid"]
-    specs = []
+    specs, plume = [], {}
     for name, smoke_rule, fog_rule in (("fig", lambda k: k % 2, lambda k: None), ("hpf", lambda k: 0, lambda k: k % 2)):
         rows, ids, embs, fines, zooms, refs = [], [], [], [], [], []
         for c in range(10):
@@ -188,6 +182,7 @@ def test_train_detector_tile_head_and_stack(tmp_path, monkeypatch):
                 zm = rng.normal(0, 1, (2, 16, D))
                 if s == 1:
                     t0 = (c * 7 + k) % 18
+                    plume[wid] = t0
                     fe[1, t0:t0 + 6, 0] += 6.0                   # a plume over 6 fine tiles, last frame
                     zm[1, :6, 0] += 6.0                          # and in the zoom crops of the top tiles
                 fines.append(_unit(fe).astype(np.float32))
@@ -200,12 +195,34 @@ def test_train_detector_tile_head_and_stack(tmp_path, monkeypatch):
             w.writerows(rows)
         np.savez(tmp_path / f"{name}.npz", window_id=np.array(ids), emb=np.stack(embs))
         np.savez(tmp_path / f"{name}_fine.npz", window_id=np.array(ids), emb=np.stack(fines))
-        np.savez(tmp_path / f"{name}_zoom.npz", window_id=np.array(ids), emb=np.stack(zooms))
+        extra = {}
+        if zoom_tiles:                                           # the zoom crops: quarters of tiles t0, t0 + 1, ...
+            extra["tiles"] = np.array([[plume.get(w, 0) + j for j in range(4)] for w in ids])
+        np.savez(tmp_path / f"{name}_zoom.npz", window_id=np.array(ids), emb=np.stack(zooms), **extra)
         keep = slice(8, None)                                    # the first camera has no reference frames
         np.savez(tmp_path / f"{name}_ref.npz", window_id=np.array(ids)[keep], fine=np.stack(refs)[keep],
                  emb=np.zeros((len(ids) - 8, 7, D), np.float32))
         specs += ["--set", f"{name}:{man}:{tmp_path / f'{name}.npz'}::{tmp_path / f'{name}_fine.npz'}:"
                            f"{tmp_path / f'{name}_zoom.npz'}:{tmp_path / f'{name}_ref.npz'}"]
+    return specs, plume
+
+
+def _toy_train_detector(monkeypatch, rng):
+    import importlib
+
+    sys.modules.pop("train_detector", None)
+    TD = importlib.import_module("train_detector")
+    monkeypatch.setattr(TD, "text_embeddings", lambda prompts: _unit(rng.normal(0, 1, (len(prompts), D))))
+    monkeypatch.setattr(TD, "GROUP_SETS", {"fog": (("full",),), "smoke": (("full",), ("full", "fine"))})
+    monkeypatch.setattr(TD, "C_GRID", (0.1,))
+    monkeypatch.setattr(TD, "TILE_C_GRID", (0.01, 0.1))
+    return TD
+
+
+def test_train_detector_tile_head_and_stack(tmp_path, monkeypatch):
+    rng = np.random.default_rng(3)
+    TD = _toy_train_detector(monkeypatch, rng)
+    specs, _ = _toy_tile_sets(tmp_path, rng)
     out, rep = tmp_path / "det", tmp_path / "rep.json"
     assert TD.main(specs + ["--out", str(out), "--report", str(rep), "--final", "--n-boot", "10",
                             "--deploy-recall", "0.8", "--fog-veto", "0.95", "--stack-fog-weight", "3"]) == 0
@@ -237,3 +254,129 @@ def test_train_detector_tile_head_and_stack(tmp_path, monkeypatch):
     assert det.select_zoom_tiles(fe, 4).shape == (2, 4)
     md = rep.with_suffix(".md").read_text()
     assert "tile head" in md and "zoom head" in md and "v2 against the v1 stack" in md
+
+
+def test_box_region_and_instance_labels(tmp_path):
+    from src.detector.boxes import fine_regions, instance_labels, load_boxes, region_labels, zoom_regions
+
+    fine = fine_regions()
+    assert len(fine) == 24 and fine[7] == pytest.approx((1 / 6, 0.25, 2 / 6, 0.5))
+    lab = region_labels(fine, (0.20, 0.30, 0.30, 0.45))               # a small plume inside tile 7
+    assert lab[7] == 1 and (lab == 1).sum() == 1
+    assert lab[23] == 0 and lab[6] == 0                                # far away / not within the margin
+    edge = region_labels(fine, (0.20, 0.30, 0.34, 0.45))               # grazes tile 8 by 0.007 of the frame
+    assert edge[7] == 1 and edge[8] == -1
+    big = region_labels(fine, (0.0, 0.0, 1.0, 0.5))                    # a plume over the top half
+    assert (big[:12] == 1).all() and (big[18:] == 0).all() and (big[12:18] == -1).all()
+    zr = zoom_regions([7, 0])
+    assert len(zr) == 8 and zr[0] == pytest.approx((1 / 6, 0.25, 1.5 / 6, 0.375))
+    assert zr[4] == pytest.approx((0.0, 0.0, 1 / 12, 0.125))
+    path = tmp_path / "boxes.csv"
+    cols = ["window_id", "sheet_id", "target", "confidence", "what", "labeler"] + \
+        [f"m{m}_{k}" for m in (0, 4, 8, 11) for k in ("visible", "x0", "y0", "x1", "y1")]
+    rows = [("a", "smoke", "high", (0.20, 0.30, 0.30, 0.45)), ("b", "smoke", "low", (0.2, 0.3, 0.3, 0.45)),
+            ("c", "none", "high", None), ("d", "smoke", "medium", None)]
+    with open(path, "w", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=cols)
+        w.writeheader()
+        for wid, target, conf, box in rows:
+            r = {"window_id": wid, "sheet_id": wid, "target": target, "confidence": conf, "what": "", "labeler": ""}
+            for m in (0, 4, 8, 11):
+                vis = box is not None and m == 11
+                r.update({f"m{m}_visible": int(vis), **{f"m{m}_{k}": (box[i] if vis else 0)
+                                                        for i, k in enumerate(("x0", "y0", "x1", "y1"))}})
+            w.writerow(r)
+    boxes = load_boxes(path)
+    assert boxes["a"]["boxes"][11] == pytest.approx((0.20, 0.30, 0.30, 0.45)) and boxes["a"]["boxes"][0] is None
+    Y, W = instance_labels(["a", "b", "c", "d", "e", "f"], np.array([1, 1, 1, 1, 1, 0]), boxes, lambda i: fine)
+    assert Y[0, 7] == 1 and Y[0].sum() == 1 and W[0].sum() == 24      # boxed: every tile used (none grazed)
+    assert W[1:5].sum() == 0                                           # low confidence, none, invisible, no box
+    assert W[5].sum() == 24 and Y[5].sum() == 0                        # smoke-free: every tile negative
+
+
+def test_tile_head_on_instance_labels_and_zoom_selector(tmp_path):
+    from src.detector.model import LinearHead, fit_tile_head, tile_logit
+
+    rng = np.random.default_rng(5)
+    n, k, d = 200, 24, 8
+    TF = rng.normal(0, 1, (n, k, d))
+    y = (np.arange(n) % 2).astype(float)
+    Y = np.zeros((n, k))
+    W = np.ones((n, k))
+    for i in np.flatnonzero(y == 1):
+        TF[i, i % k, 0] += 3.0                       # the plume tile
+        TF[i, :, 1] += 2.0                           # a scene cue on every tile of a smoke window
+        Y[i, i % k] = 1
+    inst = fit_tile_head(TF, y, 1.0, Y, W, balance=True)
+    mil = fit_tile_head(TF, y, 1.0)
+    assert abs(inst.coef[0]) > abs(inst.coef[1])     # instance labels: the plume, not the scene cue
+    assert abs(mil.coef[1]) > abs(mil.coef[0])       # every tile labelled: the scene cue dominates
+    assert tile_logit(inst, TF).shape == (n,)
+    sel = LinearHead(mean=np.zeros(2 * D + 14), scale=np.ones(2 * D + 14), coef=np.r_[1.0, np.zeros(2 * D + 13)],
+                     intercept=0.0, groups=["tiles"], C=1.0)                  # scores frame 11's first dimension
+    det = Detector(heads={"smoke": fit_head(rng.normal(0, 1, (20, 3)), np.arange(20) % 2, (), 1.0)},
+                   text={"smoke": _unit(rng.normal(0, 1, (7, D)))}, thresholds={"smoke": {"balanced": 0.5}},
+                   tile_heads={"smoke": LinearHead(mean=np.zeros(2 * D + 14), scale=np.ones(2 * D + 14),
+                                                   coef=np.zeros(2 * D + 14), intercept=0.0, groups=["t"], C=1.0)},
+                   zoom_selector={"smoke": sel})
+    fe = np.zeros((1, 2, 24, D), np.float32)
+    fe[0, 1, :, 1] = 1.0
+    fe[0, 1, 9] = 0.0
+    fe[0, 1, 9, 0] = 1.0
+    assert det.select_zoom_tiles(fe, 1)[0, 0] == 9   # the selector, not the (all-zero) tile head, decides
+    det.save(tmp_path / "d")
+    back = Detector.load(tmp_path / "d")
+    assert np.allclose(back.zoom_selector["smoke"].coef, sel.coef) and back.select_zoom_tiles(fe, 1)[0, 0] == 9
+
+
+def test_train_detector_boxes_and_score_detector(tmp_path, monkeypatch):
+    rng = np.random.default_rng(4)
+    TD = _toy_train_detector(monkeypatch, rng)
+    specs, plume = _toy_tile_sets(tmp_path, rng, zoom_tiles=True)
+    cols = ["window_id", "sheet_id", "target", "confidence", "what", "labeler"] + \
+        [f"m{m}_{k}" for m in (0, 4, 8, 11) for k in ("visible", "x0", "y0", "x1", "y1")]
+    boxes = tmp_path / "boxes.csv"
+    with open(boxes, "w", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=cols)
+        w.writeheader()
+        for i, (wid, t0) in enumerate(sorted(plume.items())):
+            r, c = divmod(t0, 6)                                 # a box on the plume's first tile
+            row = {"window_id": wid, "sheet_id": wid, "target": "smoke", "confidence": "high", "what": "",
+                   "labeler": ""}
+            for m in (0, 4, 8, 11):
+                row.update({f"m{m}_visible": 1, f"m{m}_x0": (c + 0.2) / 6, f"m{m}_y0": (r + 0.2) / 4,
+                            f"m{m}_x1": (c + 0.8) / 6, f"m{m}_y1": (r + 0.8) / 4})
+            if i == 0:
+                row["target"] = "none"                           # one window the labeller found no smoke in
+            w.writerow(row)
+    sel_dir = tmp_path / "sel"
+    out, rep = tmp_path / "det", tmp_path / "rep.json"
+    assert TD.main(specs + ["--out", str(sel_dir), "--report", str(tmp_path / "sel.json"), "--n-boot", "5"]) == 0
+    assert TD.main(specs + ["--out", str(out), "--report", str(rep), "--final", "--n-boot", "10",
+                            "--boxes", str(boxes), "--box-balance", "--zoom-selector", str(sel_dir)]) == 0
+    doc = json.loads(rep.read_text())
+    sel = doc["selection"]["smoke"]
+    n_smoke = sel["box_labels"]["smoke_windows"]
+    assert sel["box_labels"]["smoke_windows_boxed"] == n_smoke - 1 == len(plume) - 1 - sum(
+        1 for w in plume if int(w.split("-")[1]) % 5 == 4)     # test cameras are not dev rows
+    assert sel["box_labels"]["positive_tiles"] == n_smoke - 1  # one tile per boxed window
+    assert sel["box_labels_zoom"]["positive_tiles"] == 4 * (n_smoke - 1)   # the plume tile's 4 quarters
+    assert sel["tile"]["cv_auroc"] > 0.9 and doc["test"]["smoke_auroc"] > 0.9
+    assert doc["rules"]["box_balance"] is True and doc["rules"]["boxes"] == [str(boxes)]
+    det = Detector.load(out)
+    assert np.allclose(det.zoom_selector["smoke"].coef, Detector.load(sel_dir).tile_heads["smoke"].coef)
+    import importlib
+
+    SD = importlib.import_module("score_detector")
+    monkeypatch.setattr(SD, "TD", TD)
+    srep = tmp_path / "score.json"
+    assert SD.main(["--detector", f"a={sel_dir}", "--detector", f"b={out}", "--report", str(srep),
+                    "--n-boot", "10", "--matched-recall", "0.8"] + specs) == 0
+    sc = json.loads(srep.read_text())
+    assert set(sc["results"]) == {"a", "b"} and "b-a" in sc["paired"]
+    assert sc["results"]["b"]["smoke_auroc"] == pytest.approx(doc["test"]["smoke_auroc"])
+    assert sc["matched_recall"]["a"]["0.80"]["false_alarm_no_smoke"] is not None
+    pv = sc["paired"]["b-a"]["value"]
+    assert pv["smoke_auroc_within_sets"] == pytest.approx(sc["results"]["b"]["smoke_auroc_within_sets"]
+                                                          - sc["results"]["a"]["smoke_auroc_within_sets"])
+    assert np.load(srep.with_suffix(".probs.npz"))["p_smoke_b"].shape == (sc["results"]["b"]["n"]["windows"],)
