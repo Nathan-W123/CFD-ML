@@ -958,7 +958,10 @@ every set were cut from the tiles the v1 tile head ranked highest, so the
 detector stores that head as its `zoom_selector` and `select_zoom_tiles` uses
 it, not the retrained tile head. The dev data add 484 ordinary daytime
 windows as hard negatives. The test protocol adds a fresh test set (unused
-FIgLib sequences and ordinary daytime windows on the test mounts) scored once
-for v1, v2 and v3 together (`scripts/score_detector.py`, paired camera
-bootstrap), with targets fixed before scoring
-(`configs/real/detector_v3_eval_rules.json`).
+FIgLib sequences and ordinary daytime windows on the test mounts) on which
+v1, v2 and v3 were scored side by side after all three were frozen
+(`scripts/score_detector.py`, paired camera bootstrap), with targets fixed
+before scoring (`configs/real/detector_v3_eval_rules.json`). Nothing changed
+between scoring runs: the first scored all three; a second only v2 and v3,
+for the paired v3 - v2 differences; a third all three again to add the
+matched-false-alarm rows, reproducing every earlier number exactly.

@@ -14,13 +14,15 @@ A real-footage detector built next to it (frozen CLIP appearance features
 over the whole frame and 2 x 3 and 4 x 6 tiles, logistic heads, trained on
 real labelled windows) is now in its third version. v3 learns where the
 plume is (tile heads fitted on AI-drawn smoke boxes) and compares each tile
-with the same camera 14 minutes earlier. On a fresh test set that no
+with the same camera 14 minutes before the window. On a fresh test set that no
 version had seen (528 windows, 29 camera mounts) it reaches 0.81 AUROC on
 FIgLib's early plumes (v1 0.74) and alarms on 5.5 % of ordinary-day windows
 (v1 14 %), both within its pre-registered targets; at an equal 5-10 % false-
 alarm rate it catches 5-13 points more smoke than v1 on both test sets. At
-catch rates of 80 % and above every version still alarms on a quarter to a
-third of smoke-free windows. Labels and boxes come from AI labellers.**
+an 80 % catch rate every version still alarms on a quarter to a third of
+smoke-free windows, and more at higher catch rates. The 2026 HPWREN labels
+and the smoke boxes come from AI labellers; FIgLib's labels from the
+library's ignition times.**
 
 The physics expert is one of four parts of a larger system (vision, physics,
 weather, fusion). It sees only motion features measured from camera frames:
@@ -29,11 +31,12 @@ how stable the region's base is. It never sees the simulated velocity,
 pressure or concentration fields; the simulator only renders camera-like
 frames, and real footage goes through the same feature extractor.
 
-> **Status: the real-footage detector v3 is the default and met all its
-> pre-registered targets on a fresh, never-scored test set
-> ([`reports/far/detector_v3_fresh.md`](reports/far/detector_v3_fresh.md);
-> section "Detector v3" below, with its caveats); the CFD-pretrained physics
-> expert alone does not transfer to real fog.** v1 met the original goals;
+> **Status: the real-footage detector v3 is the default. It met both
+> pre-registered primary targets on a fresh, never-scored test set
+> ([`reports/far/detector_v3_fresh.md`](reports/far/detector_v3_fresh.md))
+> and the secondary checks on the old test cameras, which v1 and v2 had
+> already been scored on (section "Detector v3" below, with its caveats);
+> the CFD-pretrained physics expert alone does not transfer to real fog.** v1 met the original goals;
 > v2 improved dev but not the old test cameras (sections below). The
 > far-field physics model was tested on
 > real wildfire camera footage at its timing (one frame per minute):
@@ -70,7 +73,7 @@ model (the seed with the best validation loss) with 95 % bootstrap
 intervals over simulations or cameras; "±" is mean ± sd over three
 training seeds.
 
-### Detector v3 (default): smoke boxes, change since 14 minutes earlier, a fresh test set
+### Detector v3 (default): smoke boxes, change since 14 minutes before the window, a fresh test set
 
 Goal (the "7/10" step, CPU only): better tiny early smoke and fewer clear-scene
 false alarms, measured on a test set no version had been scored on. Targets,
@@ -85,7 +88,8 @@ What is new:
   4, 8 and 11 of each of the 653 dev smoke windows
   ([`configs/real/smoke_dev_boxes.csv`](configs/real/smoke_dev_boxes.csv);
   542 with a plume, 111 where it found none, often FIgLib windows a minute
-  after ignition). The tile and zoom heads are fitted on tile labels from the
+  after ignition; the one smoke window later found among the background
+  windows has no box). The tile and zoom heads are fitted on tile labels from the
   minute-11 box (`src/detector/boxes.py`: tiles on the plume 1, tiles away
   from it and every tile of a smoke-free window 0, tiles grazing the box
   ignored; smoke windows without a usable box are left out of the tile
@@ -95,12 +99,15 @@ What is new:
   and its change since the same camera 14 minutes before the window (box-
   supervised; dev 0.88 alone), added to the stacks that use the reference.
 * **Hard negatives.** 484 ordinary daytime windows on dev cameras (one per
-  camera-day, away from reported fires; blind AI smoke and fog labels).
+  camera-day, no CAL FIRE incident within 70 km in the previous 7 days or
+  the next day; blind AI smoke and fog labels: 483 smoke-free, 1 smoke, 33
+  fog).
 * **A fresh test set** on the test camera mounts: 79 FIgLib sequences no
   set had used (308 windows, 157 smoke, 18 cameras) and 220 ordinary daytime
   windows (21 cameras, none with smoke, 24 with fog). Zoom crops are still
-  cut from the tiles the v1 tile head picks (kept in the detector as its
-  zoom selector), the crops every version was trained on.
+  cut from the tiles the v1 tile head picks (kept in v3 as its zoom
+  selector), the crops v2's and v3's zoom heads were trained on (v1 has no
+  zoom head).
 
 Fresh test, each version scored with its own stored thresholds
 ([`reports/far/detector_v3_fresh.md`](reports/far/detector_v3_fresh.md)). The
@@ -133,17 +140,20 @@ AUROC 0.796 (v1 0.761), FIgLib 0.756 (0.713), fire days 0.911 / 0.916
 54), on all smoke-free windows 15.1 % (26.6 %) at 74.8 % smoke caught
 (82.4 %); strict 67.9 % caught at 9.2 % (53.4 % at 5.9 %).
 
-Verdict against the pre-registered targets: both primary targets (FIgLib
-AUROC >= 0.78, ordinary-day alarms <= 15 %) and all secondary checks (fog
-AUROC >= 0.95, false smoke on fog <= 5 %, fire-day AUROC within 0.02 of v1)
-are met, so v3 is the default (`artifacts_detector_v3/`).
+Verdict against the pre-registered targets: both primary targets, on the
+fresh test (FIgLib AUROC 0.813 >= 0.78, ordinary-day alarms 5.5 % <= 15 %),
+are met, and so are the secondary checks, which the rules placed on the old
+test cameras and so are not blind (fog AUROC 0.968 >= 0.95, false smoke on
+fog 1.9 % <= 5 %, fire-day AUROC on each set no more than 0.02 below v1:
+0.911 vs 0.844, 0.916 vs 0.928). v3 is the default (`artifacts_detector_v3/`).
+No fog target was set for the fresh test, where fog AUROC is 0.86 (below).
 
 What this does and does not show:
 
 * The gain is in ranking at low and moderate false-alarm rates. At an equal
   catch rate of 80 % on the test windows, v2 and v3 alarm equally often
   (26 % of smoke-free windows on the fresh test, 27 % on the old one; v1 33 %
-  and 24 %): the last fifth of the smoke, tiny plumes minutes after ignition,
+  and 24 %; 38-52 % at a 90 % catch rate): the last fifth of the smoke, tiny plumes minutes after ignition,
   is still caught only together with many false alarms. Part of the lower
   deploy-point alarm rate is a lower catch rate (the dev threshold for 80 %
   catches 73-75 % on test).
@@ -152,18 +162,21 @@ What this does and does not show:
   alarms on most days unless an alarm has to persist or a person confirms it.
   Use it to rank windows for an operator, not as an unattended alarm.
 * The fog head is unchanged in kind from v1. On the fresh ordinary-day
-  windows its fog AUROC is 0.86 for every version (24 fog windows: thin
-  marine layers and valley fog, harder than the METAR fog mornings).
+  windows its fog AUROC is about the same for every version (0.867 for v1
+  and v2, 0.864 [0.76, 0.94] for v3; 24 fog windows: thin marine layers and
+  valley fog, harder than the METAR fog mornings).
 * All 2026 labels and all smoke boxes come from AI labellers (two votes, a
-  third on disagreement; boxes one pass), not people. A spot check of 12
-  boxes (4 per confidence level) found all on the plume.
+  third on disagreement; boxes one pass), not people. A visual spot check
+  by the AI orchestrating this work, not a person, of 12 early boxes (4 per
+  confidence level, FIgLib, minute 11) found 11 on the plume; the twelfth, a
+  night glow, had no minute-11 box.
 * About ten variants were compared on dev, so the dev numbers (within-set
   0.870, 9.5 % smoke-free alarms at 80 % dev catch rate) are optimistic; the
   fresh test is the honest estimate. 18-21 test cameras per set keep the
   intervals wide.
-* 8 FIgLib pre-ignition windows of the fresh test have no frame 14 minutes
-  earlier (gaps in the sequence) and use the fallback stack without the
-  reference; v2 the same.
+* 8 FIgLib pre-ignition windows of the fresh test start 1-11 minutes after
+  their image sequence begins, so there is no frame 14 minutes before them;
+  they use the fallback stack without the reference (v2 the same).
 
 ### Real-footage detector (far field)
 
@@ -942,8 +955,11 @@ python scripts/train_detector.py --set <name>:<manifest>:<clip>:<features>:<fine
     --report reports/far/detector_v2.json --final
 
 # v3: background windows (one per camera-day away from fires), blind AI labels, smoke boxes
-python scripts/prepare_hpwren_fog.py select-background --out data/real/hpwren_bg --start 2026-07-16 \
-    --end 2026-10-18 --per-camera 5 --exclude-km 100 --exclude-days 14 --splits train val_select val_calib
+python scripts/prepare_hpwren_fog.py select-background --out data/real/hpwren_bg --start 2026-08-01 \
+    --end 2026-10-18 --per-camera 5 --exclude-km 70 --exclude-days 7 --splits train val_select val_calib --seed v3dev
+python scripts/prepare_hpwren_fog.py select-background --out data/real/hpwren_bg_test --start 2026-08-01 \
+    --end 2026-10-18 --per-camera 12 --exclude-km 70 --exclude-days 7 --splits test_iid --seed v3test
+# (both then kept only cameras of the earlier HPWREN sets, known to be archived; candidates.csv is the record)
 python scripts/prepare_hpwren_fog.py download --out data/real/hpwren_bg      # then votes -> consolidate -> manifest
 python scripts/region_boxes.py sheets --manifest smoke_dev.csv --artifacts artifacts_far --out data/real/boxes/smoke_dev
 python scripts/box_labels.py --sheets data/real/boxes/smoke_dev/box_sheets.csv --boxes boxes.json \
@@ -955,8 +971,9 @@ python scripts/train_detector.py --set ... --set hpwren_bg:<manifest>:<clip>::<f
     --out artifacts_detector_v3 --report reports/far/detector_v3.json --final
 # score saved detectors side by side on the same windows (paired camera bootstrap)
 python scripts/score_detector.py --detector v1=artifacts_detector --detector v2=artifacts_detector_v2 \
-    --detector v3=artifacts_detector_v3 --set figlib_test2:... --set hpwren_bg_test:... \
-    --matched-recall 0.8 --report reports/far/detector_v3_fresh.json
+    --detector v3=artifacts_detector_v3 --set figlib_test2:... --set hpwren_bg_test:... --matched-recall 0.8 \
+    --matched-false-alarm 0.05 --matched-false-alarm 0.1 --matched-false-alarm 0.15 \
+    --report reports/far/detector_v3_fresh.json
 ```
 
 ```python
