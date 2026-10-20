@@ -1,0 +1,28 @@
+{
+ "written": "2026-10-20, before any v3 model was trained or scored and before any detector (v1, v2 or v3) was scored on the fresh test windows",
+ "purpose": "Detector v3 (CPU only): more trustworthy test numbers and better tiny-smoke and clear-scene behaviour, from a fresh, larger test set, box labels for the dev smoke windows and background hard negatives.",
+ "fresh_test": {
+  "figlib_test2": "79 FIgLib sequences on the test camera mounts that no earlier set used (two windows before and two after the first visible plume each; 308 windows from 77 sequences, 157 smoke, 18 cameras); labels from the library's ignition times, as for the FIgLib set",
+  "hpwren_bg_test": "one daytime window per camera-day (08-17 local) on 21 archived test cameras, 2026-07 to 2026-10, on days without a CAL FIRE incident within 70 km in the previous 7 days or the next day (234 downloaded); labels: blind AI smoke and fog votes (configs/real/hpwren_background_labeling_guide.md; two votes per sheet, a third where they disagree or one is unsure); windows labelled smoke unknown or of bad quality are left out",
+  "status": "never scored by any detector before the v3 candidate is frozen; scored once, v1, v2 and v3 side by side (scripts/score_detector.py)"
+ },
+ "dev_additions": {
+  "hpwren_bg": "the same kind of background windows on dev cameras (5 per camera, 100 km / 14 days away from incidents), labelled the same way, as hard negatives",
+  "boxes": "configs/real/smoke_dev_boxes.csv: AI boxes around the plume on the 653 dev smoke windows (minutes 0, 4, 8, 11); the tile and zoom heads are fitted on tile labels from the minute-11 box (scripts/box_labels.py, src/detector/boxes.py)"
+ },
+ "dev_selection": "dev cameras only (camera-mount grouped 5-fold CV). Variants compared: (a) v2's recipe on the dev sets plus hpwren_bg; (b) (a) with box-supervised tile and zoom heads; (c) (b) with balanced positive / negative tile weights; (d) the best of (b, c) plus the reference tile head. The criterion is the dev out-of-fold within-set smoke AUROC; a variant whose dev false alarms on all smoke-free windows at the deploy point are higher than (a)'s by more than 1 point is not chosen. Operating rules as v2 (deploy: 80 % dev recall, never above 2.5 % dev fog alarms; strict: 5 % of dev smoke-free windows; fog veto 0.95; stack fog weight 3). The chosen variant and its dev numbers are added below as a revision before the fresh test is scored.",
+ "targets_7_of_10": {
+  "primary_fresh_test": {
+   "figlib_test2_smoke_auroc": ">= 0.78 (tiny early smoke; v1 on the old test: 0.713)",
+   "hpwren_bg_test_false_alarms_deploy": "<= 15 % of the smoke-free background windows alarm at the deploy point (clear scenes on ordinary days)"
+  },
+  "secondary_old_test": {
+   "note": "the old test cameras (440 windows) were scored by v1 and v2 already, so these checks are not blind",
+   "fog_auroc": ">= 0.95",
+   "false_smoke_on_fog_deploy": "<= 5 % (the original goal)",
+   "fire_day_smoke_auroc": "hpwren_smoke and hpwren_smoke2 each not lower than v1 by more than 0.02"
+  },
+  "verdict": "7/10 if both primary targets and all secondary checks are met; the paired v3 - v1 differences on the fresh test (camera bootstrap) are reported whether or not they exclude zero"
+ },
+ "caveats": "AI labels on the background windows and AI boxes are not human-checked; FIgLib labels come from the ignition time, so a window right after ignition can show no smoke yet; 18-21 test cameras make camera-level intervals wide"
+}
