@@ -470,6 +470,50 @@ def select_fire_candidates(cams: list, incidents: list, start: dt.date, end: dt.
 # =============================================================================
 
 
+BG_HOURS = tuple(range(8, 18))     # local start hours of background windows
+
+
+def select_background_candidates(cams: list, incidents: list, start: dt.date, end: dt.date, per_camera: int,
+                                 exclude_km: float = 100.0, exclude_days: int = 14, seed: str = "",
+                                 splits=None) -> list:
+    """Ordinary daytime windows (the main source of false smoke alarms): per camera, per_camera different days
+    with no CAL FIRE incident started within exclude_km in the exclude_days before the day (or on the next
+    day), one window per day at a start hour drawn from BG_HOURS (sun at least MIN_SUN_DEG over the window)."""
+    days = [start + dt.timedelta(days=k) for k in range((end - start).days + 1)]
+    rows = []
+    for cam in cams:
+        split = split_for(cam["camera"], (0.5, 0.15, 0.15, 0.2))
+        if splits and split not in splits:
+            continue
+        near = []
+        for inc in incidents:
+            d, _ = distance_bearing(cam["lat"], cam["lon"], inc["lat"], inc["lon"])
+            if d <= exclude_km:
+                near.append(dt.datetime.fromtimestamp(inc["start"], TZ).date())
+        ok = [day for day in days
+              if not any(day - dt.timedelta(days=exclude_days) <= s0 <= day + dt.timedelta(days=1) for s0 in near)]
+        ok.sort(key=lambda day: _unit_hash(f"{seed}bg{cam['camera']}{day}"))
+        taken = 0
+        for day in ok:
+            if taken >= per_camera:
+                break
+            u = _unit_hash(f"{seed}slot{cam['camera']}{day}")
+            hour = BG_HOURS[int(u * len(BG_HOURS))]
+            minute = 30 if _unit_hash(f"{seed}min{cam['camera']}{day}") >= 0.5 else 0
+            t = dt.datetime(day.year, day.month, day.day, hour, minute, tzinfo=TZ).timestamp()
+            if min(solar_elevation_deg(cam["lat"], cam["lon"], t),
+                   solar_elevation_deg(cam["lat"], cam["lon"], t + INTERVAL_S * N_STEPS)) < MIN_SUN_DEG:
+                continue
+            local = dt.datetime.fromtimestamp(t, TZ)
+            ev = {"exclude_km": exclude_km, "exclude_days": exclude_days, "incidents_within_km": len(near)}
+            rows.append({"window_id": f"hpwrenbg-{cam['camera']}-{local:%Y%m%d-%H%M}", "camera": cam["camera"],
+                         "site": cam["site"], "day": day.isoformat(), "slot": local.strftime("%H:%M"),
+                         "start_unix_target": int(t), "kind": "background", "split": split, "stations": "",
+                         "evidence": json.dumps(ev, separators=(",", ":")), "zoom_x": ""})
+            taken += 1
+    return rows
+
+
 def fit_grid(times) -> tuple:
     """Least-squares start of a 60 s grid through consecutive frame times and the largest residual (s)."""
     t = np.asarray(times, dtype=np.float64)
@@ -722,6 +766,34 @@ def cmd_select_fires(args) -> int:
     return 0
 
 
+def cmd_select_background(args) -> int:
+    out = Path(args.out)
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "CREDIT.txt").write_text(CREDIT + " Fire exclusion: CAL FIRE incident list (incidents.fire.ca.gov).\n")
+    cache_dir = out / "_cache"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    if not (cache_dir / "sites.js").is_file():
+        (cache_dir / "sites.js").write_bytes(_get(SITES_URL))
+    start, end = dt.date.fromisoformat(args.start), dt.date.fromisoformat(args.end)
+    items = []
+    for year in range(start.year, end.year + 1):
+        cache = cache_dir / f"incidents_{year}.json"
+        if not cache.is_file():
+            cache.write_bytes(_get(INCIDENTS_URL.format(year=year), timeout=120))
+        items += json.loads(cache.read_text())
+    cams = parse_sites((cache_dir / "sites.js").read_text())
+    rows = select_background_candidates(cams, parse_incidents(items), start, end, args.per_camera,
+                                        exclude_km=args.exclude_km, exclude_days=args.exclude_days, seed=args.seed,
+                                        splits=set(args.splits) if args.splits else None)
+    _write_csv(out / "candidates.csv", rows, CANDIDATE_FIELDS)
+    splits = defaultdict(int)
+    for r in rows:
+        splits[r["split"]] += 1
+    print(json.dumps({"candidates": len(rows), "cameras": len({r["camera"] for r in rows}),
+                      "splits": dict(sorted(splits.items()))}))
+    return 0
+
+
 def cmd_download(args) -> int:
     from concurrent.futures import ThreadPoolExecutor
 
@@ -933,6 +1005,15 @@ def main(argv=None) -> int:
     f.add_argument("--max-cameras", type=int, default=4)
     f.add_argument("--offsets-min", type=int, nargs="+", default=[-90, 10, 30],
                    help="window starts relative to the reported start (minutes); negative = before (smoke-free)")
+    bg = sub.add_parser("select-background", help="ordinary daytime windows away from reported fires")
+    bg.add_argument("--out", required=True)
+    bg.add_argument("--start", required=True)
+    bg.add_argument("--end", required=True)
+    bg.add_argument("--per-camera", type=int, default=6, help="windows per camera, one per day")
+    bg.add_argument("--exclude-km", type=float, default=100.0)
+    bg.add_argument("--exclude-days", type=int, default=14)
+    bg.add_argument("--splits", nargs="*", help="only cameras of these splits (default: all)")
+    bg.add_argument("--seed", default="")
     d = sub.add_parser("download", help="download candidate windows and write contact sheets")
     d.add_argument("--out", required=True)
     d.add_argument("--max-width", type=int, default=1024)
@@ -959,7 +1040,8 @@ def main(argv=None) -> int:
     g.add_argument("--out", required=True)
     g.add_argument("manifests", nargs="+")
     args = ap.parse_args(argv)
-    return {"select": cmd_select, "select-fires": cmd_select_fires, "download": cmd_download, "sheets": cmd_sheets,
+    return {"select": cmd_select, "select-fires": cmd_select_fires, "select-background": cmd_select_background,
+            "download": cmd_download, "sheets": cmd_sheets,
             "consolidate": cmd_consolidate, "manifest": cmd_manifest, "merge": cmd_merge}[args.cmd](args)
 
 

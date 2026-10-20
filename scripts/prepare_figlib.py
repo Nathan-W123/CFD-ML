@@ -257,7 +257,7 @@ def _safe_member(member: tarfile.TarInfo) -> bool:
 
 def downscale_jpeg(data: bytes, max_width: int) -> tuple:
     """Decoded image bytes -> (JPEG q90 bytes at most max_width wide, original (h, w))."""
-    img = cv2.imdecode(np.frombuffer(data, dtype=np.uint8), cv2.IMREAD_COLOR)
+    img = cv2.imdecode(np.frombuffer(data, dtype=np.uint8), cv2.IMREAD_COLOR) if data else None
     if img is None:
         raise ValueError("undecodable image")
     h, w = img.shape[:2]
@@ -294,7 +294,11 @@ def prepare_sequence(name: str, out: Path, max_width: int) -> dict:
                 fh = tf.extractfile(member)
                 if fh is None:
                     continue
-                jpeg, size = downscale_jpeg(fh.read(), max_width)
+                try:
+                    jpeg, size = downscale_jpeg(fh.read(), max_width)
+                except ValueError:                  # an empty or corrupt frame: drop it, keep the sequence
+                    print(f"  dropped undecodable frame {base}", file=sys.stderr)
+                    continue
                 jpegs.append((base, jpeg))
                 sizes.add(size)
                 frames.append({"filename": base, "unix_s": int(m.group(1)), "offset_s": int(m.group(2))})
