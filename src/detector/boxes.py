@@ -9,7 +9,10 @@ The fine tiles (4 x 6) and the zoom crops (2 x 2 quarters of selected fine
 tiles) are scored on frame 11, so their labels come from the minute-11 box:
 
 * 1: the region and the box overlap by at least pos_frac of the smaller of the
-  two (a tile inside a large plume, or a small plume inside a tile);
+  two (a tile inside a large plume, or a small plume inside a tile), or the
+  region holds at least half as much of the box as the region holding most of
+  it and at least share_frac of the box (a wide or corner-straddling plume
+  split over several tiles, none holding pos_frac of it);
 * 0: the region does not touch the box grown by margin on every side;
 * -1 (ignored): anything in between, a box edge grazing the region.
 
@@ -72,15 +75,19 @@ def _inter(a: Rect, b: Rect) -> float:
     return _area((max(a[0], b[0]), max(a[1], b[1]), min(a[2], b[2]), min(a[3], b[3])))
 
 
-def region_labels(regions: Sequence[Rect], box: Rect, pos_frac: float = 0.25, margin: float = 0.02) -> np.ndarray:
+def region_labels(regions: Sequence[Rect], box: Rect, pos_frac: float = 0.25, margin: float = 0.02,
+                  share_frac: float = 0.1) -> np.ndarray:
     """1 / 0 / -1 (ignored) per region for one box (see the module docstring)."""
     x0, y0, x1, y1 = box
     box = (min(x0, x1), min(y0, y1), max(x0, x1), max(y0, y1))
     grown = (box[0] - margin, box[1] - margin, box[2] + margin, box[3] + margin)
+    area = max(_area(box), 1e-12)
+    inter = np.array([_inter(r, box) for r in regions])
+    top = inter.max() if len(inter) else 0.0
     out = np.full(len(regions), -1, np.int64)
     for i, r in enumerate(regions):
-        inter = _inter(r, box)
-        if inter > 0 and inter >= pos_frac * min(_area(r), max(_area(box), 1e-12)):
+        if inter[i] > 0 and (inter[i] >= pos_frac * min(_area(r), area)
+                             or (inter[i] >= 0.5 * top and inter[i] >= share_frac * area)):
             out[i] = 1
         elif _inter(r, grown) == 0:
             out[i] = 0

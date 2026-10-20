@@ -41,6 +41,9 @@ def score(det, rows):
     p_s, p_f = np.zeros(len(rows)), np.zeros(len(rows))
     used = {}
     groups = {}
+    mot_needed = any("motion" in det.heads[h].groups for h in det.heads)
+    if mot_needed and any(r["motion"] is None for r in rows):
+        raise SystemExit("this detector's head uses the motion features: give every --set its features.npz")
     for i, r in enumerate(rows):
         groups.setdefault((r["fine"] is not None, r["zoom"] is not None, r["ref"] is not None), []).append(i)
     for (has_fine, has_zoom, has_ref), idx in groups.items():
@@ -49,9 +52,10 @@ def score(det, rows):
         fine = np.stack([r["fine"] for r in rs]) if has_fine else None
         zoom = np.stack([r["zoom"] for r in rs]) if has_zoom else None
         ref = np.stack([r["ref"] for r in rs]) if has_ref else None
-        p = det.proba(E, None, fine, zoom, ref)
+        mot = np.stack([r["motion"] for r in rs]) if mot_needed else None
+        p = det.proba(E, mot, fine, zoom, ref)
         p_s[idx], p_f[idx] = p["smoke"], p["fog"]
-        avail = det.stack_inputs("smoke", E[:1], None, None if fine is None else fine[:1],
+        avail = det.stack_inputs("smoke", E[:1], None if mot is None else mot[:1], None if fine is None else fine[:1],
                                  None if zoom is None else zoom[:1], None if ref is None else ref[:1])
         key = "+".join(det.stack_used("smoke", avail))
         used[key] = used.get(key, 0) + len(idx)

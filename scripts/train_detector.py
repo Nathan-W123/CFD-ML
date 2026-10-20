@@ -414,6 +414,9 @@ def main(argv=None) -> int:
     SELECT_ON = args.select_on
 
     rows = load_sets(args.sets)
+    if args.boxes and any(r["zoom"] is not None for r in rows) and not args.zoom_selector:
+        ap.error("--boxes retrains the tile head, so the zoom crops' selector must be kept: give --zoom-selector "
+                 "(the detector whose tile head chose the stored zoom tiles)")
     boxes = {}
     for path in args.boxes:
         boxes.update(load_boxes(path))
@@ -531,7 +534,8 @@ def main(argv=None) -> int:
         print(f"{head}: best {best} on {len(hr)} dev windows", file=sys.stderr)
     zoom_selector = {}
     if args.zoom_selector and zoom_heads:
-        zoom_selector = {h: Detector.load(args.zoom_selector).tile_heads[h] for h in zoom_heads}
+        sel_det = Detector.load(args.zoom_selector)
+        zoom_selector = {h: sel_det.zoom_selector.get(h) or sel_det.tile_heads[h] for h in zoom_heads}
     det = Detector(heads=heads, text=T, thresholds=thresholds,
                    info={"model_id": MODEL_ID, "sets": args.sets, "deploy_false_smoke": args.deploy_false_smoke,
                          "deploy_recall": args.deploy_recall, "strict_false_alarm": args.strict_false_alarm,

@@ -266,6 +266,8 @@ def test_box_region_and_instance_labels(tmp_path):
     assert lab[23] == 0 and lab[6] == 0                                # far away / not within the margin
     edge = region_labels(fine, (0.20, 0.30, 0.34, 0.45))               # grazes tile 8 by 0.007 of the frame
     assert edge[7] == 1 and edge[8] == -1
+    wide = region_labels(fine, (0.26, 0.45, 0.69, 0.54))               # flat plume over tiles 7-10 and 13-16
+    assert set(np.flatnonzero(wide == 1)) == {8, 9, 14, 15} and set(np.flatnonzero(wide == -1)) == {7, 10, 13, 16}
     big = region_labels(fine, (0.0, 0.0, 1.0, 0.5))                    # a plume over the top half
     assert (big[:12] == 1).all() and (big[18:] == 0).all() and (big[12:18] == -1).all()
     zr = zoom_regions([7, 0])
