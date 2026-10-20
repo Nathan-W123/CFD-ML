@@ -114,6 +114,72 @@ def matched_recall(p_s, p_f, thr, rows, r):
             "per_set": {s: float(np.mean(q[neg & (sets == s)] >= t)) for s in sorted(set(sets[neg].tolist()))}}
 
 
+def _pct(v):
+    return "n/a" if v is None else f"{100 * v:.1f}%"
+
+
+def _num(v):
+    return "n/a" if v is None else f"{v:.3f}"
+
+
+def _ci(res, key, pct=False):
+    c = res.get("ci95", {}).get(key) or {}
+    if c.get("lo") is None:
+        return ""
+    f = (lambda v: f"{100 * v:.0f}") if pct else (lambda v: f"{v:.2f}")
+    return f" [{f(c['lo'])}, {f(c['hi'])}]"
+
+
+def render(rep) -> str:
+    """A markdown summary: each detector's metrics (overall and per set) and the paired differences."""
+    names = list(rep["results"])
+    L = ["# Detectors scored side by side", "",
+         "Sets: " + ", ".join(s.split(":")[0] for s in rep["sets"]) + ". Each detector uses its own stored thresholds "
+         "(deploy, strict, fog veto); intervals resample cameras (95 %).", "",
+         "| | " + " | ".join(names) + " |", "|---|" + "---|" * len(names)]
+    R = rep["results"]
+
+    def row(label, key, pct=False):
+        L.append(f"| {label} | " + " | ".join((_pct if pct else _num)(R[n].get(key)) + _ci(R[n], key, pct)
+                                             for n in names) + " |")
+
+    row("smoke AUROC", "smoke_auroc")
+    row("smoke AUROC within sets", "smoke_auroc_within_sets")
+    row("fog AUROC", "fog_auroc")
+    row("deploy: smoke recall", "smoke_recall", True)
+    row("deploy: alarms on smoke-free windows", "false_alarm_no_smoke", True)
+    row("deploy: alarms on fog windows", "false_smoke_on_fog", True)
+    row("strict: smoke recall", "smoke_recall_strict", True)
+    row("strict: alarms on smoke-free windows", "false_alarm_no_smoke_strict", True)
+    sets = sorted({s for n in names for s in R[n]["per_set"]})
+    for s in sets:
+        for key, label, pct in (("smoke_auroc", "smoke AUROC", False),
+                                ("false_alarm_no_smoke", "deploy: alarms on smoke-free", True),
+                                ("false_smoke_on_fog", "deploy: alarms on fog", True)):
+            vals = [R[n]["per_set"].get(s, {}).get(key) for n in names]
+            if any(v is not None for v in vals):
+                L.append(f"| {s}: {label} | " + " | ".join((_pct if pct else _num)(v) for v in vals) + " |")
+    n0 = R[names[0]]["n"]
+    L += ["", f"{n0['windows']} windows, {n0['cameras']} camera mounts; smoke labelled {n0['smoke_known']} "
+          f"({n0['smoke_pos']} smoke), fog labelled {n0['fog_known']} ({n0['fog_pos']} fog).", ""]
+    for n in names:
+        mr = rep.get("matched_recall", {}).get(n) or {}
+        for r, v in mr.items():
+            if v:
+                L.append(f"* {n} at {float(r):.0%} recall on these windows (descriptive): alarms on smoke-free "
+                         f"{_pct(v['false_alarm_no_smoke'])}; " + ", ".join(f"{k} {_pct(x)}" for k, x in v["per_set"].items()))
+    for pair, d in rep.get("paired", {}).items():
+        L += ["", f"## Paired differences {pair} (same windows, same resampled cameras)", "", "| | difference | 95 % |",
+              "|---|---|---|"]
+        for k, v in d["value"].items():
+            c = d["ci95"].get(k) or {}
+            pct = "false_alarm" in k or "recall" in k
+            f = (lambda x: f"{100 * x:+.1f} pts") if pct else (lambda x: f"{x:+.3f}")
+            ci = f"[{f(c['lo'])}, {f(c['hi'])}]" if c.get("lo") is not None else ""
+            L.append(f"| {k} | {'n/a' if v is None else f(v)} | {ci} |")
+    return "\n".join(L) + "\n"
+
+
 def main(argv=None) -> int:
     warnings.filterwarnings("ignore")
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
@@ -152,6 +218,7 @@ def main(argv=None) -> int:
         rep["paired"][f"{name}-{base}"] = {"value": fn(np.arange(len(rows))),
                                            "ci95": TD.M.grouped_bootstrap(fn, cams, n_boot=args.n_boot)}
     write_json(Path(args.report), rep)
+    Path(args.report).with_suffix(".md").write_text(render(rep), encoding="utf-8")
     np.savez_compressed(Path(args.report).with_suffix(".probs.npz"), window_id=np.array([r["window_id"] for r in rows]),
                         set=np.array([r["set"] for r in rows]), smoke=np.array([r["smoke"] for r in rows]),
                         fog=np.array([r["fog"] for r in rows]),

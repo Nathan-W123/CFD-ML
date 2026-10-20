@@ -387,3 +387,5 @@ def test_train_detector_boxes_and_score_detector(tmp_path, monkeypatch):
     assert pv["smoke_auroc_within_sets"] == pytest.approx(sc["results"]["b"]["smoke_auroc_within_sets"]
                                                           - sc["results"]["a"]["smoke_auroc_within_sets"])
     assert np.load(srep.with_suffix(".probs.npz"))["p_smoke_b"].shape == (sc["results"]["b"]["n"]["windows"],)
+    md = srep.with_suffix(".md").read_text()
+    assert "Paired differences b-a" in md and "smoke AUROC within sets" in md and "fig: smoke AUROC" in md
