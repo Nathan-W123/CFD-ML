@@ -153,6 +153,7 @@ def test_score_dense(tmp_path, monkeypatch):
     assert len(z["seq"]) == 50 - 25 and z["off_end_s"][0] == 60 * (25 - 30)         # first window with a reference
     assert np.allclose(z["p_smoke"], fine[25:, 0, 0].astype(float), atol=1e-3) and z["fog_veto"][0] == 0.95
     assert np.allclose(z["input_tileref"], z["p_smoke"] - 0.5) and len(z["input_head"]) == len(z["seq"])
+    assert set(z["seq"].tolist()) == {"seqA"} and set(z["mount"].tolist()) == {"cam-s"}
 
 
 def test_change_gate():

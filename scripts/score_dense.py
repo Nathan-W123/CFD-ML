@@ -89,8 +89,8 @@ def main(argv=None) -> int:
         x = assemble(z["coarse"], z["fine"], idx[ok])
         p = det.proba(x["E"], None, x["fine"], None, x["ref"])
         k = int(ok.sum())
-        for name, v in det.stack_inputs("smoke", x["E"], None, x["fine"], None, x["ref"]).items():
-            inputs.setdefault(name, []).extend(np.asarray(v, np.float64).tolist())
+        for key, v in det.stack_inputs("smoke", x["E"], None, x["fine"], None, x["ref"]).items():
+            inputs.setdefault(key, []).extend(np.asarray(v, np.float64).tolist())
         cols["seq"] += [name] * k
         cols["camera"] += [m["camera"]] * k
         cols["mount"] += [m["mount"]] * k
