@@ -1,0 +1,31 @@
+{
+ "written": "2026-10-21, before any window was scored minute by minute and before any alarm rule was tuned or evaluated",
+ "purpose": "Fewer false alarms without missing fires: score the frozen v3 detector on a window ending every minute and raise an alarm by a rule over the recent scores instead of one window at a time; judge it per fire (time to first alarm after the first visible plume) and per camera-hour of smoke-free footage.",
+ "disclosure": "Before this was written, the fresh test's single-window v3 scores were looked at to compare thresholds and a two-windows-in-a-row rule (2026-10-21; README). That informed which rule families are tried here. No rule parameter is fitted on any test camera; the fresh test is no longer fully blind for this step.",
+ "detector": "artifacts_detector_v3, frozen, without zoom crops (its fallback stack without zoom; zoom added nothing on dev, 0.864 vs 0.865 within-set AUROC, and would need two full-resolution originals per minute). Single-window fresh-test numbers of this no-zoom use are reported next to the zoom ones.",
+ "windows": "For every minute t of a sequence: the window of frames t-11 ... t (frames 0, 6, 11 coarse, 0 and 11 fine, as scripts/embed_windows.py) and the reference frame at t-25 (14 min before frame 0), each the frame nearest the nominal time within 30 s; windows missing any of these are not scored. Every frame is embedded once (whole frame, 2 x 3 and 4 x 6 tiles) and shared by the windows that use it.",
+ "data": {
+  "dev_tuning": "dense windows on dev cameras, scored by fold models (v3's selected configuration refitted with one fifth of the dev camera mounts held out, those mounts' sequences scored by that fold's model): 100 dev FIgLib sequences (seeded draw), and ordinary-day stretches on dev cameras (one per camera on 30 cameras with a smoke-free hpwren_bg window, 40 window ends each, around that window)",
+  "test": "dense windows on the fresh test cameras scored by the final v3: the 79 figlib_test2 sequences, and ordinary-day stretches (3 per camera on the 21 hpwren_bg_test cameras, around smoke-free labelled windows, 40 window ends each)"
+ },
+ "definitions": {
+  "fire_detection": "FIgLib: a fire is detected within D minutes if the rule fires on a window ending at t with 0 <= t <= D (t in minutes from the library's first visible plume); D = 5, 10, 15, 20, 30; median delay over detected fires; fires never detected by +40 counted",
+  "false_alarm_events": "smoke-free footage: FIgLib windows ending before the first visible plume (t < 0) and ordinary-day stretches; the rule's firings grouped into events with a 30-min hold-off per camera (a firing within 30 min of the last event's start is the same event); rate = events per camera-hour of scored smoke-free window ends; also the share of smoke-free windows on which the rule fires",
+  "audit": "ordinary-day windows on which the chosen rule fires are labelled blind for smoke (AI, two votes); events on windows labelled smoke are reported separately and left out of the false-alarm rate in a secondary analysis"
+ },
+ "rules": {
+  "R0": "single window: fire when P(smoke) >= T (fog veto 0.95 as v3); baselines T = v3 deploy 0.234 and v3 strict 0.354",
+  "R1": "persistence with a bypass: fire when at least k of the last m windows have P(smoke) >= T1 (m in 2..5, k in 2..m), or the current window has P(smoke) >= T2 (T2 > T1, or no bypass)",
+  "R2": "smoothed: fire when the mean logit of the last m windows (m in 2..6) is >= T"
+ },
+ "tuning": "dev only: thresholds on a grid of dev score quantiles; among R1 and R2 settings whose dev fire detection within 15 min and within 30 min are both at least R0-deploy's on dev, choose the one with the fewest dev false-alarm events per camera-hour (FIgLib pre-ignition and ordinary-day footage pooled by hours); ties to the simpler rule. Recorded below as a revision before any test evaluation.",
+ "targets": {
+  "primary_fresh_test": {
+   "false_alarm_events": "the chosen rule's false-alarm events per camera-hour at most 0.6 x R0-deploy's, on FIgLib pre-ignition footage and on ordinary-day footage separately",
+   "fires_within_30_min": "not lower than R0-deploy's by more than one fire (1.3 points of 77)",
+   "fires_within_15_min": "not lower than R0-deploy's by more than three fires (3.9 points)"
+  },
+  "verdict": "met if all three hold; reported whatever the outcome, with camera-bootstrap intervals"
+ },
+ "stage_2": "If ordinary-day false alarms remain the larger burden after the rule, a reference from the same camera at the same time one day earlier is tried on dev (HPWREN 2026 only: FIgLib's day-before frames are not in the library), under the same rules."
+}
