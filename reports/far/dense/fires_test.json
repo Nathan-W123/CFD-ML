@@ -1,0 +1,7 @@
+{
+  "detector": "artifacts_detector_v3",
+  "kind": "fire",
+  "sequences": 79,
+  "skipped": {},
+  "windows": 4185
+}
