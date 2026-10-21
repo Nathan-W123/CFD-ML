@@ -1,0 +1,154 @@
+{
+  "detectors": {
+    "v3": "artifacts_detector_v3"
+  },
+  "matched_false_alarm": {
+    "v3": {
+      "0.05": {
+        "false_alarm_no_smoke": 0.04851752021563342,
+        "per_set": {
+          "figlib_test2": 0.5859872611464968
+        },
+        "smoke_recall": 0.5859872611464968,
+        "threshold": 0.5542432656731908
+      },
+      "0.10": {
+        "false_alarm_no_smoke": 0.09973045822102426,
+        "per_set": {
+          "figlib_test2": 0.6815286624203821
+        },
+        "smoke_recall": 0.6815286624203821,
+        "threshold": 0.313909087938767
+      }
+    }
+  },
+  "matched_recall": {
+    "v3": {
+      "0.80": {
+        "false_alarm_no_smoke": 0.24797843665768193,
+        "per_set": {
+          "figlib_test2": 0.4105960264900662,
+          "hpwren_bg_test": 0.13636363636363635
+        },
+        "threshold": 0.17172127394202402
+      }
+    }
+  },
+  "paired": {},
+  "results": {
+    "v3": {
+      "ci95": {
+        "false_alarm_no_smoke": {
+          "hi": 0.2177540225883809,
+          "lo": 0.10711134453781512,
+          "n_valid": 1000
+        },
+        "false_alarm_no_smoke_strict": {
+          "hi": 0.12172028945596965,
+          "lo": 0.04334530637467895,
+          "n_valid": 1000
+        },
+        "false_smoke_on_fog": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "n_valid": 1000
+        },
+        "false_smoke_on_fog_strict": {
+          "hi": 0.0,
+          "lo": 0.0,
+          "n_valid": 1000
+        },
+        "fog_auroc": {
+          "hi": 0.9374724353711422,
+          "lo": 0.7596178013004445,
+          "n_valid": 1000
+        },
+        "fog_auroc_within_sets": {
+          "hi": 0.9374724353711422,
+          "lo": 0.7596178013004445,
+          "n_valid": 1000
+        },
+        "smoke_auroc": {
+          "hi": 0.921024914995972,
+          "lo": 0.8441957702044798,
+          "n_valid": 1000
+        },
+        "smoke_auroc_within_sets": {
+          "hi": 0.8568657825097059,
+          "lo": 0.7785935188229492,
+          "n_valid": 1000
+        },
+        "smoke_recall": {
+          "hi": 0.8333333333333334,
+          "lo": 0.6551663428848956,
+          "n_valid": 1000
+        },
+        "smoke_recall_strict": {
+          "hi": 0.7647240377632534,
+          "lo": 0.5746914184952978,
+          "n_valid": 1000
+        }
+      },
+      "false_alarm_no_smoke": 0.16172506738544473,
+      "false_alarm_no_smoke_strict": 0.08086253369272237,
+      "false_smoke_on_fog": 0.0,
+      "false_smoke_on_fog_strict": 0.0,
+      "fog_auroc": 0.8637640449438202,
+      "fog_auroc_within_sets": 0.8637640449438202,
+      "n": {
+        "cameras": 29,
+        "fog_known": 202,
+        "fog_pos": 24,
+        "fog_windows_smoke0": 24,
+        "smoke_known": 528,
+        "smoke_pos": 157,
+        "windows": 528
+      },
+      "per_set": {
+        "figlib_test2": {
+          "false_alarm_no_smoke": 0.2781456953642384,
+          "false_alarm_no_smoke_strict": 0.152317880794702,
+          "false_smoke_on_fog": null,
+          "false_smoke_on_fog_strict": null,
+          "fog_auroc": null,
+          "fog_auroc_within_sets": null,
+          "smoke_auroc": 0.8105200995486566,
+          "smoke_auroc_within_sets": 0.8105200995486566,
+          "smoke_recall": 0.7388535031847133,
+          "smoke_recall_strict": 0.6560509554140127
+        },
+        "hpwren_bg_test": {
+          "false_alarm_no_smoke": 0.08181818181818182,
+          "false_alarm_no_smoke_strict": 0.031818181818181815,
+          "false_smoke_on_fog": 0.0,
+          "false_smoke_on_fog_strict": 0.0,
+          "fog_auroc": 0.8637640449438202,
+          "fog_auroc_within_sets": 0.8637640449438202,
+          "smoke_auroc": null,
+          "smoke_auroc_within_sets": null,
+          "smoke_recall": null,
+          "smoke_recall_strict": null
+        }
+      },
+      "smoke_auroc": 0.8780023005476677,
+      "smoke_auroc_within_sets": 0.8105200995486566,
+      "smoke_recall": 0.7388535031847133,
+      "smoke_recall_strict": 0.6560509554140127,
+      "stacks_used": {
+        "head+tile+chg_max+chg_rz+fog_chg+fogd_chg": 8,
+        "head+tile+chg_max+chg_rz+ref_max+ref_rz+fog_chg+fogd_chg+fog_ref+fogd_ref+tileref": 520
+      },
+      "thresholds": {
+        "balanced": 0.31217722981239304,
+        "deploy": 0.23434461080975716,
+        "fog_veto": 0.95,
+        "strict": 0.35368209944235185
+      }
+    }
+  },
+  "sets": [
+    "figlib_test2:data/real/figlib_test2/real.csv:data/real/figlib_test2/clip.npz::data/real/figlib_test2/clip_fine.npz::data/real/figlib_test2/clip_ref.npz",
+    "hpwren_bg_test:data/real/hpwren_bg_test/real.csv:data/real/hpwren_bg_test/clip.npz::data/real/hpwren_bg_test/clip_fine.npz::data/real/hpwren_bg_test/clip_ref.npz"
+  ],
+  "status": "detector_scores"
+}
