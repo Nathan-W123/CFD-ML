@@ -58,8 +58,11 @@ def test_evaluate_fire_delay_and_false_alarms():
             {"p": np.full(41, 0.1), "off": off, "kind": "fire"},                     # never detected
             {"p": np.r_[np.full(30, 0.1), [0.9], np.full(29, 0.1)], "off": np.full(60, np.nan), "kind": "ordinary"}]
     r = evaluate(Rule("single", 0.5), seqs)
-    assert r["fires"] == 2 and r["fires_within_5"] == 0.5 and r["fires_within_30"] == 0.5
-    assert r["median_delay_detected"] == 3 and r["fires_detected"] == 0.5
+    # the false alarm at -18 starts an event; its 30-min hold-off holds back the fire's alarm until +12
+    assert r["fires"] == 2 and r["fires_within_5"] == 0.0 and r["fires_within_15"] == 0.5
+    assert r["median_delay_detected"] == 12 and r["fires_detected"] == 0.5
+    assert r["fires_firing_within_5"] == 0.5                  # counting any firing after the plume: +3
+    assert evaluate(Rule("single", 0.5), seqs, holdoff=10)["median_delay_detected"] == 3
     assert r["fire_pre_events"] == 1 and r["fire_pre_hours"] == pytest.approx(40 / 60)
     assert r["ordinary_events"] == 1 and r["ordinary_hours"] == pytest.approx(1.0)
     assert r["events_per_hour"] == pytest.approx(2 / (100 / 60))
@@ -127,6 +130,9 @@ def test_score_dense(tmp_path, monkeypatch):
             assert zoom is None and ref is not None and fine.shape[1:3] == (2, 24)
             return {"smoke": fine[:, 1, 0, 0].astype(float), "fog": np.zeros(len(E))}
 
+        def stack_inputs(self, head, E, motion, fine, zoom, ref):
+            return {"head": np.zeros(len(E)), "tileref": fine[:, 1, 0, 0].astype(float) - 0.5}
+
     monkeypatch.setattr(score_dense.Detector, "load", staticmethod(lambda d: Stub()))
     dense = tmp_path / "dense"
     dense.mkdir()
@@ -146,3 +152,16 @@ def test_score_dense(tmp_path, monkeypatch):
     z = np.load(out)
     assert len(z["seq"]) == 50 - 25 and z["off_end_s"][0] == 60 * (25 - 30)         # first window with a reference
     assert np.allclose(z["p_smoke"], fine[25:, 0, 0].astype(float), atol=1e-3) and z["fog_veto"][0] == 0.95
+    assert np.allclose(z["input_tileref"], z["p_smoke"] - 0.5) and len(z["input_head"]) == len(z["seq"])
+
+
+def test_change_gate():
+    p = np.array([0.9, 0.9, 0.9, 0.9])
+    g = np.array([-3.0, 1.0, np.nan, 2.0])
+    assert fires(Rule("single", 0.5, G=0.0), p, g).tolist() == [0, 1, 0, 1]
+    assert fires(Rule("persist", 0.5, k=2, m=2, G=0.0), p, g).tolist() == [0, 0, 0, 0]
+    with pytest.raises(ValueError):
+        fires(Rule("single", 0.5, G=0.0), p)
+    seqs = [{"p": p, "g": g, "off": np.array([-2.0, -1.0, 0.0, 1.0]), "kind": "fire"}]
+    r = evaluate(Rule("single", 0.5, G=0.0), seqs, holdoff=1)
+    assert r["fire_pre_events"] == 1 and r["median_delay_detected"] == 1

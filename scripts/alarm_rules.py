@@ -10,14 +10,20 @@ Scores come from scripts/score_dense.py (fog-vetoed windows count as P(smoke) = 
 
 tune: R0 (one window >= T) at the v3 deploy and strict thresholds is the baseline. Candidates: R1 (k of the
 last m windows >= T1, m 2-5, k 2..m, optionally or one window >= T2 > T1) and R2 (mean logit of the last m
-windows >= logit(T), m 2-6), thresholds from a grid of dev window-score quantiles (0.50 to 0.995). Among the
+windows >= logit(T), m 2-6), thresholds from a grid of dev window-score quantiles (0.30 to 0.995), and with
+--change-gate R3 (a window counts only if its change score, the reference tile head logit, is >= G; single and
+2-of-2, 2-of-3, 3-of-3; G from the change scores' 5 % ... 90 % quantiles). Among the
 candidates whose dev fire detection within 15 and within 30 minutes are both at least the baseline's, the one
 with the fewest dev false-alarm events per camera-hour (fire sequences' pre-plume footage and ordinary
 footage pooled) is chosen; ties go to the simpler rule (single < smooth < persist < persist with bypass, then
 smaller m), then to more fires within 15 minutes.
 
 evaluate: the baselines and the chosen rule on the given scores, each with 95 % intervals resampling camera
-mounts, and the paired difference chosen - baseline (deploy) on the same resampled mounts.
+mounts, and the paired difference chosen - baseline (deploy) on the same resampled mounts; the same with a
+10-minute hold-off as a sensitivity check.
+
+A fire counts as detected at the first alarm event starting after its first visible plume (events with a
+30-minute hold-off per camera; src/detector/temporal.py), so a false alarm shortly before a fire delays it.
 """
 
 import _bootstrap  # noqa: F401
@@ -34,8 +40,10 @@ from src.detector.temporal import Rule, evaluate
 from src.utils.io import write_json
 
 DEPLOY, STRICT = 0.234, 0.354            # artifacts_detector_v3 thresholds (deploy, strict)
-QUANTILES = np.r_[np.arange(0.50, 0.90, 0.02), np.arange(0.90, 0.9951, 0.005)]
+QUANTILES = np.r_[np.arange(0.30, 0.90, 0.02), np.arange(0.90, 0.9951, 0.005)]
+GATE_QUANTILES = np.r_[np.arange(0.05, 0.95, 0.05)]
 KEYS = ("fires_within_5", "fires_within_10", "fires_within_15", "fires_within_20", "fires_within_30",
+        "fires_firing_within_15", "fires_firing_within_30",
         "fires_detected", "median_delay_detected", "fire_pre_events_per_hour", "ordinary_events_per_hour",
         "events_per_hour", "fire_pre_window_share", "ordinary_window_share")
 
@@ -59,15 +67,29 @@ def load_sequences(paths):
             minute = np.round((t - t[0]) / 60.0).astype(int)
             grid_p = np.full(minute[-1] + 1, np.nan)
             grid_off = np.full(minute[-1] + 1, np.nan)
+            grid_g = np.full(minute[-1] + 1, np.nan)
             grid_p[minute] = p[i]
+            if "input_tileref" in z.files:
+                grid_g[minute] = z["input_tileref"][i]
             if kind == "fire":
                 grid_off[minute] = z["off_end_s"][i] / 60.0
-            seqs.append({"p": grid_p, "off": grid_off, "kind": kind, "mount": str(z["mount"][i[0]]), "seq": s})
+            seqs.append({"p": grid_p, "off": grid_off, "g": grid_g, "kind": kind, "mount": str(z["mount"][i[0]]),
+                         "seq": s})
     return seqs, np.concatenate(all_p)
 
 
-def candidates(grid):
+def change_scores(paths):
+    return np.concatenate([np.load(p)["input_tileref"] for p in paths if "input_tileref" in np.load(p).files])
+
+
+def candidates(grid, ggrid=()):
     yield Rule("single", DEPLOY)
+    for G in ggrid:
+        for T in grid:
+            yield Rule("single", float(T), G=float(G))
+            for m in range(2, 4):
+                for k in range(2, m + 1):
+                    yield Rule("persist", float(T), k=k, m=m, G=float(G))
     for m in range(2, 7):
         for T in grid:
             yield Rule("smooth", float(T), m=m)
@@ -81,20 +103,24 @@ def candidates(grid):
 
 
 def complexity(rule):
-    return ({"single": 0, "smooth": 1, "persist": 2}[rule.kind] + (rule.T2 is not None), rule.m, rule.k)
+    return ({"single": 0, "smooth": 1, "persist": 2}[rule.kind] + (rule.T2 is not None) + (rule.G is not None),
+            rule.m, rule.k)
 
 
 def rule_dict(rule):
-    return {"kind": rule.kind, "T": rule.T, "k": rule.k, "m": rule.m, "T2": rule.T2, "name": rule.name()}
+    return {"kind": rule.kind, "T": rule.T, "k": rule.k, "m": rule.m, "T2": rule.T2, "G": rule.G,
+            "name": rule.name()}
 
 
 def cmd_tune(args) -> int:
     seqs, all_p = load_sequences(args.scores)
     grid = np.unique(np.round(np.quantile(all_p, QUANTILES), 4))
+    ggrid = (np.unique(np.round(np.quantile(change_scores(args.scores), GATE_QUANTILES), 3)) if args.change_gate
+             else np.array([]))
     base = {name: evaluate(Rule("single", T), seqs) for name, T in (("R0_deploy", DEPLOY), ("R0_strict", STRICT))}
     b = base["R0_deploy"]
     feasible, n = [], 0
-    for rule in candidates(grid):
+    for rule in candidates(grid, ggrid):
         n += 1
         r = evaluate(rule, seqs)
         if r["fires_within_15"] >= b["fires_within_15"] and r["fires_within_30"] >= b["fires_within_30"]:
@@ -103,9 +129,13 @@ def cmd_tune(args) -> int:
     chosen_rule, chosen = feasible[0][3], feasible[0][4]
     best_by_kind = {}
     for f in feasible:
-        best_by_kind.setdefault(f[3].kind + ("+bypass" if f[3].T2 is not None else ""), {**f[4], **rule_dict(f[3])})
-    rep = {"status": "alarm_rule_tuning", "scores": args.scores, "grid": grid.tolist(), "candidates": n,
+        best_by_kind.setdefault(f[3].kind + ("+bypass" if f[3].T2 is not None else "")
+                                + ("+gate" if f[3].G is not None else ""), {**f[4], **rule_dict(f[3])})
+    rep = {"status": "alarm_rule_tuning", "scores": args.scores, "grid": grid.tolist(),
+           "change_gate_grid": ggrid.tolist(), "candidates": n,
            "feasible": len(feasible), "baselines": base, "chosen": {**chosen, **rule_dict(chosen_rule)},
+           "holdoff10": {"R0_deploy": evaluate(Rule("single", DEPLOY), seqs, holdoff=10),
+                         "chosen": evaluate(chosen_rule, seqs, holdoff=10)},
            "best_feasible_by_kind": best_by_kind,
            "sequences": {"fire": sum(s["kind"] == "fire" for s in seqs),
                          "ordinary": sum(s["kind"] == "ordinary" for s in seqs)}}
@@ -134,7 +164,7 @@ def cmd_evaluate(args) -> int:
     seqs, _ = load_sequences(args.scores)
     ch = json.loads(Path(args.chosen).read_text())["chosen"]
     rules = {"R0_deploy": Rule("single", DEPLOY), "R0_strict": Rule("single", STRICT),
-             "chosen": Rule(ch["kind"], ch["T"], k=ch["k"], m=ch["m"], T2=ch["T2"])}
+             "chosen": Rule(ch["kind"], ch["T"], k=ch["k"], m=ch["m"], T2=ch["T2"], G=ch.get("G"))}
     pick = lambda r: {k: r[k] for k in KEYS}  # noqa: E731
     rep = {"status": "alarm_rule_evaluation", "scores": args.scores, "rules": {k: r.name() for k, r in rules.items()},
            "results": {}, "ci95": {}, "paired_chosen_minus_deploy": {}}
@@ -147,6 +177,7 @@ def cmd_evaluate(args) -> int:
         return {k: (None if a[k] is None or c[k] is None else c[k] - a[k]) for k in KEYS}
 
     rep["paired_chosen_minus_deploy"] = {"value": diff(seqs), "ci95": _boot(diff, seqs, args.n_boot)}
+    rep["holdoff10"] = {name: evaluate(rule, seqs, holdoff=10) for name, rule in rules.items()}
     r0, c = rep["results"]["R0_deploy"], rep["results"]["chosen"]
     n_fires = max(c["fires"], 1)
     rep["targets"] = {
@@ -194,6 +225,11 @@ def render(rep) -> str:
         ci = pc.get(k)
         L.append(f"| {k} | {fmt(k, v) if v is not None else 'n/a'} | "
                  + (f"[{fmt(k, ci[0])}, {fmt(k, ci[1])}]" if ci else "") + " |")
+    if rep.get("holdoff10"):
+        L += ["", "With a 10-minute hold-off instead of 30 (sensitivity):", "", "| | " + " | ".join(names) + " |",
+              "|---|" + "---|" * len(names)]
+        for k in KEYS:
+            L.append(f"| {k} | " + " | ".join(fmt(k, rep["holdoff10"][n].get(k)) for n in names) + " |")
     L += ["", "Targets: " + ", ".join(f"{k} {'met' if v else 'not met'}" for k, v in rep["targets"].items()) + "."]
     return "\n".join(L) + "\n"
 
@@ -204,6 +240,8 @@ def main(argv=None) -> int:
     t = sub.add_parser("tune")
     t.add_argument("--scores", action="append", required=True)
     t.add_argument("--out", required=True)
+    t.add_argument("--change-gate", action="store_true",
+                   help="also R3: single / 2-3 window rules gated on the change score (reference tile head logit)")
     e = sub.add_parser("evaluate")
     e.add_argument("--chosen", required=True)
     e.add_argument("--scores", action="append", required=True)

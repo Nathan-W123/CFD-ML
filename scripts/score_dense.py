@@ -14,7 +14,8 @@ within 30 s of its nominal time); windows missing any of them are not scored. No
 detector's fallback stack without zoom). Fire sequences (FIgLib) keep each window's end time relative to the
 first visible plume (from the frame names); ordinary stretches keep only window ends inside the stretch's
 scored range. Written: an .npz of one row per scored window: seq, camera, mount, kind, t_end (unix),
-off_end_s (fire sequences; NaN otherwise), p_smoke, p_fog, and the fog veto of the model that scored it.
+off_end_s (fire sequences; NaN otherwise), p_smoke, p_fog, the fog veto of the model that scored it, and the
+smoke stack's inputs (input_head, input_tile, input_tileref, input_chg_max, ...).
 """
 
 import _bootstrap  # noqa: F401
@@ -66,6 +67,7 @@ def main(argv=None) -> int:
                 models[k] = Detector.load(Path(args.fold_models) / f"fold{k}")
             return models[k]
     cols = {k: [] for k in ("seq", "camera", "mount", "t_end", "off_end_s", "p_smoke", "p_fog", "fog_veto")}
+    inputs = {}
     skipped = {}
     files = sorted(Path(args.dense_dir).glob("*.npz"))
     for n, f in enumerate(files, 1):
@@ -87,6 +89,8 @@ def main(argv=None) -> int:
         x = assemble(z["coarse"], z["fine"], idx[ok])
         p = det.proba(x["E"], None, x["fine"], None, x["ref"])
         k = int(ok.sum())
+        for name, v in det.stack_inputs("smoke", x["E"], None, x["fine"], None, x["ref"]).items():
+            inputs.setdefault(name, []).extend(np.asarray(v, np.float64).tolist())
         cols["seq"] += [name] * k
         cols["camera"] += [m["camera"]] * k
         cols["mount"] += [m["mount"]] * k
@@ -100,7 +104,8 @@ def main(argv=None) -> int:
             print(f"  {n}/{len(files)} sequences", file=sys.stderr, flush=True)
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    np.savez_compressed(out, kind=np.array(args.kind), **{k: np.array(v) for k, v in cols.items()})
+    np.savez_compressed(out, kind=np.array(args.kind), **{k: np.array(v) for k, v in cols.items()},
+                        **{f"input_{k}": np.array(v) for k, v in inputs.items()})
     write_json(out.with_suffix(".json"), {"sequences": len(files) - len(skipped), "windows": len(cols["seq"]),
                                           "skipped": skipped, "kind": args.kind,
                                           "detector": args.detector or args.fold_models})
