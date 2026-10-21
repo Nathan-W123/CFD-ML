@@ -15,7 +15,13 @@ span that range plus the 25 minutes a window and its reference frame reach back.
 
 download: for every stretch and every minute of its span, the archived frame nearest that minute (within
 --max-offset-s), downscaled to --max-width px like the stored windows, saved as <out>/<stretch_id>/<unix>.jpg.
-Existing files are kept. Imagery courtesy of HPWREN (https://www.hpwren.ucsd.edu/).
+Existing files are kept.
+
+audit-sheets: for windows listed in a CSV (stretch_id, camera, t_end: the window's last frame), the window's 12
+frames again (the stretch frames are deleted once embedded) and a blind contact sheet of minutes 0, 4, 8 and 11
+(prepare_hpwren_fog.write_sheet) under an opaque id: <out>/_audit_sheets/<sheet_id>.jpg and
+<out>/audit_sheets.csv (sheet_id, stretch_id, camera, t_end).
+Imagery courtesy of HPWREN (https://www.hpwren.ucsd.edu/).
 """
 
 import _bootstrap  # noqa: F401
@@ -24,7 +30,9 @@ import argparse
 import concurrent.futures as cf
 import csv
 import datetime as dt
+import hashlib
 import json
+import shutil
 import random
 import sys
 from pathlib import Path
@@ -33,7 +41,7 @@ import cv2
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from prepare_hpwren_fog import IMAGE_URL, TZ, _downscale, _get, image_list  # noqa: E402
+from prepare_hpwren_fog import IMAGE_URL, TZ, _downscale, _get, image_list, write_sheet  # noqa: E402
 
 REACH_MIN = 25                      # a window ending at t uses frames from t - 11 and its reference at t - 25
 FIELDS = ["stretch_id", "camera", "camera_mount", "split", "window_id", "t_label_end", "t_first_end", "t_last_end"]
@@ -138,6 +146,49 @@ def cmd_download(args) -> int:
     return 0
 
 
+def _fetch_frame(out: Path, cam: str, target: int, max_offset: float, max_width: int, folder: Path):
+    local = dt.datetime.fromtimestamp(target, TZ)
+    day, q = f"{local:%Y%m%d}", 1 + local.hour // 3
+    unix = _nearest(image_list(out, cam, day, q), target, max_offset)
+    if unix is None:
+        raise ValueError(f"no archived frame near {local:%Y-%m-%d %H:%M}")
+    path = folder / f"{unix}.jpg"
+    if not path.is_file():
+        img = cv2.imdecode(np.frombuffer(_get(IMAGE_URL.format(cam=cam, day=day, q=q, name=f"{unix}.jpg")), np.uint8),
+                           cv2.IMREAD_COLOR)
+        if img is None:
+            raise ValueError("cannot decode a frame")
+        cv2.imwrite(str(path), _downscale(img, max_width), [cv2.IMWRITE_JPEG_QUALITY, 90])
+    return path.name
+
+
+def cmd_audit_sheets(args) -> int:
+    out = Path(args.out)
+    with open(args.windows, newline="", encoding="utf-8") as fh:
+        rows = list(csv.DictReader(fh))
+    index, failed = [], []
+    for r in rows:
+        t_end = int(float(r["t_end"]))
+        sid = hashlib.sha1(f"stretch-audit:{r['stretch_id']}:{t_end}".encode()).hexdigest()[:12]
+        tmp = out / "_audit_frames" / sid
+        tmp.mkdir(parents=True, exist_ok=True)
+        try:
+            files = [_fetch_frame(out, r["camera"], t_end - 60 * (11 - k), args.max_offset_s, args.max_width, tmp)
+                     for k in range(12)]
+            write_sheet(tmp, files, out / "_audit_sheets" / f"{sid}.jpg")
+            index.append({"sheet_id": sid, "stretch_id": r["stretch_id"], "camera": r["camera"], "t_end": t_end})
+        except Exception as exc:  # noqa: BLE001 - listed, not fatal
+            failed.append({"stretch_id": r["stretch_id"], "t_end": t_end, "reason": str(exc)})
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+    with open(out / "audit_sheets.csv", "w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=["sheet_id", "stretch_id", "camera", "t_end"])
+        w.writeheader()
+        w.writerows(index)
+    print(json.dumps({"sheets": len(index), "failed": failed}))
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -155,8 +206,13 @@ def main(argv=None) -> int:
     d.add_argument("--max-offset-s", type=float, default=30.0)
     d.add_argument("--max-width", type=int, default=1024)
     d.add_argument("--only", help="file with the stretch ids to download")
+    a = sub.add_parser("audit-sheets")
+    a.add_argument("--out", required=True)
+    a.add_argument("--windows", required=True, help="CSV with stretch_id, camera, t_end")
+    a.add_argument("--max-offset-s", type=float, default=30.0)
+    a.add_argument("--max-width", type=int, default=1024)
     args = ap.parse_args(argv)
-    return cmd_select(args) if args.cmd == "select" else cmd_download(args)
+    return {"select": cmd_select, "download": cmd_download, "audit-sheets": cmd_audit_sheets}[args.cmd](args)
 
 
 if __name__ == "__main__":
