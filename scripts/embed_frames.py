@@ -10,7 +10,8 @@ grid, "fine", 24 crops). A window ending at any frame is then assembled from the
 twice (src/detector/dense.py). Written per sequence: <out-dir>/<folder name>.npz with unix (F,), offset_s (F,)
 (0 where the file name has no offset), coarse (F, 7, 512) and fine (F, 24, 512) float16. Existing outputs are
 kept (--force recomputes); --delete-frames removes a folder's frames once its embeddings are written (for
-streamed downloads). Frames are read and cropped in a background thread while CLIP runs.
+streamed downloads). Frames are read and cropped in a background thread while CLIP runs; a sequence whose
+output appears meanwhile (another worker, e.g. on the same list in reverse) is skipped.
 """
 
 import _bootstrap  # noqa: F401
@@ -64,6 +65,8 @@ def main(argv=None) -> int:
 
     def reader():
         for folder in todo:
+            if not args.force and (out_dir / f"{folder.name}.npz").is_file():
+                continue                       # written meanwhile by another worker on the same list
             q.put(("start", folder))
             for p in sequence_frames(folder):
                 img = cv2.imread(str(p), cv2.IMREAD_COLOR)
