@@ -36,6 +36,9 @@ Per head (smoke, fog), on the dev rows with a known label:
    src/detector/features.py, the first whose inputs a window has), whose
    own out-of-fold predictions (a second grouped cross-validation) are the
    head's; the v1 stack (window + tile heads) is fitted and reported too;
+   --fixed-from reuses an earlier run's choices instead (one candidate each),
+   and --holdout-mounts leaves those camera mounts out entirely (fold models
+   for scoring the held-out mounts' other windows);
 2. thresholds from the out-of-fold predictions of the chosen configuration
    (never from the refitted model's own training predictions): "balanced"
    (maximum Youden J) for both heads; for smoke also "deploy": the lowest
@@ -96,6 +99,7 @@ GROUP_SETS = {"fog": (("full",), ("sims",), ("full", "sims"), ("full", "tiles", 
 C_GRID = (0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1.0)
 TILE_C_GRID = (0.0001, 0.0003, 0.001, 0.003)
 SELECT_ON = "within"            # model selection maximises the within-set AUROC (set by --select-on)
+FIXED = {}                      # --fixed-from: head -> (groups, C) and side-head kind -> C, instead of the grids
 STACK_C = 1.0
 GOALS = {"fog_auroc": 0.90, "smoke_auroc": 0.85, "max_false_smoke_on_fog": 0.05, "min_smoke_recall": 0.50}
 
@@ -227,7 +231,8 @@ def select(rows, head, T):
     g = np.array([r["mount"] for r in rows])
     sets = np.array([r["set"] for r in rows])
     scores, best = [], None
-    for groups, C in itertools.product(GROUP_SETS[head], C_GRID):
+    grid = [FIXED[head]] if head in FIXED else itertools.product(GROUP_SETS[head], C_GRID)
+    for groups, C in grid:
         X = _features(rows, T, groups)
         if X is None:
             continue
@@ -407,13 +412,27 @@ def main(argv=None) -> int:
                          "'tileref' in the stacks that use the reference)")
     ap.add_argument("--zoom-selector",
                     help="detector whose tile head selected the stored zoom tiles (kept as the zoom selector)")
+    ap.add_argument("--fixed-from", help="a report JSON of this script: reuse its selected feature groups and C "
+                                         "values instead of selecting them (refits, e.g. per fold)")
+    ap.add_argument("--holdout-mounts", help="text file of camera mounts whose windows are left out entirely")
     ap.add_argument("--final", action="store_true", help="evaluate on the held-out test_iid cameras (once)")
     ap.add_argument("--save-oof", help="also write the dev out-of-fold probabilities and stack inputs (.npz)")
     args = ap.parse_args(argv)
     global SELECT_ON
     SELECT_ON = args.select_on
+    FIXED.clear()
+    if args.fixed_from:
+        sel = json.loads(Path(args.fixed_from).read_text())["selection"]
+        for h, sh in sel.items():
+            FIXED[h] = (tuple(sh["best"]["groups"]), float(sh["best"]["C"]))
+            for kind in ("tile", "zoom", "tileref"):
+                if kind in sh:
+                    FIXED[kind] = float(sh[kind]["C"])
 
     rows = load_sets(args.sets)
+    if args.holdout_mounts:
+        held = set(Path(args.holdout_mounts).read_text().split())
+        rows = [r for r in rows if r["mount"] not in held]
     if args.boxes and any(r["zoom"] is not None for r in rows) and not args.zoom_selector:
         ap.error("--boxes retrains the tile head, so the zoom crops' selector must be kept: give --zoom-selector "
                  "(the detector whose tile head chose the stored zoom tiles)")
@@ -443,7 +462,7 @@ def main(argv=None) -> int:
                 out-of-fold logits (NaN outside m)."""
                 best_side = None
                 side_scores = []
-                for C in TILE_C_GRID:
+                for C in ((FIXED[kind],) if kind in FIXED else TILE_C_GRID):
                     zt = grouped_oof_tile(TI, y[m], g[m], C, inst=inst, balance=args.box_balance)
                     sc, crit = cv_scores(zt, y[m], sets[m])
                     side_scores.append({"C": C, **sc})
