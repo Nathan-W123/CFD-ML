@@ -82,18 +82,18 @@ def change_scores(paths):
     return np.concatenate([np.load(p)["input_tileref"] for p in paths if "input_tileref" in np.load(p).files])
 
 
-def candidates(grid, ggrid=()):
+def candidates(grid, ggrid=(), families=("smooth", "persist", "gate")):
     yield Rule("single", DEPLOY)
-    for G in ggrid:
+    for G in (ggrid if "gate" in families else ()):
         for T in grid:
             yield Rule("single", float(T), G=float(G))
             for m in range(2, 4):
                 for k in range(2, m + 1):
                     yield Rule("persist", float(T), k=k, m=m, G=float(G))
-    for m in range(2, 7):
+    for m in (range(2, 7) if "smooth" in families else ()):
         for T in grid:
             yield Rule("smooth", float(T), m=m)
-    for m in range(2, 6):
+    for m in (range(2, 6) if "persist" in families else ()):
         for k in range(2, m + 1):
             for T1 in grid:
                 yield Rule("persist", float(T1), k=k, m=m)
@@ -120,7 +120,7 @@ def cmd_tune(args) -> int:
     base = {name: evaluate(Rule("single", T), seqs) for name, T in (("R0_deploy", DEPLOY), ("R0_strict", STRICT))}
     b = base["R0_deploy"]
     feasible, n = [], 0
-    for rule in candidates(grid, ggrid):
+    for rule in candidates(grid, ggrid, args.families.split(",")):
         n += 1
         r = evaluate(rule, seqs)
         if r["fires_within_15"] >= b["fires_within_15"] and r["fires_within_30"] >= b["fires_within_30"]:
@@ -142,6 +142,22 @@ def cmd_tune(args) -> int:
     write_json(Path(args.out), rep)
     print(json.dumps({"chosen": rep["chosen"]["name"], **{k: rep["chosen"][k] for k in KEYS},
                       "baseline": {k: b[k] for k in KEYS}}, default=float, indent=1))
+    return 0
+
+
+def cmd_merge(args) -> int:
+    """The best of several tuning runs on the same dev scores (each searched some families)."""
+    reps = [json.loads(Path(p).read_text()) for p in args.tuned]
+    if len({json.dumps(r["baselines"]["R0_deploy"], sort_keys=True) for r in reps}) != 1:
+        raise SystemExit("the tuning runs were not on the same dev scores")
+    best = min(reps, key=lambda r: (r["chosen"]["events_per_hour"], complexity(Rule(
+        r["chosen"]["kind"], r["chosen"]["T"], k=r["chosen"]["k"], m=r["chosen"]["m"], T2=r["chosen"]["T2"],
+        G=r["chosen"].get("G"))), -r["chosen"]["fires_within_15"]))
+    out = {**best, "merged_from": args.tuned, "candidates": sum(r["candidates"] for r in reps),
+           "feasible": sum(r["feasible"] for r in reps),
+           "best_feasible_by_kind": {k: v for r in reps for k, v in r["best_feasible_by_kind"].items()}}
+    write_json(Path(args.out), out)
+    print(json.dumps({"chosen": out["chosen"]["name"], "events_per_hour": out["chosen"]["events_per_hour"]}))
     return 0
 
 
@@ -240,15 +256,20 @@ def main(argv=None) -> int:
     t = sub.add_parser("tune")
     t.add_argument("--scores", action="append", required=True)
     t.add_argument("--out", required=True)
+    t.add_argument("--families", default="smooth,persist,gate",
+                   help="candidate families to search (smooth, persist, gate); runs can be merged")
     t.add_argument("--change-gate", action="store_true",
                    help="also R3: single / 2-3 window rules gated on the change score (reference tile head logit)")
+    g = sub.add_parser("merge")
+    g.add_argument("--tuned", action="append", required=True)
+    g.add_argument("--out", required=True)
     e = sub.add_parser("evaluate")
     e.add_argument("--chosen", required=True)
     e.add_argument("--scores", action="append", required=True)
     e.add_argument("--out", required=True)
     e.add_argument("--n-boot", type=int, default=1000)
     args = ap.parse_args(argv)
-    return cmd_tune(args) if args.cmd == "tune" else cmd_evaluate(args)
+    return {"tune": cmd_tune, "merge": cmd_merge, "evaluate": cmd_evaluate}[args.cmd](args)
 
 
 if __name__ == "__main__":
