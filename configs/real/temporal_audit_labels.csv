@@ -1,0 +1,144 @@
+sheet_id,stretch_id,t_end,smoke,fog,quality,smoke_votes,flags
+0216a81186c4,stretch-chino-e-mobo-c-20260805-1600,1785970282,0,0,ok,0 0,R0_deploy_event R0_deploy_fires
+027b26787fc5,stretch-sm-w-mobo-c-20260922-1000,1790096723,0,0,ok,0 0,R0_deploy_fires chosen_fires
+02d957fc5f32,stretch-wilson-w-mobo-c-20260925-1030,1790357396,0,0,ok,0 0,R0_deploy_fires chosen_fires
+0320c9799ff7,stretch-bi-e-mobo-c-20260922-1300,1790108647,0,0,ok,0 0,R0_deploy_event R0_deploy_fires chosen_event chosen_fires
+0621d2870f4f,stretch-sjh-n-mobo-c-20260808-1100,1786212438,0,0,ok,0 0,R0_deploy_event R0_deploy_fires
+07999095353c,stretch-marion-e-mobo-c-20260927-1430,1790544400,0,0,ok,0 0,R0_deploy_event R0_deploy_fires
+0969210fd10c,stretch-chino-e-mobo-c-20260805-1600,1785971842,,0,ok,? ? ?,R0_deploy_fires chosen_fires
+0aceaa20262a,stretch-wilson-w-mobo-c-20260929-1530,1790721896,0,0,ok,0 0 0,R0_deploy_fires chosen_fires
+0b3d0c9bf091,stretch-tdlln-n-mobo-c-20260929-1630,1790725541,0,0,ok,0 0,R0_deploy_fires chosen_fires
+0e0851bc5a04,stretch-wilson-w-mobo-c-20260929-1530,1790722496,0,0,ok,0 0 0,R0_deploy_fires chosen_event chosen_fires
+119190f8cc82,stretch-lp-w-mobo-c-20260926-1200,1790450316,0,0,ok,0 0,R0_deploy_fires chosen_fires
+15903c41ae08,stretch-wilson-w-mobo-c-20260929-1530,1790721476,0,0,ok,0 0 0,R0_deploy_fires chosen_fires
+162d3b1a4334,stretch-tdlln-n-mobo-c-20260929-1630,1790725481,0,0,ok,0 0,R0_deploy_fires chosen_fires
+169df2da28b8,stretch-wilson-w-mobo-c-20260925-1030,1790357996,0,0,ok,0 0,R0_deploy_fires chosen_fires
+16afd9e1dcd1,stretch-wilson-w-mobo-c-20260929-1530,1790720996,0,0,ok,0 0 0,R0_deploy_fires chosen_fires
+1756e62450c5,stretch-tdlln-n-mobo-c-20260929-1630,1790724701,0,0,ok,0 0,R0_deploy_fires chosen_fires
+1763c52de107,stretch-lp-w-mobo-c-20260926-1200,1790448996,,0,ok,? ? ?,R0_deploy_event R0_deploy_fires chosen_event chosen_fires
+1cc2414dd0d4,stretch-chino-e-mobo-c-20260929-1330,1790713282,0,0,ok,0 0,R0_deploy_event R0_deploy_fires
+1d0c9d1be192,stretch-chino-e-mobo-c-20260929-1330,1790715382,0,0,ok,0 0,R0_deploy_fires chosen_fires
+1db99d4807e9,stretch-wilson-w-mobo-c-20260925-1030,1790356976,0,0,ok,0 0,R0_deploy_fires chosen_fires
+1f186dcc505a,stretch-wilson-w-mobo-c-20260929-1530,1790722016,0,0,ok,0 0 0,R0_deploy_fires chosen_fires
+20ddbad623f4,stretch-tdlln-n-mobo-c-20260929-1630,1790724581,0,0,ok,0 0,R0_deploy_event R0_deploy_fires chosen_event chosen_fires
+2525d6daf6d5,stretch-chino-e-mobo-c-20260929-1330,1790714122,0,0,ok,0 0,R0_deploy_fires chosen_fires
+253b269c47b0,stretch-wilson-w-mobo-c-20260929-1530,1790721956,0,0,glare,0 0,R0_deploy_fires chosen_fires
+261094483f02,stretch-wilson-w-mobo-c-20260925-1030,1790356856,0,0,ok,0 0,R0_deploy_event R0_deploy_fires chosen_event chosen_fires
+28fa69e2624e,stretch-wilson-w-mobo-c-20260929-1530,1790721836,0,0,ok,0 0,R0_deploy_fires chosen_fires
+2913dd693fbd,stretch-smer-tcs3-mobo-c-20260812-1300,1786565607,0,0,ok,0 0,R0_deploy_fires chosen_fires
+2cd87788660d,stretch-wilson-w-mobo-c-20260925-1030,1790357216,0,0,ok,0 0,R0_deploy_fires chosen_fires
+2d33449da269,stretch-wilson-w-mobo-c-20260922-1430,1790113558,0,0,ok,0 0,R0_deploy_fires chosen_fires
+2d97262114b6,stretch-wilson-w-mobo-c-20260922-1430,1790112898,0,0,ok,0 0,R0_deploy_fires chosen_event chosen_fires
+3086f612921d,stretch-smer-tcs3-mobo-c-20260928-1430,1790630726,0,0,ok,0 0,R0_deploy_event R0_deploy_fires
+309d1c5895fb,stretch-sm-s-mobo-c-20260909-1100,1788978502,0,0,ok,0 0,R0_deploy_event R0_deploy_fires
+311db01adc60,stretch-tdlln-n-mobo-c-20260909-1330,1788985243,0,0,ok,0 0,R0_deploy_event R0_deploy_fires
+3399752f2270,stretch-sm-w-mobo-c-20260922-1000,1790096843,0,0,ok,0 0,R0_deploy_fires chosen_fires
+343042d90479,stretch-bh-e-mobo-c-20260928-0830,1790609283,0,,ok,0 0,R0_deploy_fires chosen_fires
+34b7b62cbd48,stretch-wilson-w-mobo-c-20260929-1530,1790721536,0,0,ok,0 0,R0_deploy_fires chosen_fires
+37b22667a8fc,stretch-wilson-w-mobo-c-20260925-1030,1790357576,0,0,ok,0 0,R0_deploy_fires chosen_fires
+380a4cfac7fb,stretch-wilson-w-mobo-c-20260929-1530,1790722136,0,0,ok,0 0,R0_deploy_fires chosen_fires
+382a81a84b2c,stretch-wilson-w-mobo-c-20260925-1030,1790358776,0,0,ok,0 0,R0_deploy_fires chosen_fires
+394d38c3cd08,stretch-wilson-w-mobo-c-20260925-1030,1790357756,0,0,ok,0 0,R0_deploy_fires chosen_fires
+3cb204a468b0,stretch-lp-w-mobo-c-20260926-1200,1790449116,,0,ok,? 1 ?,R0_deploy_fires chosen_fires
+3d9af6b1864f,stretch-chino-e-mobo-c-20260929-1330,1790714422,0,0,ok,0 0,R0_deploy_fires chosen_fires
+4386ee30f665,stretch-wilson-w-mobo-c-20260929-1530,1790721416,0,0,ok,0 0,R0_deploy_fires chosen_fires
+44641c4dfccc,stretch-om-w-mobo-c-20260829-1530,1788044096,0,0,ok,0 0,R0_deploy_event R0_deploy_fires
+46b16ef34201,stretch-smer-tcs3-mobo-c-20260812-1300,1786565847,0,0,ok,0 0,R0_deploy_fires chosen_fires
+478b8f564464,stretch-wilson-w-mobo-c-20260929-1530,1790720936,0,0,ok,0 0,R0_deploy_fires chosen_fires
+489fc9b56908,stretch-chino-e-mobo-c-20260929-1330,1790714542,0,0,ok,0 0,R0_deploy_fires chosen_fires
+49e0c0f9c41c,stretch-wilson-w-mobo-c-20260929-1530,1790720756,0,0,ok,0 0 0,R0_deploy_fires chosen_fires
+4b31f970ca5f,stretch-bh-e-mobo-c-20260928-0830,1790608863,0,,ok,0 0,R0_deploy_event R0_deploy_fires chosen_event chosen_fires
+4bdd75bd9337,stretch-chino-e-mobo-c-20260929-1330,1790714062,0,0,ok,0 0,R0_deploy_fires chosen_event chosen_fires
+4c4f14bf6651,stretch-wilson-w-mobo-c-20260922-1430,1790114038,0,0,ok,0 0 0,R0_deploy_event R0_deploy_fires chosen_fires
+4c690ea06d80,stretch-wilson-w-mobo-c-20260929-1530,1790721056,0,0,ok,0 0,R0_deploy_fires chosen_fires
+4d0f42e3dd56,stretch-wilson-w-mobo-c-20260929-1530,1790721776,0,0,ok,0 0,R0_deploy_fires chosen_fires
+4e908e06fa38,stretch-wilson-w-mobo-c-20260925-1030,1790358476,0,0,ok,0 0,R0_deploy_fires chosen_fires
+5291465313e1,stretch-wilson-w-mobo-c-20260929-1530,1790721716,0,0,ok,0 0 0,R0_deploy_fires chosen_fires
+54c1262772bc,stretch-wilson-w-mobo-c-20260922-1430,1790114218,0,0,ok,0 0,R0_deploy_fires chosen_fires
+57f050927e9b,stretch-wilson-w-mobo-c-20260929-1530,1790721176,0,0,ok,0 0 0,R0_deploy_fires chosen_fires
+5872bb084d99,stretch-lp-w-mobo-c-20260926-1200,1790449956,0,0,ok,0 0,R0_deploy_fires chosen_fires
+5891d94a7a37,stretch-wilson-w-mobo-c-20260925-1030,1790357276,0,0,ok,0 0,R0_deploy_fires chosen_fires
+5e96ec51fc2e,stretch-wilson-w-mobo-c-20260929-1530,1790721116,0,0,ok,0 0,R0_deploy_fires chosen_fires
+6378c674b335,stretch-wilson-w-mobo-c-20260929-1530,1790722196,0,0,ok,0 0 0,R0_deploy_fires chosen_fires
+643479157612,stretch-wilson-w-mobo-c-20260922-1430,1790114278,0,0,ok,0 0,R0_deploy_fires chosen_fires
+6436db6affc1,stretch-wilson-w-mobo-c-20260925-1030,1790358896,0,0,ok,0 0,R0_deploy_fires chosen_fires
+64c37e47d304,stretch-wilson-w-mobo-c-20260922-1430,1790113018,0,0,ok,0 0,R0_deploy_fires chosen_fires
+65672e8b974a,stretch-wilson-w-mobo-c-20260925-1030,1790357636,0,0,ok,0 0,R0_deploy_fires chosen_fires
+698b438e3187,stretch-sm-s-mobo-c-20261012-1500,1791842661,0,0,ok,0 0,R0_deploy_event R0_deploy_fires chosen_event chosen_fires
+6aa2ee7f9d5a,stretch-lp-w-mobo-c-20260926-1200,1790450076,0,0,ok,0 0,R0_deploy_fires chosen_fires
+6d2c55396f40,stretch-bh-e-mobo-c-20260928-0830,1790608923,0,0,ok,0 0,R0_deploy_fires chosen_fires
+6e1cb4970aea,stretch-tdlln-n-mobo-c-20260929-1630,1790725421,0,0,ok,0 0,R0_deploy_fires chosen_fires
+71e05bd6925b,stretch-chino-e-mobo-c-20260929-1330,1790714362,0,0,ok,0 0,R0_deploy_fires chosen_fires
+76144096835a,stretch-tdlln-n-mobo-c-20260929-1630,1790724881,0,0,ok,0 0,R0_deploy_fires chosen_fires
+76bc903b36db,stretch-wilson-w-mobo-c-20260922-1430,1790114398,0,0,ok,0 0,R0_deploy_fires chosen_fires
+78f705e33f98,stretch-marion-e-mobo-c-20260927-1430,1790546260,0,0,ok,0 0,R0_deploy_event R0_deploy_fires
+794589d7ffc7,stretch-wilson-w-mobo-c-20260925-1030,1790358836,0,0,ok,0 0,R0_deploy_fires chosen_fires
+7c7d35c00cec,stretch-tdlln-n-mobo-c-20260929-1630,1790725181,0,0,ok,0 0,R0_deploy_fires chosen_fires
+823afc248e55,stretch-bh-e-mobo-c-20260928-0830,1790609823,,1,ok,? 0 ?,R0_deploy_fires chosen_fires
+8b5f696b4627,stretch-wilson-w-mobo-c-20260929-1530,1790721356,0,0,ok,0 0,R0_deploy_fires chosen_fires
+8fbb51295013,stretch-chino-e-mobo-c-20260929-1330,1790714302,0,0,ok,0 0,R0_deploy_fires chosen_fires
+8ff97d894e55,stretch-wilson-w-mobo-c-20260925-1030,1790357456,0,0,ok,0 0,R0_deploy_fires chosen_fires
+964de1aea83c,stretch-sjh-n-mobo-c-20260811-0930,1786467438,0,0,ok,0 0,R0_deploy_event R0_deploy_fires chosen_event chosen_fires
+964f8ad65313,stretch-starr-e-mobo-c-20260929-1130,1790708314,0,0,ok,0 0,R0_deploy_event R0_deploy_fires
+9655b3c95b64,stretch-chino-e-mobo-c-20260929-1330,1790714902,0,0,ok,0 0,R0_deploy_fires chosen_fires
+99bca2ef3b26,stretch-sm-w-mobo-c-20260922-1000,1790096483,0,0,ok,0 0,R0_deploy_fires chosen_event chosen_fires
+9d0fd3d6b1ec,stretch-wilson-w-mobo-c-20260925-1030,1790358956,0,0,ok,0 0,R0_deploy_fires chosen_fires
+9e798c1dd331,stretch-wilson-w-mobo-c-20260929-1530,1790721296,0,0,ok,0 0,R0_deploy_fires chosen_fires
+9e97b4187b9b,stretch-smer-tcs3-mobo-c-20260812-1300,1786565187,0,0,ok,0 0,R0_deploy_fires chosen_fires
+9f38add082a1,stretch-wilson-w-mobo-c-20260925-1030,1790357816,0,0,ok,0 0,R0_deploy_fires chosen_fires
+a776b7d41105,stretch-bh-e-mobo-c-20260928-0830,1790608983,0,0,ok,0 0,R0_deploy_fires chosen_fires
+a7f062ec9f64,stretch-smer-tcs3-mobo-c-20260928-1430,1790632526,0,0,ok,0 0,R0_deploy_event R0_deploy_fires chosen_event chosen_fires
+a994b07597b9,stretch-chino-e-mobo-c-20260929-1330,1790714782,0,0,ok,0 0,R0_deploy_fires chosen_fires
+ae1244310ca8,stretch-bh-e-mobo-c-20260928-0830,1790609223,0,0,ok,0 0,R0_deploy_fires chosen_fires
+af14973f7cba,stretch-tdlln-n-mobo-c-20260914-1000,1789406501,0,0,ok,0 0,R0_deploy_event R0_deploy_fires chosen_event chosen_fires
+aff6a08bedb2,stretch-sm-w-mobo-c-20260922-1000,1790096363,0,0,ok,0 0,R0_deploy_event R0_deploy_fires
+b0479ae32e21,stretch-bi-e-mobo-c-20260922-1300,1790108827,0,0,ok,0 0,R0_deploy_fires chosen_fires
+b0683f83fa52,stretch-wilson-w-mobo-c-20260922-1430,1790113618,0,0,ok,0 0,R0_deploy_fires chosen_fires
+b1818495e034,stretch-wilson-w-mobo-c-20260929-1530,1790720516,0,0,ok,0 0,R0_deploy_fires chosen_fires
+b3a112034b50,stretch-chino-e-mobo-c-20260929-1330,1790714242,0,0,ok,0 0,R0_deploy_fires chosen_fires
+b3b876a5d4c9,stretch-wilson-w-mobo-c-20260929-1530,1790720816,0,0,ok,0 0,R0_deploy_fires chosen_fires
+b4155e55a1e3,stretch-lp-w-mobo-c-20260926-1200,1790450916,0,0,ok,0 0,R0_deploy_event R0_deploy_fires
+b527099ded28,stretch-wilson-w-mobo-c-20260925-1030,1790357876,0,0,ok,0 0,R0_deploy_fires chosen_fires
+b63bbde41739,stretch-wilson-w-mobo-c-20260925-1030,1790358536,0,0,ok,0 0,R0_deploy_fires chosen_fires
+b667246406f9,stretch-chino-e-mobo-c-20260805-1600,1785972262,,0,ok,? 0 ?,R0_deploy_event R0_deploy_fires
+baacf301ecb7,stretch-bh-e-mobo-c-20260928-0830,1790610183,0,,ok,0 0,R0_deploy_fires chosen_fires
+bb07d6bc3a40,stretch-wilson-w-mobo-c-20260925-1030,1790357516,0,0,ok,0 0,R0_deploy_fires chosen_fires
+bdc227ea1bde,stretch-bh-e-mobo-c-20260928-0830,1790609343,,,ok,? 0 ?,R0_deploy_fires chosen_fires
+be1a1a104b7a,stretch-wilson-w-mobo-c-20260922-1430,1790112118,0,0,ok,0 0,R0_deploy_event R0_deploy_fires
+be31c60f6411,stretch-chino-e-mobo-c-20260929-1330,1790714182,0,0,ok,0 0,R0_deploy_fires chosen_fires
+bff8587e08b5,stretch-wilson-w-mobo-c-20260925-1030,1790357336,0,0,ok,0 0,R0_deploy_fires chosen_fires
+c0825172875a,stretch-wilson-w-mobo-c-20260925-1030,1790359196,0,0,ok,0 0,R0_deploy_fires chosen_fires
+c2318bf4c794,stretch-wilson-w-mobo-c-20260925-1030,1790357156,0,0,ok,0 0,R0_deploy_fires chosen_fires
+c393926c3ed8,stretch-wilson-w-mobo-c-20260929-1530,1790721656,0,0,ok,0 0 0,R0_deploy_fires chosen_fires
+c779a7cd00cf,stretch-wilson-w-mobo-c-20260929-1530,1790720636,0,0,ok,0 0 0,R0_deploy_fires chosen_fires
+c77c888da63d,stretch-wilson-w-mobo-c-20260929-1530,1790722256,0,0,ok,0 0,R0_deploy_event R0_deploy_fires
+c8fe4d446e3a,stretch-smer-tcs3-mobo-c-20260812-1300,1786564647,0,0,ok,0 0,R0_deploy_fires chosen_fires
+cbe7cf1aae34,stretch-chino-e-mobo-c-20260929-1330,1790715082,0,0,ok,0 0,R0_deploy_event R0_deploy_fires
+cd4778037a21,stretch-chino-e-mobo-c-20260820-1030,1787246482,0,0,ok,0 0,R0_deploy_event R0_deploy_fires chosen_event chosen_fires
+ced0e7dbb813,stretch-wilson-w-mobo-c-20260929-1530,1790720456,0,0,ok,0 0 0,R0_deploy_event R0_deploy_fires chosen_event chosen_fires
+cf2b8000487e,stretch-wilson-w-mobo-c-20260925-1030,1790358236,0,0,ok,0 0,R0_deploy_fires chosen_fires
+cf99dcfa4c3a,stretch-chino-e-mobo-c-20260929-1330,1790715142,0,0,ok,0 0,R0_deploy_fires chosen_fires
+d6eb089f767a,stretch-smer-tcs3-mobo-c-20260812-1300,1786564467,0,0,ok,0 0,R0_deploy_event R0_deploy_fires chosen_event chosen_fires
+d73299e3f1e9,stretch-chino-e-mobo-c-20260805-1600,1785970822,0,0,ok,0 0,R0_deploy_fires chosen_event chosen_fires
+da1985e9d314,stretch-wilson-w-mobo-c-20260929-1530,1790721236,0,0,ok,0 0 0,R0_deploy_fires chosen_fires
+db7e6a72eacf,stretch-tdlln-n-mobo-c-20260929-1630,1790725721,0,0,ok,0 0,R0_deploy_fires chosen_fires
+dd0ef4cbcbe0,stretch-wilson-w-mobo-c-20260925-1030,1790358296,0,0,ok,0 0,R0_deploy_fires chosen_fires
+e185d532252b,stretch-chino-e-mobo-c-20260805-1600,1785971482,0,0,ok,0 0,R0_deploy_fires chosen_fires
+e6e5fcc05e7c,stretch-wilson-w-mobo-c-20260925-1030,1790357936,0,0,ok,0 0,R0_deploy_fires chosen_fires
+e7fb58fd45b5,stretch-chino-e-mobo-c-20260929-1330,1790714842,0,0,ok,0 0,R0_deploy_fires chosen_fires
+e81c14bbf823,stretch-wilson-w-mobo-c-20260925-1030,1790358176,0,0,ok,0 0,R0_deploy_fires chosen_fires
+eac0ceccec34,stretch-wilson-w-mobo-c-20260929-1530,1790721596,0,0,ok,0 0,R0_deploy_fires chosen_fires
+eb01e2282e52,stretch-bh-e-mobo-c-20260928-0830,1790609703,0,,ok,0 0,R0_deploy_fires chosen_fires
+eb9a36c77202,stretch-sm-w-mobo-c-20260922-1000,1790097383,0,0,ok,0 0,R0_deploy_fires chosen_fires
+ebba0a781703,stretch-smer-tcs3-mobo-c-20260812-1300,1786566267,0,0,ok,0 0,R0_deploy_event R0_deploy_fires
+ee83481c65b5,stretch-wilson-w-mobo-c-20260925-1030,1790358596,0,0,ok,0 0,R0_deploy_fires chosen_fires
+f02b45ba4158,stretch-wilson-w-mobo-c-20260925-1030,1790357696,0,0,ok,0 0,R0_deploy_fires chosen_fires
+f07a28d523cf,stretch-wilson-w-mobo-c-20260925-1030,1790358056,0,0,ok,0 0,R0_deploy_fires chosen_fires
+f2543c0e0f10,stretch-sjh-n-mobo-c-20260808-1100,1786212738,0,0,ok,0 0,R0_deploy_fires chosen_event chosen_fires
+f2e6e75f43eb,stretch-bh-e-mobo-c-20260928-0830,1790610723,0,0,ok,0 0,R0_deploy_event R0_deploy_fires chosen_event chosen_fires
+f3b2feb1194b,stretch-69bravo-e-mobo-c-20260930-1300,1790799781,0,0,ok,0 0,R0_deploy_event R0_deploy_fires
+f3c3e5b3efdc,stretch-bh-e-mobo-c-20260928-0830,1790609883,0,,ok,0 0,R0_deploy_fires chosen_fires
+f851f26c1adf,stretch-69bravo-e-mobo-c-20260930-1300,1790797981,0,0,ok,0 0,R0_deploy_event R0_deploy_fires
+faccd809425a,stretch-wilson-w-mobo-c-20260925-1030,1790358656,0,0,ok,0 0,R0_deploy_event R0_deploy_fires chosen_event chosen_fires
+fb0312689c11,stretch-bh-e-mobo-c-20260928-0830,1790609163,,,ok,? ? ?,R0_deploy_fires chosen_fires
+ff8487cf8920,stretch-bh-e-mobo-c-20260928-0830,1790609403,0,,ok,0 0,R0_deploy_fires chosen_fires

@@ -965,3 +965,18 @@ before scoring (`configs/real/detector_v3_eval_rules.json`). Nothing changed
 between scoring runs: the first scored all three; a second only v2 and v3,
 for the paired v3 - v2 differences; a third all three again to add the
 matched-false-alarm rows, reproducing every earlier number exactly.
+
+Alarms over time. A deployed camera scores a window ending every minute. Every
+frame is embedded once (`scripts/embed_frames.py`: whole frame, 2 x 3 and 4 x 6
+tiles) and each window is assembled from those embeddings (`src/detector/dense.py`:
+frames 0, 6 and 11 and the reference 14 minutes before frame 0, each within 30 s
+of its nominal time), so per-minute scoring costs one frame's crops per minute.
+Zoom crops are not used per minute (they would need two full-resolution
+originals per window); v3's stack without zoom is used. An alarm rule
+(`src/detector/temporal.py`) turns the per-minute scores into alarm events with
+a hold-off per camera; the chosen rule fires on a window whose P(smoke) and
+whose reference tile head logit (change since 14 minutes before the window) are
+both above thresholds tuned on dev scores from fold models
+(`scripts/alarm_rules.py`). Detection is measured per fire as the first new
+event after the plume, false alarms as events per camera-hour of smoke-free
+footage (`configs/real/detector_temporal_rules.json`).

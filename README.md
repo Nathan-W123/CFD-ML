@@ -36,7 +36,10 @@ frames, and real footage goes through the same feature extractor.
 > ([`reports/far/detector_v3_fresh.md`](reports/far/detector_v3_fresh.md))
 > and the secondary checks on the old test cameras, which v1 and v2 had
 > already been scored on (section "Detector v3" below, with its caveats);
-> the CFD-pretrained physics expert alone does not transfer to real fog.** v1 met the original goals;
+> the CFD-pretrained physics expert alone does not transfer to real fog.** Scored every minute, an
+> alarm rule that also asks for change since 14 minutes earlier cut false-alarm events by a quarter on
+> the fresh test (ordinary days by 41 %) at one fire fewer caught within 15 and within 30 minutes
+> (section "Alarms over time"). v1 met the original goals;
 > v2 improved dev but not the old test cameras (sections below). The
 > far-field physics model was tested on
 > real wildfire camera footage at its timing (one frame per minute):
@@ -177,6 +180,98 @@ What this does and does not show:
 * 8 FIgLib pre-ignition windows of the fresh test start 1-11 minutes after
   their image sequence begins, so there is no frame 14 minutes before them;
   they use the fallback stack without the reference (v2 the same).
+
+### Alarms over time: scoring every minute, fewer false alarms
+
+Goal: fewer false alarms without missing fires. A deployed camera can score a
+window ending every minute, and an alarm can look at the recent scores
+instead of one window. Plan, definitions and targets were written before any
+per-minute scoring
+([`configs/real/detector_temporal_rules.json`](configs/real/detector_temporal_rules.json),
+with dated revisions); the result is
+[`reports/far/alarm_rules_test.md`](reports/far/alarm_rules_test.md).
+
+* **Scoring.** Every frame is embedded once (`scripts/embed_frames.py`) and
+  the window ending at each frame is assembled from those embeddings
+  (`src/detector/dense.py`) and scored by the frozen v3 detector without zoom
+  crops (`scripts/score_dense.py`; zoom would need two full-resolution
+  originals per minute; without it v3's single-window ordinary-day alarm rate
+  on the fresh test is 8.2 % instead of 5.5 %).
+* **Data.** Dev, scored by fold models that never saw the camera (v3's
+  configuration refitted with a fifth of the dev camera mounts held out): 100
+  dev FIgLib fires and 30 ordinary-day stretches (40 window ends each). Test,
+  scored by v3: the 79 fresh-test fires and 63 ordinary-day stretches on the
+  21 fresh-test cameras (`scripts/hpwren_stretches.py`).
+* **Measures.** Alarm firings become events with a 30-minute hold-off per
+  camera (the operator has looked). A fire is detected when a new event
+  starts after its first visible plume; an event before the plume is a false
+  alarm and its hold-off also delays the fire's alarm. False alarms: events
+  per camera-hour of smoke-free footage (FIgLib's minutes before the plume,
+  ordinary days). The plan's first definition (any firing after the plume
+  counts) credited look-alikes already alarming before the plume (44 of the
+  62 early dev "detections"); it was revised on dev before any test scoring.
+* **Rules** (`src/detector/temporal.py`, `scripts/alarm_rules.py`): one
+  window above a threshold (the current behaviour); k of the last m windows;
+  a smoothed score; and, added on dev, a change gate: a window counts only if
+  the detector's reference tile head (each tile against the same camera 14
+  minutes before the window) also says something changed. Rules that only
+  ask for persistence gained almost nothing on dev (-5 % events): the false
+  alarms are look-alikes that persist minute after minute. Chosen on dev:
+  **P(smoke) >= 0.259 and change >= -2.455**.
+
+Fresh test, scored once (95 % intervals resample camera mounts):
+
+| fresh test (79 fires; 18 h before plumes, 42 h ordinary days) | one window >= 0.234 (now) | one window >= 0.354 (strict) | change-gated rule |
+|---|---|---|---|
+| false-alarm events per camera-hour, all | 1.43 [1.01, 1.85] | 0.94 | **1.08** [0.70, 1.52] |
+| ... on ordinary days | 0.81 [0.48, 1.18] | 0.45 | **0.48** [0.23, 0.76] |
+| ... in the 15 min before a fire's plume | 2.83 [2.36, 3.35] | 2.07 | **2.45** [1.96, 3.01] |
+| smoke-free minutes in alarm: before plumes / ordinary days | 28.5 % / 8.1 % | 16.9 % / 4.4 % | 19.1 % / 4.9 % |
+| fires alarmed within 15 / 30 min of the plume | 44.3 % / 92.4 % | 48.1 % / 88.6 % | 43.0 % / 91.1 % |
+| fires alarmed by +40 min | 98.7 % | 93.7 % | 96.2 % |
+| with a 10-min hold-off: events per hour; fires within 15 min | 2.09; 88.6 % | 1.31; 81.0 % | 1.62; 84.8 % |
+
+Paired, change-gated minus now: events per camera-hour -0.35 [-0.49, -0.22]
+(-25 %), ordinary days -0.33 [-0.50, -0.18] (-41 %), before plumes -0.38
+[-0.71, -0.12] (-13 %); fires within 15 min -1.3 points [-9.8, +3.8] and
+within 30 min -1.3 points [-3.9, 0.0] (one fire each), by +40 min -2.5
+points (two fires).
+
+Verdict against the targets set before scoring: ordinary-day false alarms
+cut by at least 40 % (met, 41 %), fires within 30 minutes no more than one
+fire lower (met) and within 15 minutes no more than three lower (met); false
+alarms before plumes cut by 40 % (**not met**, 13 %; dev had predicted about
+20 %, so this was expected to fall short).
+
+What this does and does not show:
+
+* The change gate removes look-alikes that were already there 14 minutes
+  earlier; it cuts the minutes spent in alarm by about 40 % on ordinary days
+  and by a third before fires. It does not remove look-alikes that
+  appear or move (passing clouds, sun glare), and it costs one or two of 79
+  fires a later alarm.
+* A blind AI audit of the 143 ordinary-day windows the rules alarmed on (all
+  windows of the chosen rule, every event start of the current one) found no
+  smoke in any (136 none, 7 unclear; clouds, haze bands and sun glare), so
+  these are real false alarms
+  ([`configs/real/temporal_audit_labels.csv`](configs/real/temporal_audit_labels.csv)).
+* Even with the rule, an ordinary day still brings about 0.5 false-alarm
+  events per camera-hour, roughly 6 per camera in 12 hours of daylight, and
+  FIgLib's fire-weather minutes before an ignition far more. This is a
+  queue for a human reviewer, not an unattended alarm.
+* With a 30-minute hold-off, a false alarm shortly before a fire delays the
+  fire's alarm, which is why only 43-48 % of fires get a new alarm within 15
+  minutes; with a 10-minute hold-off 81-89 % do, at more events per hour. A
+  hold-off per image region instead of per camera would avoid much of this
+  delay (not tried).
+* The strict single threshold (0.354) is a different trade: fewer events
+  (0.94 per hour) and more fires within 15 minutes, but three fewer within 30
+  minutes and four fewer by +40.
+* Before this was planned, the fresh test's single-window scores had been
+  looked at (README, v3), and the detection measure and the change-gated rule
+  family were added after the dev results; no rule parameter was fitted on
+  any test camera. About 14,900 rules were compared on dev, so dev numbers
+  are optimistic.
 
 ### Real-footage detector (far field)
 
@@ -969,6 +1064,23 @@ python scripts/train_detector.py --set ... --set hpwren_bg:<manifest>:<clip>::<f
     --deploy-recall 0.8 --fog-veto 0.95 --stack-fog-weight 3 --boxes configs/real/smoke_dev_boxes.csv \
     --box-min-confidence low --ref-tile-head --zoom-selector artifacts_detector \
     --out artifacts_detector_v3 --report reports/far/detector_v3.json --final
+# alarms over time: embed every frame once, score a window ending every minute, tune a rule on dev, test it
+python scripts/embed_frames.py --out-dir data/real/dense/figlib_test2 --list sequences.txt
+python scripts/hpwren_stretches.py select --manifest data/real/hpwren_bg_test/real.csv --per-camera 3 \
+    --seed temporal-test --out data/real/stretches_test
+python scripts/hpwren_stretches.py download --out data/real/stretches_test
+python scripts/embed_frames.py --out-dir data/real/dense/stretches_test --delete-frames data/real/stretches_test/stretch-*
+python scripts/train_detector.py ... --fixed-from reports/far/detector_v3.json --holdout-mounts fold0_mounts.txt \
+    --out folds/fold0 --report folds/fold0.json          # one per fold (configs/real/temporal_dev_folds.json)
+python scripts/score_dense.py --dense-dir data/real/dense/figlib_dev --kind fire --manifest data/real/figlib/real.csv \
+    --fold-models folds --folds configs/real/temporal_dev_folds.json --out reports/far/dense/fires_dev.npz
+python scripts/alarm_rules.py tune --families gate --change-gate --scores reports/far/dense/fires_dev.npz \
+    --scores reports/far/dense/ordinary_dev.npz --out reports/far/alarm_rules_dev_gate.json   # also persist,smooth
+python scripts/alarm_rules.py merge --tuned reports/far/alarm_rules_dev_r1r2.json \
+    --tuned reports/far/alarm_rules_dev_gate.json --out reports/far/alarm_rules_dev.json
+python scripts/alarm_rules.py evaluate --chosen reports/far/alarm_rules_dev.json \
+    --scores reports/far/dense/fires_test.npz --scores reports/far/dense/ordinary_test.npz \
+    --out reports/far/alarm_rules_test.json
 # score saved detectors side by side on the same windows (paired camera bootstrap)
 python scripts/score_detector.py --detector v1=artifacts_detector --detector v2=artifacts_detector_v2 \
     --detector v3=artifacts_detector_v3 --set figlib_test2:... --set hpwren_bg_test:... --matched-recall 0.8 \
@@ -1123,7 +1235,9 @@ configs/      simulation.yaml (near-field profile: CFD, scenarios, rendering, da
               real/hpwren_fog_* (fog set: candidates, labelling guide, votes, labels, boxes),
               real/hpwren_fog2_*, real/hpwren_smoke_*, real/hpwren_smoke2_* (votes, labels),
               real/hpwren_bg_*, real/hpwren_bg_test_* (background windows: votes, labels),
-              real/smoke_dev_boxes.csv (smoke boxes), real/detector_v2/v3_eval_rules.json
+              real/smoke_dev_boxes.csv (smoke boxes), real/detector_v2/v3_eval_rules.json,
+              real/detector_temporal_rules.json and real/temporal_* (alarm rules over time: plan,
+              dev sequences and folds, audit)
 src/cfd/      lbm, scalars, thermo, smoke, fog, scenarios, scenario_util, simulation, validation, results
 src/data/     render, masks, features, feature_spec, normalization, dataset, pipeline, visualize
 src/models/   physics_gru
@@ -1131,15 +1245,17 @@ src/training/ train, evaluate, metrics, baselines, audit
 src/inference/predict (no training dependencies)
 src/detector/ features (CLIP feature groups, fine tiles, zoom, change and reference scores),
               model (heads, tile, zoom and reference tile heads, stacks, fog veto, zoom selector,
-              Detector), boxes (smoke boxes -> tile labels)
+              Detector), boxes (smoke boxes -> tile labels), dense (a window ending at every frame
+              from per-frame embeddings), temporal (alarm rules over recent scores, per-fire metrics)
 scripts/      generate_dataset, qa_dataset, extract_features, train_physics, evaluate_physics,
               oracle_diagnostic, benchmark_cpu, summarize_results, image_stats,
               prepare_firesense, prepare_figlib, prepare_mivia, prepare_hpwren_fog, region_boxes,
               merge_features, evaluate_real_zero_shot, report_real_fog, embed_windows, train_detector,
-              zoom_windows, reference_frames, box_labels, score_detector
+              zoom_windows, reference_frames, box_labels, score_detector, embed_frames, score_dense,
+              alarm_rules, hpwren_stretches
 tests/        test_lbm, test_scalars, test_simulation, test_render, test_features, test_pipeline,
               test_model, test_training, test_image_stats, test_prepare_figlib,
-              test_prepare_hpwren_fog, test_region_boxes, test_detector
+              test_prepare_hpwren_fog, test_region_boxes, test_detector, test_temporal
 docs/         spec.md (requirements), design.md (interface contract and design decisions)
 artifacts/    exported near-field model (encoder, classifier, normaliser, config, evaluation);
               the far-field model goes to artifacts_far/, the real-footage detector to
@@ -1149,6 +1265,7 @@ reports/      near field: evaluation.json, results.md, QA, oracle diagnostic, be
               FIRESENSE zero-shot and image statistics, subgrid-texture ablation;
               far/: the same for the far field plus the FIgLib zero-shot, Stage B and image
               statistics, and the real-footage detector (detector*.json / .md; v3's fresh
-              and old test comparisons detector_v3_fresh / _oldtest); v1/: the
+              and old test comparisons detector_v3_fresh / _oldtest; alarm_rules_dev / _test and
+              dense/ for the alarms over time); v1/: the
               engine v1 reports
 ```
