@@ -37,9 +37,10 @@ frames, and real footage goes through the same feature extractor.
 > and the secondary checks on the old test cameras, which v1 and v2 had
 > already been scored on (section "Detector v3" below, with its caveats);
 > the CFD-pretrained physics expert alone does not transfer to real fog.** Scored every minute, an
-> alarm rule that also asks for change since 14 minutes earlier cut false-alarm events by a quarter on
-> the fresh test (ordinary days by 41 %) at one fire fewer caught within 15 and within 30 minutes
-> (section "Alarms over time"). v1 met the original goals;
+> alarm rule that also asks for change since 14 minutes before the window (with a slightly higher
+> threshold) cut false-alarm events by 24 % on the fresh test (ordinary days by 41 %, the minutes
+> before fires by 13 %) at one fire fewer alarmed within 15 and within 30 minutes and two fewer by
+> +40; it missed its pre-registered target (section "Alarms over time"). v1 met the original goals;
 > v2 improved dev but not the old test cameras (sections below). The
 > far-field physics model was tested on
 > real wildfire camera footage at its timing (one frame per minute):
@@ -232,28 +233,42 @@ Fresh test, scored once (95 % intervals resample camera mounts):
 | with a 10-min hold-off: events per hour; fires within 15 min | 2.09; 88.6 % | 1.31; 81.0 % | 1.62; 84.8 % |
 
 Paired, change-gated minus now: events per camera-hour -0.35 [-0.49, -0.22]
-(-25 %), ordinary days -0.33 [-0.50, -0.18] (-41 %), before plumes -0.38
+(-24 %; 65 vs 86 events in the same 60 camera-hours), ordinary days -0.33 [-0.50, -0.18] (-41 %), before plumes -0.38
 [-0.71, -0.12] (-13 %); fires within 15 min -1.3 points [-9.8, +3.8] and
 within 30 min -1.3 points [-3.9, 0.0] (one fire each), by +40 min -2.5
 points (two fires).
 
-Verdict against the targets set before scoring: ordinary-day false alarms
-cut by at least 40 % (met, 41 %), fires within 30 minutes no more than one
-fire lower (met) and within 15 minutes no more than three lower (met); false
-alarms before plumes cut by 40 % (**not met**, 13 %; dev had predicted about
-20 %, so this was expected to fall short).
+Verdict against the targets set before scoring: **not met**; the plan
+required all three, and two held. (1) False-alarm events at most 0.6 x the
+current rule's, before plumes and on ordinary days separately: not met.
+Ordinary days passed narrowly (20 events against the 20.4 allowed, -41 %),
+which dev had not predicted (7 vs 7 dev events); before plumes the cut was
+13 % (dev had predicted about 20 %). (2) Fires within 30 minutes no more than
+one fire lower: met (one lower). (3) Fires within 15 minutes no more than
+three lower: met (one lower).
 
 What this does and does not show:
 
-* The change gate removes look-alikes that were already there 14 minutes
-  earlier; it cuts the minutes spent in alarm by about 40 % on ordinary days
-  and by a third before fires. It does not remove look-alikes that
-  appear or move (passing clouds, sun glare), and it costs one or two of 79
-  fires a later alarm.
+* The chosen rule is a change gate plus a threshold raised from 0.234 to
+  0.259. Together they cut the minutes spent in alarm by about 40 % on
+  ordinary days (8.1 % -> 4.9 %) and by a third before fires (28.5 % ->
+  19.1 %); about a quarter of that comes from the higher threshold alone.
+  Which look-alikes the gate removes was not checked; the ordinary-day
+  windows it still alarms on are mostly haze bands, small cumulus and cirrus,
+  and sun glare (audit notes).
+* It also shifts which fires are alarmed early. Fire by fire, 21 of the 79
+  get a later alarm than with the current rule (9 by 5 minutes or more, and 2
+  that the current rule alarmed at +10 and +34 minutes get none by +40), and
+  5 get a much earlier one because a false alarm no longer holds them back
+  (e.g. +32 -> +3 and +22 -> +1 minutes). The net is one fire fewer within 15
+  and within 30 minutes, two fewer by +40.
 * A blind AI audit of the 143 ordinary-day windows the rules alarmed on (all
-  windows of the chosen rule, every event start of the current one) found no
-  smoke in any (136 none, 7 unclear; clouds, haze bands and sun glare), so
-  these are real false alarms
+  windows of the chosen rule, every event start of the current one) labelled
+  136 smoke-free (clouds, haze bands, sun glare) and left 7 unresolved
+  (mostly low-confidence "unknown": a small puff that could be cumulus,
+  wisps under a low cloud base, a brief dark puff one of three votes called
+  smoke). None reached a smoke label, so nothing was removed from the
+  false-alarm rates; the 7 count as false alarms without being cleared
   ([`configs/real/temporal_audit_labels.csv`](configs/real/temporal_audit_labels.csv)).
 * Even with the rule, an ordinary day still brings about 0.5 false-alarm
   events per camera-hour, roughly 6 per camera in 12 hours of daylight, and
