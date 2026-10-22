@@ -19,7 +19,8 @@ footage pooled) is chosen; ties go to the simpler rule (single < smooth < persis
 smaller m), then to more fires within 15 minutes.
 
 evaluate: the baselines and the chosen rule on the given scores, each with 95 % intervals resampling camera
-mounts, and the paired difference chosen - baseline (deploy) on the same resampled mounts; the same with a
+mounts, and the paired difference chosen - baseline (deploy) on the same resampled mounts (--exclude leaves listed
+windows unscored, e.g. ordinary-day windows an audit found smoke in); the same with a
 10-minute hold-off as a sensitivity check.
 
 A fire counts as detected at the first alarm event starting after its first visible plume (events with a
@@ -48,9 +49,11 @@ KEYS = ("fires_within_5", "fires_within_10", "fires_within_15", "fires_within_20
         "events_per_hour", "fire_pre_window_share", "ordinary_window_share")
 
 
-def load_sequences(paths):
-    """Sequences on a minute grid: [{"p", "off", "kind", "mount", "seq"}] (fog-vetoed windows -> P(smoke) 0)."""
+def load_sequences(paths, exclude=None):
+    """Sequences on a minute grid: [{"p", "off", "kind", "mount", "seq"}] (fog-vetoed windows -> P(smoke) 0;
+    windows in exclude, a set of (seq, t_end), are left unscored)."""
     seqs, all_p = [], []
+    exclude = exclude or set()
     for path in paths:
         z = np.load(path)
         kind = str(z["kind"])
@@ -68,7 +71,7 @@ def load_sequences(paths):
             grid_p = np.full(minute[-1] + 1, np.nan)
             grid_off = np.full(minute[-1] + 1, np.nan)
             grid_g = np.full(minute[-1] + 1, np.nan)
-            grid_p[minute] = p[i]
+            grid_p[minute] = np.where([(s, int(t_)) in exclude for t_ in t], np.nan, p[i])
             if "input_tileref" in z.files:
                 grid_g[minute] = z["input_tileref"][i]
             if kind == "fire":
@@ -177,12 +180,18 @@ def _boot(fn, seqs, n_boot, seed=0):
 
 
 def cmd_evaluate(args) -> int:
-    seqs, _ = load_sequences(args.scores)
+    exclude = set()
+    if args.exclude:
+        import csv
+        with open(args.exclude, newline="", encoding="utf-8") as fh:
+            exclude = {(r["stretch_id"], int(float(r["t_end"]))) for r in csv.DictReader(fh)}
+    seqs, _ = load_sequences(args.scores, exclude)
     ch = json.loads(Path(args.chosen).read_text())["chosen"]
     rules = {"R0_deploy": Rule("single", DEPLOY), "R0_strict": Rule("single", STRICT),
              "chosen": Rule(ch["kind"], ch["T"], k=ch["k"], m=ch["m"], T2=ch["T2"], G=ch.get("G"))}
     pick = lambda r: {k: r[k] for k in KEYS}  # noqa: E731
-    rep = {"status": "alarm_rule_evaluation", "scores": args.scores, "rules": {k: r.name() for k, r in rules.items()},
+    rep = {"status": "alarm_rule_evaluation", "scores": args.scores, "excluded_windows": len(exclude),
+           "rules": {k: r.name() for k, r in rules.items()},
            "results": {}, "ci95": {}, "paired_chosen_minus_deploy": {}}
     for name, rule in rules.items():
         rep["results"][name] = evaluate(rule, seqs)
@@ -268,6 +277,7 @@ def main(argv=None) -> int:
     e.add_argument("--scores", action="append", required=True)
     e.add_argument("--out", required=True)
     e.add_argument("--n-boot", type=int, default=1000)
+    e.add_argument("--exclude", help="CSV (stretch_id, t_end) of windows to leave out, e.g. ones an audit found smoke in")
     args = ap.parse_args(argv)
     return {"tune": cmd_tune, "merge": cmd_merge, "evaluate": cmd_evaluate}[args.cmd](args)
 

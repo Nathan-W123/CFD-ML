@@ -166,3 +166,13 @@ def test_change_gate():
     seqs = [{"p": p, "g": g, "off": np.array([-2.0, -1.0, 0.0, 1.0]), "kind": "fire"}]
     r = evaluate(Rule("single", 0.5, G=0.0), seqs, holdoff=1)
     assert r["fire_pre_events"] == 1 and r["median_delay_detected"] == 1
+
+
+def test_alarm_rules_exclude(tmp_path):
+    import alarm_rules
+
+    rows = [{"seq": "o1", "camera": "c", "mount": "m", "t_end": 1000 + 60 * k, "off_end_s": np.nan,
+             "p_smoke": 0.9 if k == 3 else 0.05, "p_fog": 0.0, "fog_veto": 0.95} for k in range(10)]
+    _score_npz(tmp_path / "o.npz", "ordinary", rows)
+    seqs, _ = alarm_rules.load_sequences([tmp_path / "o.npz"], {("o1", 1180)})
+    assert np.isnan(seqs[0]["p"][3]) and not np.isnan(seqs[0]["p"][2])
