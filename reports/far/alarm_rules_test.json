@@ -1,0 +1,431 @@
+{
+  "ci95": {
+    "R0_deploy": {
+      "events_per_hour": [
+        1.0101743710808309,
+        1.8498581912955279
+      ],
+      "fire_pre_events_per_hour": [
+        2.3576462450040525,
+        3.3476953961171043
+      ],
+      "fire_pre_window_share": [
+        0.19750554431561745,
+        0.3887112461434269
+      ],
+      "fires_detected": [
+        0.95,
+        1.0
+      ],
+      "fires_firing_within_15": [
+        0.829756838905775,
+        0.9583333333333334
+      ],
+      "fires_firing_within_30": [
+        0.9040874944763587,
+        1.0
+      ],
+      "fires_within_10": [
+        0.16392697466467956,
+        0.30560897435897433
+      ],
+      "fires_within_15": [
+        0.35185185185185186,
+        0.5581860465116278
+      ],
+      "fires_within_20": [
+        0.684780160595378,
+        0.8182400932400933
+      ],
+      "fires_within_30": [
+        0.8771862348178138,
+        0.9634364111498257
+      ],
+      "fires_within_5": [
+        0.1282051282051282,
+        0.27419354838709675
+      ],
+      "median_delay_detected": [
+        15.0,
+        16.966666666666665
+      ],
+      "ordinary_events_per_hour": [
+        0.4765639755806624,
+        1.1818293775190327
+      ],
+      "ordinary_window_share": [
+        0.025986421483961304,
+        0.16089117748337167
+      ]
+    },
+    "R0_strict": {
+      "events_per_hour": [
+        0.6116034771921744,
+        1.3278974627703937
+      ],
+      "fire_pre_events_per_hour": [
+        1.5028826859145226,
+        2.745491797447462
+      ],
+      "fire_pre_window_share": [
+        0.09985186476124085,
+        0.25248133425069436
+      ],
+      "fires_detected": [
+        0.8965453384418902,
+        0.9791875
+      ],
+      "fires_firing_within_15": [
+        0.724633984028394,
+        0.8961371961371961
+      ],
+      "fires_firing_within_30": [
+        0.8526226076555024,
+        0.9512195121951219
+      ],
+      "fires_within_10": [
+        0.260829307568438,
+        0.40625
+      ],
+      "fires_within_15": [
+        0.40475521669341896,
+        0.5555907172995781
+      ],
+      "fires_within_20": [
+        0.618418541582965,
+        0.7659751773049646
+      ],
+      "fires_within_30": [
+        0.8490566037735849,
+        0.9285714285714286
+      ],
+      "fires_within_5": [
+        0.18887254901960784,
+        0.3484991423670669
+      ],
+      "median_delay_detected": [
+        15.0,
+        16.02062499999999
+      ],
+      "ordinary_events_per_hour": [
+        0.1998913043478261,
+        0.75
+      ],
+      "ordinary_window_share": [
+        0.010988408521303259,
+        0.09258116839269885
+      ]
+    },
+    "chosen": {
+      "events_per_hour": [
+        0.6995623487362606,
+        1.518299269365163
+      ],
+      "fire_pre_events_per_hour": [
+        1.9582760367663026,
+        3.0108074505254123
+      ],
+      "fire_pre_window_share": [
+        0.13415487699069312,
+        0.24941140178333845
+      ],
+      "fires_detected": [
+        0.928538961038961,
+        1.0
+      ],
+      "fires_firing_within_15": [
+        0.7960931103052988,
+        0.9245283018867925
+      ],
+      "fires_firing_within_30": [
+        0.8965337643678161,
+        0.9891333567087424
+      ],
+      "fires_within_10": [
+        0.19696969696969696,
+        0.3333333333333333
+      ],
+      "fires_within_15": [
+        0.3333333333333333,
+        0.5208333333333334
+      ],
+      "fires_within_20": [
+        0.6881319210399616,
+        0.8077380952380953
+      ],
+      "fires_within_30": [
+        0.8539257330775555,
+        0.9600384615384615
+      ],
+      "fires_within_5": [
+        0.14538961038961037,
+        0.2950912816691505
+      ],
+      "median_delay_detected": [
+        15.0,
+        16.0
+      ],
+      "ordinary_events_per_hour": [
+        0.2292788986117792,
+        0.7634539473684209
+      ],
+      "ordinary_window_share": [
+        0.013331589114965533,
+        0.10509518757461282
+      ]
+    }
+  },
+  "holdoff10": {
+    "R0_deploy": {
+      "events_per_hour": 2.087821043910522,
+      "fire_pre_events": 76,
+      "fire_pre_events_per_hour": 4.137931034482759,
+      "fire_pre_hours": 18.366666666666667,
+      "fire_pre_window_share": 0.2849364791288566,
+      "fires": 79,
+      "fires_detected": 0.9873417721518988,
+      "fires_firing_within_10": 0.8227848101265823,
+      "fires_firing_within_15": 0.8987341772151899,
+      "fires_firing_within_20": 0.9620253164556962,
+      "fires_firing_within_30": 0.9620253164556962,
+      "fires_firing_within_5": 0.7468354430379747,
+      "fires_within_10": 0.810126582278481,
+      "fires_within_15": 0.8860759493670886,
+      "fires_within_20": 0.9620253164556962,
+      "fires_within_30": 0.9620253164556962,
+      "fires_within_5": 0.4810126582278481,
+      "holdoff": 10,
+      "median_delay_detected": 5.016666666666667,
+      "ordinary_events": 50,
+      "ordinary_events_per_hour": 1.1909487892020643,
+      "ordinary_hours": 41.983333333333334,
+      "ordinary_window_share": 0.08098451766574037,
+      "rule": "single T=0.234"
+    },
+    "R0_strict": {
+      "events_per_hour": 1.3090306545153272,
+      "fire_pre_events": 49,
+      "fire_pre_events_per_hour": 2.6678765880217785,
+      "fire_pre_hours": 18.366666666666667,
+      "fire_pre_window_share": 0.16878402903811252,
+      "fires": 79,
+      "fires_detected": 0.9493670886075949,
+      "fires_firing_within_10": 0.7721518987341772,
+      "fires_firing_within_15": 0.810126582278481,
+      "fires_firing_within_20": 0.8481012658227848,
+      "fires_firing_within_30": 0.8987341772151899,
+      "fires_firing_within_5": 0.6329113924050633,
+      "fires_within_10": 0.7721518987341772,
+      "fires_within_15": 0.810126582278481,
+      "fires_within_20": 0.8481012658227848,
+      "fires_within_30": 0.8987341772151899,
+      "fires_within_5": 0.5316455696202531,
+      "holdoff": 10,
+      "median_delay_detected": 5.0,
+      "ordinary_events": 30,
+      "ordinary_events_per_hour": 0.7145692735212386,
+      "ordinary_hours": 41.983333333333334,
+      "ordinary_window_share": 0.043668122270742356,
+      "rule": "single T=0.354"
+    },
+    "chosen": {
+      "events_per_hour": 1.6238608119304059,
+      "fire_pre_events": 63,
+      "fire_pre_events_per_hour": 3.4301270417422867,
+      "fire_pre_hours": 18.366666666666667,
+      "fire_pre_window_share": 0.19147005444646098,
+      "fires": 79,
+      "fires_detected": 0.9746835443037974,
+      "fires_firing_within_10": 0.7848101265822784,
+      "fires_firing_within_15": 0.8607594936708861,
+      "fires_firing_within_20": 0.9367088607594937,
+      "fires_firing_within_30": 0.9493670886075949,
+      "fires_firing_within_5": 0.6708860759493671,
+      "fires_within_10": 0.7721518987341772,
+      "fires_within_15": 0.8481012658227848,
+      "fires_within_20": 0.9240506329113924,
+      "fires_within_30": 0.9493670886075949,
+      "fires_within_5": 0.4430379746835443,
+      "holdoff": 10,
+      "median_delay_detected": 6.0,
+      "ordinary_events": 35,
+      "ordinary_events_per_hour": 0.833664152441445,
+      "ordinary_hours": 41.983333333333334,
+      "ordinary_window_share": 0.04922588328701866,
+      "rule": "single T=0.259 with change >= -2.46"
+    }
+  },
+  "paired_chosen_minus_deploy": {
+    "ci95": {
+      "events_per_hour": [
+        -0.48837445962576126,
+        -0.21699679060870083
+      ],
+      "fire_pre_events_per_hour": [
+        -0.7060570762958646,
+        -0.1211572084213595
+      ],
+      "fire_pre_window_share": [
+        -0.15219419208306292,
+        -0.054077218579291764
+      ],
+      "fires_detected": [
+        -0.04717166839994057,
+        0.0
+      ],
+      "fires_firing_within_15": [
+        -0.060003759398496295,
+        0.0
+      ],
+      "fires_firing_within_30": [
+        -0.033333333333333326,
+        0.0
+      ],
+      "fires_within_10": [
+        0.0,
+        0.06666666666666665
+      ],
+      "fires_within_15": [
+        -0.0980392156862745,
+        0.038486842105263167
+      ],
+      "fires_within_20": [
+        -0.06945251937984494,
+        0.06350050658561296
+      ],
+      "fires_within_30": [
+        -0.03948684210526317,
+        0.0
+      ],
+      "fires_within_5": [
+        0.0,
+        0.05050824702723439
+      ],
+      "median_delay_detected": [
+        -0.9833333333333325,
+        0.9833333333333325
+      ],
+      "ordinary_events_per_hour": [
+        -0.5001816567411342,
+        -0.18002546411638903
+      ],
+      "ordinary_window_share": [
+        -0.05880263157894737,
+        -0.010426897709438387
+      ]
+    },
+    "value": {
+      "events_per_hour": -0.3479701739850869,
+      "fire_pre_events_per_hour": -0.3811252268602541,
+      "fire_pre_window_share": -0.09346642468239563,
+      "fires_detected": -0.025316455696202556,
+      "fires_firing_within_15": -0.03797468354430378,
+      "fires_firing_within_30": -0.012658227848101333,
+      "fires_within_10": 0.0253164556962025,
+      "fires_within_15": -0.012658227848101222,
+      "fires_within_20": 0.0,
+      "fires_within_30": -0.012658227848101333,
+      "fires_within_5": 0.025316455696202528,
+      "median_delay_detected": -0.00833333333333286,
+      "ordinary_events_per_hour": -0.33346566097657804,
+      "ordinary_window_share": -0.031758634378721715
+    }
+  },
+  "results": {
+    "R0_deploy": {
+      "events_per_hour": 1.4250207125103562,
+      "fire_pre_events": 52,
+      "fire_pre_events_per_hour": 2.8312159709618876,
+      "fire_pre_hours": 18.366666666666667,
+      "fire_pre_window_share": 0.2849364791288566,
+      "fires": 79,
+      "fires_detected": 0.9873417721518988,
+      "fires_firing_within_10": 0.8227848101265823,
+      "fires_firing_within_15": 0.8987341772151899,
+      "fires_firing_within_20": 0.9620253164556962,
+      "fires_firing_within_30": 0.9620253164556962,
+      "fires_firing_within_5": 0.7468354430379747,
+      "fires_within_10": 0.24050632911392406,
+      "fires_within_15": 0.4430379746835443,
+      "fires_within_20": 0.7468354430379747,
+      "fires_within_30": 0.9240506329113924,
+      "fires_within_5": 0.20253164556962025,
+      "holdoff": 30,
+      "median_delay_detected": 15.983333333333333,
+      "ordinary_events": 34,
+      "ordinary_events_per_hour": 0.8098451766574037,
+      "ordinary_hours": 41.983333333333334,
+      "ordinary_window_share": 0.08098451766574037,
+      "rule": "single T=0.234"
+    },
+    "R0_strict": {
+      "events_per_hour": 0.9444904722452361,
+      "fire_pre_events": 38,
+      "fire_pre_events_per_hour": 2.0689655172413794,
+      "fire_pre_hours": 18.366666666666667,
+      "fire_pre_window_share": 0.16878402903811252,
+      "fires": 79,
+      "fires_detected": 0.9367088607594937,
+      "fires_firing_within_10": 0.7721518987341772,
+      "fires_firing_within_15": 0.810126582278481,
+      "fires_firing_within_20": 0.8481012658227848,
+      "fires_firing_within_30": 0.8987341772151899,
+      "fires_firing_within_5": 0.6329113924050633,
+      "fires_within_10": 0.34177215189873417,
+      "fires_within_15": 0.4810126582278481,
+      "fires_within_20": 0.6835443037974683,
+      "fires_within_30": 0.8860759493670886,
+      "fires_within_5": 0.27848101265822783,
+      "holdoff": 30,
+      "median_delay_detected": 15.0,
+      "ordinary_events": 19,
+      "ordinary_events_per_hour": 0.4525605398967844,
+      "ordinary_hours": 41.983333333333334,
+      "ordinary_window_share": 0.043668122270742356,
+      "rule": "single T=0.354"
+    },
+    "chosen": {
+      "events_per_hour": 1.0770505385252693,
+      "fire_pre_events": 45,
+      "fire_pre_events_per_hour": 2.4500907441016335,
+      "fire_pre_hours": 18.366666666666667,
+      "fire_pre_window_share": 0.19147005444646098,
+      "fires": 79,
+      "fires_detected": 0.9620253164556962,
+      "fires_firing_within_10": 0.7848101265822784,
+      "fires_firing_within_15": 0.8607594936708861,
+      "fires_firing_within_20": 0.9367088607594937,
+      "fires_firing_within_30": 0.9493670886075949,
+      "fires_firing_within_5": 0.6708860759493671,
+      "fires_within_10": 0.26582278481012656,
+      "fires_within_15": 0.43037974683544306,
+      "fires_within_20": 0.7468354430379747,
+      "fires_within_30": 0.9113924050632911,
+      "fires_within_5": 0.22784810126582278,
+      "holdoff": 30,
+      "median_delay_detected": 15.975,
+      "ordinary_events": 20,
+      "ordinary_events_per_hour": 0.4763795156808257,
+      "ordinary_hours": 41.983333333333334,
+      "ordinary_window_share": 0.04922588328701866,
+      "rule": "single T=0.259 with change >= -2.46"
+    }
+  },
+  "rules": {
+    "R0_deploy": "single T=0.234",
+    "R0_strict": "single T=0.354",
+    "chosen": "single T=0.259 with change >= -2.46"
+  },
+  "scores": [
+    "reports/far/dense/fires_test.npz",
+    "reports/far/dense/ordinary_test.npz"
+  ],
+  "status": "alarm_rule_evaluation",
+  "targets": {
+    "all_met": false,
+    "fire_pre_events": false,
+    "fires_within_15": true,
+    "fires_within_30": true,
+    "ordinary_events": true
+  }
+}

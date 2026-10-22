@@ -1,0 +1,7 @@
+{
+  "detector": "artifacts_detector_v3",
+  "kind": "ordinary",
+  "sequences": 63,
+  "skipped": {},
+  "windows": 2519
+}
